@@ -64,10 +64,10 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 		int i = 0;
 		for (char a = 'a'; i < largest && a < 'z'; a++, i++) {
 			if (i < innerIconCount()) {
-				inner_icons[i] = reg.registerIcon(getTextureName() + "_inner_" + (char) (a + (isUp ? innerIconCount() : 0)));
+				inner_icons[i] = reg.registerIcon(getTextureName() + "_inner_" + (char) (a + (isUp ? 0 : innerIconCount())));
 			}
 			if (i < outerIconCount()) {
-				outer_icons[i] = reg.registerIcon(getTextureName() + "_outer_" + (char) (a + (isUp ? outerIconCount() : 0)));
+				outer_icons[i] = reg.registerIcon(getTextureName() + "_outer_" + (char) (a + (isUp ? 0 : outerIconCount())));
 			}
 			if (i < topIconCount()) {
 				top_icons[i] = reg.registerIcon(getTextureName() + "_" + (isUp ? "up" : "down") + "_top_" + a);
