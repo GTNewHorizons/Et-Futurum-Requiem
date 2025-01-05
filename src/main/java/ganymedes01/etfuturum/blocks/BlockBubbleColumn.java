@@ -10,6 +10,7 @@ import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
@@ -98,6 +99,16 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 			worldIn.playSound(x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(),
 					getBubblingNoise(worldIn, x, y, z, random), 1, 1, false);
 		}
+	}
+
+	@Override
+	public void onEntityCollidedWithBlock(World worldIn, int x, int y, int z, Entity entityIn) {
+		if (isUp){
+			entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
+		}else {
+			entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+		}
+		entityIn.fallDistance = 0;
 	}
 
 	protected String getBubblingNoise(World world, int x, int y, int z, Random random) {
