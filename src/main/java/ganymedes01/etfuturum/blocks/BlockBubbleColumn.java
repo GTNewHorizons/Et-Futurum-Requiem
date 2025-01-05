@@ -18,7 +18,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -183,10 +182,15 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 		return meta == 0 && (block == Blocks.water || block == Blocks.flowing_water);
 	}
 
-	@Override
-	public int getRenderBlockPass() {
-		return ForgeHooksClient.getWorldRenderPass() == 1 ? 1 : 0;
-	}
+    @Override
+    public boolean canRenderInPass(int pass) {
+        return pass == 0 || pass == 1;
+    }
+
+    @Override
+    public int getRenderBlockPass() {
+        return 1;
+    }
 
 	@Override
 	public int getRenderType() {
