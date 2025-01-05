@@ -103,12 +103,21 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 
 	@Override
 	public void onEntityCollidedWithBlock(World worldIn, int x, int y, int z, Entity entityIn) {
-		if (isUp){
-			entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
-		}else {
-			entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+		Block above = worldIn.getBlock(x, y + 1, z);
+		if (above != null && above == Blocks.air){
+			if (isUp){
+				entityIn.motionY = Math.min(1.8D, entityIn.motionY + 0.1D);
+			}else {
+				entityIn.motionY = Math.max(-0.9D, entityIn.motionY - 0.03D);
+			}
+		} else {
+			if (isUp){
+				entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
+			}else {
+				entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+			}
+			entityIn.fallDistance = 0;
 		}
-		entityIn.fallDistance = 0;
 	}
 
 	protected String getBubblingNoise(World world, int x, int y, int z, Random random) {
