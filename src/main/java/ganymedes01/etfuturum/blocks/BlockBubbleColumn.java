@@ -9,6 +9,7 @@ import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -103,12 +104,37 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 
 	@Override
 	public void onEntityCollidedWithBlock(World worldIn, int x, int y, int z, Entity entityIn) {
-		Block above = worldIn.getBlock(x, y + 1, z);
-		if (above != null && above == Blocks.air){
+		// dont have particles trigger this; gets a little too crazy
+		if (entityIn instanceof EntityFX) return;
+
+		Block blockAbove = worldIn.getBlock(x, y + 1, z);
+		if (blockAbove == Blocks.air){
 			if (isUp){
 				entityIn.motionY = Math.min(1.8D, entityIn.motionY + 0.1D);
 			}else {
 				entityIn.motionY = Math.max(-0.9D, entityIn.motionY - 0.03D);
+			}
+
+			// handle splash effects
+			if (worldIn.isRemote) {
+				for (int i = 0; i < 2; i++){
+					worldIn.spawnParticle("splash",
+							x + worldIn.rand.nextDouble(),
+						y + 1,
+							z + worldIn.rand.nextDouble(),
+						0,
+						0,
+						0
+					);
+					worldIn.spawnParticle("bubble",
+							x + worldIn.rand.nextDouble(),
+							y + 1,
+							z + worldIn.rand.nextDouble(),
+							0,
+							0,
+							0
+					);
+				}
 			}
 		} else {
 			if (isUp){
