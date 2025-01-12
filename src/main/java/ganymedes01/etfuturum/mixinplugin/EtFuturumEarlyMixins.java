@@ -278,6 +278,11 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		mixins.add("deepslateores.MixinChunk");
 
+		if (ConfigEntities.enableFoxes) {
+			mixins.add("foxes.MixinEntityLivingBase");
+			mixins.add("foxes.MixinEntityWolf");
+		}
+
 		return mixins;
 	}
 
