@@ -7,8 +7,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.block.Block;
-import roadhog360.hogutils.HogUtils;
-import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import static com.falsepattern.rple.api.common.color.DefaultColor.*;
 
