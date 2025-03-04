@@ -21,6 +21,8 @@ import java.util.function.Supplier;
 
 public class ItemNewBoat extends BaseItem {
 
+    @Deprecated
+    private EntityNewBoat.Type type;
 	private final boolean isChest;
 
 	private final String name;
@@ -31,6 +33,7 @@ public class ItemNewBoat extends BaseItem {
 	@Deprecated
 	public ItemNewBoat(EntityNewBoat.Type type, boolean isChest) {
 		super(type.getName() + (isChest ? "_chest_boat" : "_boat"));
+		this.type = type;
 		this.name = type.getName();
 		this.domain = "minecraft";
 		this.isChest = isChest;
