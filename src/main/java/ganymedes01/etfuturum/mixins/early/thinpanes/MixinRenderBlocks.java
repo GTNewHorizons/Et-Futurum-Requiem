@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-@Mixin(value = RenderBlocks.class, priority = 5000)
+@Mixin(value = RenderBlocks.class, priority = 999)
 public abstract class MixinRenderBlocks {
 
 	@Shadow
