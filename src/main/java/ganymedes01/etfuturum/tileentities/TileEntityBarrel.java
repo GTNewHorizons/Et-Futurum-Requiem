@@ -299,7 +299,9 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 		DIAMOND(108, 12,  238, 256, "diamondcontainer"),
 		COPPER(45, 9,  184, 184, "coppercontainer"),
 		SILVER(72, 9,  184, 238, "silvercontainer"),
+		STEEL(72, 9, 184, 238, "silvercontainer"),
 		OBSIDIAN(108, 12, 238, 256, "diamondcontainer"),
+		DARKSTEEL(135, 15, 292, 256, "netheritecontainer"),
 		NETHERITE(135, 15, 292, 256, "netheritecontainer");
 
 		public static final BarrelType[] VALUES = values();
@@ -326,7 +328,9 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
                 case DIAMOND -> ModBlocks.DIAMOND_BARREL.get();
                 case COPPER -> ModBlocks.COPPER_BARREL.get();
                 case SILVER -> ModBlocks.SILVER_BARREL.get();
+				case STEEL -> ModBlocks.STEEL_BARREL.get();
                 case OBSIDIAN -> ModBlocks.OBSIDIAN_BARREL.get();
+				case DARKSTEEL -> ModBlocks.DARKSTEEL_BARREL.get();
                 case NETHERITE -> ModBlocks.NETHERITE_BARREL.get();
             };
         }

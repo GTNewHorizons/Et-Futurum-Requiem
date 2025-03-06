@@ -58,7 +58,7 @@ public class GuiBarrel extends GuiContainer {
 		int k = (this.width - this.xSize) / 2;
 		int l = (this.height - this.ySize) / 2;
 
-		if (type == BarrelType.NETHERITE) {
+		if (type == BarrelType.NETHERITE || type == BarrelType.DARKSTEEL) {
 			final Tessellator tessellator = Tessellator.instance;
 			tessellator.startDrawingQuads();
 			tessellator.addVertexWithUV(guiLeft, guiTop, 0, 0.0, 0.0);

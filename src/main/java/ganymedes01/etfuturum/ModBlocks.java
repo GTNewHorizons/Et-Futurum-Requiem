@@ -319,7 +319,9 @@ public enum ModBlocks {
 	DIAMOND_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.DIAMOND)),
 	COPPER_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.COPPER)),
 	SILVER_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.SILVER)),
+	STEEL_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.STEEL)),
 	OBSIDIAN_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.OBSIDIAN)),
+	DARKSTEEL_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.DARKSTEEL)),
 	NETHERITE_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.NETHERITE)),
 
 	BLACKSTONE(ConfigBlocksItems.enableBlackstone, new BlockBlackstone()),
