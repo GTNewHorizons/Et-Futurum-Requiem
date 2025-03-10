@@ -14,8 +14,10 @@ public class ItemBarrelUpgrade extends BaseSubtypesItem {
 				"vanilla_copper_upgrade",
 				"iron_gold_upgrade",
 				"gold_diamond_upgrade",
+				"steel_gold_upgrade",
 				"diamond_obsidian_upgrade",
 				"obsidian_netherite_upgrade",
+				"obsidian_darksteel_upgrade",
 				"copper_iron_upgrade",
 				"copper_silver_upgrade",
 				"silver_gold_upgrade"

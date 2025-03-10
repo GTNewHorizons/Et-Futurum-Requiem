@@ -356,6 +356,4 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 		}
 	}
 
-	public static final String[] tiers = new String[]{"iron", "gold", "diamond", "copper", "silver", "obsidian", "netherite"};
-
 }
