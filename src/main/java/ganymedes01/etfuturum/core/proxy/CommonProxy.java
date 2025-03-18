@@ -22,14 +22,12 @@ import ganymedes01.etfuturum.inventory.*;
 import ganymedes01.etfuturum.lib.GUIIDs;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.tileentities.*;
-import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -74,7 +72,7 @@ public class CommonProxy implements IGuiHandler {
 		if (ModBlocks.BEACON.isEnabled()) {
 			GameRegistry.registerTileEntity(TileEntityNewBeacon.class, Utils.getUnlocalisedName("beacon"));
 		}
-		if (ModBlocks.VANILLA_BARREL.isEnabled()) {
+		if (ModBlocks.BARREL.isEnabled()) {
 			GameRegistry.registerTileEntity(TileEntityBarrel.class, Utils.getUnlocalisedName("barrel"));
 		}
 		if (ModBlocks.SMOKER.isEnabled()) {

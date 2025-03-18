@@ -6,7 +6,6 @@ import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -322,7 +321,7 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 
         public Block getBlock() {
             return switch (this) {
-                case VANILLA -> ModBlocks.VANILLA_BARREL.get();
+                case VANILLA -> ModBlocks.BARREL.get();
                 case IRON -> ModBlocks.IRON_BARREL.get();
                 case GOLD -> ModBlocks.GOLD_BARREL.get();
                 case DIAMOND -> ModBlocks.DIAMOND_BARREL.get();

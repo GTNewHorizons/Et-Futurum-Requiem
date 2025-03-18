@@ -313,7 +313,7 @@ public enum ModBlocks {
 	BUBBLE_COLUMN_DOWN(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(false, Tags.MOD_ID + ":downward_bubble_column_support_blocks"), null),
 
 	// barrels + iron barrels
-	VANILLA_BARREL(ConfigBlocksItems.enableBarrel, new BlockBarrel(TileEntityBarrel.BarrelType.VANILLA)),
+	BARREL(ConfigBlocksItems.enableBarrel, new BlockBarrel(TileEntityBarrel.BarrelType.VANILLA)),
 	IRON_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.IRON)),
 	GOLD_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.GOLD)),
 	DIAMOND_BARREL(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel && ConfigModCompat.barrelIronChest, new BlockBarrel(TileEntityBarrel.BarrelType.DIAMOND)),
