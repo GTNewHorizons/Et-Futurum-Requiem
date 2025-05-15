@@ -12,12 +12,11 @@ import ganymedes01.etfuturum.tileentities.TileEntityGlowLichen;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemShears;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -29,13 +28,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.apache.commons.lang3.tuple.Pair;
+import tconstruct.mechworks.entity.item.ExplosivePrimed;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import static net.minecraftforge.common.util.ForgeDirection.getOrientation;
 
-public class BlockGlowLichen extends BlockContainer implements IShearable {
+public class BlockGlowLichen extends BlockContainer {
     public BlockGlowLichen() {
         super(Material.vine);
         this.lightValue = 7;
@@ -43,7 +43,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
                 .setHardness(0.2F)
                 .setCreativeTab(EtFuturum.creativeTabBlocks)
                 .setBlockTextureName("glow_lichen")
-                .setBlockName(Utils.getUnlocalisedName("glow_lichen"));
+                .setBlockName(Utils.getUnlocalisedName("glow_lichen"));;
     }
 
     @Override
@@ -53,16 +53,15 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
         }
         return super.getPlayerRelativeBlockHardness(player, world, x, y, z);
     }
-
+    
     private boolean isHoldingShears(ItemStack itemStack) {
         if (itemStack == null) {
             return false;
         }
-        Item item = itemStack.getItem();
-        if (item == Items.shears) {
+        if (itemStack.getItem() == Items.shears) {
             return true;
         }
-        return item instanceof ItemShears;
+        return itemStack.getItem() instanceof IShearable;
     }
 
     @Override
@@ -71,17 +70,28 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
     }
 
     @Override
-    public Item getItemDropped(int meta, Random random, int fortune)
-    {
-        return null;
+    public void onBlockHarvested(World world, int x, int y, int z, int metadata, EntityPlayer player) {
+        if (isHoldingShears(player.getHeldItem())) {
+            dropBlockAsItem(world, x, y, z, metadata, 0);
+        }
+        world.setBlockToAir(x, y, z);
     }
 
+    @Override
+    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
+    {
+        if (isHoldingShears(Minecraft.getMinecraft().thePlayer.getHeldItem())) {
+            return super.getDrops(world, x, y, z, metadata, fortune);
+        }
+        return new ArrayList<ItemStack>();
+    }
+    
     @Override
     public boolean isOpaqueCube()
     {
         return false;
     }
-
+    
     @Override
     public boolean renderAsNormalBlock()
     {
@@ -89,11 +99,11 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, int x, int y, int z, int side)
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, int x, int y, int z, int side) 
     {
         return true;
     }
-
+    
     @Override
     public int getRenderType()
     {
@@ -111,17 +121,17 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
     public void registerBlockIcons(IIconRegister reg) {
         this.blockIcon = reg.registerIcon(getTextureName());
     }
-
+    
     @Override
     public String getItemIconName() {
         return "glow_lichen";
     }
-
+    
     @Override
     public boolean hasTileEntity(int metadata) {
         return true;
     }
-
+    
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new TileEntityGlowLichen();
@@ -135,7 +145,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
             if (!world.isRemote) {
                 TileEntity te = world.getTileEntity(x, y, z);
                 if (te instanceof TileEntityGlowLichen glowLichen) {
-
+                    
                     if (grow(world, glowLichen, x, y, z))
                     {
                         world.playAuxSFX(2005, x, y, z, 0);
@@ -149,13 +159,13 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
         }
         return false;
     }
-
-    public boolean grow(World world, TileEntityGlowLichen te, int x, int y, int z)
+    
+    private boolean grow(World world, TileEntityGlowLichen te, int x, int y, int z)
     {
         int sideMap = te.getSideMap();
         ArrayList<Pair<BlockPos, ForgeDirection>> validSpots = new ArrayList<>();
         for (int i = 0; i < ForgeDirection.values().length; i++) {
-            if ((sideMap & (1 << i)) != 0)
+            if ((sideMap & (1 << i)) != 0) 
             {
                 // directions that aren't valid are the current side and the opposite
                 int validMap = 63 & ~((1 << i) | (1 << ForgeDirection.OPPOSITES[i]));
@@ -244,7 +254,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
         }
         return false;
     }
-
+    
     @Override
     public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side)
     {
@@ -261,20 +271,20 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
             glowLichen.setSideMap(glowLichen.getSideMap() | sideBit);
         }
     }
-
+    
     @Override
     public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
         return ForgeDirection.OPPOSITES[side];
     }
-
+    
     @Override
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z)
     {
         return null;
     }
-
+    
     @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec)
+    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec) 
     {
         TileEntity te = world.getTileEntity(x, y, z);
         if (!(te instanceof TileEntityGlowLichen)) {
@@ -315,7 +325,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
         }
         return closestHit;
     }
-
+    
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor)
     {
@@ -337,7 +347,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
             }
         }
     }
-
+    
     private boolean isDirectionSolid(World world, int x, int y, int z, ForgeDirection direction)
     {
         return switch (direction) {
@@ -349,25 +359,5 @@ public class BlockGlowLichen extends BlockContainer implements IShearable {
             case EAST -> world.isSideSolid(x + 1, y, z, ForgeDirection.WEST);
             default -> false;
         };
-    }
-
-    @Override
-    public boolean isShearable(ItemStack item, IBlockAccess world, int x, int y, int z) {
-        return true;
-    }
-
-    @Override
-    public ArrayList<ItemStack> onSheared(ItemStack item, IBlockAccess world, int x, int y, int z, int fortune)
-    {
-        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
-        ret.add(new ItemStack(ModBlocks.GLOW_LICHEN.getItem()));
-        return ret;
-    }
-
-    public void harvestBlock(World worldIn, EntityPlayer player, int x, int y, int z, int meta)
-    {
-        {
-            super.harvestBlock(worldIn, player, x, y, z, meta);
-        }
     }
 }
