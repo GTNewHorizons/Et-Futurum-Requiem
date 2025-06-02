@@ -4,59 +4,11 @@ plugins {
     id 'com.gtnewhorizons.gtnhconvention'
 }
 
-// The planned name of the next release
-def NEXT_VERSION = ext.modVersion
-
-// Append to the version as needed. If the variables look a bit strange, that's because they are -
-// git-version doesn't expose a ton of useful functions, we need to extract them indirectly.
-
-def details = versionDetails()
-
-// If we have a clean tag (or manually specified), this is a production release.
-// No need for the commit hash!
-def isPlainTag = details.getCommitDistance() == 0 && details.getLastTag().isEmpty()
-
-// If we didn't ask for the commit hash, don't put it there. If the GitHash is empty (no Git repo?) then this is true.
-boolean noCommitHash = (providers.gradleProperty("noCommitHash").isPresent() || details.gitHash.isEmpty()) && !ext.modVersion.isEmpty()
-if (!isPlainTag && !noCommitHash) {
-    if(!NEXT_VERSION.isEmpty()) {
-        NEXT_VERSION += "-"
-    }
-    NEXT_VERSION += details.gitHash
-}
-
-// If we have uncommitted changes, say so.
-def isDirty = gitVersion().endsWith(".dirty")
-if (isDirty && !noCommitHash) {
-    NEXT_VERSION += "-dirty"
-}
-
-//Set the mod and jar version to the info we just collected.
-version = NEXT_VERSION
-
-//If version is blank we'll use the above version instead.
-if(ext.modVersion.isEmpty()) {
-    ext.modVersion = NEXT_VERSION
-}
-
-
 minecraft {
     //Creates a tag in Tags with the above generated mod version, instead of the "clean" one
-    injectedTags.put("RAW_VERSION", NEXT_VERSION)
     injectedTags.put("MOD_ID", project.modId)
     injectedTags.put("MOD_NAME", project.modName)
     injectedTags.put("MOD_GROUP", project.modGroup)
-
-    //Returns true if this build is in a dev env or has a commit hash (typically used by CI), false if otherwise
-    injectedTags.put("CI_BUILD", !noCommitHash)
-    //Returns true if this build is the above or has key words in its name that indicate it may not be a release build
-    injectedTags.put("SNAPSHOT_BUILD", !noCommitHash
-                || NEXT_VERSION.contains("snapshot")
-                || NEXT_VERSION.contains("nightly")
-                || NEXT_VERSION.contains("alpha")
-                || NEXT_VERSION.contains("beta")
-                || NEXT_VERSION.contains("rc")
-                || (NEXT_VERSION.contains("release") && NEXT_VERSION.contains("candidate")))
-
+    injectedTags.put("SNAPSHOT_BUILD", false)
     injectedTags.put("MC_ASSET_VER", "minecraft_1.21")
 }
