@@ -198,21 +198,4 @@ public class BlockBarrel extends BlockContainer {
 		return new TileEntityBarrel(type);
 	}
 
-//	@Override
-//	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
-//		ItemStack stack = new ItemStack(this);
-//		TileEntityBarrel box = (TileEntityBarrel) world.getTileEntity(x, y, z);
-//
-//		if (box != null) {
-//			if (box.type.ordinal() > 0) {
-//				stack.setTagCompound(new NBTTagCompound());
-//			}
-//			if (box.type.ordinal() > 0 && ConfigModCompat.barrelIronChest && ModsList.IRON_CHEST.isLoaded()) {
-//				stack.getTagCompound().setByte("Type", (byte) box.type.ordinal());
-//			}
-//		}
-//
-//		return stack;
-//	}
-
 }
