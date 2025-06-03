@@ -3,7 +3,6 @@ package ganymedes01.etfuturum;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent;
@@ -824,6 +823,16 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.bee.death", "neutral");
 		config.addSoundEvent(ver, "entity.bee.pollinate", "neutral");
 		config.addSoundEvent(ver, "entity.bee.sting", "neutral");
+		config.addSoundEvent(ver, "entity.fox.eat", "neutral");
+		config.addSoundEvent(ver, "entity.fox.aggro", "neutral");
+		config.addSoundEvent(ver, "entity.fox.spit", "neutral");
+		config.addSoundEvent(ver, "entity.fox.screech", "neutral");
+		config.addSoundEvent(ver, "entity.fox.sleep", "neutral");
+		config.addSoundEvent(ver, "entity.fox.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.fox.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.fox.death", "neutral");
+		config.addSoundEvent(ver, "entity.fox.bite", "neutral");
+		config.addSoundEvent(ver, "entity.fox.sniff", "neutral");
 
 
 		config.addSoundEvent(ver, "entity.player.hurt_on_fire", "player");

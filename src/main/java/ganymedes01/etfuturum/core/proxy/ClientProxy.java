@@ -18,7 +18,6 @@ import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import ganymedes01.etfuturum.entities.*;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.spectator.SpectatorModeClient;
 import ganymedes01.etfuturum.tileentities.*;
@@ -138,6 +137,7 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityShulkerBullet.class, new ShulkerBulletRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityBee.class, new BeeRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityNewSnowGolem.class, new NewSnowGolemRenderer());
+		RenderingRegistry.registerEntityRenderingHandler(EntityFox.class, new FoxRenderer());
 
 		RenderingRegistry.registerEntityRenderingHandler(EntityPig.class, new TechnobladeCrownRenderer());
 
