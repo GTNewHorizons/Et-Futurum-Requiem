@@ -86,17 +86,10 @@ public class BlockBarrel extends BlockContainer {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister i) {
-		if (type == TileEntityBarrel.BarrelType.VANILLA){
-			this.blockIcon = i.registerIcon(getTextureName() + "_side");
-			this.topIcon = i.registerIcon(getTextureName() + "_top");
-			this.innerTopIcon = i.registerIcon(getTextureName() + "_top_open");
-			this.bottomIcon = i.registerIcon(getTextureName() + "_bottom");
-		}else {
-			this.blockIcon = i.registerIcon(String.format("metalbarrels:%s_barrel_side", type.name().toLowerCase()));
-			this.topIcon = i.registerIcon(String.format("metalbarrels:%s_barrel_top", type.name().toLowerCase()));
-			this.innerTopIcon = i.registerIcon(String.format("metalbarrels:%s_barrel_top_open", type.name().toLowerCase()));
-			this.bottomIcon = i.registerIcon(String.format("metalbarrels:%s_barrel_bottom", type.name().toLowerCase()));
-		}
+		this.blockIcon = i.registerIcon(getTextureName() + "_side");
+		this.topIcon = i.registerIcon(getTextureName() + "_top");
+		this.innerTopIcon = i.registerIcon(getTextureName() + "_top_open");
+		this.bottomIcon = i.registerIcon(getTextureName() + "_bottom");
 	}
 
 	@Override
