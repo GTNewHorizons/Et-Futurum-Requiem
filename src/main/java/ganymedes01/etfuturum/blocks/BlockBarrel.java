@@ -51,7 +51,6 @@ public class BlockBarrel extends BlockContainer {
 		this.setResistance(2.5F);
 		this.setBlockTextureName("barrel");
 		this.useNeighborBrightness = true;
-		this.setLightOpacity(500);
 		this.setCreativeTab(EtFuturum.creativeTabBlocks);
 	}
 
