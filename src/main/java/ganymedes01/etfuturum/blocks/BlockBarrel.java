@@ -60,7 +60,6 @@ public class BlockBarrel extends BlockContainer {
 				break;
 		}
 
-		this.setBlockTextureName("barrel");
 		this.useNeighborBrightness = true;
 		this.setCreativeTab(EtFuturum.creativeTabBlocks);
 	}
