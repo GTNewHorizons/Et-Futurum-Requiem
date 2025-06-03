@@ -98,30 +98,32 @@ public class BlockBarrel extends BlockContainer {
 			return true;
 		}
 
-		if (world.getTileEntity(x, y, z) instanceof TileEntityBarrel barrel) {
+		if (!(world.getTileEntity(x, y, z) instanceof TileEntityBarrel barrel)) {
+			return false;
+		}
 
-			if (!player.isSneaking() && barrel.numPlayersUsing == 0 && player.getHeldItem() != null && player.getHeldItem().getItem() == ModItems.BARREL_UPGRADE.get()) {
-				ItemStack stack = player.getHeldItem();
-				String[] upgrades = ((BaseSubtypesItem) player.getHeldItem().getItem()).types[stack.getItemDamage()].split("_");
-				if (upgrades[0].equals(barrel.type.toString().toLowerCase())) {
-					barrel.upgrading = true;
-					ItemStack[] tempCopy = barrel.chestContents == null ? new ItemStack[barrel.getSizeInventory()] : ArrayUtils.clone(barrel.chestContents);
-					TileEntityBarrel newTE = (TileEntityBarrel) TileEntityBarrel.BarrelType.valueOf(upgrades[1].toUpperCase()).getBlock().createTileEntity(world, barrel.getBlockMetadata());
-					System.arraycopy(tempCopy, 0, newTE.chestContents, 0, tempCopy.length);
-					if (!player.capabilities.isCreativeMode) {
-						stack.stackSize--;
-					}
-					world.setBlock(x, y, z, newTE.type.getBlock(), barrel.getBlockMetadata(), 3);
-					world.setTileEntity(x, y, z, newTE);
-					world.markBlockForUpdate(x, y, z);
-					return true;
-				}
-			}
-
+		if (player.isSneaking() || barrel.numPlayersUsing != 0 || player.getHeldItem() == null || player.getHeldItem().getItem() != ModItems.BARREL_UPGRADE.get()) {
 			player.openGui(EtFuturum.instance, GUIIDs.BARREL, world, x, y, z);
 			return true;
 		}
-		return false;
+
+		ItemStack upgradeStack = player.getHeldItem();
+		String[] upgradeStrings = ((BaseSubtypesItem) player.getHeldItem().getItem()).types[upgradeStack.getItemDamage()].split("_");
+		if (upgradeStrings.length < 3 || !upgradeStrings[0].equals(barrel.type.toString().toLowerCase())) {
+			return false;
+		}
+
+		barrel.upgrading = true;
+		ItemStack[] tempCopy = barrel.chestContents == null ? new ItemStack[barrel.getSizeInventory()] : ArrayUtils.clone(barrel.chestContents);
+		TileEntityBarrel newTE = (TileEntityBarrel) TileEntityBarrel.BarrelType.valueOf(upgradeStrings[1].toUpperCase()).getBlock().createTileEntity(world, barrel.getBlockMetadata());
+		System.arraycopy(tempCopy, 0, newTE.chestContents, 0, tempCopy.length);
+		if (!player.capabilities.isCreativeMode) {
+			upgradeStack.stackSize--;
+		}
+		world.setBlock(x, y, z, newTE.type.getBlock(), barrel.getBlockMetadata(), 3);
+		world.setTileEntity(x, y, z, newTE);
+		world.markBlockForUpdate(x, y, z);
+		return true;
 	}
 
 	public IInventory getInventory(World p_149951_1_, int p_149951_2_, int p_149951_3_, int p_149951_4_) {
