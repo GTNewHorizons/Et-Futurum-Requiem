@@ -39,10 +39,12 @@ public class BlockBarrel extends BlockContainer {
 			this.setStepSound(soundTypeWood);
 			this.setHarvestLevel("axe", 0);
 			this.setBlockName(Utils.getUnlocalisedName("barrel"));
-		}else {
+			this.setBlockTextureName("barrel");
+		} else {
 			this.setStepSound(soundTypeMetal);
 			this.setHarvestLevel("pickaxe", 1);
-			this.setBlockName(Utils.getUnlocalisedName(type.name().toLowerCase()+"_barrel"));
+			this.setBlockName(Utils.getUnlocalisedName(type.name().toLowerCase() + "_barrel"));
+			this.setBlockTextureName("metalbarrels:" + type.name().toLowerCase() + "_barrel");
 		}
 
 		this.setHardness(2.5F);
