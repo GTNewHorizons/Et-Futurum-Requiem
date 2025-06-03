@@ -268,19 +268,6 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 		this.updateContainingBlockInfo();
 	}
 
-	@Override
-	public int getBlockMetadata() {
-		if (this.blockMetadata == -1) {
-			if (ConfigModCompat.barrelIronChest) {
-				this.blockMetadata = this.worldObj.getBlockMetadata(this.xCoord, this.yCoord, this.zCoord);
-			} else {
-				blockMetadata = 0;
-			}
-		}
-
-		return this.blockMetadata;
-	}
-
 	public enum BarrelType {
 		VANILLA(27, 9,  184, 168, null),
 		IRON(54, 9,  184, 202, "ironcontainer"),

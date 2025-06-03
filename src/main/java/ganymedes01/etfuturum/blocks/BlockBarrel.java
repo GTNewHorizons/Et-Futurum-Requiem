@@ -47,8 +47,19 @@ public class BlockBarrel extends BlockContainer {
 			this.setBlockTextureName("metalbarrels:" + type.name().toLowerCase() + "_barrel");
 		}
 
-		this.setHardness(2.5F);
-		this.setResistance(2.5F);
+		switch (type){
+			case OBSIDIAN:
+			case DARKSTEEL:
+			case NETHERITE:
+				this.setHardness(50F);
+				this.setResistance(2000F);
+				break;
+			default:
+				this.setHardness(2.5F);
+				this.setResistance(2.5F);
+				break;
+		}
+
 		this.setBlockTextureName("barrel");
 		this.useNeighborBrightness = true;
 		this.setCreativeTab(EtFuturum.creativeTabBlocks);
@@ -135,40 +146,31 @@ public class BlockBarrel extends BlockContainer {
 		return (IInventory) object;
 	}
 
-	private final Random rand = new Random();
-
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-		TileEntityBarrel tileentitychest = (TileEntityBarrel) world.getTileEntity(x, y, z);
-
-		if (tileentitychest != null) {
-			if (!tileentitychest.upgrading) {
-				for (int i1 = 0; i1 < tileentitychest.getSizeInventory(); ++i1) {
-					ItemStack itemstack = tileentitychest.getStackInSlot(i1);
-
-					if (itemstack != null) {
-						float f = this.rand.nextFloat() * 0.8F + 0.1F;
-						float f1 = this.rand.nextFloat() * 0.8F + 0.1F;
-						EntityItem entityitem;
-
-						for (float f2 = this.rand.nextFloat() * 0.8F + 0.1F; itemstack.stackSize > 0; world.spawnEntityInWorld(entityitem)) {
-							int j1 = this.rand.nextInt(21) + 10;
-
-							if (j1 > itemstack.stackSize) {
-								j1 = itemstack.stackSize;
-							}
-
-							itemstack.stackSize -= j1;
-							entityitem = new EntityItem(world, x + f, y + f1, z + f2, new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
-							float f3 = 0.05F;
-							entityitem.motionX = (float) this.rand.nextGaussian() * f3;
-							entityitem.motionY = (float) this.rand.nextGaussian() * f3 + 0.2F;
-							entityitem.motionZ = (float) this.rand.nextGaussian() * f3;
-
-							if (itemstack.hasTagCompound()) {
-								entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemstack.getTagCompound().copy());
-							}
-						}
+		TileEntityBarrel tileEntityBarrel = (TileEntityBarrel) world.getTileEntity(x, y, z);
+		if (tileEntityBarrel != null && !tileEntityBarrel.upgrading) {
+			for (int i1 = 0; i1 < tileEntityBarrel.getSizeInventory(); ++i1) {
+				ItemStack itemstack = tileEntityBarrel.getStackInSlot(i1);
+				if (itemstack == null) {
+					continue;
+				}
+				float xOffset = world.rand.nextFloat() * 0.8F + 0.1F;
+				float yOffset = world.rand.nextFloat() * 0.8F + 0.1F;
+				EntityItem entityitem;
+				for (float zOffset = world.rand.nextFloat() * 0.8F + 0.1F; itemstack.stackSize > 0; world.spawnEntityInWorld(entityitem)) {
+					int itemCount = world.rand.nextInt(21) + 10;
+					if (itemCount > itemstack.stackSize) {
+						itemCount = itemstack.stackSize;
+					}
+					itemstack.stackSize -= itemCount;
+					entityitem = new EntityItem(world, x + xOffset, y + yOffset, z + zOffset, new ItemStack(itemstack.getItem(), itemCount, itemstack.getItemDamage()));
+					float motionMultiplier = 0.05F;
+					entityitem.motionX = (float) world.rand.nextGaussian() * motionMultiplier;
+					entityitem.motionY = (float) world.rand.nextGaussian() * motionMultiplier + 0.2F;
+					entityitem.motionZ = (float) world.rand.nextGaussian() * motionMultiplier;
+					if (itemstack.hasTagCompound()) {
+						entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemstack.getTagCompound().copy());
 					}
 				}
 			}
