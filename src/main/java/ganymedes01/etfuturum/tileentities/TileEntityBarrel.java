@@ -281,16 +281,6 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 		return this.blockMetadata;
 	}
 
-	public TileEntityBarrel updateFromMetadata(int l) {
-		if (worldObj != null && worldObj.isRemote) {
-			if (l != blockMetadata) {
-//                worldObj.setTileEntity(xCoord, yCoord, zCoord, IronChestType.makeEntity(l));
-				return (TileEntityBarrel) worldObj.getTileEntity(xCoord, yCoord, zCoord);
-			}
-		}
-		return this;
-	}
-
 	public enum BarrelType {
 		VANILLA(27, 9,  184, 168, null),
 		IRON(54, 9,  184, 202, "ironcontainer"),
