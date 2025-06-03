@@ -557,7 +557,7 @@ public class EntityNewBoat extends Entity {
 	}
 
 	private void tickLerp() {
-		if (worldObj.isRemote && this.lerpSteps > 0) {
+		if (worldObj.isRemote && this.lerpSteps > 0 && !ConfigTweaks.stopBoatRotationLock) {
 			if (worldObj.isRemote && getSeat() != null && getSeat().riddenByEntity instanceof EntityClientPlayerMP) {
 				double i = MathHelper.wrapAngleTo180_double(this.boatYaw - (double) this.rotationYaw);
 				getSeat().riddenByEntity.rotationYaw += i / lerpSteps;
