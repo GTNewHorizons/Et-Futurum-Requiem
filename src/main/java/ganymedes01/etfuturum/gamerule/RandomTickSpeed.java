@@ -10,9 +10,13 @@ public class RandomTickSpeed {
 
 	public static final String GAMERULE_NAME = "randomTickSpeed";
 	public static final String DEFAULT_VALUE = "3";
+	public int CURRENT_VALUE = -1;
 
 	public int getRandomTickSpeed(GameRules gameRulesInstance) {
-		return Integer.parseInt(StringUtils.defaultIfEmpty(gameRulesInstance.getGameRuleStringValue(GAMERULE_NAME), DEFAULT_VALUE));
+		if (RandomTickSpeed.INSTANCE.CURRENT_VALUE == -1) {
+			RandomTickSpeed.INSTANCE.CURRENT_VALUE = Integer.parseInt(StringUtils.defaultIfEmpty(gameRulesInstance.getGameRuleStringValue(GAMERULE_NAME), DEFAULT_VALUE));
+		}
+		return RandomTickSpeed.INSTANCE.CURRENT_VALUE;
 	}
 
 	public static void registerGamerule(World world) {

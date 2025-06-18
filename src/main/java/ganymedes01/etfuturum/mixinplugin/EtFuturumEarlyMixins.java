@@ -129,6 +129,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigMixins.enableRandomTickSpeed) {
 			mixins.add("randomtickspeed.MixinWorldServer");
+			mixins.add("randomtickspeed.MixinGameRules");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {

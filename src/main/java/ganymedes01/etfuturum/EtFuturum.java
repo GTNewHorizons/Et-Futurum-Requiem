@@ -154,7 +154,7 @@ public class EtFuturum {
 	@EventHandler
 	public void onConstruction(FMLConstructionEvent event) {
 		if(Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			Logger.info(Reference.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
+			Logger.info(Tags.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
 		}
 
 		MCLib.init();
