@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import ganymedes01.etfuturum.EtFuturum;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -57,20 +58,46 @@ public abstract class MixinEntityItem extends Entity {
 	 * Yet no matter what I do changing this to WrapOperation either causes no float or the item to sling out of and bounce on lava.
 	 * So this stays as a redirect for now until I can find some in-between
 	 */
-	@Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;moveEntity(DDD)V"))
-	private void floatLava(EntityItem instance, double mx, double my, double mz) {
-		double buoyancy = 0;
-		if (isImmuneToFire && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava) {
-			motionY += 0.04D; //Necessary to do this too or the ingot floats slightly below the lava for some reason
-			//Yes I tried setting my to += 0.08D it DOES NOT FIX IT
-			my += 0.04D;
-			buoyancy = 0.3D;
-			mx *= 0.5D;
-			mz *= 0.5D;
+	@Inject(method = "onUpdate", at = @At("HEAD"))
+	private void floatLava(CallbackInfo ci) {
+		Block state = this.worldObj.getBlock((int) this.posX, (int) this.posY, (int) this.posZ);
+		
+		if (isImmuneToFire && state.getMaterial().isLiquid() && state.getMaterial() == Material.lava) {
+			// Is item still falling?
+			if (this.motionY < -0.15D || Math.abs(this.motionX) > 0.15D || Math.abs(this.motionZ) > 0.15D) {
+				this.motionX *= 0.4D;
+				this.motionY *= 0.75D;
+				this.motionZ *= 0.4D;
+
+			} else {
+        		// Find top lava level
+        		int blockY = MathHelper.floor_double(this.posY);
+        		while (this.worldObj.getBlock((int)this.posX, blockY + 1, (int)this.posZ).getMaterial() == Material.lava) {
+        		    blockY++;
+        		}
+				
+				// Liquid height is reversed for some reason
+        		float liquidHeight = 0.9f - BlockLiquid.getLiquidHeightPercent(this.worldObj.getBlockMetadata(
+        		    MathHelper.floor_double(this.posX),
+        		    blockY,
+        		    MathHelper.floor_double(this.posZ))
+        		);
+				
+        		double surfaceY = blockY + liquidHeight;
+				// Logger.debug("y: " + this.posY +" target: " + surfaceY);
+				if (this.posY < surfaceY) {
+					this.motionX *= 0.5D;
+					this.motionY = 0.05D;
+					this.motionZ *= 0.5D;
+				} else {
+					// Once we reach the target height, float
+					this.motionY = 0.04D;
+				}
+			}
 		}
-		moveEntity(mx, my + buoyancy, mz);
 	}
 
+	
 	@WrapOperation(method = "onUpdate",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlock(III)Lnet/minecraft/block/Block;"))
 	private Block noFizzBounce(World instance, int x, int y, int z, Operation<Block> original) { //Returns AIR so the check for lava is false; we do this to remove the fizzing and bouncing
