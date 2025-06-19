@@ -40,9 +40,6 @@ public abstract class MixinEntityItem extends Entity {
 					|| tags.contains("ingotNetherite") || tags.contains("blockNetherite")) {
 				this.isImmuneToFire = true;
 				this.fireResistance = Integer.MAX_VALUE;
-			} else if (isImmuneToFire) {
-				this.isImmuneToFire = false;
-				this.fireResistance = 1;
 			}
 		}
 	}
