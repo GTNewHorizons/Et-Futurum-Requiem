@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -52,46 +51,36 @@ public abstract class MixinEntityItem extends Entity {
 		}
 	}
 
-	/**
-	 * TODO: This should be changed to a WrapOperation
-	 * I've tried rearranging all of the motion values in every way I could think of.
-	 * Yet no matter what I do changing this to WrapOperation either causes no float or the item to sling out of and bounce on lava.
-	 * So this stays as a redirect for now until I can find some in-between
-	 */
 	@Inject(method = "onUpdate", at = @At("HEAD"))
 	private void floatLava(CallbackInfo ci) {
-		Block state = this.worldObj.getBlock((int) this.posX, (int) this.posY, (int) this.posZ);
-		
-		if (isImmuneToFire && state.getMaterial().isLiquid() && state.getMaterial() == Material.lava) {
-			// Is item still falling?
-			if (this.motionY < -0.15D || Math.abs(this.motionX) > 0.15D || Math.abs(this.motionZ) > 0.15D) {
-				this.motionX *= 0.4D;
-				this.motionY *= 0.75D;
-				this.motionZ *= 0.4D;
+//		if (!worldObj.isRemote && isImmuneToFire) Logger.debug("item motions: x: " + motionX + " y: " + motionY + " z: " + motionZ);
+		// This is a rough check if the item is in lava, if we wanted something based on the actual hitbox, see World.handleMaterialAcceleration()
+		if (isImmuneToFire && isLava(this.posX, this.posY, this.posZ, this.worldObj, false)) {
+			if (this.motionY > -0.15D && Math.max(Math.abs(this.motionX), Math.abs(this.motionZ)) < 0.015) {
 
-			} else {
-        		// Find top lava level
-        		int blockY = MathHelper.floor_double(this.posY);
-        		while (this.worldObj.getBlock((int)this.posX, blockY + 1, (int)this.posZ).getMaterial() == Material.lava) {
-        		    blockY++;
-        		}
-				
-				// Liquid height is reversed for some reason
-        		float liquidHeight = 0.9f - BlockLiquid.getLiquidHeightPercent(this.worldObj.getBlockMetadata(
+				boolean aboveBlockIsSource = isLava(this.posX, this.posY + 1, this.posZ, this.worldObj, true);
+				// We set the target height into the next (higher) block if it is also source-lava, otherwise we use the liquid level of the current block
+				float liquidHeight = aboveBlockIsSource ? 1.1f : 0.9f - BlockLiquid.getLiquidHeightPercent(this.worldObj.getBlockMetadata(
         		    MathHelper.floor_double(this.posX),
-        		    blockY,
-        		    MathHelper.floor_double(this.posZ))
-        		);
-				
-        		double surfaceY = blockY + liquidHeight;
-				// Logger.debug("y: " + this.posY +" target: " + surfaceY);
+					MathHelper.floor_double(this.posY),
+        		    MathHelper.floor_double(this.posZ)
+				));
+				double surfaceY = Math.floor(this.posY) + liquidHeight;
+
 				if (this.posY < surfaceY) {
-					this.motionX *= 0.5D;
 					this.motionY = 0.05D;
-					this.motionZ *= 0.5D;
+					this.motionX *= 0.4D;
+					this.motionZ *= 0.4D;
 				} else {
+					/* This is an alternate variant that simulates stronger bobbing on lava, needs  - 0.3D at the surface check
+					if ((this.ticksExisted - (!this.worldObj.isRemote ? 0 : 10)) % 100 < 50) {
+						this.motionY = 0.045D;
+					} else {
+						this.motionY = 0.032D;
+					}*/
 					// Once we reach the target height, float
-					this.motionY = 0.04D;
+					// Using the exact gravity constant here, to prevent resync later on
+					this.motionY = 0.03999999910593033D;
 				}
 			}
 		}
@@ -100,7 +89,7 @@ public abstract class MixinEntityItem extends Entity {
 	
 	@WrapOperation(method = "onUpdate",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlock(III)Lnet/minecraft/block/Block;"))
-	private Block noFizzBounce(World instance, int x, int y, int z, Operation<Block> original) { //Returns AIR so the check for lava is false; we do this to remove the fizzing and bouncing
+	private Block noFizzBounce(World instance, int x, int y, int z, Operation<Block> original) { //Returns AIR so the check for lava is false; we do this to remove the fizzing and bouncing that happens when items get incinerated
 		return isImmuneToFire ? Blocks.air : original.call(instance, x, y, z);
 	}
 
@@ -114,5 +103,14 @@ public abstract class MixinEntityItem extends Entity {
 		if (isImmuneToFire && source.isFireDamage()) {
 			cir.setReturnValue(false);
 		}
+	}
+
+	private boolean isLava(double posX, double posY, double posZ, World worldObj, boolean checkSource) {
+		int[] pos = new int[] {MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)};
+		Block block = worldObj.getBlock(pos[0], pos[1], pos[2]);
+
+		return block.getMaterial().isLiquid() &&
+				block.getMaterial() == Material.lava &&
+				(!checkSource || worldObj.getBlockMetadata(pos[0], pos[1], pos[2]) == 0);
 	}
 }
