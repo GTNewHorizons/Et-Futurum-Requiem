@@ -234,10 +234,11 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
             mixins.add("isLadderFix.MixinEntityLivingBase");
         }
 
-        if (ConfigMixins.adjustedLiquidPhysics) {
-            mixins.add("liquidphysics.MixinEntity");
-            mixins.add("liquidphysics.MixinWorld");
-        }
+		if (ConfigMixins.adjustedLiquidPhysics) {
+			mixins.add("liquidphysics.MixinEntity");
+			mixins.add("liquidphysics.MixinWorld");
+			mixins.add("liquidphysics.MixinBlockLiquid");
+		}
 
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
