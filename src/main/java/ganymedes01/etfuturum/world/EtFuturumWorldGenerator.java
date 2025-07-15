@@ -9,7 +9,9 @@ import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.world.end.dimension.WorldProviderEFREnd;
 import ganymedes01.etfuturum.world.generate.WorldGenMinableCustom;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenBamboo;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenCaveVines;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenGlowLichen;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenPinkPetals;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
@@ -56,6 +58,8 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator lilyValleyGen;
 	protected WorldGenerator pinkPetalsGen;
 	protected WorldGenerator bambooGen;
+	protected WorldGenerator glowLichenGen;
+	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
 
 	//trees
@@ -123,13 +127,19 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 		if (ModBlocks.BAMBOO.isEnabled() && ConfigWorld.bambooWorldgen) {
 			bambooGen = new WorldGenBamboo(ModBlocks.BAMBOO.get());
-			for(BiomeGenBase biome : Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.JUNGLE))) {
-				String type = ArrayUtils.contains(BiomeDictionary.getTypesForBiome(biome), Type.SPARSE) ? "sparse_bamboo" : "dense_bamboo";
-				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/" + type);
-			}
+			bambooBiomes = Arrays.asList(Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.JUNGLE)));
 		}
 
+		if (ModBlocks.GLOW_LICHEN.isEnabled())
 		{
+			glowLichenGen = new WorldGenGlowLichen(ModBlocks.GLOW_LICHEN.get());
+		}
+
+		if (ModBlocks.CAVE_VINE.isEnabled())
+		{
+			caveVineGen = new WorldGenCaveVines(ModBlocks.CAVE_VINE.get());
+		}
+		if (ModBlocks.CHERRY_LOG.isEnabled() && ModBlocks.LEAVES.isEnabled()) {
 			BiomeGenBase[] cherryBiomeArray = BiomeDictionary.getBiomesForType(Type.MOUNTAIN);
 			cherryBiomeArray = Utils.excludeBiomesFromTypesWithDefaults(cherryBiomeArray, Type.SNOWY, Type.HOT, Type.SANDY, Type.MESA, Type.SPARSE, Type.JUNGLE);
 			if (ModBlocks.CHERRY_LOG.isEnabled() && ModBlocks.LEAVES.isEnabled()) {
@@ -228,7 +238,33 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				}
 			}
 
-			if (cherryTreeGen != null && ConfigWorld.cherryTreeRarity > 0) {
+			if (glowLichenGen != null)
+			{
+				x = (chunkX << 4) + rand.nextInt(16) + 8;
+				z = (chunkZ << 4) + rand.nextInt(16) + 8;
+
+				for (int tries = 0; tries < 40; tries++) {
+					int xoff = x + rand.nextInt(10) - rand.nextInt(10);
+					int yoff = rand.nextInt(128);
+					int zoff = z + rand.nextInt(10) - rand.nextInt(10);
+					glowLichenGen.generate(world, rand, xoff, yoff, zoff);
+				}
+			}
+
+			if (caveVineGen != null)
+			{
+				x = (chunkX << 4) + rand.nextInt(16) + 8;
+				z = (chunkZ << 4) + rand.nextInt(16) + 8;
+
+				for (int tries = 0; tries < 20; tries++) {
+					int xoff = x + rand.nextInt(10) - rand.nextInt(10);
+					int yoff = rand.nextInt(128);
+					int zoff = z + rand.nextInt(10) - rand.nextInt(10);
+					caveVineGen.generate(world, rand, xoff, yoff, zoff);
+				}
+			}
+
+			if (cherryTreeGen != null) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
 				if(BiomeTags.hasTag(world.getBiomeGenForCoords(x, z), Tags.MOD_ID + ":has_decorator/cherry_tree")) {
