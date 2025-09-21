@@ -354,6 +354,7 @@ item.etfuturum.amethyst_shard.name=Amethystscherbe
 item.etfuturum.honeycomb.name=Honigwabe
 item.etfuturum.honey_bottle.name=Honigflasche
 item.etfuturum.bamboo.name=Bambus
+item.etfuturum.glow_berries.name=Glühbeeren
 
 # Pfeile
 item.etfuturum.tipped_arrow.name=Getränkter Pfeil
@@ -1581,7 +1582,7 @@ efr.nei.composter=Kompostieren
 efr.nei.banner=Banner
 efr.nei.amount=Menge
 efr.nei.weight=Gewicht
-				   
+
 efr.decoration.only=Nur Dekoration
 
 efr.warn.prerelease.version=§c§l[Debug]: §rDu benutzt eine Pre-Release-Version von §bEt §bFuturum §bRequiem§r. Diese Version könnte instabil sein, klicke hier, um auf GitHub Fehler zu melden.
