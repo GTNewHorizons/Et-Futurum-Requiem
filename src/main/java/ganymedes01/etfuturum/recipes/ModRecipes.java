@@ -51,6 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static cpw.mods.fml.common.registry.GameRegistry.addShapedRecipe;
+
 public class ModRecipes {
 
 	public static final String[] ore_dyes = new String[]{"dyeBlack", "dyeRed", "dyeGreen", "dyeBrown", "dyeBlue", "dyePurple", "dyeCyan", "dyeLightGray", "dyeGray", "dyePink", "dyeLime", "dyeYellow", "dyeLightBlue", "dyeMagenta", "dyeOrange", "dyeWhite"};
@@ -1581,17 +1583,17 @@ public class ModRecipes {
 		if (ConfigWorld.tileReplacementMode == -1) {
 			//We keep the original enabled checks inside of the booleans and use the original addShapedRecipe function because we need to check it anyways for recipe removal
 			if (ModBlocks.ANVIL.isEnabled()) {
-				GameRegistry.addShapedRecipe(ModBlocks.ANVIL.newItemStack(), "BBB", " I ", "III", 'I', new ItemStack(Items.iron_ingot), 'B', new ItemStack(Blocks.iron_block));
+				addShapedRecipe(ModBlocks.ANVIL.newItemStack(), "BBB", " I ", "III", 'I', new ItemStack(Items.iron_ingot), 'B', new ItemStack(Blocks.iron_block));
 				RecipeHelper.removeFirstRecipeWithOutput(Blocks.anvil, 0, false);
 			}
 
 			if (ModBlocks.BREWING_STAND.isEnabled()) {
-				GameRegistry.addShapedRecipe(ModBlocks.BREWING_STAND.newItemStack(), " B ", "CCC", 'C', new ItemStack(Blocks.cobblestone), 'B', new ItemStack(Items.blaze_rod));
+				addShapedRecipe(ModBlocks.BREWING_STAND.newItemStack(), " B ", "CCC", 'C', new ItemStack(Blocks.cobblestone), 'B', new ItemStack(Items.blaze_rod));
 				RecipeHelper.removeFirstRecipeWithOutput(Blocks.brewing_stand, 0, false);
 			}
 
 			if (ModBlocks.BEACON.isEnabled()) {
-				GameRegistry.addShapedRecipe(ModBlocks.BEACON.newItemStack(), "GGG", "GNG", "OOO", 'G', new ItemStack(Blocks.glass), 'N', new ItemStack(Items.nether_star), 'O', new ItemStack(Blocks.obsidian));
+				addShapedRecipe(ModBlocks.BEACON.newItemStack(), "GGG", "GNG", "OOO", 'G', new ItemStack(Blocks.glass), 'N', new ItemStack(Items.nether_star), 'O', new ItemStack(Blocks.obsidian));
 				RecipeHelper.removeFirstRecipeWithOutput(Blocks.beacon, 0, false);
 			}
 
