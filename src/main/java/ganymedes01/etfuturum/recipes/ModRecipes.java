@@ -937,7 +937,7 @@ public class ModRecipes {
 		RecipeHelper.addHighPriorityShapedRecipe(output126, "i", "x", "s", 'x', "stickWood", 'i', "charcoal", 's', "soulSoil");
 
 		if (!ModsList.GTNH.isLoaded()) {
-			addShapedRecipe(ModBlocks.BARREL.newItemStack(), "xsx", "x x", "xsx", 'x', "plankWood", 's', "slabWood");
+			GameRegistry.addShapedRecipe(ModBlocks.BARREL.newItemStack(), "xsx", "x x", "xsx", 'x', "plankWood", 's', "slabWood");
 
 			ItemStack output3 = ModBlocks.BLUE_ICE.newItemStack();
 			RecipeHelper.addHighPriorityShapedRecipe(output3, "xxx", "xxx", "xxx", 'x', Blocks.packed_ice);
