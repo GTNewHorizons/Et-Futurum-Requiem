@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.items;
 
 import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.item.Item;
 
 public class BaseItem extends Item {
@@ -43,6 +43,6 @@ public class BaseItem extends Item {
 	}
 
 	public String getNameDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 }

@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.tileentities;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockBlastFurnace;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.recipes.BlastFurnaceRecipes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -107,7 +107,7 @@ public class TileEntityBlastFurnace extends TileEntity implements ISidedInventor
 	 */
 	@Override
 	public String getInventoryName() {
-		return this.hasCustomInventoryName() ? this.furnaceCustomName : "container." + Reference.MOD_ID + ".blast_furnace";
+		return this.hasCustomInventoryName() ? this.furnaceCustomName : "container." + Tags.MOD_ID + ".blast_furnace";
 	}
 
 	/**

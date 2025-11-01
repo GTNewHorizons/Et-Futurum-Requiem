@@ -6,10 +6,10 @@ import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.rawore.modded.ItemGeneralModdedRawOre;
-import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.item.Item;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.ArrayUtils;
+import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class RawOreRegistry {
 	 * @param ore
 	 */
 	public static void addOre(String oreDict, Item ore, int meta) {
-		if (ModRecipes.validateItems(ore)) {
+		if (RecipeHelper.validateItems(ore)) {
 			RawOreDropMapping mapping = new RawOreDropMapping(ore, meta);
 			if (ArrayUtils.contains(ConfigFunctions.extraDropRawOres, oreDict)) {
 				mapping.setDropsExtra(true);

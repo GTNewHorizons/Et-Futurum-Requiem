@@ -2,7 +2,7 @@ package ganymedes01.etfuturum.configuration;
 
 import cpw.mods.fml.client.config.GuiConfig;
 import cpw.mods.fml.client.config.IConfigElement;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.launchwrapper.Launch;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class ConfigGUI extends GuiConfig {
 
 	public ConfigGUI(GuiScreen parent) {
-		super(parent, getElements(), Reference.MOD_ID, Reference.MOD_ID, false, false, GuiConfig.getAbridgedConfigPath(Launch.minecraftHome + "config" + File.separator + Reference.MOD_ID));
+		super(parent, getElements(), Tags.MOD_ID, Tags.MOD_ID, false, false, GuiConfig.getAbridgedConfigPath(Launch.minecraftHome + "config" + File.separator + Tags.MOD_ID));
 	}
 
 	@SuppressWarnings("rawtypes")

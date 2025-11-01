@@ -1,7 +1,6 @@
 package ganymedes01.etfuturum.client.particle;
 
 import ganymedes01.etfuturum.client.OpenGLHelper;
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
@@ -9,6 +8,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.util.Random;
 
@@ -28,7 +28,7 @@ public class EtFuturumFXParticle extends EntityFX {
 	protected boolean usesSheet;
 	protected final ResourceLocation[] resourceLocations;
 
-	protected static final Random particleRand = new RandomXoshiro256StarStar();
+	protected static final Random particleRand = new FastRandom();
 
 	public EtFuturumFXParticle(World world, double x, double y, double z, double mx, double my, double mz, int maxAge,
 							   float scale, int color, String texture, int textures) {

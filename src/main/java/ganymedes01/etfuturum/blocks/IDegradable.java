@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.blocks;
 
 import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -204,7 +204,7 @@ public interface IDegradable {
 	default void playSound(World world, double x, double y, double z, int type) {
 		int pitch = world.rand.nextInt(3);
 		world.playSound(x, y, z,
-				Reference.MCAssetVer + ":item." + (type == 0 ? "honeycomb.wax_on" : type == 1 ? "axe.wax_off" : "axe.scrape"),
+				Tags.MC_ASSET_VER + ":item." + (type == 0 ? "honeycomb.wax_on" : type == 1 ? "axe.wax_off" : "axe.scrape"),
 				1F, (float) ((pitch == 0 ? 0 : ((double) pitch / 10D)) + 0.9D), false);
 	}
 

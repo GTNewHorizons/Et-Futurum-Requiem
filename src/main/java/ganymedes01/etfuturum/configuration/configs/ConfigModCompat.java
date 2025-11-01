@@ -9,6 +9,7 @@ import java.util.List;
 public class ConfigModCompat extends ConfigBase {
 
 	public static int elytraBaublesExpandedCompat;
+	public static boolean baublesMending;
 	public static boolean shulkerBoxesIronChest;
 
 	public static boolean moddedRawOres;
@@ -49,6 +50,7 @@ public class ConfigModCompat extends ConfigBase {
 				0 = No compat, do not allow the elytra to be placed in a wings slot.\
 				1 = Elytra will be placeable in a wings slot. Will enable the slot, if it isn't there.\
 				2 = The elytra can ONLY go in the wings slots, not the chestplate slot.""");
+		baublesMending = getBoolean("baublesMending", catMisc, true, "If Baubles (or Baubles Expanded) is installed, allows the Mending enchantment to repair items that are worn in bauble slots when experience is collected.\nThis option does nothing if Baubles (or BE) is not installed or if the Mending enchantment is disabled.");
 		soulFireColor = (short) getInt("soulFireColor", catRPLE, 0x49A, 0x000, 0xFFF, """
 						The color of soul fire. Needs to be a separate option because it's a mixin for fire and not a meta state.
 						Does not have any effect on the color of soul lanterns or soul torches. Check the RPLE colors config for those.""");

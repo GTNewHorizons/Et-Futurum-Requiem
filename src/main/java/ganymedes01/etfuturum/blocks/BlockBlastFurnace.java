@@ -4,10 +4,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.lib.GUIIDs;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntityBlastFurnace;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFurnace;
@@ -50,7 +50,7 @@ public class BlockBlastFurnace extends BlockFurnace {
 		if (this.isCooking) {
 			if (ConfigSounds.furnaceCrackling && random.nextDouble() < 0.1D) {
 				worldIn.playSound(x + .5D, y + .5D, z + .5D,
-						Reference.MCAssetVer + ":block.blastfurnace.fire_crackle", 1,
+						Tags.MC_ASSET_VER + ":block.blastfurnace.fire_crackle", 1,
 						(worldIn.rand.nextFloat() * 0.1F) + 0.9F, false);
 			}
 

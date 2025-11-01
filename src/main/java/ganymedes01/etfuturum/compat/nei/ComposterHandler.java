@@ -9,9 +9,9 @@ import codechicken.nei.recipe.IUsageHandler;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import ganymedes01.etfuturum.EtFuturumLootTables;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.api.CompostingRegistry;
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
@@ -134,7 +134,11 @@ public class ComposterHandler extends TemplateRecipeHandler implements ICrafting
 
 	@Override
 	public void loadCraftingRecipes(String outputId, Object... results) {
-		if (outputId.equals(this.getOverlayIdentifier())) composeRecipeMap(null);
+		if (outputId.equals(this.getOverlayIdentifier())) {
+			composeRecipeMap(null);
+		} else {
+			super.loadCraftingRecipes(outputId, results);
+		}
 	}
 
 	@Override
@@ -199,12 +203,12 @@ public class ComposterHandler extends TemplateRecipeHandler implements ICrafting
 
 	@Override
 	public String getOverlayIdentifier() {
-		return Reference.MOD_ID + ".composter";
+		return Tags.MOD_ID + ".composter";
 	}
 
 	@Override
 	public String getGuiTexture() {
-		return Reference.MOD_ID + ":textures/gui/nei/board.png";
+		return Tags.MOD_ID + ":textures/gui/nei/board.png";
 	}
 
 	@Override

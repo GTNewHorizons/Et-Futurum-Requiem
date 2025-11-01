@@ -1,9 +1,9 @@
 package ganymedes01.etfuturum.client.sound;
 
 import cpw.mods.fml.client.FMLClientHandler;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.entities.EntityBee;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.util.MathHelper;
@@ -16,7 +16,7 @@ public class BeeFlySound extends MovingSound {
 	private final boolean wasAngry;
 
 	public BeeFlySound(EntityBee beeIn) {
-		super(new ResourceLocation(Reference.MCAssetVer + ":entity.bee.loop" + (beeIn.isAngry() ? "_aggressive" : "")));
+		super(new ResourceLocation(Tags.MC_ASSET_VER + ":entity.bee.loop" + (beeIn.isAngry() ? "_aggressive" : "")));
 		this.beeInstance = beeIn;
 		xPosF = (float) beeIn.posX;
 		yPosF = (float) beeIn.posY;

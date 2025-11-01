@@ -9,15 +9,10 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
-import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.ModEnchantments;
-import ganymedes01.etfuturum.ModItems;
-import ganymedes01.etfuturum.api.HoeRegistry;
+import ganymedes01.etfuturum.*;
 import ganymedes01.etfuturum.api.RawOreRegistry;
 import ganymedes01.etfuturum.api.StrippedLogRegistry;
 import ganymedes01.etfuturum.api.mappings.RawOreDropMapping;
-import ganymedes01.etfuturum.api.mappings.RegistryMapping;
 import ganymedes01.etfuturum.blocks.BlockHoney;
 import ganymedes01.etfuturum.blocks.BlockMagma;
 import ganymedes01.etfuturum.client.sound.ModSounds;
@@ -35,7 +30,6 @@ import ganymedes01.etfuturum.gamerule.DoWeatherCycle;
 import ganymedes01.etfuturum.gamerule.PlayersSleepingPercentage;
 import ganymedes01.etfuturum.gamerule.RandomTickSpeed;
 import ganymedes01.etfuturum.items.ItemArrowTipped;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
 import ganymedes01.etfuturum.recipes.ModRecipes;
@@ -101,6 +95,9 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableFloat;
+import roadhog360.hogutils.api.blocksanditems.utils.BlockMetaPair;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
+import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -231,7 +228,7 @@ public class ServerEventHandler {
 					}
 					// Play a sound if one of the equipment pieces changed
 					if (!itemEquippedSound.equals("")) {
-						player.worldObj.playSoundAtEntity(player, Reference.MCAssetVer + ":" + itemEquippedSound, 1, 1);
+						player.worldObj.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":" + itemEquippedSound, 1, 1);
 					}
 				}
 			} else {
@@ -246,14 +243,14 @@ public class ServerEventHandler {
 			// --- Left-click an item frame --- //
 			if (ConfigSounds.paintingItemFramePlacing && event.target instanceof EntityItemFrame itemframe) {
 				if (itemframe.getDisplayedItem() != null) {
-					event.target.playSound(Reference.MCAssetVer + ":entity.item_frame.remove_item", 1.0F, 1.0F);
+					event.target.playSound(Tags.MC_ASSET_VER + ":entity.item_frame.remove_item", 1.0F, 1.0F);
 				} else {
-					event.target.playSound(Reference.MCAssetVer + ":entity.item_frame.break", 1.0F, 1.0F);
+					event.target.playSound(Tags.MC_ASSET_VER + ":entity.item_frame.break", 1.0F, 1.0F);
 				}
 			} else if (ConfigSounds.paintingItemFramePlacing && event.target instanceof EntityPainting) { // --- Break a painting --- //
-				event.target.playSound(Reference.MCAssetVer + ":entity.painting.break", 1.0F, 1.0F);
+				event.target.playSound(Tags.MC_ASSET_VER + ":entity.painting.break", 1.0F, 1.0F);
 			} else if (ConfigSounds.leashSounds && event.target instanceof EntityLeashKnot) { // --- Break a lead knot --- //
-				event.target.playSound(Reference.MCAssetVer + ":entity.leash_knot.break", 1.0F, 1.0F);
+				event.target.playSound(Tags.MC_ASSET_VER + ":entity.leash_knot.break", 1.0F, 1.0F);
 			}
 		}
 	}
@@ -274,7 +271,7 @@ public class ServerEventHandler {
 			sound = "leash_knot";
 		}
 		if (!sound.equals("")) {
-			event.world.playSoundAtEntity(event.entity, Reference.MCAssetVer + ":entity." + sound + ".place", 1.0F, 1.0F);
+			event.world.playSoundAtEntity(event.entity, Tags.MC_ASSET_VER + ":entity." + sound + ".place", 1.0F, 1.0F);
 			return;
 		}
 
@@ -427,7 +424,7 @@ public class ServerEventHandler {
 	@SubscribeEvent
 	public void onPlayerLoadFromFileEvent(PlayerEvent.LoadFromFile event) {
 		if (!ConfigBlocksItems.enableEnchantingTable) return;
-		Path file = event.getPlayerFile(Reference.MOD_ID).toPath();
+		Path file = event.getPlayerFile(Tags.MOD_ID).toPath();
 
 		if (Files.exists(file)) {
 			EtFuturumPlayer storage = EtFuturumPlayer.get(event.entityPlayer);
@@ -476,7 +473,7 @@ public class ServerEventHandler {
 					//For some reason this list is always empty for items which were added during the event being fired
 					RawOreDropMapping mapping = RawOreRegistry.getOreMap().get(oreName);
 					if (mapping != null && stack != null && !EtFuturum.dictTagsStartWith(stack, "raw")) {
-						event.drops.set(i, new ItemStack(mapping.getObject(), mapping.getDropAmount(event.world.rand, event.fortuneLevel), mapping.getMeta()));
+						event.drops.set(i, new ItemStack(mapping.get(), mapping.getDropAmount(event.world.rand, event.fortuneLevel), mapping.getMeta()));
 						break;
 					}
 				}
@@ -509,47 +506,24 @@ public class ServerEventHandler {
 		boolean flag = false;
 		float toolSpeed = 0;
 		float speedModifier = 0;
-		if (ConfigFunctions.enableHoeMining && HoeRegistry.hoeArrayHas(event.block)) {
-			ItemStack stack = event.entityPlayer.getHeldItem();
-			if (stack != null && stack.getItem() instanceof ItemHoe) {
-				try {
-					Item hoe = stack.getItem();
-					toolSpeed = getHoeSpeed(hoe);
-					speedModifier = this.speedModifier(event.entityPlayer, event.block, event.metadata, toolSpeed);
-					flag = true;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
+		if (ConfigFunctions.enableHoeMining) {
+			boolean result = BlockTags.hasTag(event.block, event.metadata, "minecraft:mineable/hoe");
+			if (result) {
+				ItemStack stack = event.entityPlayer.getHeldItem();
+				if (stack != null && stack.getItem() instanceof ItemHoe hoe) {
+					try {
+						toolSpeed = hoe.theToolMaterial.getEfficiencyOnProperMaterial();
+						speedModifier = this.speedModifier(event.entityPlayer, event.block, event.metadata, toolSpeed);
+						flag = true;
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					}
 				}
-			}
 
+			}
 		}
 		if (flag)
 			event.newSpeed = event.originalSpeed + toolSpeed + speedModifier;
-	}
-
-	/**
-	 * Return 0 if the input is not a tool.
-	 * Gets private tool speed value from tool material.
-	 * Now cleaned up and uses Access Transformers for better performance!
-	 *
-	 * @param item
-	 */
-	public float getHoeSpeed(Item item) {
-		float returnValue = 0;
-		try {
-			if (item instanceof ItemHoe || item instanceof ItemTool) {
-				Item.ToolMaterial theToolMaterial;
-				if (item instanceof ItemTool) {
-					theToolMaterial = ((ItemTool) item).toolMaterial;
-				} else {
-					theToolMaterial = ((ItemHoe) item).theToolMaterial;
-				}
-				returnValue = theToolMaterial.getEfficiencyOnProperMaterial();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return returnValue;
 	}
 
 	public float speedModifier(EntityPlayer entity, Block block, int meta, float digSpeed) {
@@ -561,7 +535,10 @@ public class ServerEventHandler {
 		if (i > 0 && itemstack != null) {
 			float f1 = i * i + 1;
 
-			//boolean canHarvest = ForgeHooks.canToolHarvestBlock(block, meta, itemstack); // TODO Do you even care if it is harvestable? Tbh not sure of what to slash the speed by if it isn't
+			//boolean canHarvest = ForgeHooks.canToolHarvestBlock(block, meta, itemstack);
+			// TODO Do you even care if it is harvestable? Tbh not sure of what to slash the speed by if it isn't
+			// Not sure who wrote this, but the answer is NO. If a block is flagged as hoe mineable we're
+			// assuming it should be mined at harvest speed, harvestable or not.
 			moddedDigSpeed += f1;
 		}
 
@@ -641,7 +618,7 @@ public class ServerEventHandler {
 	public void onBoneMeal(BonemealEvent event) {
 		if (ConfigSounds.bonemealing && event.block instanceof IGrowable && !event.world.isRemote &&
 				((IGrowable) event.block).func_149851_a/*canFertilize*/(event.world, event.x, event.y, event.z, false)) { //Last arg should always be false because it typically checks for isRemote
-			event.world.playSoundEffect(event.x + .5F, event.y + .5F, event.z + .5F, Reference.MCAssetVer + ":item.bone_meal.use", 1, 1);
+			event.world.playSoundEffect(event.x + .5F, event.y + .5F, event.z + .5F, Tags.MC_ASSET_VER + ":item.bone_meal.use", 1, 1);
 		}
 	}
 
@@ -662,7 +639,7 @@ public class ServerEventHandler {
 					if (event.getResult() == event.useItem) {
 						//Eye of Ender place sounds
 						if (ConfigSounds.endPortalFillSounds && heldStack != null && !world.isRemote && heldStack.getItem() == Items.ender_eye && oldBlock == Blocks.end_portal_frame && !BlockEndPortalFrame.isEnderEyeInserted(meta)) {
-							world.playSoundEffect(x + .5F, y + .5F, z + .5F, Reference.MCAssetVer + ":block.end_portal_frame.fill", 1, 1);
+							world.playSoundEffect(x + .5F, y + .5F, z + .5F, Tags.MC_ASSET_VER + ":block.end_portal_frame.fill", 1, 1);
 							int j1 = meta & 3;
 							int j2 = 0;
 							int k1 = 0;
@@ -729,7 +706,7 @@ public class ServerEventHandler {
 									for (WorldServer worldserver : FMLCommonHandler.instance().getMinecraftServerInstance().worldServers) {
 										for (Object playerobj : worldserver.playerEntities) {
 											if (playerobj instanceof EntityPlayerMP playermp) {
-												playermp.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(Reference.MCAssetVer + ":block.end_portal.spawn",
+												playermp.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(Tags.MC_ASSET_VER + ":block.end_portal.spawn",
 														playermp.posX, playermp.lastTickPosY, playermp.posZ, 1F, 1F));
 											}
 										}
@@ -859,7 +836,7 @@ public class ServerEventHandler {
 								player.swingItem();
 								world.setBlock(x, y, z, ModBlocks.LAVA_CAULDRON.get());
 								if (ConfigSounds.fluidInteract) {
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.empty_lava", 1, 1);
+									world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bucket.empty_lava", 1, 1);
 								}
 								if (!player.capabilities.isCreativeMode) {
 									if (heldStack.stackSize <= 1) {
@@ -880,7 +857,7 @@ public class ServerEventHandler {
 									fillOrEmpty = /* meta < 3 && item == Items.potionitem ? "empty" : */ item == Items.glass_bottle && meta > 0 ? "fill" : "";
 								}//TODO add taking from cauldrons and evaporation, and filling a cauldron with regular potion bottles
 								if (!container.equals("") && !fillOrEmpty.equals("")) {
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item." + container + "." + fillOrEmpty, 1, 1);
+									world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item." + container + "." + fillOrEmpty, 1, 1);
 									return;
 								}
 							}
@@ -905,7 +882,7 @@ public class ServerEventHandler {
 								boolean isWater = world.getBlock(i, j, k).getMaterial() == Material.water;
 
 								if (isWater) {
-									world.playSoundAtEntity(player, Reference.MCAssetVer + ":item.bottle.fill", 1.0F, 1.0F);
+									world.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":item.bottle.fill", 1.0F, 1.0F);
 									return;
 								}
 							}
@@ -931,7 +908,7 @@ public class ServerEventHandler {
 									}
 
 									if (block.canBlockStay(world, i, j + 1, k) && event.action == Action.RIGHT_CLICK_AIR) {
-										world.playSoundEffect(i + 0.5F, j + 0.5F, k + 0.5F, Reference.MCAssetVer + ":block.lily_pad.place", 1.0F, 1.0F);
+										world.playSoundEffect(i + 0.5F, j + 0.5F, k + 0.5F, Tags.MC_ASSET_VER + ":block.lily_pad.place", 1.0F, 1.0F);
 										return;
 									}
 								}
@@ -990,16 +967,16 @@ public class ServerEventHandler {
 									if (!world.isRemote) {
 										world.setBlock(x, y, z, ModBlocks.GRASS_PATH.get());
 										heldStack.damageItem(1, player);
-										world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Reference.MCAssetVer + ":item.shovel.flatten", 1.0F, 1.0F);
+										world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Tags.MC_ASSET_VER + ":item.shovel.flatten", 1.0F, 1.0F);
 									}
 								} else if (ConfigBlocksItems.enableStrippedLogs && toolClasses.contains("axe")) {
-									RegistryMapping<Block> newBlock = StrippedLogRegistry.getLog(oldBlock, world.getBlockMetadata(x, y, z) % 4);
+									BlockMetaPair newBlock = StrippedLogRegistry.getLog(oldBlock, world.getBlockMetadata(x, y, z) % 4);
 									if (newBlock != null) {
 										player.swingItem();
 										if (!world.isRemote) {
-											world.setBlock(x, y, z, newBlock.getObject(), newBlock.getMeta() + ((meta / 4) * 4), 2);
+											world.setBlock(x, y, z, newBlock.get(), newBlock.getMeta() + ((meta / 4) * 4), 2);
 											heldStack.damageItem(1, player);
-											world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Reference.MCAssetVer + ":item.axe.strip", 1.0F, 0.8F);
+											world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Tags.MC_ASSET_VER + ":item.axe.strip", 1.0F, 0.8F);
 										}
 									}
 								}
@@ -1019,7 +996,7 @@ public class ServerEventHandler {
 		}
 		if (ModBlocks.MUD.isEnabled() && isValid && ((oldBlock == Blocks.dirt && meta != 2) || oldBlock == ModBlocks.COARSE_DIRT.get())) { //TODO: Rooted dirt
 			world.setBlock(x, y, z, ModBlocks.MUD.get());
-			world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Reference.MCAssetVer + ":item.bottle.empty", 1.0F, 1.0F);
+			world.playSoundEffect(x + 0.5F, y + 0.5F, z + 0.5F, Tags.MC_ASSET_VER + ":item.bottle.empty", 1.0F, 1.0F);
 			player.swingItem();
 			if (world.isRemote) {
 				double d0 = 0.0625D;
@@ -1094,14 +1071,14 @@ public class ServerEventHandler {
 
 			if (!event.world.isRemote) { //We assume lava sounds if it's not water because most modded liquids are molten metals
 				if (isFull.getMaterial() == Material.water) {// --- Pour water --- //
-					event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Reference.MCAssetVer + ":item.bucket.empty", 1.0F, 1.0F);
+					event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Tags.MC_ASSET_VER + ":item.bucket.empty", 1.0F, 1.0F);
 				} else if (isFull != Blocks.air) {// --- Pour something else --- //
-					event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Reference.MCAssetVer + ":item.bucket.empty_lava", 1.0F, 1.0F);
+					event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Tags.MC_ASSET_VER + ":item.bucket.empty_lava", 1.0F, 1.0F);
 				} else {
 					if (event.world.getBlock(target.blockX, target.blockY, target.blockZ).getMaterial() == Material.water) {// --- Fill with water --- //
-						event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Reference.MCAssetVer + ":item.bucket.fill", 1.0F, 1.0F);
+						event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Tags.MC_ASSET_VER + ":item.bucket.fill", 1.0F, 1.0F);
 					} else if (event.world.getBlock(target.blockX, target.blockY, target.blockZ).getMaterial().isLiquid()) {// --- Fill with something else --- //
-						event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Reference.MCAssetVer + ":item.bucket.fill_lava", 1.0F, 1.0F);
+						event.world.playSoundEffect(target.blockX + 0.5, target.blockY + 0.5, target.blockZ + 0.5, Tags.MC_ASSET_VER + ":item.bucket.fill_lava", 1.0F, 1.0F);
 					}
 				}
 			}
@@ -1187,8 +1164,10 @@ public class ServerEventHandler {
 	public void teleportEvent(EnderTeleportEvent event) {
 		EntityLivingBase entity = event.entityLiving;
 		if (entity instanceof EntityPlayerMP) {
-			if (ConfigEntities.enableEndermite) {
-				if (entity.getRNG().nextFloat() < 0.05F && entity.worldObj.getGameRules().getGameRuleBooleanValue("doMobSpawning")) {
+			if (ConfigEntities.enableEndermite && entity.getRNG().nextFloat() < 0.05F) {
+				boolean doMobSpawning = entity.worldObj.getGameRules().getGameRuleBooleanValue("doMobSpawning");
+				boolean spawnHostileMobs = entity.worldObj.spawnHostileMobs;
+				if (doMobSpawning && spawnHostileMobs) {
 					EntityEndermite entityendermite = new EntityEndermite(entity.worldObj);
 					entityendermite.setLocationAndAngles(event.targetX, event.targetY, event.targetZ, entity.rotationYaw, entity.rotationPitch);
 					entity.worldObj.spawnEntityInWorld(entityendermite);
@@ -1429,9 +1408,9 @@ public class ServerEventHandler {
 		// --- Milk Mooshroom --- //
 		if (target instanceof EntityCow && stack != null && ConfigSounds.horseEatCowMilk) {
 			if (target instanceof EntityMooshroom && stack.getItem() == Items.bowl) {
-				world.playSoundEffect(target.posX, target.posY, target.posZ, Reference.MCAssetVer + ":entity.mooshroom.milk", 1.0F, 0.9F + (world.rand.nextInt(3) - 1) * 0.1F);
+				world.playSoundEffect(target.posX, target.posY, target.posZ, Tags.MC_ASSET_VER + ":entity.mooshroom.milk", 1.0F, 0.9F + (world.rand.nextInt(3) - 1) * 0.1F);
 			} else if (stack.getItem() == Items.bucket) {
-				world.playSoundEffect(target.posX, target.posY, target.posZ, Reference.MCAssetVer + ":entity.cow.milk", 1.0F, 1.0F);
+				world.playSoundEffect(target.posX, target.posY, target.posZ, Tags.MC_ASSET_VER + ":entity.cow.milk", 1.0F, 1.0F);
 			}
 			return;
 		}
@@ -1441,16 +1420,16 @@ public class ServerEventHandler {
 
 			if (stack != null && itemframe.getDisplayedItem() == null) // This frame is empty and is getting an item placed inside.
 			{
-				world.playSoundEffect(target.posX, target.posY, target.posZ, Reference.MCAssetVer + ":entity.item_frame.add_item", 1.0F, 1.0F);
+				world.playSoundEffect(target.posX, target.posY, target.posZ, Tags.MC_ASSET_VER + ":entity.item_frame.add_item", 1.0F, 1.0F);
 			} else if (itemframe.getDisplayedItem() != null) // There is an item in there, it's going to be rotated.
 			{
-				world.playSoundEffect(target.posX, target.posY, target.posZ, Reference.MCAssetVer + ":entity.item_frame.rotate_item", 1.0F, 1.0F);
+				world.playSoundEffect(target.posX, target.posY, target.posZ, Tags.MC_ASSET_VER + ":entity.item_frame.rotate_item", 1.0F, 1.0F);
 			}
 			return;
 		}
 
 		if (ConfigSounds.leashSounds && target instanceof EntityLeashKnot) { // --- Remove a Lead Knot --- //
-			world.playSoundEffect(target.posX + 0.5, target.posY + 0.5, target.posZ + 0.5, Reference.MCAssetVer + ":entity.leash_knot.break", 1.0F, 1.0F);
+			world.playSoundEffect(target.posX + 0.5, target.posY + 0.5, target.posZ + 0.5, Tags.MC_ASSET_VER + ":entity.leash_knot.break", 1.0F, 1.0F);
 		}
 	}
 
@@ -1555,7 +1534,7 @@ public class ServerEventHandler {
 				brownmooshroom.copyLocationAndAnglesFrom(mooshroom);
 				brownmooshroom.onSpawnWithEgg(null);
 				mooshroom.worldObj.spawnEntityInWorld(brownmooshroom);
-				brownmooshroom.playSound(Reference.MCAssetVer + ":entity.mooshroom.convert", 1, 1);
+				brownmooshroom.playSound(Tags.MC_ASSET_VER + ":entity.mooshroom.convert", 1, 1);
 				mooshroom.setDead();
 			}
 		} else if (ConfigEntities.enableBrownMooshroom && event.entity.ticksExisted > 40 && event.entity.getClass() == EntityBrownMooshroom.class) {
@@ -1565,7 +1544,7 @@ public class ServerEventHandler {
 				mooshroom.copyLocationAndAnglesFrom(brownmooshroom);
 				mooshroom.onSpawnWithEgg(null);
 				brownmooshroom.worldObj.spawnEntityInWorld(mooshroom);
-				mooshroom.playSound(Reference.MCAssetVer + ":entity.mooshroom.convert", 1, 1);
+				mooshroom.playSound(Tags.MC_ASSET_VER + ":entity.mooshroom.convert", 1, 1);
 				brownmooshroom.setDead();
 			}
 		}
@@ -1605,7 +1584,7 @@ public class ServerEventHandler {
 
 						if (playerSource.isSprinting()) {
 							// --- Knockback attack sound --- //
-							world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":entity.player.attack.knockback", 1, 1);
+							world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":entity.player.attack.knockback", 1, 1);
 //                          ++i;
 						}
 
@@ -1623,21 +1602,21 @@ public class ServerEventHandler {
 
 						if (targetTakesDamage) {
 							if (isCriticalHit) {
-								world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":entity.player.attack.crit", 1, 1);
+								world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":entity.player.attack.crit", 1, 1);
 							}
 
 							if (!isCriticalHit) {// flag in 1.12 is playerSource.getCooledAttackStrength(0.5F) > 0.9F
 								if (isStrongAttack) {
 									// --- Strong attack sound --- //
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":entity.player.attack.strong", 1, 1);
+									world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":entity.player.attack.strong", 1, 1);
 								} else {
 									// --- Weak attack sound --- //
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":entity.player.attack.weak", 1, 1);
+									world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":entity.player.attack.weak", 1, 1);
 								}
 							}
 						} else {
 							// --- Damageless attack sound --- //
-							world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":entity.player.attack.nodamage", 1, 1);
+							world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":entity.player.attack.nodamage", 1, 1);
 						}
 					}
 				}
@@ -1673,7 +1652,7 @@ public class ServerEventHandler {
 					}
 					if (ConfigMixins.newMobSounds) {
 						float pitch = (r.nextFloat() - r.nextFloat()) * 0.2F + (target.isChild() ? 1.5F : 1.0F);
-						w.playSoundAtEntity(target, Reference.MCAssetVer + ":entity.squid.squirt", 0.4F, pitch);
+						w.playSoundAtEntity(target, Tags.MC_ASSET_VER + ":entity.squid.squirt", 0.4F, pitch);
 					}
 					if (target.isInWater() && ConfigTweaks.squidsBlindPlayers) {
 						PotionEffect activeEff = target.getActivePotionEffect(Potion.blindness);
@@ -1713,7 +1692,7 @@ public class ServerEventHandler {
 				}
 			}
 			if (ConfigSounds.thornsSounds && event.source.getDamageType().equals("thorns")) {
-				event.entity.worldObj.playSoundAtEntity(event.entity, Reference.MCAssetVer + ":enchant.thorns.hit", 1, 1);
+				event.entity.worldObj.playSoundAtEntity(event.entity, Tags.MC_ASSET_VER + ":enchant.thorns.hit", 1, 1);
 			}
 		}
 	}
@@ -1728,7 +1707,7 @@ public class ServerEventHandler {
 
 		if (entity instanceof EntityLiving || entity instanceof EntityPlayer) {
 			//this.spawnTotemParticles(player);
-			entity.worldObj.playSoundEffect(entity.posX + 0.5, entity.posY + 0.5, entity.posZ + 0.5, Reference.MCAssetVer + ":item.totem.use", 1.0f, entity.worldObj.rand.nextFloat() * 0.1f + 0.9f);
+			entity.worldObj.playSoundEffect(entity.posX + 0.5, entity.posY + 0.5, entity.posZ + 0.5, Tags.MC_ASSET_VER + ":item.totem.use", 1.0f, entity.worldObj.rand.nextFloat() * 0.1f + 0.9f);
 
 			entity.clearActivePotions();
 			float healpercent = (float) ConfigFunctions.totemHealPercent / 100;
@@ -1933,7 +1912,7 @@ public class ServerEventHandler {
 
 	@SubscribeEvent
 	public void fuelBurnTime(FuelBurnTimeEvent e) {
-		if (e.fuel == null || e.fuel.getItem() == null || Item.itemRegistry.getNameForObject(e.fuel.getItem()) == null)
+		if (RecipeHelper.validateItems(e.fuel))
 			return;
 
 		initFurnaceModifiers();

@@ -1,10 +1,10 @@
 package ganymedes01.etfuturum.entities;
 
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -120,17 +120,17 @@ public class EntityShulker extends EntityGolem implements IMob {
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.shulker.ambient";
+		return Tags.MC_ASSET_VER + ":entity.shulker.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.shulker.hurt" + (isClosed() ? "_closed" : "");
+		return Tags.MC_ASSET_VER + ":entity.shulker.hurt" + (isClosed() ? "_closed" : "");
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.shulker.death";
+		return Tags.MC_ASSET_VER + ":entity.shulker.death";
 	}
 
 	@Override
@@ -393,7 +393,7 @@ public class EntityShulker extends EntityGolem implements IMob {
 					}
 
 					if (flag) {
-						this.playSound(Reference.MCAssetVer + ":entity.shulker.teleport", 1.0F, 1.0F);
+						this.playSound(Tags.MC_ASSET_VER + ":entity.shulker.teleport", 1.0F, 1.0F);
 						this.setAttachmentPos(new BlockPos(newx, newy, newz));
 						this.getDataWatcher().updateObject(PEEK_TICK, (byte) 0);
 						this.setAttackTarget(null);
@@ -513,9 +513,9 @@ public class EntityShulker extends EntityGolem implements IMob {
 
 			if (p_184691_1_ == 0) {
 //              this.getEntityAttribute(SharedMonsterAttributes.ARMOR).applyModifier(COVERED_ARMOR_BONUS_MODIFIER);
-				this.playSound(Reference.MCAssetVer + ":entity.shulker.close", 1.0F, 1.0F);
+				this.playSound(Tags.MC_ASSET_VER + ":entity.shulker.close", 1.0F, 1.0F);
 			} else {
-				this.playSound(Reference.MCAssetVer + ":entity.shulker.open", 1.0F, 1.0F);
+				this.playSound(Tags.MC_ASSET_VER + ":entity.shulker.open", 1.0F, 1.0F);
 			}
 		}
 
@@ -682,7 +682,7 @@ public class EntityShulker extends EntityGolem implements IMob {
 						this.attackTime = 20 + EntityShulker.this.rand.nextInt(10) * 20 / 2;
 						EntityShulkerBullet entityshulkerbullet = new EntityShulkerBullet(EntityShulker.this.worldObj, EntityShulker.this, entitylivingbase, EntityShulker.this.getAttachmentFacing());
 						EntityShulker.this.worldObj.spawnEntityInWorld(entityshulkerbullet);
-						EntityShulker.this.playSound(Reference.MCAssetVer + ":entity.shulker.shoot", 1, 1);
+						EntityShulker.this.playSound(Tags.MC_ASSET_VER + ":entity.shulker.shoot", 1, 1);
 					}
 				} else {
 					EntityShulker.this.setAttackTarget(null);

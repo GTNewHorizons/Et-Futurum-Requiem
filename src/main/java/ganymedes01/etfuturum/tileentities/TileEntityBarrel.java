@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.tileentities;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockBarrel;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
@@ -150,7 +150,7 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 			d2 = this.zCoord + 0.5D;
 
 			this.worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, this.worldObj.getBlockMetadata(xCoord, yCoord, zCoord) % 8 + 8, 2);
-			this.worldObj.playSoundEffect(d1, this.yCoord + 0.5D, d2, Reference.MCAssetVer + ":block.barrel.open", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+			this.worldObj.playSoundEffect(d1, this.yCoord + 0.5D, d2, Tags.MC_ASSET_VER + ":block.barrel.open", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
 
 		}
 
@@ -169,7 +169,7 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 
 			if (this.soundTimer < f1 && worldObj.getBlockMetadata(xCoord, yCoord, zCoord) > 7) {
 				this.worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, this.worldObj.getBlockMetadata(xCoord, yCoord, zCoord) % 8, 2);
-				this.worldObj.playSoundEffect(this.xCoord + 0.5D, this.yCoord + 0.5D, this.zCoord + 0.5D, Reference.MCAssetVer + ":block.barrel.close", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+				this.worldObj.playSoundEffect(this.xCoord + 0.5D, this.yCoord + 0.5D, this.zCoord + 0.5D, Tags.MC_ASSET_VER + ":block.barrel.close", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
 			}
 
 			if (this.soundTimer < 0) {
@@ -180,7 +180,7 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 
 	@Override
 	public String getInventoryName() {
-		return this.hasCustomInventoryName() ? this.customName : "container." + Reference.MOD_ID + ".barrel";
+		return this.hasCustomInventoryName() ? this.customName : "container." + Tags.MOD_ID + ".barrel";
 	}
 
 	@Override

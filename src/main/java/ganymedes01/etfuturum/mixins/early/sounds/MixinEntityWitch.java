@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.world.World;
@@ -19,22 +19,22 @@ public class MixinEntityWitch extends EntityMob {
 
 	@Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemPotion;getEffects(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"))
 	public void playDrinkSound(CallbackInfo ci) {
-		this.playSound(Reference.MCAssetVer + ":entity.witch.drink", getSoundVolume(), getSoundPitch());
+		this.playSound(Tags.MC_ASSET_VER + ":entity.witch.drink", getSoundVolume(), getSoundPitch());
 	}
 
 	@Inject(method = "getHurtSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewHurtSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.witch.hurt");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.witch.hurt");
 	}
 
 	@Inject(method = "getDeathSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewDeathSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.witch.death");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.witch.death");
 	}
 
 	@Inject(method = "getLivingSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewLivingSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.witch.ambient");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.witch.ambient");
 	}
 
 }

@@ -14,11 +14,12 @@ import ganymedes01.etfuturum.client.renderer.tileentity.*;
 import ganymedes01.etfuturum.client.skins.NewRenderPlayer;
 import ganymedes01.etfuturum.client.skins.NewSkinManager;
 import ganymedes01.etfuturum.client.subtitle.GuiSubtitles;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.core.handlers.BubbleColumnSoundEventHandler;
 import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import ganymedes01.etfuturum.entities.*;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.spectator.SpectatorModeClient;
 import ganymedes01.etfuturum.tileentities.*;
@@ -58,6 +59,8 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		MinecraftForge.EVENT_BUS.register(BiomeFogEventHandler.INSTANCE);
+
+		FMLCommonHandler.instance().bus().register(BubbleColumnSoundEventHandler.INSTANCE);
 	}
 
 	@Override
@@ -79,6 +82,10 @@ public class ClientProxy extends CommonProxy {
 					MinecraftForgeClient.registerItemRenderer(bed.getItem(), new Item3DBedRenderer((BlockBed) bed.get()));
 				}
 			}
+		}
+
+		if(ModsList.APPLIED_ENERGISTICS_2.isLoaded()) {
+			MinecraftForgeClient.registerItemRenderer(ModBlocks.DEEPSLATE_CERTUS_QUARTZ_ORE.getItem(), new BlockDeepslateCertusQuartzRenderer());
 		}
 	}
 
@@ -117,6 +124,9 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerBlockHandler(new BlockPinkPetalsRenderer(RenderIDs.PINK_PETALS));
 		RenderingRegistry.registerBlockHandler(new BlockBambooRenderer(RenderIDs.BAMBOO));
 		RenderingRegistry.registerBlockHandler(new BlockBubbleColumnRenderer(RenderIDs.BUBBLE_COLUMN));
+		if(ModsList.APPLIED_ENERGISTICS_2.isLoaded()) {
+			RenderingRegistry.registerBlockHandler(new BlockDeepslateCertusQuartzRenderer());
+		}
 
 		RenderingRegistry.registerBlockHandler(new BlockEmissiveLayerRenderer(RenderIDs.EMISSIVE_DOUBLE_LAYER));
 	}

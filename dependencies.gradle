@@ -37,6 +37,12 @@ dependencies {
 //Change to "implementation" to test RPLE in dev; change it back when you're done please!
     compileOnly "com.falsepattern:rple-mc1.7.10:1.1.0"
 
+    //My core mod
+    api files("libs/hogutils-0.0.0-nightly-83803d8185-dirty-dev.jar")
+
+
+    implementation("com.github.GTNewHorizons:GTNHLib:0.6.36")
+
     // Can use `compileOnly` instead of `compile` if you want to require it at build time,
     // but not require it in `runClient`/`runServer`
     compileOnly "thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev"
@@ -51,6 +57,10 @@ dependencies {
     compileOnly "codechicken:CodeChickenCore:1.7.10-1.0.7.47:dev"
     compileOnly 'com.github.GTNewHorizons:ironchest:6.0.87'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
+
+    compileOnly("org.projectlombok:lombok:1.18.42") { transitive = false }
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
+    compileOnly('org.jetbrains:annotations:24.0.1')
 
     compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.12.6-GTNH:dev") {
         transitive = false

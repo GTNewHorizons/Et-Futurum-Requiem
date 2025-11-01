@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.entities;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -140,17 +140,17 @@ public class EntityHusk extends EntityZombie {
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.husk.ambient";
+		return Tags.MC_ASSET_VER + ":entity.husk.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.husk.hurt";
+		return Tags.MC_ASSET_VER + ":entity.husk.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.husk.death";
+		return Tags.MC_ASSET_VER + ":entity.husk.death";
 	}
 
 	/**
@@ -158,7 +158,7 @@ public class EntityHusk extends EntityZombie {
 	 */
 	@Override
 	protected void func_145780_a(final int x, final int y, final int z, final Block blockIn) {
-		this.playSound(Reference.MCAssetVer + ":entity.husk.step", 0.15f, 1.0f);
+		this.playSound(Tags.MC_ASSET_VER + ":entity.husk.step", 0.15f, 1.0f);
 	}
 
 	@Override
