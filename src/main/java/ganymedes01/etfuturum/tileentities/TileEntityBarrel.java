@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.tileentities;
 
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockBarrel;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
