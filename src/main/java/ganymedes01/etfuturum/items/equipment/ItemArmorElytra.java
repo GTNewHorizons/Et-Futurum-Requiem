@@ -5,13 +5,13 @@ import baubles.api.expanded.BaubleItemHelper;
 import baubles.api.expanded.IBaubleExpanded;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.BaseItem;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.resources.I18n;
@@ -134,7 +134,7 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 	@Override
 	public void onEquipped(ItemStack itemstack, EntityLivingBase player) {
 		if (ConfigSounds.armorEquip) {
-			player.worldObj.playSoundAtEntity(player, Reference.MCAssetVer + ":item.armor.equip_elytra", 1, 1);
+			player.worldObj.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":item.armor.equip_elytra", 1, 1);
 		}
 	}
 

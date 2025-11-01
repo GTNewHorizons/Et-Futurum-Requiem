@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.tileentities;
 
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockShulkerBox;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
@@ -8,7 +9,6 @@ import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.inventory.ContainerChestGeneric;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -227,7 +227,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 
 	@Override
 	public String getInventoryName() {
-		return this.hasCustomInventoryName() ? this.customName : "container." + Reference.MOD_ID + ".shulker_box";
+		return this.hasCustomInventoryName() ? this.customName : "container." + Tags.MOD_ID + ".shulker_box";
 	}
 
 	@Override
@@ -266,7 +266,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		++this.numPlayersUsing;
 
 		if (this.numPlayersUsing == 1) {
-			this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Reference.MCAssetVer + ":block.shulker_box.open", 1, 1);
+			this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Tags.MC_ASSET_VER + ":block.shulker_box.open", 1, 1);
 		}
 		this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 		this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
@@ -278,7 +278,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		if (this.getBlockType() instanceof BlockShulkerBox) {
 			--this.numPlayersUsing;
 			if (this.numPlayersUsing <= 0) {
-				this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Reference.MCAssetVer + ":block.shulker_box.close", 1, 1);
+				this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Tags.MC_ASSET_VER + ":block.shulker_box.close", 1, 1);
 			}
 			this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 			this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
@@ -477,10 +477,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	 * <tr><td><pre><code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).contract(0, 1, -1)</code></pre></td><td><pre><samp>box[5.0, 5.0, 6.0 -> 7.0, 6.0, 7.0]</samp></pre></td></tr>
 	 * <tr><td><pre><code>new AxisAlignedBB(-2, -2, -2, 2, 2, 2).contract(4, -4, 0)</code></pre></td><td><pre><samp>box[-8.0, 2.0, -2.0 -> -2.0, 8.0, 2.0]</samp></pre></td></tr>
 	 * </table>
-	 * 
-	 * @see {@link #expand(double, double, double)} - like this, except for expanding.</li>
-	 * @see {@link #grow(double, double, double)} and {@link #grow(double)} - expands in all directions.</li>
-	 * @see {@link #shrink(double)} - contracts in all directions (like {@link #grow(double)})</li>
+	 *
 	 * 
 	 * @return A new modified bounding box.
 	 */

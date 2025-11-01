@@ -3,9 +3,9 @@ package ganymedes01.etfuturum.blocks;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -119,7 +119,7 @@ public class BlockBerryBush extends BlockBush implements IGrowable {
 				entityitem.delayBeforeCanPickup = 10;
 				world.spawnEntityInWorld(entityitem);
 			}
-			world.playSound(x, y, z, Reference.MCAssetVer + ":block.sweet_berry_bush.pick_berries", 1.0F, 0.8F + world.rand.nextFloat() * 0.4F, false);
+			world.playSound(x, y, z, Tags.MC_ASSET_VER + ":block.sweet_berry_bush.pick_berries", 1.0F, 0.8F + world.rand.nextFloat() * 0.4F, false);
 			world.setBlockMetadataWithNotify(x, y, z, 1, 2);
 			return true;
 		}

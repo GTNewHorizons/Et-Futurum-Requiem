@@ -7,7 +7,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.block.Block;
-import ganymedes01.etfuturum.recipes.ModRecipes;
+import roadhog360.hogutils.HogUtils;
+import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import static com.falsepattern.rple.api.common.color.DefaultColor.*;
 
@@ -65,25 +66,25 @@ public class CompatRPLEEventHandler {
 	}
 	
 	private void colorize(RPLEBlockColorRegistry registry, Block block, int rgb16) {
-		if(ModRecipes.validateItems(block)) {
+		if(RecipeHelper.validateItems(block)) {
 			registry.colorizeBlock(block).brightness(rgb16).apply();
 		}
 	}
 
 	private void colorize(RPLEBlockColorRegistry registry, Block block, int meta, int rgb16) {
-		if(ModRecipes.validateItems(block)) {
+		if(RecipeHelper.validateItems(block)) {
 			registry.colorizeBlock(block, meta).brightness(rgb16).apply();
 		}
 	}
 
 	private void transparency(RPLEBlockColorRegistry registry, Block block, int rgb16) {
-		if(ModRecipes.validateItems(block)) {
+		if(RecipeHelper.validateItems(block)) {
 			registry.colorizeBlock(block).translucency(rgb16).apply();
 		}
 	}
 
 	private void transparency(RPLEBlockColorRegistry registry, Block block, int meta, int rgb16) {
-		if(ModRecipes.validateItems(block)) {
+		if(RecipeHelper.validateItems(block)) {
 			registry.colorizeBlock(block, meta).translucency(rgb16).apply();
 		}
 	}

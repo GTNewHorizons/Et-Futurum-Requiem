@@ -3,10 +3,10 @@ package ganymedes01.etfuturum.items;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.handlers.WorldEventHandler;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenNBTStructureTesting;
@@ -50,7 +50,7 @@ public class DebugTestItem extends BaseItem {
 		if (world.isRemote && testSubject.isServerOnly()) {
 			return true;
 		}
-		world.theProfiler.startSection(Reference.MOD_NAME + " debugging item task");
+		world.theProfiler.startSection(Tags.MOD_NAME + " debugging item task");
 
 		boolean flag = testSubject.runAction(stack, player, world, x, y, z, side, hitX, hitY, hitZ);
 

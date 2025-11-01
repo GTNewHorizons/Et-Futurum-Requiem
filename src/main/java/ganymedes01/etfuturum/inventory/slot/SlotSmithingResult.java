@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.inventory.slot;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.SlotCrafting;
@@ -14,6 +14,6 @@ public class SlotSmithingResult extends SlotCrafting {
 	@Override
 	public void onPickupFromSlot(EntityPlayer player, ItemStack stack) {
 		super.onPickupFromSlot(player, stack);
-		player.playSound(Reference.MCAssetVer + ":block.smithing_table.use", 1F, 1F);
+		player.playSound(Tags.MC_ASSET_VER + ":block.smithing_table.use", 1F, 1F);
 	}
 }

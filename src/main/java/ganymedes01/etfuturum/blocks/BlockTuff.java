@@ -46,14 +46,9 @@ public class BlockTuff extends BaseSubtypesBlock {
 
 	@Override
 	public boolean isReplaceableOreGen(World world, int x, int y, int z, Block target) {
-		boolean flag = this == target;
-		if (world.getBlockMetadata(x, y, z) == 0 && world.getBlock(x, y, z) == this) {
-			flag |= target == Blocks.stone || target == ModBlocks.DEEPSLATE.get();
-			if (flag) {
-				BlockDeepslate.doDeepslateRedoCheck(world, x, y, z);
-			}
-		}
-		return flag;
+		// If the target is deepslate or stone, we additionally check if the metadata of this tuff is 0, since the other metas are building blocks and not natural stone bases.
+		// If the target is tuff itself, the pass shall still be true with no further checks; we'll assume the invoker will check the metadata itself.
+		return super.isReplaceableOreGen(world, x, y, z, target) || (target == Blocks.stone || target == ModBlocks.DEEPSLATE.get()) && world.getBlockMetadata(x, y, z) == 0;
 	}
 
 }

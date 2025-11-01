@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.tileentities;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockSmoker;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.recipes.SmokerRecipes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -111,7 +111,7 @@ public class TileEntitySmoker extends TileEntity implements ISidedInventory {
 	 */
 	@Override
 	public String getInventoryName() {
-		return this.hasCustomInventoryName() ? this.furnaceCustomName : "container." + Reference.MOD_ID + ".smoker";
+		return this.hasCustomInventoryName() ? this.furnaceCustomName : "container." + Tags.MOD_ID + ".smoker";
 	}
 
 	/**

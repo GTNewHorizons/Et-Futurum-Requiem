@@ -2,28 +2,38 @@ package ganymedes01.etfuturum.api;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.api.mappings.RegistryMapping;
-import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Logger;
-import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.recipes.ModRecipes;
+import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.ApiStatus;
+import roadhog360.hogutils.api.blocksanditems.utils.BlockMeta2ObjectOpenHashMap;
+import roadhog360.hogutils.api.blocksanditems.utils.BlockMetaPair;
+import roadhog360.hogutils.api.blocksanditems.utils.base.ObjMetaPair;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
+import roadhog360.hogutils.api.utils.GenericUtils;
+import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * The registry for which blocks should convert into a deepslate ore. When the game reaches
- * LoaderState.AVAILABLE, the registry cannot be added to. It is highly advised you use
- * the helper methods when getting an ore, or checking of one exists, instead of using {@code getOreMap()},
- * in the case the key changes to something more efficient.
+ * The registry for which blocks should convert into a deepslate ore.
+ * If the result is {@link ModBlocks#DEEPSLATE}, then the resulting block will
+ * be set to deepslate, tuff or whatever other deepslate-type block replaced it.
+ * And that block won't be able to replace deepslate/tuff.
  * <p>
  * The getOre methods return a BlockAndMetadataMapping, which is used to store the block instance
  * and its desired meta value in the same object.
@@ -34,8 +44,7 @@ import java.util.Map.Entry;
  * deepslate generates over it.
  */
 public class DeepslateOreRegistry {
-
-	private static final Map<RegistryMapping<Block>, RegistryMapping<Block>> deepslateOres = new HashMap<>();
+	private static final BlockMeta2ObjectOpenHashMap<BlockMetaPair> deepslateOres = new BlockMeta2ObjectOpenHashMap<>(false);
 
 	/**
 	 * Adds a block to block pair to the deepslate mapping registry.
@@ -62,31 +71,33 @@ public class DeepslateOreRegistry {
 	 * @param to       The block deepslate changes it to
 	 * @param toMeta   The meta deepslate changes it to
 	 */
-	public static void addOre(Block from, int fromMeta, Block to, int toMeta, boolean putIfAbsent) {
+	public static void addOre(Block from, int fromMeta, Block to, int toMeta, boolean onlyIfAbsent) {
 		if (from.hasTileEntity(fromMeta) || to.hasTileEntity(toMeta)) {
 			throw new IllegalArgumentException("Block Entities are not supported for the deepslate ore registry!");
 		}
-		if (!Utils.isMetaInBlockBoundsIgnoreWildcard(fromMeta) || !Utils.isMetaInBlockBoundsIgnoreWildcard(toMeta)) {
-			throw new IllegalArgumentException("Meta must be between " + Utils.getMinMetadata() + " and " + Utils.getMaxMetadata() + " (inclusive).");
+		if (!GenericUtils.isBlockMetaInBounds(fromMeta) || !GenericUtils.isBlockMetaInBounds(toMeta)) {
+			throw new IllegalArgumentException("Meta must be between " + GenericUtils.getMinBlockMetadata() + " and " + GenericUtils.getMaxBlockMetadata() + " (inclusive).");
 		}
-		if (putIfAbsent) {
-			deepslateOres.putIfAbsent(new RegistryMapping<>(from, fromMeta), new RegistryMapping<>(to, toMeta));
+		if (onlyIfAbsent) {
+			deepslateOres.putIfAbsent(from, fromMeta, BlockMetaPair.intern(to, toMeta));
 		} else {
-			deepslateOres.put(new RegistryMapping<>(from, fromMeta), new RegistryMapping<>(to, toMeta));
+			deepslateOres.put(from, fromMeta, BlockMetaPair.intern(to, toMeta));
 		}
 	}
 
-	/**
-	 * Adds a block to block pair to the deepslate mapping registry.
-	 * This is used when Et Futurum deepslate overwrites the specified block.
-	 * <p>
-	 * Note this does not actually look at the tags for an item, it just replaces everything in that tag.
-	 * CraftTweaker OreDictionary additions/removals may not work. For best results, please restart the game before reporting issues.
-	 *
-	 * @param oreDict The oreDict tag to overwrite
-	 * @param to      The block deepslate changes it to
-	 * @param toMeta  The metadata deepslate changes it to
-	 */
+	/// Adds a block to block pair to the deepslate mapping registry.
+	/// This is used when Et Futurum deepslate overwrites the specified block.
+	///
+	/// Note this does not actually look at the tags for an item, it just replaces everything in that tag.
+	/// CraftTweaker OreDictionary additions/removals may not work. For best results, please restart the game before reporting issues.
+	///
+	/// You can set the result to deepslate block (recommended to find it using {@link GameRegistry#findBlock(String, String) GameRegistry#findBlock("etfuturum", "deepslate")} and not direct access)
+	/// if you want your block to be overwritten by deepslate and not generate over it. Other blocks with the "minecraft:deepslate_ore_replaceables" tag will also be preserved. For example, if your
+	/// block generates over tuff, or tuff generates over it, the block will become tuff, not deepslate.
+	///
+	/// @param oreDict The oreDict tag to overwrite
+	/// @param to      The block deepslate changes it to
+	/// @param toMeta  The metadata deepslate changes it to
 	public static void addOreByOreDict(String oreDict, Block to, int toMeta) {
 		boolean hasBadEntry = false;
 //		HashMap<String, String> ignoredEntries = Maps.newHashMap();
@@ -94,19 +105,24 @@ public class DeepslateOreRegistry {
 			return;
 		}
 		for (ItemStack ore : OreDictionary.getOres(oreDict)) {
-			Block blockToAdd = Block.getBlockFromItem(ore.getItem());
-			if (blockToAdd != to && ModRecipes.validateItems(blockToAdd, to)) {
-				try {
-					addOre(blockToAdd, ore.getItemDamage(), to, toMeta, true);
-				} catch (IllegalArgumentException e) {
-//					ignoredEntries.putIfAbsent(Block.blockRegistry.getNameForObject(blockToAdd) + ":" + (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE ? "*" : ore.getItemDamage()),
-//							Block.blockRegistry.getNameForObject(to) + ":" + (toMeta == OreDictionary.WILDCARD_VALUE ? "*" : toMeta) + " (" + (e.getMessage().contains("Block Entities") ? "is block entity" : "meta out of 0-15 range") + ")");
-					hasBadEntry = true;
+			if(ore.getItemDamage() != toMeta) {
+				Block blockToAdd = Block.getBlockFromItem(ore.getItem());
+				if (blockToAdd != to) {
+					if (RecipeHelper.validateItems(blockToAdd, to)) {
+						try {
+							addOre(blockToAdd, ore.getItemDamage(), to, toMeta, true);
+						} catch (IllegalArgumentException e) {
+							e.printStackTrace();
+//						ignoredEntries.putIfAbsent(blockToAdd.delegate.name() + ":" + (ore.getItemDamage() == OreDictionary.WILDCARD_VALUE ? "*" : ore.getItemDamage()),
+//								to.delegate.name() + ":" + (toMeta == OreDictionary.WILDCARD_VALUE ? "*" : toMeta) + " (" + (e.getMessage().contains("Block Entities") ? "is block entity" : "meta out of 0-15 range") + ")");
+							hasBadEntry = true;
+						}
+					}
 				}
 			}
 		}
 		if (/*!ignoredEntries.isEmpty()*/ hasBadEntry) {
-			Logger.warn(oreDict + " had one ore more entries which are either block entities or supplying a meta outside of " + Utils.getMinMetadata() + "-" + Utils.getMaxMetadata() + ". Check the contents of the OreDict tag for more info.");
+			Logger.warn(oreDict + " had one ore more entries which are either block entities or supplying a meta outside of " + GenericUtils.getMinBlockMetadata() + "-" + GenericUtils.getMaxBlockMetadata() + ". Check the contents of the OreDict tag for more info.");
 			Logger.warn("Ignoring those entries instead of crashing, since this could be an unintended side effect of adding by OreDict string.");
 //			StringBuilder builder = new StringBuilder();
 //			int i = 0;
@@ -121,16 +137,18 @@ public class DeepslateOreRegistry {
 		}
 	}
 
-	/**
-	 * Adds a block to block pair to the deepslate mapping registry.
-	 * This is used when Et Futurum deepslate overwrites the specified block.
-	 * <p>
-	 * Note this does not actually look at the tags for an item, it just replaces everything in that tag.
-	 * CraftTweaker OreDictionary additions/removals may not work. For best results, please restart the game before reporting issues.
-	 *
-	 * @param oreDict The oreDict tag to overwrite
-	 * @param to      The block:0 deepslate changes it to
-	 */
+	/// Adds a block to block pair to the deepslate mapping registry.
+	/// This is used when Et Futurum deepslate overwrites the specified block.
+	///
+	/// Note this does not actually look at the tags for an item, it just replaces everything in that tag.
+	/// CraftTweaker OreDictionary additions/removals may not work. For best results, please restart the game before reporting issues.
+	///
+	/// You can set the result to deepslate block (recommended to find it using {@link GameRegistry#findBlock(String, String) GameRegistry#findBlock("etfuturum", "deepslate")} and not direct access)
+	/// if you want your block to be overwritten by deepslate and not generate over it. Other blocks with the "minecraft:deepslate_ore_replaceables" tag will also be preserved. For example, if your
+	/// block generates over tuff, or tuff generates over it, the block will become tuff, not deepslate.
+	///
+	/// @param oreDict The oreDict tag to overwrite
+	/// @param to      The block:0 deepslate changes it to
 	public static void addOreByOreDict(String oreDict, Block to) {
 		addOreByOreDict(oreDict, to, 0);
 	}
@@ -165,7 +183,7 @@ public class DeepslateOreRegistry {
 	 * an instance of the BlockAndMetadataMapping class, containing a variable with
 	 * the block instance and the meta data it should be replaced with.
 	 */
-	public static RegistryMapping<Block> getOre(Block block) {
+	public static BlockMetaPair getOre(Block block) {
 		return getOre(block, 0);
 	}
 
@@ -179,33 +197,31 @@ public class DeepslateOreRegistry {
 	 * an instance of the BlockAndMetadataMapping class, containing a variable with
 	 * the block instance and the meta data it should be replaced with.
 	 */
-	public static RegistryMapping<Block> getOre(Block block, int meta) {
-		return deepslateOres.get(RegistryMapping.getKeyFor(block, meta));
+	public static BlockMetaPair getOre(Block block, int meta) {
+		return deepslateOres.get(block, meta);
 	}
 
-	/// @return The entire deepslate ore mapping, where a [RegistryMapping<Block>] is the key.
-	/// The key's return value is of the class [RegistryMapping<Block>], which just store a Block instance, and a metadata value.
+	/// @return The entire deepslate ore mapping, where a [BlockMetaPair] is the key.
+	/// The key's return value is of the class [BlockMetaPair], which just store a Block instance, and a metadata value.
 	/// The map is not modifiable, please use the registry helper functions to add/remove entries.
-	public static Map<RegistryMapping<Block>, RegistryMapping<Block>> getOreMap() {
+	public static Map<ObjMetaPair<Block>, BlockMetaPair> getOreMap() {
 		return Collections.unmodifiableMap(deepslateOres);
 	}
 
+	@ApiStatus.Internal
 	public static void init() {
 		if (ConfigBlocksItems.enableDeepslateOres) { //Copy block settings from deepslate base blocks
-			for (Entry<RegistryMapping<Block>, RegistryMapping<Block>> entry : getOreMap().entrySet()) {
+			for (Entry<ObjMetaPair<Block>, BlockMetaPair> entry : getOreMap().entrySet()) {
 
-				Block oreNorm = entry.getKey().getObject();
-				Block oreDeep = entry.getValue().getObject();
-				if (!ModRecipes.validateItems(oreNorm, oreDeep)) {
-					Logger.error("INVALID FURNACE RECIPE DETECTED: " + entry);
-					Logger.error("This means that a mod added INVALID items to the furnace registry!");
+				Block oreNorm = entry.getKey().get();
+				Block oreDeep = entry.getValue().get();
+				if (!RecipeHelper.validateItems(oreNorm, oreDeep)) {
+					Logger.error("INVALID DEEPSLATE ENTRY DETECTED: " + entry);
+					Logger.error("This means that a mod added INVALID items to the deepslate registry, or there were NULL items in an OreDictionary tag!");
+					continue;
 				}
-
-				boolean saltyModOre = oreDeep.getClass().getName().toLowerCase().contains("saltymod");
-
-				if (oreDeep.stepSound == Block.soundTypeStone || saltyModOre) {
-					Utils.setBlockSound(oreDeep, ModSounds.soundDeepslate);
-					//SaltyMod introduces a deepslate salt ore but it assumes an old resource domain, making it silent on new EFR versions
+				if(oreDeep == ModBlocks.DEEPSLATE.get()) {
+					continue;
 				}
 
 				ItemStack
@@ -223,4 +239,44 @@ public class DeepslateOreRegistry {
 		}
 	}
 
+	@ApiStatus.AvailableSince("3.0.0")
+	/// Changes the block at the location to its deepslate version
+	/// Deepslate's generators use Chunk instead of World setblock for speed, so you have to pass in that, as well as the chunk's X and Z.
+	public static boolean setBlockDeepslate(Chunk chunk, int x, int y, int z, Block input, int inputMeta) {
+		Block currentBlock = chunk.getBlock(x, y, z);
+		int currentMeta = chunk.getBlockMetadata(x, y, z);
+		if(currentBlock.getMaterial() == Material.air // Deepslate should not replace other deepslates (otherwise it'd do crap like overwrite all the tuff)
+				|| BlockTags.hasTag(currentBlock, currentMeta, "minecraft:deepslate_ore_replaceables")) return false;
+
+		BlockMetaPair pair = getOre(currentBlock, currentMeta);
+		if(pair != null) {
+			// The deepslate mapping for this block is deepslate itself.
+			// This special case means that this block is to be explicitly overwritten to deepslate.
+			// We do this specifically, so if tuff overwrites, say, diorite, it turns to tuff and not deepslate.
+			// Maybe we should replace this behavior with a tag instead?
+			if(pair.get() == ModBlocks.DEEPSLATE.get()) {
+				return chunk.func_150807_a(x, y, z, input, inputMeta);
+			}
+			// Used for debugging, the other part is in MixinChunk
+//			return chunk.func_150807_a(chunkX, y, chunkZ, Blocks.redstone_block, 0);
+			return chunk.func_150807_a(x, y, z, pair.get(), pair.getMeta());
+		}
+		// TODO: In the future, maybe change this to == Blocks.stone? Or perhaps, a tag
+		// Brandyn doesn't like it lol, but I feel it's necessary
+		return currentBlock.isReplaceableOreGen(chunk.worldObj, chunk.xPosition << 4 + x, y, chunk.zPosition << 4 + z, Blocks.stone)
+				&& chunk.func_150807_a(x, y, z, input, inputMeta);
+	}
+
+	@ApiStatus.AvailableSince("3.0.0")
+	public static boolean doesChunkSupportLayerDeepslate(IChunkProvider provider, int dimId) {
+		if (ConfigWorld.deepslateGenerationMode == 0 && ConfigWorld.deepslateMaxY > 0) {
+			return !EtFuturumWorldGenerator.isFlatWorld(provider) && ArrayUtils.contains(ConfigWorld.deepslateLayerDimensionBlacklist, dimId) == ConfigWorld.deepslateLayerDimensionBlacklistAsWhitelist;
+		}
+		return false;
+	}
+
+	@ApiStatus.AvailableSince("3.0.0")
+	public static int getDeepslateHeight(World world) {
+		return Math.min(ArrayUtils.contains(ConfigWorld.replaceAllStoneWithDeepslateDimensionWhitelist, world.provider.dimensionId) ? Integer.MAX_VALUE : ConfigWorld.deepslateMaxY, world.getHeight());
+	}
 }

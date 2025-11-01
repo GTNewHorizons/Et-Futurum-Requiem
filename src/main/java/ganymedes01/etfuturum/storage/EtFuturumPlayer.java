@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.storage;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,7 +10,7 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 
 public final class EtFuturumPlayer implements IExtendedEntityProperties {
-	private static final String PROPERTIES_NAME = Reference.MOD_ID;
+	private static final String PROPERTIES_NAME = Tags.MOD_ID;
 
 	private static final String TAG_ENCHANTMENT_SEED = "EnchantmentSeed";
 

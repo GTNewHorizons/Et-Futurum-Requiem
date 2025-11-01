@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.client.skins;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
@@ -11,7 +11,7 @@ import java.util.WeakHashMap;
 
 public class PlayerModelManager {
 
-	public static final String MODEL_KEY = Reference.MOD_ID + "_model";
+	public static final String MODEL_KEY = Tags.MOD_ID + "_model";
 
 	public static Map<UUID, Boolean> alexCache = new WeakHashMap<>();
 

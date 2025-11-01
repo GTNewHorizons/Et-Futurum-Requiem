@@ -4,8 +4,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -132,7 +132,7 @@ public class BlockChorusFlower extends Block {
 
 	private void setFlower(World world, int x, int y, int z, int age) {
 		world.setBlock(x, y, z, this, age, 3);
-		world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.chorus_flower." + (age < 5 ? "grow" : "death"), 1, 1);
+		world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.chorus_flower." + (age < 5 ? "grow" : "death"), 1, 1);
 	}
 
 	@Override

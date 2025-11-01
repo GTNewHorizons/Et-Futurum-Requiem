@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.blocks;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
@@ -21,6 +21,6 @@ public interface ISubBlocksBlock {
 	}
 
 	default String getNameDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 }

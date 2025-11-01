@@ -2,11 +2,10 @@ package ganymedes01.etfuturum.blocks.rawore.modded;
 
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BaseSubtypesBlock;
-import ganymedes01.etfuturum.core.utils.DummyWorld;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -16,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.StringUtils;
+import roadhog360.hogutils.api.world.DummyWorld;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class BlockGeneralModdedRawOre extends BaseSubtypesBlock implements IInit
 
 	@Override
 	public String getTextureDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class BlockGeneralModdedRawOre extends BaseSubtypesBlock implements IInit
 
 	@Override
 	public void onLoadAction() {
-		DummyWorld world = DummyWorld.GLOBAL_DUMMY_WORLD;
+		DummyWorld world = DummyWorld.getGlobalInstance();
 		for (int i = 0; i < ores.length; i++) {
 			ItemStack stack = Utils.getFirstBlockFromTag(ores[i], new ItemStack(Blocks.iron_block));
 			Block block = Block.getBlockFromItem(stack.getItem());
@@ -88,6 +88,6 @@ public class BlockGeneralModdedRawOre extends BaseSubtypesBlock implements IInit
 				resistances[i] = Blocks.iron_block.blockResistance;
 			}
 		}
-		world.clearBlocksCache();
+		world.clearFakeData();
 	}
 }

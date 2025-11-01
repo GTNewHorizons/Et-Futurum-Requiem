@@ -2,10 +2,10 @@ package ganymedes01.etfuturum.blocks.ores.modded;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.IEmissiveLayerBlock;
 import ganymedes01.etfuturum.blocks.ores.BaseSubtypesDeepslateOre;
 import ganymedes01.etfuturum.compat.ExternalContent;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import net.minecraft.block.Block;
 import net.minecraft.client.particle.EffectRenderer;
@@ -56,9 +56,9 @@ public class BlockDeepslateThaumcraftOre extends BaseSubtypesDeepslateOre implem
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister reg) {
 		setIcons(new IIcon[3]);
-		getIcons()[0] = reg.registerIcon(Reference.MOD_ID + ":thaumcraft/deepslate_cinnabar_ore");
-		getIcons()[1] = reg.registerIcon(Reference.MOD_ID + ":thaumcraft/infused_deepslate");
-		getIcons()[2] = reg.registerIcon(Reference.MOD_ID + ":thaumcraft/amber_bearing_deepslate");
+		getIcons()[0] = reg.registerIcon(Tags.MOD_ID + ":thaumcraft/deepslate_cinnabar_ore");
+		getIcons()[1] = reg.registerIcon(Tags.MOD_ID + ":thaumcraft/infused_deepslate");
+		getIcons()[2] = reg.registerIcon(Tags.MOD_ID + ":thaumcraft/amber_bearing_deepslate");
 		infusedOverlay = reg.registerIcon("thaumcraft:infusedore");
 	}
 

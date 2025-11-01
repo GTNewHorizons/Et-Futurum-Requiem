@@ -3,10 +3,10 @@ package ganymedes01.etfuturum.entities;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.items.ItemNewBoat;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.BoatMoveMessage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -26,9 +26,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
+import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class EntityNewBoat extends Entity {
 	//    private static final DataParameter<Integer> TIME_SINCE_HIT = EntityDataManager.<Integer>createKey(EntityNewBoat.class, DataSerializers.VARINT);
@@ -545,9 +547,9 @@ public class EntityNewBoat extends Entity {
 			case IN_WATER:
 			case UNDER_WATER:
 			case UNDER_FLOWING_WATER:
-				return Reference.MCAssetVer + ":entity.boat.paddle_water";
+				return Tags.MC_ASSET_VER + ":entity.boat.paddle_water";
 			case ON_LAND:
-				return Reference.MCAssetVer + ":entity.boat.paddle_land";
+				return Tags.MC_ASSET_VER + ":entity.boat.paddle_land";
 			case IN_AIR:
 			default:
 				return null;
@@ -881,8 +883,13 @@ public class EntityNewBoat extends Entity {
 		Vec3 vec3d = (Vec3.createVectorHelper(f, 0.0D, 0.0D));
 		vec3d.rotateAroundY(-this.rotationYaw * 0.017453292F - ((float) Math.PI / 2F));
 		passenger.setPosition(this.posX + vec3d.xCoord, this.posY + (double) f1, this.posZ + vec3d.zCoord);
-		passenger.rotationYaw += this.deltaRotation;
-		this.applyYawToEntity(passenger);
+		if (ConfigTweaks.stopBoatRotationLock) {
+			return;
+		}
+		else {
+			passenger.rotationYaw += this.deltaRotation;
+			this.applyYawToEntity(passenger);
+		}
 	}
 
 	/**

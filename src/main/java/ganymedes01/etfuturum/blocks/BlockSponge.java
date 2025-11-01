@@ -3,11 +3,11 @@ package ganymedes01.etfuturum.blocks;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.world.WorldCoord;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -55,7 +55,7 @@ public class BlockSponge extends BaseSubtypesBlock {
 			if (!wet && absorb(worldIn, x, y, z)) {
 				worldIn.setBlockMetadataWithNotify(x, y, z, 1, 2);
 				if (ConfigSounds.newBlockSounds) {
-					worldIn.playSoundEffect(x + .5D, y + .5D, z + .5D, Reference.MCAssetVer + ":block.sponge.absorb", 1, 1);
+					worldIn.playSoundEffect(x + .5D, y + .5D, z + .5D, Tags.MC_ASSET_VER + ":block.sponge.absorb", 1, 1);
 				}
 			}
 		} else if (wet) {

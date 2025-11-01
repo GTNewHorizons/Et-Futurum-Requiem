@@ -1,10 +1,10 @@
 package ganymedes01.etfuturum.items.rawore.modded;
 
 import com.google.common.collect.Lists;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.BaseSubtypesItem;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,7 +39,7 @@ public class ItemGeneralModdedRawOre extends BaseSubtypesItem implements IInitAc
 
 	@Override
 	public String getTextureDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 
 

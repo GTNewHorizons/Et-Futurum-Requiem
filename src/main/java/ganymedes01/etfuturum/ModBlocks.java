@@ -309,8 +309,8 @@ public enum ModBlocks {
 	FROSTED_ICE(ConfigEnchantsPotions.enableFrostWalker, new BlockFrostedIce(), null),
 	LAVA_CAULDRON(ConfigBlocksItems.enableLavaCauldrons, new BlockLavaCauldron(), null),
 	POTION_CAULDRON(ConfigBlocksItems.enablePotionCauldron, new BlockPotionCauldron(), null),
-	BUBBLE_COLUMN_UP(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(true, Blocks.soul_sand), null),
-	BUBBLE_COLUMN_DOWN(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(false, MAGMA.get()), null),
+	BUBBLE_COLUMN_UP(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(true, Tags.MOD_ID + ":upward_bubble_column_support_blocks"), null),
+	BUBBLE_COLUMN_DOWN(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(false, Tags.MOD_ID + ":downward_bubble_column_support_blocks"), null),
 
 	BLACKSTONE(ConfigBlocksItems.enableBlackstone, new BlockBlackstone()),
 	GILDED_BLACKSTONE(ConfigBlocksItems.enableBlackstone, new BlockGildedBlackstone()),

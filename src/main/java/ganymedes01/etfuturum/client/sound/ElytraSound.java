@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.client.sound;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.MathHelper;
@@ -12,7 +12,7 @@ public class ElytraSound extends MovingSound {
 	private int time;
 
 	public ElytraSound(EntityPlayerSP p_i47113_1_) {
-		super(new ResourceLocation(Reference.MCAssetVer + ":item.elytra.flying"));
+		super(new ResourceLocation(Tags.MC_ASSET_VER + ":item.elytra.flying"));
 		this.player = p_i47113_1_;
 		this.repeat = true;
 		this.volume = 0.1F;

@@ -32,6 +32,7 @@ public class RenderIDs {
 	public static final int PINK_PETALS = RenderingRegistry.getNextAvailableRenderId();
 	public static final int BAMBOO = RenderingRegistry.getNextAvailableRenderId();
 	public static final int BUBBLE_COLUMN = RenderingRegistry.getNextAvailableRenderId();
+	public static final int DEEPSLATE_CERTUS_QUARTZ_ORE = RenderingRegistry.getNextAvailableRenderId();
 
 	public static final int EXTENDED_CROSSED_SQUARES = RenderingRegistry.getNextAvailableRenderId();
 	public static final int FENCE = RenderingRegistry.getNextAvailableRenderId();
