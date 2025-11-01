@@ -391,7 +391,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
         return rand.nextInt(i);
     }
 
-    protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
+    public static boolean isFlatWorld(IChunkProvider chunkProvider) {
         return chunkProvider instanceof ChunkProviderFlat && !chunkProvider.getClass().getName().equals("com.rwtema.extrautils.worldgen.Underdark.ChunkProviderUnderdark");
     }
 }
