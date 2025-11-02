@@ -123,15 +123,26 @@ public class BlockBarrel extends BlockContainer {
 			return false;
 		}
 
+		// Prevent dropping inventory items when the block is replaced.
 		barrel.upgrading = true;
-		ItemStack[] tempCopy = barrel.chestContents == null ? new ItemStack[barrel.getSizeInventory()] : ArrayUtils.clone(barrel.chestContents);
-		TileEntityBarrel newTE = (TileEntityBarrel) TileEntityBarrel.BarrelType.valueOf(upgradeStrings[1].toUpperCase()).getBlock().createTileEntity(world, barrel.getBlockMetadata());
-		System.arraycopy(tempCopy, 0, newTE.chestContents, 0, tempCopy.length);
+
+		TileEntityBarrel.BarrelType newType = TileEntityBarrel.BarrelType.valueOf(upgradeStrings[1].toUpperCase());
+		Block newBlock = newType.getBlock();
+		int metadata = world.getBlockMetadata(x, y, z);
+
 		if (!player.capabilities.isCreativeMode) {
 			upgradeStack.stackSize--;
 		}
-		world.setBlock(x, y, z, newTE.type.getBlock(), barrel.getBlockMetadata(), 3);
-		world.setTileEntity(x, y, z, newTE);
+
+		barrel.upgrade(newType);
+
+		world.setBlock(x, y, z, newBlock, metadata, 3);
+
+		// The TE needs to be re-validated after its block has been changed
+		barrel.validate();
+		barrel.upgrading = false;
+
+		world.setTileEntity(x, y, z, barrel);
 		world.markBlockForUpdate(x, y, z);
 		return true;
 	}

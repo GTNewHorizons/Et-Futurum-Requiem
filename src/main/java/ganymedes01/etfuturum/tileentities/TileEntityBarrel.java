@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +36,21 @@ public class TileEntityBarrel extends TileEntity implements IInventory {
 	public TileEntityBarrel(BarrelType type) {
 		this.type = type;
 		this.chestContents = new ItemStack[type.size];
+	}
+
+	public void upgrade(BarrelType newType) {
+		if (this.type == newType) {
+			return;
+		}
+
+		ItemStack[] tempCopy = ArrayUtils.clone(this.chestContents);
+
+		this.type = newType;
+		this.chestContents = new ItemStack[this.getSizeInventory()];
+
+		System.arraycopy(tempCopy, 0, this.chestContents, 0, tempCopy.length);
+
+		this.markDirty();
 	}
 
 	@Override
