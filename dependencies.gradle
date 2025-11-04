@@ -52,6 +52,7 @@ dependencies {
     compileOnly 'com.github.GTNewHorizons:ironchest:6.1.6'
 //    compileOnly 'com.github.GTNewHorizons:ironchest:6.1.6'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
+    compileOnly 'curse.maven:mb-battlegear-2-59710:2286765'
 
     compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.6-GTNH:dev") {
         transitive = false
