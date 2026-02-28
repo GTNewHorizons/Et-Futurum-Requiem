@@ -27,8 +27,15 @@ public class SpectatorModeClient extends SpectatorMode {
 		biped.bipedLeftLeg.showModel = visible;
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
+		EntityPlayer viewer = Minecraft.getMinecraft().thePlayer;
+		if (viewer != null && isSpectator(event.entityPlayer) && event.entityPlayer != viewer
+				&& !isSpectator(viewer) && !viewer.capabilities.isCreativeMode) {
+			event.setCanceled(true);
+			return;
+		}
+
 		if (!SPECTATING_ENTITIES.containsKey(event.entityPlayer)) {
 			if (isSpectator(event.entityPlayer)) {
 				setBipedVisible(event.renderer.modelBipedMain, false);
@@ -42,7 +49,7 @@ public class SpectatorModeClient extends SpectatorMode {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onRenderPlayerArmor(RenderPlayerEvent.Specials.Pre event) {
 		if (isSpectator(event.entityPlayer)) {
 			event.setCanceled(true);
