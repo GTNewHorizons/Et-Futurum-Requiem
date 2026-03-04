@@ -7,6 +7,18 @@ import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
+import static gregtech.api.enums.Materials.MeatRaw;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_PotatoChips;
+import static gregtech.common.items.IDMetaItem02.Food_Potato_On_Stick;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Pizza_Veggie;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Pizza_Cheese;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Pizza_Meat;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Bun;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Baguette;
+import static gregtech.common.items.IDMetaItem02.Food_Raw_Cake;
+import gregtech.api.enums.ItemList;
+import gregtech.api.util.GTUtility;
+
 public class SmokerRecipes {
 	private static final SmokerRecipes smeltingBase = new SmokerRecipes();
 	private boolean reloadingCT;
@@ -17,7 +29,8 @@ public class SmokerRecipes {
 	public final ItemStackMap<ItemStack> smeltingList = new ItemStackMap<ItemStack>();
 	public final ItemStackMap<Float> experienceList = new ItemStackMap<Float>();
 	public final ItemStackSet smeltingBlacklist = new ItemStackSet();
-
+    // set of inputs that for one reason or another don't have ItemFood output but still fit in the smoker
+	public final ItemStackSet smokerExtraRecipes = new ItemStackSet();
 
 	public final ItemStackMap<ItemStack> smeltingListCache = new ItemStackMap<ItemStack>();
 	public final ItemStackMap<Float> experienceListCache = new ItemStackMap<Float>();
@@ -87,16 +100,36 @@ public class SmokerRecipes {
 		smeltingList.remove(input);
 		smeltingBlacklist.add(input);
 	}
+    
+    private void populateExtraRecipes(){
+        smokerExtraRecipes.add(MeatRaw.getDust(1));
+        smokerExtraRecipes.add(ItemList.Food_Potato_On_Stick.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_PotatoChips.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Pizza_Veggie.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Pizza_Cheese.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Pizza_Meat.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Bun.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Baguette.get(1L));
+        smokerExtraRecipes.add(ItemList.Food_Raw_Cake.get(1L));
+        // sesame seeds?
+        // vanilla bean?
+        
+    }
 
 	public boolean canAdd(ItemStack input, ItemStack result) {
-		if (ConfigFunctions.enableAutoAddSmoker) {
-			// Make sure there is no Nullpointers in there, yes there can be invalid Recipes in the Furnace List.
-			// That was why DragonAPI somehow fixed a Bug in here, because Reika removes nulls from the List!
-			if (input != null && result != null) {
-				//If the result is a food, allow smelting.
-				return result.getItem() instanceof ItemFood && ((ItemFood) result.getItem()).func_150905_g/*getHealAmount*/(result) > 0;
-			}
-		}
+		if (!ConfigFunctions.enableAutoAddSmoker) return false;
+		// Make sure there is no Nullpointers in there, yes there can be invalid Recipes in the Furnace List.
+		// That was why DragonAPI somehow fixed a Bug in here, because Reika removes nulls from the List!
+        if (input == null || result == null) return false;
+        
+        //If the result is a food, allow smelting.
+        if (result.getItem() instanceof ItemFood &&
+            ((ItemFood) result.getItem()).func_150905_g/*getHealAmount*/(result) > 0) return true;
+        
+        // set up extra recipes on first pass
+        if (smokerExtraRecipes.isEmpty()) populateExtraRecipes();
+        if (smokerExtraRecipes.contains(input)) return true;
+        
 		return false;
 	}
 }
