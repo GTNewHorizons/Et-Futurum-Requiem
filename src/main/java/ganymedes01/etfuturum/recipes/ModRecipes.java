@@ -318,6 +318,10 @@ public class ModRecipes {
 
 		registerOre("cobblestone", ModBlocks.COBBLED_DEEPSLATE.newItemStack());
 
+		registerOre("stone", ModBlocks.BASALT.newItemStack());
+		registerOre("stone", ModBlocks.DEEPSLATE.newItemStack());
+		registerOre("stone", ModBlocks.TUFF.newItemStack());
+
 		registerOre("record", ModItems.PIGSTEP_RECORD.get());
 		registerOre("record", ModItems.OTHERSIDE_RECORD.get());
 
