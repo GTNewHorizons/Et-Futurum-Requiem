@@ -3,10 +3,10 @@ package ganymedes01.etfuturum.entities;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.items.ItemNewBoat;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.BoatMoveMessage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -547,9 +547,9 @@ public class EntityNewBoat extends Entity {
 			case IN_WATER:
 			case UNDER_WATER:
 			case UNDER_FLOWING_WATER:
-				return Reference.MCAssetVer + ":entity.boat.paddle_water";
+				return Tags.MC_ASSET_VER + ":entity.boat.paddle_water";
 			case ON_LAND:
-				return Reference.MCAssetVer + ":entity.boat.paddle_land";
+				return Tags.MC_ASSET_VER + ":entity.boat.paddle_land";
 			case IN_AIR:
 			default:
 				return null;

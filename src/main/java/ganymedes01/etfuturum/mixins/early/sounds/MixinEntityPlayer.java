@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockBerryBush;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
@@ -41,13 +41,13 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
 	private String etfuturum$getUniqueHurtSound() {
 		if (etfuturum$lastDamageSource != null) {
 			if (etfuturum$lastDamageSource.isFireDamage()) {
-				return Reference.MCAssetVer + ":entity.player.hurt_on_fire";
+				return Tags.MC_ASSET_VER + ":entity.player.hurt_on_fire";
 			}
 			if (etfuturum$lastDamageSource == DamageSource.drown) {
-				return Reference.MCAssetVer + ":entity.player.hurt_drown";
+				return Tags.MC_ASSET_VER + ":entity.player.hurt_drown";
 			}
 			if (etfuturum$lastDamageSource == BlockBerryBush.SWEET_BERRY_BUSH) {
-				return Reference.MCAssetVer + ":entity.player.hurt_sweet_berry_bush";
+				return Tags.MC_ASSET_VER + ":entity.player.hurt_sweet_berry_bush";
 			}
 		}
 		return null;

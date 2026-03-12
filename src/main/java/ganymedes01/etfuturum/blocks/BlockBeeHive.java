@@ -5,10 +5,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.entities.EntityBee;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntityBeeHive;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -192,13 +192,13 @@ public class BlockBeeHive extends BlockContainer {
 		boolean flag = false;
 		if (world.getBlockMetadata(x, y, z) > 6 && itemstack != null) {
 			if (itemstack.getItem() instanceof ItemShears) {
-				world.playSoundAtEntity(player, Reference.MCAssetVer + ":block.beehive.shear", 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":block.beehive.shear", 1.0F, 1.0F);
 				dropHoneyComb(world, x, y, z);
 				itemstack.damageItem(1, player);
 				flag = true;
 			} else if (itemstack.getItem() == Items.glass_bottle) {
 				itemstack.stackSize--;
-				world.playSoundAtEntity(player, Reference.MCAssetVer + ":item.bottle.fill", 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":item.bottle.fill", 1.0F, 1.0F);
 				ItemStack bottle = ModItems.HONEY_BOTTLE.newItemStack();
 				if (itemstack.stackSize == 0) {
 					player.setCurrentItemOrArmor(0, bottle);
@@ -250,7 +250,7 @@ public class BlockBeeHive extends BlockContainer {
 				for (int i = 0; i < random.nextInt(1) + 1; ++i) {
 					if (random.nextFloat() > 0.3F) {
 						CustomParticles.spawnDrippingParticleWithSound(world, world.rand.nextDouble() + x, y, world.rand.nextDouble() + z,
-								Reference.MCAssetVer + ":block.beehive.drip", 0xFF8E6D14);
+								Tags.MC_ASSET_VER + ":block.beehive.drip", 0xFF8E6D14);
 					}
 				}
 			}

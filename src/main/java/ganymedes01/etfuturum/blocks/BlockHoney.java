@@ -3,9 +3,9 @@ package ganymedes01.etfuturum.blocks;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.entities.EntityNewBoat;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -40,7 +40,7 @@ public class BlockHoney extends BaseBlock {
 
 	@Override
 	public void onFallenUpon(World world, int x, int y, int z, Entity entity, float fallDistance) {
-		world.playSoundAtEntity(entity, Reference.MCAssetVer + ":block.honey_block.slide", 1.0F, 1.0F);
+		world.playSoundAtEntity(entity, Tags.MC_ASSET_VER + ":block.honey_block.slide", 1.0F, 1.0F);
 		showJumpParticles(entity);
 		entity.fallDistance *= 0.2F;
 	}
@@ -89,7 +89,7 @@ public class BlockHoney extends BaseBlock {
 	private void maybeDoSlideEffects(World world, Entity entity) {
 		if (doesEntityDoHoneyBlockSlideEffects(entity)) {
 			if (world.rand.nextInt(5) == 0) {
-				world.playSoundAtEntity(entity, Reference.MCAssetVer + ":block.honey_block.slide", 1.0F, 1.0F);
+				world.playSoundAtEntity(entity, Tags.MC_ASSET_VER + ":block.honey_block.slide", 1.0F, 1.0F);
 				showSlideParticles(entity);
 			}
 		}

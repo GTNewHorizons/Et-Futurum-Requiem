@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.core.utils;
 
 import cpw.mods.fml.common.Loader;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
@@ -43,7 +44,7 @@ public class Utils {
 	public static final float SQRT_2 = MathHelper.sqrt_float(2.0F);
 
 	public static String getUnlocalisedName(String name) {
-		return Reference.MOD_ID + "." + name;
+		return Tags.MOD_ID + "." + name;
 	}
 
 	public static String getBlockTexture(String name) {
@@ -59,7 +60,7 @@ public class Utils {
 	}
 
 	public static String getConainerName(String name) {
-		return "container." + Reference.MOD_ID + "." + name;
+		return "container." + Tags.MOD_ID + "." + name;
 	}
 
 	public static String getModContainer() {
@@ -381,41 +382,6 @@ public class Utils {
 			list = ArrayUtils.removeElements(list, BiomeDictionary.getBiomesForType(typeToBlacklist));
 		}
 		return list;
-	}
-
-	private static Integer maxMeta;
-	private static Integer minMeta;
-
-	public static int getMaxMetadata() {
-		if (maxMeta == null) {
-			if (ModsList.NOT_ENOUGH_IDS.isLoaded() && ModsList.NOT_ENOUGH_IDS.isVersionNewerOrEqual("2.0.0")) {
-				maxMeta = (int) Short.MAX_VALUE;
-			} else if (ModsList.ENDLESS_IDS_BLOCKITEM.isLoaded()) {
-				maxMeta = 65536;
-			} else {
-				maxMeta = 15;
-			}
-		}
-		return maxMeta;
-	}
-
-	public static int getMinMetadata() {
-		if (minMeta == null) {
-			if (ModsList.NOT_ENOUGH_IDS.isLoaded() && ModsList.NOT_ENOUGH_IDS.isVersionNewerOrEqual("2.0.0")) {
-				minMeta = (int) Short.MIN_VALUE;
-			} else { //EIDs has min meta 0 too, so we don't need to check for it
-				minMeta = 0;
-			}
-		}
-		return minMeta;
-	}
-
-	public static boolean isMetaInBlockBounds(int meta) {
-		return meta <= getMaxMetadata() && meta >= getMinMetadata();
-	}
-
-	public static boolean isMetaInBlockBoundsIgnoreWildcard(int meta) {
-		return meta == OreDictionary.WILDCARD_VALUE || isMetaInBlockBounds(meta);
 	}
 
 	public static void copyAttribs(Block to, Block from) {

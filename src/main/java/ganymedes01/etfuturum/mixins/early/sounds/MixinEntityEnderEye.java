@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.world.World;
@@ -18,7 +18,7 @@ public abstract class MixinEntityEnderEye extends Entity {
 
 	@Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityEnderEye;setDead()V"))
 	public void playDropSound(CallbackInfo ci) {
-		worldObj.playSoundAtEntity(this, Reference.MCAssetVer + ":entity.ender_eye.death", 1.0F, 1.0F);
+		worldObj.playSoundAtEntity(this, Tags.MC_ASSET_VER + ":entity.ender_eye.death", 1.0F, 1.0F);
 	}
 
 }

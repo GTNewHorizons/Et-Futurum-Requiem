@@ -10,6 +10,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.api.MultiBlockSoundRegistry;
 import ganymedes01.etfuturum.api.mappings.MultiBlockSoundContainer;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
@@ -25,7 +26,6 @@ import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 import ganymedes01.etfuturum.configuration.configs.*;
 import ganymedes01.etfuturum.core.utils.Logger;
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
 import ganymedes01.etfuturum.entities.EntityBee;
@@ -76,6 +76,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.io.File;
 import java.util.*;
@@ -86,7 +87,7 @@ public class ClientEventHandler {
 
 	public static final ClientEventHandler INSTANCE = new ClientEventHandler();
 	private final Minecraft mc = FMLClientHandler.instance().getClient();
-	private final Random rand = new RandomXoshiro256StarStar();
+	private final Random rand = new FastRandom();
 	private boolean showedDebugWarning;
 	private int currPage;
 	/**
@@ -316,7 +317,7 @@ public class ClientEventHandler {
 			return null;
 		}
 		if (netherAmbienceLoopNames.contains(netherAmbienceLoop.getName())) {
-			return Reference.MCAssetVer + ":ambient." + netherAmbienceLoop.getName() + ".mood";
+			return Tags.MC_ASSET_VER + ":ambient." + netherAmbienceLoop.getName() + ".mood";
 		}
 		return null;
 	}
@@ -326,7 +327,7 @@ public class ClientEventHandler {
 			return null;
 		}
 		if (netherAmbienceLoopNames.contains(netherAmbienceLoop.getName())) {
-			return Reference.MCAssetVer + ":music.nether." + netherAmbienceLoop.getName();
+			return Tags.MC_ASSET_VER + ":music.nether." + netherAmbienceLoop.getName();
 		}
 		return null;
 	}
@@ -334,7 +335,7 @@ public class ClientEventHandler {
 	@SubscribeEvent
 	public void toolTipEvent(ItemTooltipEvent event) {
 //		if (event.itemStack.getItem() instanceof ItemBlock) {
-//			DummyWorld dummyWorld = DummyWorld.GLOBAL_DUMMY_WORLD;
+//			DummyWorld dummyWorld = DummyWorld.getGlobalInstance();
 //			try {
 //				Block block = Block.getBlockFromItem(event.itemStack.getItem());
 //				dummyWorld.setBlock(0, 0, 0, block, event.itemStack.itemDamage, 0);
@@ -345,8 +346,8 @@ public class ClientEventHandler {
 //				//It keeps crashing when I go to item search, I give up
 //			}
 //		}
-		if (ConfigFunctions.enableExtraF3HTooltips && event.showAdvancedItemTooltips) {
-			event.toolTip.add("\u00a78" + Item.itemRegistry.getNameForObject(event.itemStack.getItem()));
+		if (ConfigFunctions.enableExtraF3HTooltips && event.showAdvancedItemTooltips && event.itemStack.getItem() != null) {
+			event.toolTip.add("\u00a78" + event.itemStack.getItem().delegate.name());
 			if (event.itemStack.stackTagCompound != null && !event.itemStack.stackTagCompound.hasNoTags()) {
 				event.toolTip.add("\u00a78NBT: " + event.itemStack.stackTagCompound.func_150296_c/*getKeySet*/().size() + " Tag(s)");
 			}
@@ -429,12 +430,12 @@ public class ClientEventHandler {
 			}
 			if (ConfigSounds.chestOpenClose && event.name.contains("random.chest")) {
 				String s = event.name;
-				String blockID = Block.blockRegistry.getNameForObject(block).split(":")[1].toLowerCase();
+				String blockID = block.delegate.name().split(":")[1].toLowerCase();
 				if (blockID.contains("chest") && (event.name.contains("open") || event.name.contains("close"))) {
 					if ((blockID.contains("ender") && block.getMaterial().equals(Material.rock)))
-						s = Reference.MCAssetVer + ":" + "block.ender_chest." + (event.name.contains("close") ? "close" : "open");
+						s = Tags.MC_ASSET_VER + ":" + "block.ender_chest." + (event.name.contains("close") ? "close" : "open");
 					else if (block.getMaterial().equals(Material.wood) && event.name.contains("close"))
-						s = Reference.MCAssetVer + ":" + "block.chest.close";
+						s = Tags.MC_ASSET_VER + ":" + "block.chest.close";
 				}
 
 				if (!s.equals(event.name)) {
@@ -449,13 +450,13 @@ public class ClientEventHandler {
 				if (block instanceof BlockButton && event.name.equals("random.click")) {
 					String s = null;
 					if (block.stepSound == Block.soundTypeWood) {
-						s = Reference.MCAssetVer + ":block.wooden_button.click";
+						s = Tags.MC_ASSET_VER + ":block.wooden_button.click";
 					} else if (block.stepSound == ModSounds.soundNetherWood) {
-						s = Reference.MCAssetVer + ":block.nether_wood_button.click";
+						s = Tags.MC_ASSET_VER + ":block.nether_wood_button.click";
 					} else if (block.stepSound == ModSounds.soundCherryWood) {
-						s = Reference.MCAssetVer + ":block.cherry_wood_button.click";
+						s = Tags.MC_ASSET_VER + ":block.cherry_wood_button.click";
 					} else if (block.stepSound == ModSounds.soundBambooWood) {
-						s = Reference.MCAssetVer + ":block.bamboo_wood_button.click";
+						s = Tags.MC_ASSET_VER + ":block.bamboo_wood_button.click";
 					}
 					if (s != null) {
 						event.result = new PositionedSoundRecord(new ResourceLocation(s + "_" + (event.sound.getPitch() > 0.5F ? "on" : "off")), 1, 1, soundX, soundY, soundZ);
@@ -467,15 +468,15 @@ public class ClientEventHandler {
 				if (block instanceof BlockBasePressurePlate && event.name.equals("random.click")) {
 					String s = null;
 					if (block.stepSound == Block.soundTypeMetal) {
-						s = Reference.MCAssetVer + ":block.metal_pressure_plate.click";
+						s = Tags.MC_ASSET_VER + ":block.metal_pressure_plate.click";
 					} else if (block.stepSound == Block.soundTypeWood) {
-						s = Reference.MCAssetVer + ":block.wooden_pressure_plate.click";
+						s = Tags.MC_ASSET_VER + ":block.wooden_pressure_plate.click";
 					} else if (block.stepSound == ModSounds.soundNetherWood) {
-						s = Reference.MCAssetVer + ":block.nether_wood_pressure_plate.click";
+						s = Tags.MC_ASSET_VER + ":block.nether_wood_pressure_plate.click";
 					} else if (block.stepSound == ModSounds.soundCherryWood) {
-						s = Reference.MCAssetVer + ":block.cherry_wood_pressure_plate.click";
+						s = Tags.MC_ASSET_VER + ":block.cherry_wood_pressure_plate.click";
 					} else if (block.stepSound == ModSounds.soundBambooWood) {
-						s = Reference.MCAssetVer + ":block.bamboo_wood_pressure_plate.click";
+						s = Tags.MC_ASSET_VER + ":block.bamboo_wood_pressure_plate.click";
 					}
 
 					if (s != null) {
@@ -511,29 +512,29 @@ public class ClientEventHandler {
 
 				// Specific blocks
 				if (blockBeneath == Blocks.soul_sand) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.cow_bell";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.cow_bell";
 				} else if (blockName.contains("hay")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.banjo";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.banjo";
 				} else if (EtFuturum.hasDictTag(blockBeneath, "blockGold")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.bell";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.bell";
 				} else if (EtFuturum.hasDictTag(blockBeneath, "blockEmerald")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.bit";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.bit";
 				} else if (blockName.contains("packed") && blockName.contains("ice")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.chime";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.chime";
 				} else if (blockName.contains("pumpkin")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.didgeridoo";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.didgeridoo";
 				} else if (blockBeneath.getMaterial() == Material.clay) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.flute";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.flute";
 				} else if (EtFuturum.hasDictTag(blockBeneath, "blockIron")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.iron_xylophone";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.iron_xylophone";
 				} else if (blockBeneath.getMaterial() == Material.cloth) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.guitar";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.guitar";
 				} else if (blockName.contains("bone") || blockName.contains("ivory")) {
-					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.xylophone";
+					instrumentToPlay = Tags.MC_ASSET_VER + ":block.note_block.xylophone";
 				}
 				if (event.name.equals(instrumentToPlay)) return;
 
-				event.result = new PositionedSoundRecord(new ResourceLocation(instrumentToPlay), instrumentToPlay.equals(Reference.MCAssetVer + ":block.note_block.iron_xylophone") ? 1F : event.sound.getVolume(), event.sound.getPitch(), soundX, soundY, soundZ);
+				event.result = new PositionedSoundRecord(new ResourceLocation(instrumentToPlay), instrumentToPlay.equals(Tags.MC_ASSET_VER + ":block.note_block.iron_xylophone") ? 1F : event.sound.getVolume(), event.sound.getPitch(), soundX, soundY, soundZ);
 				return;
 			}
 
@@ -544,14 +545,14 @@ public class ClientEventHandler {
 				if (gui.currPage != this.currPage) {
 					this.currPage = gui.currPage;
 					EntityClientPlayerMP player = mc.thePlayer;
-					player.playSound(Reference.MCAssetVer + ":item.book.page_turn", 1.0F, 1.0F);
+					player.playSound(Tags.MC_ASSET_VER + ":item.book.page_turn", 1.0F, 1.0F);
 					event.result = null;
 					return;
 				}
 			}
 
 			if (ConfigSounds.rainSounds && event.name.equals("ambient.weather.rain")) {
-				event.result = new PositionedSoundRecord(new ResourceLocation(Reference.MCAssetVer + ":weather.rain" + (event.sound.getPitch() < 1.0F ? ".above" : "")),
+				event.result = new PositionedSoundRecord(new ResourceLocation(Tags.MC_ASSET_VER + ":weather.rain" + (event.sound.getPitch() < 1.0F ? ".above" : "")),
 						event.sound.getVolume(), event.sound.getPitch(), x + 0.5F, y + 0.5F, z + 0.5F);
 			}
 
@@ -582,55 +583,55 @@ public class ClientEventHandler {
 		if (block instanceof BlockDoor) {
 			if (block.getMaterial() == Material.wood) {
 				if (block.stepSound == ModSounds.soundNetherWood) {
-					return Reference.MCAssetVer + ":block.nether_wood_door." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.nether_wood_door." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundCherryWood) {
-					return Reference.MCAssetVer + ":block.cherry_wood_door." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.cherry_wood_door." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundBambooWood) {
-					return Reference.MCAssetVer + ":block.bamboo_wood_door." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.bamboo_wood_door." + closeOrOpen;
 				}
-				return Reference.MCAssetVer + ":block.wooden_door." + closeOrOpen;
+				return Tags.MC_ASSET_VER + ":block.wooden_door." + closeOrOpen;
 			} else if (block.getMaterial() == Material.iron) {
 				if (block.stepSound == ModSounds.soundCopper) {
-					return Reference.MCAssetVer + ":block.copper_door." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.copper_door." + closeOrOpen;
 				}
-				return Reference.MCAssetVer + ":block.iron_door." + closeOrOpen;
+				return Tags.MC_ASSET_VER + ":block.iron_door." + closeOrOpen;
 			}
 		}
 
 		if (block instanceof BlockTrapDoor) {
 			if (block.getMaterial() == Material.wood) {
 				if (block.stepSound == ModSounds.soundNetherWood) {
-					return Reference.MCAssetVer + ":block.nether_wood_trapdoor." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.nether_wood_trapdoor." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundCherryWood) {
-					return Reference.MCAssetVer + ":block.cherry_wood_trapdoor." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.cherry_wood_trapdoor." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundBambooWood) {
-					return Reference.MCAssetVer + ":block.bamboo_wood_trapdoor." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.bamboo_wood_trapdoor." + closeOrOpen;
 				}
-				return Reference.MCAssetVer + ":block.wooden_trapdoor." + closeOrOpen;
+				return Tags.MC_ASSET_VER + ":block.wooden_trapdoor." + closeOrOpen;
 			} else if (block.getMaterial() == Material.iron) {
 				if (block.stepSound == ModSounds.soundCopper) {
-					return Reference.MCAssetVer + ":block.copper_trapdoor." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.copper_trapdoor." + closeOrOpen;
 				}
-				return Reference.MCAssetVer + ":block.iron_trapdoor." + closeOrOpen;
+				return Tags.MC_ASSET_VER + ":block.iron_trapdoor." + closeOrOpen;
 			}
 		}
 
 		if (block instanceof BlockFenceGate) {
 			if (block.getMaterial() == Material.wood) {
 				if (block.stepSound == ModSounds.soundNetherWood) {
-					return Reference.MCAssetVer + ":block.nether_wood_fence_gate." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.nether_wood_fence_gate." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundCherryWood) {
-					return Reference.MCAssetVer + ":block.cherry_wood_fence_gate." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.cherry_wood_fence_gate." + closeOrOpen;
 				}
 				if (block.stepSound == ModSounds.soundBambooWood) {
-					return Reference.MCAssetVer + ":block.bamboo_wood_fence_gate." + closeOrOpen;
+					return Tags.MC_ASSET_VER + ":block.bamboo_wood_fence_gate." + closeOrOpen;
 				}
-				return Reference.MCAssetVer + ":block.fence_gate." + closeOrOpen;
+				return Tags.MC_ASSET_VER + ":block.fence_gate." + closeOrOpen;
 			}
 		}
 
@@ -659,14 +660,14 @@ public class ClientEventHandler {
 		if (!entity.worldObj.isRemote) {
 			// --- Horse eat --- //
 			if (ConfigSounds.horseEatCowMilk && entity instanceof EntityHorse && event.name.equals("eating")) {
-				event.name = Reference.MCAssetVer + ":entity.horse.eat";
+				event.name = Tags.MC_ASSET_VER + ":entity.horse.eat";
 			}
 			return;//This is the only code I want to run if !isRemote
 		}
 
 		if (entity instanceof EntityPlayer player && event.name.equals("random.drink")) {
 			if (player.isUsingItem() && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemHoneyBottle) {
-				entity.playSound(Reference.MCAssetVer + ":item.honey_bottle.drink" + ignore_suffix, 1, 1);
+				entity.playSound(Tags.MC_ASSET_VER + ":item.honey_bottle.drink" + ignore_suffix, 1, 1);
 				event.setCanceled(true);
 				return;
 			}
@@ -684,7 +685,7 @@ public class ClientEventHandler {
 
 			// Play fast splash sound instead
 			if (doWaterSplashEffect_f1 >= 0.25D) {
-				event.name = Reference.MCAssetVer + ":entity.player.splash.high_speed";
+				event.name = Tags.MC_ASSET_VER + ":entity.player.splash.high_speed";
 				return;
 			}
 		}
@@ -719,7 +720,7 @@ public class ClientEventHandler {
 				field_26997 = Math.min(1.0F, field_26997 + 0.07F);
 				float f = 0.5F + field_26997 * entity.worldObj.rand.nextFloat() * 1.2F;
 				float g = 0.1F + field_26997 * 1.2F;
-				entity.playSound(Reference.MCAssetVer + ":block.amethyst_block.chime", g, f);
+				entity.playSound(Tags.MC_ASSET_VER + ":block.amethyst_block.chime", g, f);
 				lastChimeAge = entity.ticksExisted;
 				pair.setLeft(field_26997);
 				pair.setRight(lastChimeAge);

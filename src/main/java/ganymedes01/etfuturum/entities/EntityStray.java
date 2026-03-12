@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.entities;
 
 import ganymedes01.etfuturum.ModItems;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -125,17 +125,17 @@ public class EntityStray extends EntitySkeleton {
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.stray.ambient";
+		return Tags.MC_ASSET_VER + ":entity.stray.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.stray.hurt";
+		return Tags.MC_ASSET_VER + ":entity.stray.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.stray.death";
+		return Tags.MC_ASSET_VER + ":entity.stray.death";
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class EntityStray extends EntitySkeleton {
 	 */
 	@Override
 	protected void func_145780_a(final int x, final int y, final int z, final Block blockIn) {
-		this.playSound(Reference.MCAssetVer + ":entity.stray.step", 0.15f, 1.0f);
+		this.playSound(Tags.MC_ASSET_VER + ":entity.stray.step", 0.15f, 1.0f);
 	}
 
 	@Override

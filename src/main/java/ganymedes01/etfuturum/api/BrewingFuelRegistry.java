@@ -1,60 +1,58 @@
 package ganymedes01.etfuturum.api;
 
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
-import ganymedes01.etfuturum.core.utils.Logger;
-import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.block.Block;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
 import java.util.List;
 
+@Deprecated
 public class BrewingFuelRegistry {
 
-	private static final ItemStackMap<Integer> FUEL_REGISTRY = new ItemStackMap<>();
-
-	static {
-		FUEL_REGISTRY.put(new ItemStack(Items.blaze_powder), 30);
-	}
-
+	@Deprecated
 	public static void registerFuel(Object itemObj, int count) {
 		if (count <= 0) {
 			throw new IllegalArgumentException("Tried to add a brewing fuel with " + count + " cycles??? It must be able to at least brew 1 set of potions...");
 		}
 
-		if (ModRecipes.validateItems(itemObj)) {
-			if (itemObj instanceof ItemStack) {
-				FUEL_REGISTRY.put(((ItemStack) itemObj).copy(), count);
-			} else if (itemObj instanceof String) {
-				for (ItemStack oreStack : OreDictionary.getOres((String) itemObj)) {
-					FUEL_REGISTRY.put(oreStack.copy(), count);
+		if (itemObj instanceof ItemStack stack && stack.getItem() != null) {
+			ItemTags.addTags(stack.getItem(), stack.getItemDamage(), "minecraft:brewing_fuel");
+		} else if (itemObj instanceof String) {
+			for (ItemStack oreStack : OreDictionary.getOres((String) itemObj)) {
+				if(oreStack.getItem() != null) {
+					ItemTags.addTags(oreStack.getItem(), oreStack.getItemDamage(), "minecraft:brewing_fuel");
 				}
-			} else if (itemObj instanceof Item) {
-				FUEL_REGISTRY.put(new ItemStack((Item) itemObj, 1, OreDictionary.WILDCARD_VALUE), count);
-			} else if (itemObj instanceof Block && Item.getItemFromBlock((Block) itemObj) != null) {
-				FUEL_REGISTRY.put(new ItemStack(Item.getItemFromBlock((Block) itemObj), 1, OreDictionary.WILDCARD_VALUE), count);
-			} else {
-				throw new IllegalArgumentException("Tried to add " + itemObj + " as a brewing fuel, which is not an Itemstack, item, block or string.");
 			}
+		} else if (itemObj instanceof Item item) {
+			ItemTags.addTags(item, "minecraft:brewing_fuel");
+		} else if (itemObj instanceof Block block && Item.getItemFromBlock(block) != null) {
+			ItemTags.addTags(Item.getItemFromBlock(block), "minecraft:brewing_fuel");
+		} else {
+			throw new IllegalArgumentException("Tried to add " + itemObj + " as a brewing fuel, which is not an Itemstack, item, block or string.");
 		}
 	}
 
+	@Deprecated
 	public static void registerFuel(List<Object> list, int count) {
 		list.forEach(o -> registerFuel(o, count));
 	}
 
+	@Deprecated
 	public static void remove(String fuelOreDict) {
 		for (ItemStack stack : OreDictionary.getOres(fuelOreDict)) {
 			remove(stack);
 		}
 	}
 
+	@Deprecated
 	public static void remove(ItemStack fuel) {
-		FUEL_REGISTRY.remove(fuel);
+		ItemTags.removeTags(fuel.getItem(), fuel.getItemDamage(), "minecraft:brewing_fuel");
 	}
 
+	@Deprecated
 	public static boolean isFuel(String fuelOreDict) {
 		for (ItemStack stack : OreDictionary.getOres(fuelOreDict)) {
 			if (isFuel(stack)) return true;
@@ -62,27 +60,30 @@ public class BrewingFuelRegistry {
 		return false;
 	}
 
+	@Deprecated
 	public static boolean isFuel(ItemStack fuel) {
 		return getBrewingAmount(fuel) > 0;
 	}
 
+	/// I'll let this slide as it can now be used as a helper function to get the custom fuel level tag
 	public static int getBrewingAmount(ItemStack fuel) {
-		Integer time = FUEL_REGISTRY.get(fuel);
-		if (time != null) {
-			return time;
+		int count = 0;
+		if(ItemTags.hasTag(fuel.getItem(), fuel.getItemDamage(), "minecraft:brewing_fuel")) {
+			count = 20;
+			//TODO: Do we want to support custom fuel counts with tagging, or just remove that entirely?
 		}
 
-		return 0;
+		return count;
 	}
 
+	/// TODO: This should populate an ItemStackMap with the current tags contents
+	@Deprecated
 	public static ItemStackMap<Integer> getFuels() {
-		return FUEL_REGISTRY;
+		return new ItemStackMap<>();
 	}
 
-	/**
-	 * Print all entries in composting registry. Used for debugging purposes.
-	 */
+	/// TODO: This needs to print the tags stuff instead
+	@Deprecated
 	public void printFuels() {
-		getFuels().forEach((key, value) -> Logger.info("Brewing fuel entry: " + Item.itemRegistry.getNameForObject(key.getItem()) + " Meta: " + (key.getItemDamage() == OreDictionary.WILDCARD_VALUE ? "any" : key.getItemDamage())));
 	}
 }

@@ -2,12 +2,11 @@ package ganymedes01.etfuturum.blocks.ores;
 
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BaseBlock;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
-import ganymedes01.etfuturum.core.utils.DummyWorld;
 import ganymedes01.etfuturum.core.utils.IInitAction;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -21,6 +20,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import roadhog360.hogutils.api.world.DummyWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,7 +229,7 @@ public abstract class BaseDeepslateOre extends BaseBlock implements IInitAction 
 
 	@Override
 	public String getTextureDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 
 	public abstract Block getBase();
@@ -249,7 +249,7 @@ public abstract class BaseDeepslateOre extends BaseBlock implements IInitAction 
 
 	@Override
 	public void onLoadAction() {
-		DummyWorld world = DummyWorld.GLOBAL_DUMMY_WORLD;
+		DummyWorld world = DummyWorld.getGlobalInstance();
 		Block block = getBase();
 		//See BlockGeneralModdedDeepslateOre for a comment on why we do this cursed stuff
 		world.setBlock(0, 0, 0, block, getBaseMeta(), 0);
@@ -264,6 +264,6 @@ public abstract class BaseDeepslateOre extends BaseBlock implements IInitAction 
 			blockHardness = ConfigFunctions.useStoneHardnessForDeepslate ? Blocks.iron_ore.blockHardness : Blocks.iron_ore.blockHardness * 1.5F;
 			blockResistance = Blocks.iron_ore.blockResistance;
 		}
-		world.clearBlocksCache();
+		world.clearFakeData();
 	}
 }

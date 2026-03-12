@@ -1,7 +1,8 @@
 package ganymedes01.etfuturum.entities;
 
 import com.google.common.collect.Lists;
-import ganymedes01.etfuturum.api.BeePlantRegistry;
+import ganymedes01.etfuturum.Tags;
+import ganymedes01.etfuturum.api.crops.IBeeGrowable;
 import ganymedes01.etfuturum.blocks.BlockBeeHive;
 import ganymedes01.etfuturum.blocks.BlockMagma;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
@@ -11,7 +12,6 @@ import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
 import ganymedes01.etfuturum.entities.ai.FlyMoveHelper;
 import ganymedes01.etfuturum.entities.ai.FlyingPathNavigator;
 import ganymedes01.etfuturum.entities.attributes.EtFuturumEntityAttributes;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntityBeeHive;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -19,6 +19,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathEntity;
@@ -31,6 +32,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -146,7 +149,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 		tasks.addTask(7, new EntityBee.FindPollinationTargetGoal());
 		tasks.addTask(8, new EntityBee.WanderGoal());
 		tasks.addTask(9, new EntityAISwimming(this));
-		targetTasks.addTask(1, (new EntityBee.AngerGoal(this))/*.setCallsForHelp(new Class[0])*/);
+		targetTasks.addTask(1, (new AngerGoal(this))/*.setCallsForHelp(new Class[0])*/);
 		targetTasks.addTask(2, new EntityBee.AttackPlayerGoal(this));
 		getNavigator().setAvoidsWater(true);
 	}
@@ -390,7 +393,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 
 			this.setHasStung(true);
 			this.setAttackTarget(null);
-			this.playSound(Reference.MCAssetVer + ":entity.bee.sting", 1.0F, 1.0F);
+			this.playSound(Tags.MC_ASSET_VER + ":entity.bee.sting", 1.0F, 1.0F);
 		}
 
 		return flag;
@@ -411,19 +414,20 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 		CustomParticles.spawnBeeNectarParticle(worldIn, Utils.lerp(worldIn.rand.nextDouble(), p_226397_2_, p_226397_4_), posY, Utils.lerp(worldIn.rand.nextDouble(), p_226397_6_, p_226397_8_));
 	}
 
-	private boolean isBreedingFlower(Block block, int meta) {
-		return BeePlantRegistry.isFlower(block, meta);
+	private boolean isBreedingFlower(Item item, int meta) {
+		return ItemTags.hasTag(item, meta, "minecraft:bee_food");
 	}
 
 	//TODO: Maybe fix [https://bugs.mojang.com/browse/MC-168267](MC-168267) and evaluate the contents of flower pots?
-	//Both flowers. For breeding the ItemBlock will have different metas, this is an issue for double plants so we handle them separately.
+	//For breeding the ItemBlock will have different metas, this is an issue for double plants so we handle them separately.
 	public static boolean isValidFlower(World world, int x, int y, int z) {
 		Block block = world.getBlock(x, y, z);
 		int meta = world.getBlockMetadata(x, y, z);
-		if (block instanceof BlockDoublePlant && meta > 8) {
-			return BeePlantRegistry.isFlower(world.getBlock(x, y - 1, z), world.getBlockMetadata(x, y - 1, z));
+		if (block instanceof BlockDoublePlant && BlockDoublePlant.func_149887_c(meta)) {
+			return BlockTags.hasTag(
+					world.getBlock(x, y - 1, z), world.getBlockMetadata(x, y - 1, z), "minecraft:bee_attractive");
 		}
-		return BeePlantRegistry.isFlower(block, meta);
+		return BlockTags.hasTag(block, meta, "minecraft:bee_attractive");
 	}
 
 	public BlockPos getFlowerPos() {
@@ -660,7 +664,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 
 	@Override
 	public boolean isBreedingItem(ItemStack stack) {
-		return isBreedingFlower(Block.getBlockFromItem(stack.getItem()), stack.getItemDamage());
+		return isBreedingFlower(stack.getItem(), stack.getItemDamage());
 	}
 
 	/**
@@ -681,12 +685,12 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.bee.hurt";
+		return Tags.MC_ASSET_VER + ":entity.bee.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.bee.death";
+		return Tags.MC_ASSET_VER + ":entity.bee.death";
 	}
 
 	@Override
@@ -772,7 +776,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 		return getDataWatcher().getWatchableObjectByte(NO_GRAVITY) == 1;
 	}
 
-	class AngerGoal extends EntityAIHurtByTarget {
+	static class AngerGoal extends EntityAIHurtByTarget {
 		AngerGoal(EntityBee beeIn) {
 			super(beeIn, true);
 		}
@@ -1096,11 +1100,21 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 					int y = (int) posY - i;
 					int z = (int) posZ;
 					Block block = worldObj.getBlock(x, y, z);
-					if (BeePlantRegistry.isCrop(block) && ((IGrowable) block).func_149851_a/*canFertilize*/(worldObj, x, y, z, false) && ((IGrowable) block).func_149852_a/*shouldFertilize*/(worldObj, worldObj.rand, x, y, z)) {
-						//BlockCrops, BlockStem and BlockBerryBush should use the next meta for growth stage. We can change this later if incrementing the meta doesn't work with mod crops.
-						//For now we'll just increment instead of using the IGrowable grow event, since that often adds several growth stages.
-						worldObj.setBlockMetadataWithNotify(x, y, z, worldObj.getBlockMetadata(x, y, z) + 1, 2);
-						addCropCounter();
+					if(BlockTags.hasTag(block, worldObj.getBlockMetadata(x, y, z), "minecraft:bee_growables")) {
+						if (block instanceof IBeeGrowable beeGrowable) {
+							if(beeGrowable.canBeeGrow(worldObj, worldObj.rand, x, y, z)) {
+								beeGrowable.onBeeGrow(worldObj, worldObj.rand, x, y, z);
+								addCropCounter();
+							}
+						} else if (block instanceof IGrowable growable
+								&& growable.func_149851_a/*canFertilize*/(worldObj, x, y, z, false)
+								&& growable.func_149852_a/*shouldFertilize*/(worldObj, worldObj.rand, x, y, z)) {
+							//BlockCrops, BlockStem and BlockBerryBush should use the next meta for growth stage.
+							// We can change this later if incrementing the meta doesn't work with mod crops.
+							//For now we'll just increment instead of using the IGrowable grow event, since that often adds several growth stages, when we only want one.
+							worldObj.setBlockMetadataWithNotify(x, y, z, worldObj.getBlockMetadata(x, y, z) + 1, 2);
+							addCropCounter();
+						}
 					}
 				}
 			}
@@ -1247,7 +1261,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 						++this.pollinationTicks;
 						if (EntityBee.this.rand.nextFloat() < 0.05F && this.pollinationTicks > this.lastPollinationTick + 60) {
 							this.lastPollinationTick = this.pollinationTicks;
-							EntityBee.this.playSound(Reference.MCAssetVer + ":entity.bee.pollinate", 1.0F, 1.0F);
+							EntityBee.this.playSound(Tags.MC_ASSET_VER + ":entity.bee.pollinate", 1.0F, 1.0F);
 						}
 					}
 				}
@@ -1376,7 +1390,7 @@ public class EntityBee extends EntityAnimal implements INoGravityEntity {
 					return false;
 				} else {
 					ItemStack itemstack = this.temptingPlayer.getCurrentEquippedItem();
-					return itemstack != null && isBreedingFlower(Block.getBlockFromItem(itemstack.getItem()), itemstack.getItemDamage());
+					return itemstack != null && isBreedingFlower(itemstack.getItem(), itemstack.getItemDamage());
 				}
 			}
 		}

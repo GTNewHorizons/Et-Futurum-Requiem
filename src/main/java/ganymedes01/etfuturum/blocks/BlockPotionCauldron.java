@@ -3,11 +3,11 @@ package ganymedes01.etfuturum.blocks;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack.GrayscaleType;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronColoredWater;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronPotion;
@@ -193,7 +193,7 @@ public class BlockPotionCauldron extends BlockCauldronTileEntity {
 				float b = (float) (color & 255) / 255.0F;
 				float liquidLevel = y + getRenderLiquidLevel(world.getBlockMetadata(x, y, z) + 1);
 				if (ConfigSounds.fluidInteract) {
-					world.playSoundEffect(x + 0.5D, liquidLevel, z + 0.5D, Reference.MCAssetVer + ":item.bottle." + (filling ? "fill" : "empty"), 1, 1);
+					world.playSoundEffect(x + 0.5D, liquidLevel, z + 0.5D, Tags.MC_ASSET_VER + ":item.bottle." + (filling ? "fill" : "empty"), 1, 1);
 				}
 				for (int i = 0; i < world.rand.nextInt(4) + 4; i++) {
 					world.spawnParticle("mobSpell", this.getParticleXYCoord(x, world.rand), liquidLevel, this.getParticleXYCoord(z, world.rand), r, g, b);

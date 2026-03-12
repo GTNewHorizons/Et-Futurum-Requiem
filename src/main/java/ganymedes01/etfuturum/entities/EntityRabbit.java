@@ -1,9 +1,9 @@
 package ganymedes01.etfuturum.entities;
 
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
 import ganymedes01.etfuturum.entities.ai.EntityAIMoveToBlock;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCarrot;
 import net.minecraft.entity.EntityAgeable;
@@ -252,22 +252,22 @@ public class EntityRabbit extends EntityAnimal {
 	}
 
 	protected String getJumpingSound() {
-		return Reference.MCAssetVer + ":entity.rabbit.jump";
+		return Tags.MC_ASSET_VER + ":entity.rabbit.jump";
 	}
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.rabbit.ambient";
+		return Tags.MC_ASSET_VER + ":entity.rabbit.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.rabbit.hurt";
+		return Tags.MC_ASSET_VER + ":entity.rabbit.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.rabbit.death";
+		return Tags.MC_ASSET_VER + ":entity.rabbit.death";
 	}
 
 	@Override

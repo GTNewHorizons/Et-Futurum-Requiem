@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.core.utils;
 
 import cpw.mods.fml.common.FMLLog;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.lib.Reference;
 import org.apache.logging.log4j.Level;
 
@@ -9,7 +10,7 @@ public class Logger {
 	 * Taken from Village Names with permission from AstroTibs
 	 */
 	public static void log(Level logLevel, Object object) {
-		FMLLog.log(Reference.MOD_NAME, logLevel, String.valueOf(object));
+		FMLLog.log(Tags.MOD_NAME, logLevel, String.valueOf(object));
 	}
 
 	public static void all(Object object) {

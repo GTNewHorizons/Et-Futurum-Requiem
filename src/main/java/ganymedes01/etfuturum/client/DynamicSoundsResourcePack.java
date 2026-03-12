@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
-import ganymedes01.etfuturum.lib.Reference;
 import makamys.mclib.json.JsonUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
@@ -123,12 +123,12 @@ public class DynamicSoundsResourcePack implements IResourcePack {
 		public JsonObject getJson() {
 			if (ConfigSounds.caveAmbience) {
 				addSoundsToCategory("ambient.cave.cave",
-						Reference.MCAssetVer + ":ambient/cave/cave14",
-						Reference.MCAssetVer + ":ambient/cave/cave15",
-						Reference.MCAssetVer + ":ambient/cave/cave16",
-						Reference.MCAssetVer + ":ambient/cave/cave17",
-						Reference.MCAssetVer + ":ambient/cave/cave18",
-						Reference.MCAssetVer + ":ambient/cave/cave19");
+						Tags.MC_ASSET_VER + ":ambient/cave/cave14",
+						Tags.MC_ASSET_VER + ":ambient/cave/cave15",
+						Tags.MC_ASSET_VER + ":ambient/cave/cave16",
+						Tags.MC_ASSET_VER + ":ambient/cave/cave17",
+						Tags.MC_ASSET_VER + ":ambient/cave/cave18",
+						Tags.MC_ASSET_VER + ":ambient/cave/cave19");
 			}
 			return rootObject;
 		}

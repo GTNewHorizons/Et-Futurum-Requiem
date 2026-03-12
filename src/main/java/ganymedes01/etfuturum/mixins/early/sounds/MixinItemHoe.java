@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemHoe;
 import net.minecraft.world.World;
@@ -13,6 +13,6 @@ public abstract class MixinItemHoe extends Item {
 
 	@Redirect(method = "onItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSoundEffect(DDDLjava/lang/String;FF)V"))
 	private void overwriteSound(World world, double x, double y, double z, String string, float volume, float pitch) {
-		world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.hoe.till", 1.0F, 1.0F);
+		world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.hoe.till", 1.0F, 1.0F);
 	}
 }

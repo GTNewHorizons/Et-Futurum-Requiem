@@ -2,7 +2,6 @@ package ganymedes01.etfuturum.blocks;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.api.HoeRegistry;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -27,7 +26,6 @@ public class BlockTarget extends BaseBlock {
 		setStepSound(soundTypeGrass);
 		setHardness(0.5F);
 		setResistance(0.5F);
-		HoeRegistry.addToHoeArray(this);
 	}
 
 	@Override

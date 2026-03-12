@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.entities;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.monster.EntityZombie;
@@ -83,17 +83,17 @@ public class EntityZombieVillager extends EntityZombie {
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.zombie_villager.ambient";
+		return Tags.MC_ASSET_VER + ":entity.zombie_villager.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.zombie_villager.hurt";
+		return Tags.MC_ASSET_VER + ":entity.zombie_villager.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.zombie_villager.death";
+		return Tags.MC_ASSET_VER + ":entity.zombie_villager.death";
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class EntityZombieVillager extends EntityZombie {
 	 */
 	@Override
 	protected void func_145780_a(int x, int y, int z, Block blockIn) {
-		this.playSound(Reference.MCAssetVer + ":entity.zombie_villager.step", 0.15F, 1.0F);
+		this.playSound(Tags.MC_ASSET_VER + ":entity.zombie_villager.step", 0.15F, 1.0F);
 	}
 
 	@Override
