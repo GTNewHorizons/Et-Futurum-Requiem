@@ -27,6 +27,9 @@ public class EtFuturumLateMixins implements ILateMixinLoader {
 			if (loadedMods.contains("appliedenergistics2")) {
 				mixins.add("spectator.MixinPacketInventoryAction");
 			}
+			if (loadedMods.contains("TConstruct")) {
+				mixins.add("spectator.MixinArmorProxyClientTConstruct");
+			}
 		}
 
 		return mixins;
