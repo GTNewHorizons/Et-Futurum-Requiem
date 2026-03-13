@@ -66,6 +66,10 @@ dependencies {
         transitive = false
     }
 
+    compileOnly("com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH") {
+        transitive = false
+    }
+
     shadowImplementation('com.github.makamys:MCLib:0.3.7.7') {
         exclude group: "codechicken"
     }
