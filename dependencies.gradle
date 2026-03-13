@@ -65,6 +65,12 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:lwjgl3ify:2.1.17:api") {
         transitive = false
     }
+<<<<<<< Updated upstream
+=======
+    compileOnly("com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH") {
+        transitive = false
+    }
+>>>>>>> Stashed changes
 
     shadowImplementation('com.github.makamys:MCLib:0.3.7.7') {
         exclude group: "codechicken"
