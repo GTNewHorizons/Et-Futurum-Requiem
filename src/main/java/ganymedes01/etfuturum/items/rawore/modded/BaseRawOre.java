@@ -4,25 +4,27 @@ import ganymedes01.etfuturum.items.BaseItem;
 import ganymedes01.etfuturum.lib.Reference;
 
 public class BaseRawOre extends BaseItem {
-	private final String subfolder;
 
-	public BaseRawOre(String subfolder, String name) {
-		this.subfolder = subfolder;
-		setNames("raw_" + name);
-	}
+    private final String subfolder;
 
-	@Override
-	public String getTextureSubfolder() {
-		return subfolder;
-	}
+    public BaseRawOre(String subfolder, String name) {
+        this.subfolder = subfolder;
+        setNames("raw_" + name);
+    }
 
-	@Override
-	public String getTextureDomain() {
-		return Reference.MOD_ID;
-	}
+    @Override
+    public String getTextureSubfolder() {
+        return subfolder;
+    }
 
-	@Override
-	public String getNameDomain() {
-		return super.getNameDomain() + (getTextureSubfolder().isEmpty() ? "" : (super.getNameDomain().isEmpty() ? "" : ".") + getTextureSubfolder());
-	}
+    @Override
+    public String getTextureDomain() {
+        return Reference.MOD_ID;
+    }
+
+    @Override
+    public String getNameDomain() {
+        return super.getNameDomain() + (getTextureSubfolder().isEmpty() ? ""
+            : (super.getNameDomain().isEmpty() ? "" : ".") + getTextureSubfolder());
+    }
 }

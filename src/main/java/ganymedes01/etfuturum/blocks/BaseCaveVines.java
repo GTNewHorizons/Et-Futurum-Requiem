@@ -1,10 +1,7 @@
 package ganymedes01.etfuturum.blocks;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.ModItems;
-import ganymedes01.etfuturum.core.utils.Utils;
+import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -22,83 +19,78 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import java.util.Random;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.core.utils.Utils;
 
-public class BaseCaveVines extends Block implements IGrowable
-{
+public class BaseCaveVines extends Block implements IGrowable {
+
     private final IIcon[] iicons = new IIcon[2];
     private final String[] iconNames;
 
-    public BaseCaveVines(String[] iconNames)
-    {
+    public BaseCaveVines(String[] iconNames) {
         super(Material.vine);
         this.setStepSound(soundTypeGrass)
-                .setHardness(0.2F)
-                .setBlockName(Utils.getUnlocalisedName("cave_vines"))
-                .setBlockTextureName("cave_vines")
-                .setBlockBounds(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F);
+            .setHardness(0.2F)
+            .setBlockName(Utils.getUnlocalisedName("cave_vines"))
+            .setBlockTextureName("cave_vines")
+            .setBlockBounds(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F);
         this.iconNames = iconNames;
     }
 
     @SideOnly(Side.CLIENT)
     @Override
-    public IIcon getIcon(int side, int meta)
-    {
+    public IIcon getIcon(int side, int meta) {
         return iicons[meta];
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister reg) {
-        for (int i = 0; i < iconNames.length; i++)
-        {
+        for (int i = 0; i < iconNames.length; i++) {
             iicons[i] = reg.registerIcon(iconNames[i]);
         }
     }
 
     @Override
-    public int getRenderType()
-    {
+    public int getRenderType() {
         return 1;
     }
 
     @Override
-    public boolean isOpaqueCube()
-    {
+    public boolean isOpaqueCube() {
         return false;
     }
 
     @Override
-    public boolean renderAsNormalBlock()
-    {
+    public boolean renderAsNormalBlock() {
         return false;
     }
 
     @Override
-    public boolean canBlockStay(World worldIn, int x, int y, int z)
-    {
-        return (worldIn.getBlock(x, y + 1, z) instanceof BlockCaveVinesPlant) || worldIn.isSideSolid(x, y + 1, z, ForgeDirection.DOWN);
+    public boolean canBlockStay(World worldIn, int x, int y, int z) {
+        return (worldIn.getBlock(x, y + 1, z) instanceof BlockCaveVinesPlant)
+            || worldIn.isSideSolid(x, y + 1, z, ForgeDirection.DOWN);
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player)
-    {
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
         return getPickBlock(target, world, x, y, z);
     }
-    
+
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z)
-    {
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         return ModItems.GLOW_BERRIES_ITEM.newItemStack();
     }
-    
-    protected boolean onBlockActivatedShared(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-        if (world.getBlockMetadata(x, y, z) == 1)
-        {
+
+    protected boolean onBlockActivatedShared(World world, int x, int y, int z, EntityPlayer player, int side,
+        float hitX, float hitY, float hitZ) {
+        if (world.getBlockMetadata(x, y, z) == 1) {
             world.setBlockMetadataWithNotify(x, y, z, 0, 3);
             world.updateLightByType(EnumSkyBlock.Block, x, y, z);
-            if (!world.isRemote)
-            {
+            if (!world.isRemote) {
                 world.spawnEntityInWorld(new EntityItem(world, x, y, z, ModItems.GLOW_BERRIES_ITEM.newItemStack(1)));
             }
             return true;
@@ -107,19 +99,15 @@ public class BaseCaveVines extends Block implements IGrowable
     }
 
     @Override
-    public void onNeighborBlockChange(World worldIn, int x, int y, int z, Block neighbor)
-    {
-        if (!canBlockStay(worldIn, x, y, z))
-        {
-            if (!worldIn.isRemote)
-            {
+    public void onNeighborBlockChange(World worldIn, int x, int y, int z, Block neighbor) {
+        if (!canBlockStay(worldIn, x, y, z)) {
+            if (!worldIn.isRemote) {
                 worldIn.playAuxSFX(2001, x, y, z, Block.getIdFromBlock(this));
             }
             worldIn.setBlockToAir(x, y, z);
-        }
-        else if (!(worldIn.getBlock(x, y - 1, z) instanceof BaseCaveVines))
-        {
-            worldIn.setBlock(x, y, z, ModBlocks.CAVE_VINE.get(), worldIn.getBlockMetadata(x, y, z), 3); // set the meta to the head
+        } else if (!(worldIn.getBlock(x, y - 1, z) instanceof BaseCaveVines)) {
+            worldIn.setBlock(x, y, z, ModBlocks.CAVE_VINE.get(), worldIn.getBlockMetadata(x, y, z), 3); // set the meta
+                                                                                                        // to the head
         }
     }
 
@@ -165,8 +153,7 @@ public class BaseCaveVines extends Block implements IGrowable
         return 0;
     }
 
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z)
-    {
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z) {
         return null;
     }
 
@@ -174,12 +161,10 @@ public class BaseCaveVines extends Block implements IGrowable
     public boolean isLadder(IBlockAccess world, int x, int y, int z, EntityLivingBase entity) {
         return true;
     }
-    
+
     @Override
-    public Item getItemDropped(int meta, Random random, int fortune)
-    {
-        if (meta == 1)
-        {
+    public Item getItemDropped(int meta, Random random, int fortune) {
+        if (meta == 1) {
             return ModItems.GLOW_BERRIES_ITEM.get();
         }
         return null;

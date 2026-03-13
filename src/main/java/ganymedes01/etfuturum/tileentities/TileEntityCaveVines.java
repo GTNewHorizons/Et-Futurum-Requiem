@@ -1,39 +1,35 @@
 package ganymedes01.etfuturum.tileentities;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 
 import java.util.Random;
 
-public class TileEntityCaveVines extends TileEntity
-{
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+
+public class TileEntityCaveVines extends TileEntity {
+
     private int maxLength;
     private boolean tipSheared = false;
 
-    public TileEntityCaveVines()
-    {
+    public TileEntityCaveVines() {
         Random rand = new Random();
 
         maxLength = rand.nextInt(26) + 2;
     }
 
-    public int getMaxLength()
-    {
+    public int getMaxLength() {
         return maxLength;
     }
-    public void setMaxLength(int length)
-    {
+
+    public void setMaxLength(int length) {
         maxLength = length;
         this.markDirty();
     }
-    public boolean getTipSheared()
-    {
+
+    public boolean getTipSheared() {
         return tipSheared;
     }
-    public void setTipSheared(boolean value)
-    {
+
+    public void setTipSheared(boolean value) {
         tipSheared = value;
         this.markDirty();
     }
@@ -54,8 +50,7 @@ public class TileEntityCaveVines extends TileEntity
     }
 
     @Override
-    public boolean canUpdate()
-    {
+    public boolean canUpdate() {
         return false;
     }
 }

@@ -10,34 +10,35 @@ import java.util.Random;
  */
 public class WeightedRandomList<T> {
 
-	private class Entry {
-		double accumulatedWeight;
-		T object;
-	}
+    private class Entry {
 
-	private final List<Entry> entries = new ArrayList<>();
-	private double accumulatedWeight;
+        double accumulatedWeight;
+        T object;
+    }
 
-	public void addEntry(T object, double weight) {
-		accumulatedWeight += weight;
-		Entry e = new Entry();
-		e.object = object;
-		e.accumulatedWeight = accumulatedWeight;
-		entries.add(e);
-	}
+    private final List<Entry> entries = new ArrayList<>();
+    private double accumulatedWeight;
 
-	public T getRandom(Random rand) {
-		if (entries.size() == 1) {
-			return entries.get(0).object;
-		}
+    public void addEntry(T object, double weight) {
+        accumulatedWeight += weight;
+        Entry e = new Entry();
+        e.object = object;
+        e.accumulatedWeight = accumulatedWeight;
+        entries.add(e);
+    }
 
-		double r = rand.nextDouble() * accumulatedWeight;
+    public T getRandom(Random rand) {
+        if (entries.size() == 1) {
+            return entries.get(0).object;
+        }
 
-		for (Entry entry : entries) {
-			if (entry.accumulatedWeight >= r) {
-				return entry.object;
-			}
-		}
-		return entries.get(entries.size() - 1).object;
-	}
+        double r = rand.nextDouble() * accumulatedWeight;
+
+        for (Entry entry : entries) {
+            if (entry.accumulatedWeight >= r) {
+                return entry.object;
+            }
+        }
+        return entries.get(entries.size() - 1).object;
+    }
 }

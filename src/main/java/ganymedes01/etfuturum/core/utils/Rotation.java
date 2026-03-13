@@ -4,148 +4,150 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public enum Rotation {
-	NONE("rotate_0"),//North facing
-	CLOCKWISE_90("rotate_90"),//East
-	CLOCKWISE_180("rotate_180"),//South
-	COUNTERCLOCKWISE_90("rotate_270");//West
 
-	private final String name;
-	public static final Rotation[] VALUES = values();
-	private static final String[] ROTATION_NAMES = new String[VALUES.length];
+    NONE("rotate_0"), // North facing
+    CLOCKWISE_90("rotate_90"), // East
+    CLOCKWISE_180("rotate_180"), // South
+    COUNTERCLOCKWISE_90("rotate_270");// West
 
-	static {
-		int i = 0;
-		for (Rotation rotation : values()) {
-			ROTATION_NAMES[i++] = rotation.name;
-		}
-	}
+    private final String name;
+    public static final Rotation[] VALUES = values();
+    private static final String[] ROTATION_NAMES = new String[VALUES.length];
 
-	Rotation(String nameIn) {
-		this.name = nameIn;
-	}
+    static {
+        int i = 0;
+        for (Rotation rotation : values()) {
+            ROTATION_NAMES[i++] = rotation.name;
+        }
+    }
 
-	public Rotation add(Rotation rotation) {
-		switch (rotation) {
-			case CLOCKWISE_180:
-				switch (this) {
-					case NONE:
-						return CLOCKWISE_180;
+    Rotation(String nameIn) {
+        this.name = nameIn;
+    }
 
-					case CLOCKWISE_90:
-						return COUNTERCLOCKWISE_90;
+    public Rotation add(Rotation rotation) {
+        switch (rotation) {
+            case CLOCKWISE_180:
+                switch (this) {
+                    case NONE:
+                        return CLOCKWISE_180;
 
-					case CLOCKWISE_180:
-						return NONE;
+                    case CLOCKWISE_90:
+                        return COUNTERCLOCKWISE_90;
 
-					case COUNTERCLOCKWISE_90:
-						return CLOCKWISE_90;
-				}
+                    case CLOCKWISE_180:
+                        return NONE;
 
-			case COUNTERCLOCKWISE_90:
-				switch (this) {
-					case NONE:
-						return COUNTERCLOCKWISE_90;
+                    case COUNTERCLOCKWISE_90:
+                        return CLOCKWISE_90;
+                }
 
-					case CLOCKWISE_90:
-						return NONE;
+            case COUNTERCLOCKWISE_90:
+                switch (this) {
+                    case NONE:
+                        return COUNTERCLOCKWISE_90;
 
-					case CLOCKWISE_180:
-						return CLOCKWISE_90;
+                    case CLOCKWISE_90:
+                        return NONE;
 
-					case COUNTERCLOCKWISE_90:
-						return CLOCKWISE_180;
-				}
+                    case CLOCKWISE_180:
+                        return CLOCKWISE_90;
 
-			case CLOCKWISE_90:
-				switch (this) {
-					case NONE:
-						return CLOCKWISE_90;
+                    case COUNTERCLOCKWISE_90:
+                        return CLOCKWISE_180;
+                }
 
-					case CLOCKWISE_90:
-						return CLOCKWISE_180;
+            case CLOCKWISE_90:
+                switch (this) {
+                    case NONE:
+                        return CLOCKWISE_90;
 
-					case CLOCKWISE_180:
-						return COUNTERCLOCKWISE_90;
+                    case CLOCKWISE_90:
+                        return CLOCKWISE_180;
 
-					case COUNTERCLOCKWISE_90:
-						return NONE;
-				}
+                    case CLOCKWISE_180:
+                        return COUNTERCLOCKWISE_90;
 
-			default:
-				return this;
-		}
-	}
+                    case COUNTERCLOCKWISE_90:
+                        return NONE;
+                }
 
-	public EnumFacing rotate(EnumFacing facing) {
-		if (facing.getFrontOffsetY() != 0) {
-			return facing;
-		}
-		switch (this) {
-			case CLOCKWISE_90:
-				return rotateY(facing);
+            default:
+                return this;
+        }
+    }
 
-			case CLOCKWISE_180:
-				return Utils.ENUM_FACING_VALUES[ForgeDirection.VALID_DIRECTIONS[facing.ordinal()].getOpposite().ordinal()];
+    public EnumFacing rotate(EnumFacing facing) {
+        if (facing.getFrontOffsetY() != 0) {
+            return facing;
+        }
+        switch (this) {
+            case CLOCKWISE_90:
+                return rotateY(facing);
 
-			case COUNTERCLOCKWISE_90:
-				return rotateYCCW(facing);
+            case CLOCKWISE_180:
+                return Utils.ENUM_FACING_VALUES[ForgeDirection.VALID_DIRECTIONS[facing.ordinal()].getOpposite()
+                    .ordinal()];
 
-			default:
-				return facing;
-		}
-	}
+            case COUNTERCLOCKWISE_90:
+                return rotateYCCW(facing);
 
-	public EnumFacing rotateY(EnumFacing facing) {
-		switch (facing) {
-			case NORTH:
-				return EnumFacing.EAST;
+            default:
+                return facing;
+        }
+    }
 
-			case EAST:
-				return EnumFacing.SOUTH;
+    public EnumFacing rotateY(EnumFacing facing) {
+        switch (facing) {
+            case NORTH:
+                return EnumFacing.EAST;
 
-			case SOUTH:
-				return EnumFacing.WEST;
+            case EAST:
+                return EnumFacing.SOUTH;
 
-			case WEST:
-				return EnumFacing.NORTH;
+            case SOUTH:
+                return EnumFacing.WEST;
 
-			default:
-				throw new IllegalStateException("Unable to get Y-rotated facing of " + this);
-		}
-	}
+            case WEST:
+                return EnumFacing.NORTH;
 
-	public EnumFacing rotateYCCW(EnumFacing facing) {
-		switch (facing) {
-			case NORTH:
-				return EnumFacing.WEST;
+            default:
+                throw new IllegalStateException("Unable to get Y-rotated facing of " + this);
+        }
+    }
 
-			case EAST:
-				return EnumFacing.NORTH;
+    public EnumFacing rotateYCCW(EnumFacing facing) {
+        switch (facing) {
+            case NORTH:
+                return EnumFacing.WEST;
 
-			case SOUTH:
-				return EnumFacing.EAST;
+            case EAST:
+                return EnumFacing.NORTH;
 
-			case WEST:
-				return EnumFacing.SOUTH;
+            case SOUTH:
+                return EnumFacing.EAST;
 
-			default:
-				throw new IllegalStateException("Unable to get CCW facing of " + this);
-		}
-	}
+            case WEST:
+                return EnumFacing.SOUTH;
 
-	public int rotate(int p_185833_1_, int p_185833_2_) {
-		switch (this) {
-			case CLOCKWISE_90:
-				return (p_185833_1_ + p_185833_2_ / 4) % p_185833_2_;
+            default:
+                throw new IllegalStateException("Unable to get CCW facing of " + this);
+        }
+    }
 
-			case CLOCKWISE_180:
-				return ((p_185833_1_ + p_185833_2_) / 2) % p_185833_2_;
+    public int rotate(int p_185833_1_, int p_185833_2_) {
+        switch (this) {
+            case CLOCKWISE_90:
+                return (p_185833_1_ + p_185833_2_ / 4) % p_185833_2_;
 
-			case COUNTERCLOCKWISE_90:
-				return (p_185833_1_ + p_185833_2_ * 3 / 4) % p_185833_2_;
+            case CLOCKWISE_180:
+                return ((p_185833_1_ + p_185833_2_) / 2) % p_185833_2_;
 
-			default:
-				return p_185833_1_;
-		}
-	}
+            case COUNTERCLOCKWISE_90:
+                return (p_185833_1_ + p_185833_2_ * 3 / 4) % p_185833_2_;
+
+            default:
+                return p_185833_1_;
+        }
+    }
 }

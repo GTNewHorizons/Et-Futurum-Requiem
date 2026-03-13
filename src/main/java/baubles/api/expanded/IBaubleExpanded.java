@@ -1,7 +1,8 @@
 package baubles.api.expanded;
 
-import baubles.api.IBauble;
 import net.minecraft.item.ItemStack;
+
+import baubles.api.IBauble;
 
 /**
  * This interface should be extended by items that can be worn in bauble slots.
@@ -11,11 +12,13 @@ import net.minecraft.item.ItemStack;
  */
 public interface IBaubleExpanded extends IBauble {
 
-	/**
-	 * This method returns the types of bauble slots this item can go into.
-	 * getBaubleType is generally ignored when using IBaubleExpanded, so it can return null unless you want backwards compatibility with official bauble builds.
-	 * Pre-registered slot types can be found in BaubleExpandedSlots, but it is possible to add more during pre-initialization.
-	 */
-	String[] getBaubleTypes(ItemStack itemstack);
+    /**
+     * This method returns the types of bauble slots this item can go into.
+     * getBaubleType is generally ignored when using IBaubleExpanded, so it can return null unless you want backwards
+     * compatibility with official bauble builds.
+     * Pre-registered slot types can be found in BaubleExpandedSlots, but it is possible to add more during
+     * pre-initialization.
+     */
+    String[] getBaubleTypes(ItemStack itemstack);
 
 }

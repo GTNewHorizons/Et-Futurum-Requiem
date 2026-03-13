@@ -1,13 +1,14 @@
 package ganymedes01.etfuturum.elytra;
 
 public interface IElytraPlayer extends ganymedes01.etfuturum.api.elytra.IElytraPlayer {
-	void etfu$setElytraFlying(boolean flag);
 
-	float etfu$getTicksElytraFlying();
+    void etfu$setElytraFlying(boolean flag);
 
-	boolean etfu$lastElytraFlying();
+    float etfu$getTicksElytraFlying();
 
-	void etfu$setLastElytraFlying(boolean flag);
+    boolean etfu$lastElytraFlying();
 
-	void tickElytra();
+    void etfu$setLastElytraFlying(boolean flag);
+
+    void tickElytra();
 }

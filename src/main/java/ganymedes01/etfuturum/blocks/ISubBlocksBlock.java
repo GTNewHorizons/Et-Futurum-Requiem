@@ -1,26 +1,27 @@
 package ganymedes01.etfuturum.blocks;
 
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
+import ganymedes01.etfuturum.lib.Reference;
+
 public interface ISubBlocksBlock {
 
-	IIcon[] getIcons();
+    IIcon[] getIcons();
 
-	String[] getTypes();
+    String[] getTypes();
 
-	String getNameFor(ItemStack stack);
+    String getNameFor(ItemStack stack);
 
-	default String getTextureDomain() {
-		return "";
-	}
+    default String getTextureDomain() {
+        return "";
+    }
 
-	default String getTextureSubfolder() {
-		return "";
-	}
+    default String getTextureSubfolder() {
+        return "";
+    }
 
-	default String getNameDomain() {
-		return Reference.MOD_ID;
-	}
+    default String getNameDomain() {
+        return Reference.MOD_ID;
+    }
 }

@@ -4,5 +4,5 @@ import net.minecraft.util.IIcon;
 
 public interface IFloatingParticleBlock {
 
-	IIcon getParticleName(int meta);
+    IIcon getParticleName(int meta);
 }

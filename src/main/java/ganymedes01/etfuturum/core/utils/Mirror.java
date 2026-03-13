@@ -1,84 +1,85 @@
 package ganymedes01.etfuturum.core.utils;
 
-
 import net.minecraft.util.EnumFacing;
 
 public enum Mirror {
-	NONE("no_mirror"),
-	LEFT_RIGHT("mirror_left_right"),
-	FRONT_BACK("mirror_front_back");
 
-	private final String name;
-	private static final String[] mirrorNames = new String[values().length];
+    NONE("no_mirror"),
+    LEFT_RIGHT("mirror_left_right"),
+    FRONT_BACK("mirror_front_back");
 
-	Mirror(String nameIn) {
-		this.name = nameIn;
-	}
+    private final String name;
+    private static final String[] mirrorNames = new String[values().length];
 
-	/**
-	 * Mirrors the given rotation like specified by this mirror. rotations start at 0 and go up to rotationCount-1. 0 is
-	 * front, rotationCount/2 is back.
-	 */
-	public int mirrorRotation(int rotationIn, int rotationCount) {
-		int i = rotationCount / 2;
-		int j = rotationIn > i ? rotationIn - rotationCount : rotationIn;
+    Mirror(String nameIn) {
+        this.name = nameIn;
+    }
 
-		switch (this) {
-			case LEFT_RIGHT:
-				return (rotationCount - j) % rotationCount;
+    /**
+     * Mirrors the given rotation like specified by this mirror. rotations start at 0 and go up to rotationCount-1. 0 is
+     * front, rotationCount/2 is back.
+     */
+    public int mirrorRotation(int rotationIn, int rotationCount) {
+        int i = rotationCount / 2;
+        int j = rotationIn > i ? rotationIn - rotationCount : rotationIn;
 
-			case FRONT_BACK:
-				return (i - j + rotationCount) % rotationCount;
+        switch (this) {
+            case LEFT_RIGHT:
+                return (rotationCount - j) % rotationCount;
 
-			default:
-				return rotationIn;
-		}
-	}
+            case FRONT_BACK:
+                return (i - j + rotationCount) % rotationCount;
 
-	/**
-	 * Determines the rotation that is equivalent to this mirror if the rotating object faces in the given direction
-	 */
-	public Rotation toRotation(EnumFacing facing) {
-		return (this != LEFT_RIGHT || facing.getFrontOffsetZ() == 0) && (this != FRONT_BACK || facing.getFrontOffsetX() == 0) ? Rotation.NONE : Rotation.CLOCKWISE_180;
-	}
+            default:
+                return rotationIn;
+        }
+    }
 
-	/**
-	 * Mirror the given facing according to this mirror
-	 */
-	public EnumFacing mirror(EnumFacing facing) {
-		switch (this) {
-			case LEFT_RIGHT:
-				if (facing == EnumFacing.WEST) {
-					return EnumFacing.EAST;
-				} else {
-					if (facing == EnumFacing.EAST) {
-						return EnumFacing.WEST;
-					}
+    /**
+     * Determines the rotation that is equivalent to this mirror if the rotating object faces in the given direction
+     */
+    public Rotation toRotation(EnumFacing facing) {
+        return (this != LEFT_RIGHT || facing.getFrontOffsetZ() == 0)
+            && (this != FRONT_BACK || facing.getFrontOffsetX() == 0) ? Rotation.NONE : Rotation.CLOCKWISE_180;
+    }
 
-					return facing;
-				}
+    /**
+     * Mirror the given facing according to this mirror
+     */
+    public EnumFacing mirror(EnumFacing facing) {
+        switch (this) {
+            case LEFT_RIGHT:
+                if (facing == EnumFacing.WEST) {
+                    return EnumFacing.EAST;
+                } else {
+                    if (facing == EnumFacing.EAST) {
+                        return EnumFacing.WEST;
+                    }
 
-			case FRONT_BACK:
-				if (facing == EnumFacing.NORTH) {
-					return EnumFacing.SOUTH;
-				} else {
-					if (facing == EnumFacing.SOUTH) {
-						return EnumFacing.NORTH;
-					}
+                    return facing;
+                }
 
-					return facing;
-				}
+            case FRONT_BACK:
+                if (facing == EnumFacing.NORTH) {
+                    return EnumFacing.SOUTH;
+                } else {
+                    if (facing == EnumFacing.SOUTH) {
+                        return EnumFacing.NORTH;
+                    }
 
-			default:
-				return facing;
-		}
-	}
+                    return facing;
+                }
 
-	static {
-		int i = 0;
+            default:
+                return facing;
+        }
+    }
 
-		for (Mirror mirror : values()) {
-			mirrorNames[i++] = mirror.name;
-		}
-	}
+    static {
+        int i = 0;
+
+        for (Mirror mirror : values()) {
+            mirrorNames[i++] = mirror.name;
+        }
+    }
 }

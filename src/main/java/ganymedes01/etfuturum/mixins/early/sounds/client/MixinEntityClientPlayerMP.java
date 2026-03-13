@@ -5,6 +5,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.Session;
 import net.minecraft.world.World;
+
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityClientPlayerMP.class)
@@ -18,25 +19,24 @@ import org.spongepowered.asm.mixin.Mixin;
  */
 public class MixinEntityClientPlayerMP extends EntityPlayerSP {
 
-	public MixinEntityClientPlayerMP(Minecraft p_i1238_1_, World p_i1238_2_, Session p_i1238_3_,
-									 int p_i1238_4_) {
-		super(p_i1238_1_, p_i1238_2_, p_i1238_3_, p_i1238_4_);
-	}
+    public MixinEntityClientPlayerMP(Minecraft p_i1238_1_, World p_i1238_2_, Session p_i1238_3_, int p_i1238_4_) {
+        super(p_i1238_1_, p_i1238_2_, p_i1238_3_, p_i1238_4_);
+    }
 
-	@Override
-	protected String getDeathSound() {
-		return "null";
-	}
+    @Override
+    protected String getDeathSound() {
+        return "null";
+    }
 
-	@Override
-	protected String getHurtSound() {
-		return "null";
-	}
+    @Override
+    protected String getHurtSound() {
+        return "null";
+    }
 
-	@Override
-	public void playSound(String name, float volume, float pitch) {
-		if (!name.equals("null")) {
-			super.playSound(name, volume, pitch);
-		}
-	}
+    @Override
+    public void playSound(String name, float volume, float pitch) {
+        if (!name.equals("null")) {
+            super.playSound(name, volume, pitch);
+        }
+    }
 }

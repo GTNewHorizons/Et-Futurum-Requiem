@@ -26,7 +26,7 @@ public class ExtendedEntityLookHelper extends EntityLookHelper {
         this.posX = entity.posX;
 
         if (entity instanceof EntityLivingBase) {
-            this.posY = entity.posY + (double)entity.getEyeHeight();
+            this.posY = entity.posY + (double) entity.getEyeHeight();
         } else {
             this.posY = (entity.boundingBox.minY + entity.boundingBox.maxY) / 2.0D;
         }
@@ -38,7 +38,8 @@ public class ExtendedEntityLookHelper extends EntityLookHelper {
     }
 
     @Override
-    public void setLookPosition(double p_75650_1_, double p_75650_3_, double p_75650_5_, float p_75650_7_, float p_75650_8_) {
+    public void setLookPosition(double p_75650_1_, double p_75650_3_, double p_75650_5_, float p_75650_7_,
+        float p_75650_8_) {
         this.posX = p_75650_1_;
         this.posY = p_75650_3_;
         this.posZ = p_75650_5_;
@@ -52,14 +53,14 @@ public class ExtendedEntityLookHelper extends EntityLookHelper {
      */
     @Override
     public void onUpdateLook() {
-        if(shouldStayHorizontal()) {
+        if (shouldStayHorizontal()) {
             this.entity.rotationPitch = 0.0F;
         }
 
         if (this.isLooking) {
             this.isLooking = false;
             double d0 = this.posX - this.entity.posX;
-            double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
+            double d1 = this.posY - (this.entity.posY + (double) this.entity.getEyeHeight());
             double d2 = this.posZ - this.entity.posZ;
             double d3 = MathHelper.sqrt_double(d0 * d0 + d2 * d2);
             float f = (float) (Math.atan2(d2, d0) * 180.0D / Math.PI) - 90.0F;
@@ -67,12 +68,14 @@ public class ExtendedEntityLookHelper extends EntityLookHelper {
             this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, f1, this.deltaLookPitch);
             this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, f, this.deltaLookYaw);
         } else {
-            this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, this.entity.renderYawOffset, 10.0F);
+            this.entity.rotationYawHead = this
+                .updateRotation(this.entity.rotationYawHead, this.entity.renderYawOffset, 10.0F);
         }
 
         float f2 = MathHelper.wrapAngleTo180_float(this.entity.rotationYawHead - this.entity.renderYawOffset);
 
-        if (!this.entity.getNavigator().noPath()) {
+        if (!this.entity.getNavigator()
+            .noPath()) {
             if (f2 < -75.0F) {
                 this.entity.rotationYawHead = this.entity.renderYawOffset - 75.0F;
             }

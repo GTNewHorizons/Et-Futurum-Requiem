@@ -10,18 +10,19 @@ import net.minecraft.util.IIcon;
  * Currently unused, was originally made for bubble columns before I realized that BE animates some of them in reverse.
  */
 public class IconFlippedFixed extends IconFlipped {
-	//Too lazy to AT the super fields atm
-	private final IIcon baseIcon;
-	private final boolean flipV;
 
-	public IconFlippedFixed(IIcon p_i1560_1_, boolean p_i1560_2_, boolean p_i1560_3_) {
-		super(p_i1560_1_, p_i1560_2_, p_i1560_3_);
-		this.baseIcon = p_i1560_1_;
-		this.flipV = p_i1560_3_;
-	}
+    // Too lazy to AT the super fields atm
+    private final IIcon baseIcon;
+    private final boolean flipV;
 
-	@Override
-	public float getMinV() {
-		return this.flipV ? this.baseIcon.getMaxV() : this.baseIcon.getMinV();
-	}
+    public IconFlippedFixed(IIcon p_i1560_1_, boolean p_i1560_2_, boolean p_i1560_3_) {
+        super(p_i1560_1_, p_i1560_2_, p_i1560_3_);
+        this.baseIcon = p_i1560_1_;
+        this.flipV = p_i1560_3_;
+    }
+
+    @Override
+    public float getMinV() {
+        return this.flipV ? this.baseIcon.getMaxV() : this.baseIcon.getMinV();
+    }
 }

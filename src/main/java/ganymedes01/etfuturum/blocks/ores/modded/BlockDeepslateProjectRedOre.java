@@ -1,29 +1,31 @@
 package ganymedes01.etfuturum.blocks.ores.modded;
 
-import ganymedes01.etfuturum.blocks.ores.BaseSubtypesDeepslateOre;
-import ganymedes01.etfuturum.compat.ExternalContent;
 import net.minecraft.block.Block;
 
+import ganymedes01.etfuturum.blocks.ores.BaseSubtypesDeepslateOre;
+import ganymedes01.etfuturum.compat.ExternalContent;
+
 public class BlockDeepslateProjectRedOre extends BaseSubtypesDeepslateOre {
-	public BlockDeepslateProjectRedOre() {
-		super("deepslate_ruby_ore", "deepslate_sapphire_ore", "deepslate_peridot_ore", "deepslate_electrotine_ore");
-	}
 
-	@Override
-	public String getTextureSubfolder() {
-		return "projectred";
-	}
+    public BlockDeepslateProjectRedOre() {
+        super("deepslate_ruby_ore", "deepslate_sapphire_ore", "deepslate_peridot_ore", "deepslate_electrotine_ore");
+    }
 
-	@Override
-	public Block getBase(int meta) {
-		return ExternalContent.Blocks.PROJECT_RED_ORE.get();
-	}
+    @Override
+    public String getTextureSubfolder() {
+        return "projectred";
+    }
 
-	@Override
-	public int getBaseMeta(int meta) {
-		if (meta == 3) {
-			return 6;
-		}
-		return meta;
-	}
+    @Override
+    public Block getBase(int meta) {
+        return ExternalContent.Blocks.PROJECT_RED_ORE.get();
+    }
+
+    @Override
+    public int getBaseMeta(int meta) {
+        if (meta == 3) {
+            return 6;
+        }
+        return meta;
+    }
 }

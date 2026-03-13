@@ -1,10 +1,15 @@
 package ganymedes01.etfuturum.compat;
 
+import java.util.List;
+
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.oredict.OreDictionary;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
-
 import ganymedes01.etfuturum.compat.cthandlers.CTBlastFurnace;
 import ganymedes01.etfuturum.compat.cthandlers.CTBrewingFuels;
 import ganymedes01.etfuturum.compat.cthandlers.CTComposting;
@@ -23,95 +28,100 @@ import minetweaker.api.liquid.ILiquidStack;
 import minetweaker.api.minecraft.MineTweakerMC;
 import minetweaker.api.oredict.IOreDictEntry;
 import minetweaker.util.IEventHandler;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.oredict.OreDictionary;
-
-import java.util.List;
 
 public class CompatCraftTweaker {
 
-	public static void onPostInit() {
-		MineTweakerAPI.registerClass(CTBlastFurnace.class);
-		MineTweakerAPI.registerClass(CTSmoker.class);
-		MineTweakerAPI.registerClass(CTSmithingTable.class);
-		MineTweakerAPI.registerClass(CTBrewingFuels.class);
-		MineTweakerAPI.registerClass(CTEnchantingFuels.class);
-		MineTweakerAPI.registerClass(CTComposting.class);
+    public static void onPostInit() {
+        MineTweakerAPI.registerClass(CTBlastFurnace.class);
+        MineTweakerAPI.registerClass(CTSmoker.class);
+        MineTweakerAPI.registerClass(CTSmithingTable.class);
+        MineTweakerAPI.registerClass(CTBrewingFuels.class);
+        MineTweakerAPI.registerClass(CTEnchantingFuels.class);
+        MineTweakerAPI.registerClass(CTComposting.class);
 
-		MineTweakerImplementationAPI.onReloadEvent(new ReloadEventHandler());
-		MineTweakerImplementationAPI.onPostReload(new PostReloadEventHandler());
-	}
+        MineTweakerImplementationAPI.onReloadEvent(new ReloadEventHandler());
+        MineTweakerImplementationAPI.onPostReload(new PostReloadEventHandler());
+    }
 
-	public static Object toObject(IIngredient iStack) {
-		if (iStack == null)
-			return null;
-		else {
-			if (iStack instanceof IOreDictEntry)
-				return ((IOreDictEntry) iStack).getName();
-			else if (iStack instanceof IItemStack)
-				return MineTweakerMC.getItemStack((IItemStack) iStack);
-			else if (iStack instanceof IngredientStack) {
-				IIngredient ingr = ReflectionHelper.getPrivateValue(IngredientStack.class, (IngredientStack) iStack, "ingredient");
-				return toObject(ingr);
-			} else
-				return null;
-		}
-	}
+    public static Object toObject(IIngredient iStack) {
+        if (iStack == null) return null;
+        else {
+            if (iStack instanceof IOreDictEntry) return ((IOreDictEntry) iStack).getName();
+            else if (iStack instanceof IItemStack) return MineTweakerMC.getItemStack((IItemStack) iStack);
+            else if (iStack instanceof IngredientStack) {
+                IIngredient ingr = ReflectionHelper
+                    .getPrivateValue(IngredientStack.class, (IngredientStack) iStack, "ingredient");
+                return toObject(ingr);
+            } else return null;
+        }
+    }
 
-	public static FluidStack toFluidStack(ILiquidStack iStack) {
-		return MineTweakerMC.getLiquidStack(iStack);
-	}
+    public static FluidStack toFluidStack(ILiquidStack iStack) {
+        return MineTweakerMC.getLiquidStack(iStack);
+    }
 
-	public static ItemStack getItemStack(IItemStack item) {
-		return MineTweakerMC.getItemStack(item);
-	}
+    public static ItemStack getItemStack(IItemStack item) {
+        return MineTweakerMC.getItemStack(item);
+    }
 
-	public static ItemStack[] getItemStacks(List<IItemStack> item) {
-		return MineTweakerMC.getItemStacks(item);
-	}
+    public static ItemStack[] getItemStacks(List<IItemStack> item) {
+        return MineTweakerMC.getItemStacks(item);
+    }
 
-	public static Object getInternal(IIngredient pattern) {
-		Object internal = pattern.getInternal();
-		if (internal instanceof String || internal instanceof ItemStack) {
-			return internal;
-		}
-		return null;
-	}
+    public static Object getInternal(IIngredient pattern) {
+        Object internal = pattern.getInternal();
+        if (internal instanceof String || internal instanceof ItemStack) {
+            return internal;
+        }
+        return null;
+    }
 
-	public static class ReloadEventHandler implements IEventHandler<MineTweakerImplementationAPI.ReloadEvent> {
-		@Override
-		public void handle(MineTweakerImplementationAPI.ReloadEvent event) {
-			ModRecipes.registerGeneralDeepslateOres();
+    public static class ReloadEventHandler implements IEventHandler<MineTweakerImplementationAPI.ReloadEvent> {
 
-			ModRecipes.unregisterGeneralRawOres();
-			ModRecipes.registerGeneralRawOres();
+        @Override
+        public void handle(MineTweakerImplementationAPI.ReloadEvent event) {
+            ModRecipes.registerGeneralDeepslateOres();
 
-			BlastFurnaceRecipes.smelting().setReloadingCT(true);
-			BlastFurnaceRecipes.smelting().clearLists();
-			SmokerRecipes.smelting().setReloadingCT(true);
-			SmokerRecipes.smelting().clearLists();
-		}
-	}
+            ModRecipes.unregisterGeneralRawOres();
+            ModRecipes.registerGeneralRawOres();
 
-	/**
-	 * Rebakes the Ore Dictionary, then refreshes recipes and ensures recipe lists are sorted.
-	 */
-	public static class PostReloadEventHandler implements IEventHandler<MineTweakerImplementationAPI.ReloadEvent> {
-		@Override
-		public void handle(MineTweakerImplementationAPI.ReloadEvent event) {
-			// CraftTweaker doesn't rebake OreDictionary.stackToId when you /mt reload or when the client connects to a server...
-			// If your scripts change ore dicts, this can lead to issues where OreDictionary.getOreIDs(ItemStack) returns old unchanged ore ids.
-			// Technically, I could avoid this issue by avoiding OreDictionary.stackToId and only using methods that involve OreDictionary.idToStack.
-			// However, that would be slightly slower every time I want to check a stack's IDs. Rebaking the map means it's slower just once, and other mods may appreciate it.
-			if (Loader.isModLoaded("NotEnoughItems") && FMLCommonHandler.instance().getSide() != Side.SERVER) {
-				NEIEtFuturumConfig.clearCaches();
-			}
+            BlastFurnaceRecipes.smelting()
+                .setReloadingCT(true);
+            BlastFurnaceRecipes.smelting()
+                .clearLists();
+            SmokerRecipes.smelting()
+                .setReloadingCT(true);
+            SmokerRecipes.smelting()
+                .clearLists();
+        }
+    }
 
-			OreDictionary.rebakeMap();
+    /**
+     * Rebakes the Ore Dictionary, then refreshes recipes and ensures recipe lists are sorted.
+     */
+    public static class PostReloadEventHandler implements IEventHandler<MineTweakerImplementationAPI.ReloadEvent> {
 
-			BlastFurnaceRecipes.smelting().setReloadingCT(false);
-			SmokerRecipes.smelting().setReloadingCT(false);
-		}
-	}
+        @Override
+        public void handle(MineTweakerImplementationAPI.ReloadEvent event) {
+            // CraftTweaker doesn't rebake OreDictionary.stackToId when you /mt reload or when the client connects to a
+            // server...
+            // If your scripts change ore dicts, this can lead to issues where OreDictionary.getOreIDs(ItemStack)
+            // returns old unchanged ore ids.
+            // Technically, I could avoid this issue by avoiding OreDictionary.stackToId and only using methods that
+            // involve OreDictionary.idToStack.
+            // However, that would be slightly slower every time I want to check a stack's IDs. Rebaking the map means
+            // it's slower just once, and other mods may appreciate it.
+            if (Loader.isModLoaded("NotEnoughItems") && FMLCommonHandler.instance()
+                .getSide() != Side.SERVER) {
+                NEIEtFuturumConfig.clearCaches();
+            }
+
+            OreDictionary.rebakeMap();
+
+            BlastFurnaceRecipes.smelting()
+                .setReloadingCT(false);
+            SmokerRecipes.smelting()
+                .setReloadingCT(false);
+        }
+    }
 }

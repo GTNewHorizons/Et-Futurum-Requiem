@@ -1,21 +1,10 @@
 package ganymedes01.etfuturum.entities;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.ModItems;
-import ganymedes01.etfuturum.blocks.BlockBerryBush;
-import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
-import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
-import ganymedes01.etfuturum.core.handlers.ServerEventHandler;
-import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.core.utils.helpers.WeightedRandomItem;
-import ganymedes01.etfuturum.entities.ai.EntityAICustomAvoidEntity;
-import ganymedes01.etfuturum.entities.ai.EntityAICustomNearestAttackableTarget;
-import ganymedes01.etfuturum.entities.ai.EntityAIFleeSunExtended;
-import ganymedes01.etfuturum.entities.ai.ExtendedEntityLookHelper;
-import ganymedes01.etfuturum.entities.ai.TargetPredicate;
-import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Predicate;
+
 import net.minecraft.block.Block;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.enchantment.Enchantment;
@@ -65,10 +54,22 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Predicate;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.blocks.BlockBerryBush;
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.core.handlers.ServerEventHandler;
+import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
+import ganymedes01.etfuturum.core.utils.helpers.WeightedRandomItem;
+import ganymedes01.etfuturum.entities.ai.EntityAICustomAvoidEntity;
+import ganymedes01.etfuturum.entities.ai.EntityAICustomNearestAttackableTarget;
+import ganymedes01.etfuturum.entities.ai.EntityAIFleeSunExtended;
+import ganymedes01.etfuturum.entities.ai.ExtendedEntityLookHelper;
+import ganymedes01.etfuturum.entities.ai.TargetPredicate;
+import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.spectator.SpectatorMode;
 
 public class EntityFox extends EntityAnimal {
 
@@ -77,15 +78,14 @@ public class EntityFox extends EntityAnimal {
     private static final int TYPE = 20;
     private static final int FOX_FLAGS = 21;
 
-    private static final IEntitySelector PICKABLE_DROP_FILTER =
-            entity -> entity instanceof EntityItem item && item.delayBeforeCanPickup <= 0 && item.isEntityAlive();
-    private static final Predicate<EntityLivingBase> CHICKEN_AND_RABBIT_FILTER =
-            entity -> entity instanceof EntityChicken || entity instanceof EntityRabbit;
-    private static final Predicate<EntityLivingBase> NOTICEABLE_PLAYER_FILTER =
-            entity -> !(entity instanceof EntityPlayer player)
-                    || (!player.isSneaking() && !player.capabilities.isCreativeMode && !SpectatorMode.isSpectator(player));
-    private static final Predicate<EntityLivingBase> JUST_ATTACKED_SOMETHING_FILTER =
-            entity -> entity instanceof EntityLiving;
+    private static final IEntitySelector PICKABLE_DROP_FILTER = entity -> entity instanceof EntityItem item
+        && item.delayBeforeCanPickup <= 0
+        && item.isEntityAlive();
+    private static final Predicate<EntityLivingBase> CHICKEN_AND_RABBIT_FILTER = entity -> entity instanceof EntityChicken
+        || entity instanceof EntityRabbit;
+    private static final Predicate<EntityLivingBase> NOTICEABLE_PLAYER_FILTER = entity -> !(entity instanceof EntityPlayer player)
+        || (!player.isSneaking() && !player.capabilities.isCreativeMode && !SpectatorMode.isSpectator(player));
+    private static final Predicate<EntityLivingBase> JUST_ATTACKED_SOMETHING_FILTER = entity -> entity instanceof EntityLiving;
 
     private EntityAIBase followChickenAndRabbitTask;
     // private EntityAIBase followBabyTurtleTask;
@@ -118,26 +118,48 @@ public class EntityFox extends EntityAnimal {
     }
 
     protected void initTasks() {
-        this.followChickenAndRabbitTask = new EntityAICustomNearestAttackableTarget(this, EntityLiving.class, 10, true, false,
-                entity -> entity instanceof EntityChicken || entity instanceof EntityRabbit);
+        this.followChickenAndRabbitTask = new EntityAICustomNearestAttackableTarget(
+            this,
+            EntityLiving.class,
+            10,
+            true,
+            false,
+            entity -> entity instanceof EntityChicken || entity instanceof EntityRabbit);
         // todo when turtles are added
-        // this.followBabyTurtleTask = new EntityAICustomNearestAttackableTarget(this, EntityTurtle.class, 10, false, false,
-        //         TurtleEntity.BABY_TURTLE_ON_LAND_FILTER);
+        // this.followBabyTurtleTask = new EntityAICustomNearestAttackableTarget(this, EntityTurtle.class, 10, false,
+        // false,
+        // TurtleEntity.BABY_TURTLE_ON_LAND_FILTER);
         // todo when fish entities are added
         // this.followFishTask = new EntityAICustomNearestAttackableTarget(this, EntityFish.class, 20, false, false,
-        //         entity -> entity instanceof EntitySchoolingFish);
+        // entity -> entity instanceof EntitySchoolingFish);
 
         this.tasks.addTask(0, new EntityFox.AISwim());
         this.tasks.addTask(1, new EntityFox.AIStopWandering());
         this.tasks.addTask(2, new EntityFox.AIEscapeWhenNotAggressive(2.2D));
 
-        this.tasks.addTask(3, new EntityAICustomAvoidEntity(this, EntityPlayer.class, 16.0F, 1.6D, 1.4D,
-                livingEntity -> NOTICEABLE_PLAYER_FILTER.test(livingEntity) && !this.canTrust(livingEntity.getUniqueID()) && !this.isAggressive()));
-        this.tasks.addTask(3, new EntityAICustomAvoidEntity(this, EntityWolf.class, 8.0F, 1.6D, 1.4D,
+        this.tasks.addTask(
+            3,
+            new EntityAICustomAvoidEntity(
+                this,
+                EntityPlayer.class,
+                16.0F,
+                1.6D,
+                1.4D,
+                livingEntity -> NOTICEABLE_PLAYER_FILTER.test(livingEntity)
+                    && !this.canTrust(livingEntity.getUniqueID())
+                    && !this.isAggressive()));
+        this.tasks.addTask(
+            3,
+            new EntityAICustomAvoidEntity(
+                this,
+                EntityWolf.class,
+                8.0F,
+                1.6D,
+                1.4D,
                 livingEntity -> !((EntityWolf) livingEntity).isTamed() && !this.isAggressive()));
         // todo when polar bears are added
         // this.tasks.addTask(3, new EntityAICustomAvoidEntity(this, EntityPolarBear.class, 8.0F, 1.6D, 1.4D,
-        //         livingEntity -> !this.isAggressive()));
+        // livingEntity -> !this.isAggressive()));
 
         this.tasks.addTask(4, new EntityFox.AIMoveToHunt());
         this.tasks.addTask(5, new EntityFox.AIJumpChase());
@@ -157,8 +179,14 @@ public class EntityFox extends EntityAnimal {
         this.tasks.addTask(11, new EntityFox.AILookAtEntity(this, EntityPlayer.class, 24.0F));
         this.tasks.addTask(12, new EntityFox.AISitDownAndLookAround());
 
-        this.targetTasks.addTask(3, new EntityFox.AIDefendFriend(EntityLiving.class, false, false,
-                entity -> entity != null && JUST_ATTACKED_SOMETHING_FILTER.test(entity) && !this.canTrust(entity.getUniqueID())));
+        this.targetTasks.addTask(
+            3,
+            new EntityFox.AIDefendFriend(
+                EntityLiving.class,
+                false,
+                false,
+                entity -> entity != null && JUST_ATTACKED_SOMETHING_FILTER.test(entity)
+                    && !this.canTrust(entity.getUniqueID())));
     }
 
     @Override
@@ -202,12 +230,13 @@ public class EntityFox extends EntityAnimal {
 
         super.onLivingUpdate();
 
-        if (!this.worldObj.isRemote
-                && this.canPickUpLoot()
-                && this.isEntityAlive()
-                && !this.dead
-                && this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
-            List<EntityItem> list = this.worldObj.getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(1.0D, 0.0D, 1.0D));
+        if (!this.worldObj.isRemote && this.canPickUpLoot()
+            && this.isEntityAlive()
+            && !this.dead
+            && this.worldObj.getGameRules()
+                .getGameRuleBooleanValue("mobGriefing")) {
+            List<EntityItem> list = this.worldObj
+                .getEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(1.0D, 0.0D, 1.0D));
             for (EntityItem item : list) {
                 if (!item.isDead && item.getEntityItem() != null && item.delayBeforeCanPickup <= 0) {
                     this.loot(item);
@@ -221,18 +250,18 @@ public class EntityFox extends EntityAnimal {
     }
 
     private boolean canEat(ItemStack stack) {
-        return stack != null
-                && stack.getItem() instanceof ItemFood
-                && this.getAttackTarget() == null
-                && this.onGround
-                && !this.isPlayerSleeping();
+        return stack != null && stack.getItem() instanceof ItemFood
+            && this.getAttackTarget() == null
+            && this.onGround
+            && !this.isPlayerSleeping();
     }
 
     protected void initEquipment() {
         if (this.rand.nextFloat() < 0.2F) {
             List<WeightedRandomItem<Item>> items = getSpawnItems();
             if (!items.isEmpty()) {
-                WeightedRandomItem<Item> choice = (WeightedRandomItem<Item>) WeightedRandom.getRandomItem(getRNG(), items);
+                WeightedRandomItem<Item> choice = (WeightedRandomItem<Item>) WeightedRandom
+                    .getRandomItem(getRNG(), items);
                 this.setCurrentItemOrArmor(0, new ItemStack(choice.data));
             }
         }
@@ -275,14 +304,21 @@ public class EntityFox extends EntityAnimal {
             ItemStack itemStack = this.getHeldItem();
             if (itemStack != null && itemStack.getItem() != null && itemStack.stackSize > 0) {
                 for (int i = 0; i < 8; ++i) {
-                    Vec3 vec3d = (Vec3.createVectorHelper(((double) this.rand.nextFloat() - 0.5D) * 0.1D,
-                            Math.random() * 0.1D + 0.1D, 0.0D));
+                    Vec3 vec3d = (Vec3.createVectorHelper(
+                        ((double) this.rand.nextFloat() - 0.5D) * 0.1D,
+                        Math.random() * 0.1D + 0.1D,
+                        0.0D));
                     vec3d.rotateAroundX(-this.rotationPitch * 0.017453292F);
                     vec3d.rotateAroundY(-this.rotationYaw * 0.017453292F);
                     Vec3 rv = getRotationVector(this.rotationPitch, this.rotationYaw);
-                    this.worldObj.spawnParticle(getItemStackParticleName(itemStack),
-                            this.posX + rv.xCoord / 2.0D, this.posY,
-                            this.posZ + rv.zCoord / 2.0D, vec3d.xCoord, vec3d.yCoord + 0.05D, vec3d.zCoord);
+                    this.worldObj.spawnParticle(
+                        getItemStackParticleName(itemStack),
+                        this.posX + rv.xCoord / 2.0D,
+                        this.posY,
+                        this.posZ + rv.zCoord / 2.0D,
+                        vec3d.xCoord,
+                        vec3d.yCoord + 0.05D,
+                        vec3d.zCoord);
                 }
             }
         } else {
@@ -311,11 +347,16 @@ public class EntityFox extends EntityAnimal {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage);
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(32D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2D);
+        this.getAttributeMap()
+            .registerAttribute(SharedMonsterAttributes.attackDamage);
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth)
+            .setBaseValue(10.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed)
+            .setBaseValue(0.3D);
+        this.getEntityAttribute(SharedMonsterAttributes.followRange)
+            .setBaseValue(32D);
+        this.getEntityAttribute(SharedMonsterAttributes.attackDamage)
+            .setBaseValue(2D);
     }
 
     @Override
@@ -407,7 +448,8 @@ public class EntityFox extends EntityAnimal {
     }
 
     private void addTrustedUuid(UUID uuid) {
-        if (!this.dataWatcher.getWatchableObjectString(OWNER).isEmpty()) {
+        if (!this.dataWatcher.getWatchableObjectString(OWNER)
+            .isEmpty()) {
             this.dataWatcher.updateObject(OTHER_TRUSTED, uuid.toString());
         } else {
             this.dataWatcher.updateObject(OWNER, uuid.toString());
@@ -428,7 +470,10 @@ public class EntityFox extends EntityAnimal {
 
         tag.setTag("Trusted", listTag);
         tag.setBoolean("Sleeping", this.isPlayerSleeping());
-        tag.setString("Type", this.getFoxType().getKey());
+        tag.setString(
+            "Type",
+            this.getFoxType()
+                .getKey());
         tag.setBoolean("Sitting", this.isSitting());
         tag.setBoolean("Crouching", this.isInSneakingPose());
         if (this.followOwner) {
@@ -447,7 +492,7 @@ public class EntityFox extends EntityAnimal {
 
         this.setSleeping(tag.getBoolean("Sleeping"));
         this.setType(EntityFox.Type.byName(tag.getString("Type")));
-        this.setSitting(false);//tag.getBoolean("Sitting")); // disabled to avoid bugs
+        this.setSitting(false);// tag.getBoolean("Sitting")); // disabled to avoid bugs
         this.setCrouching(tag.getBoolean("Crouching"));
         if (this.worldObj instanceof WorldServer) {
             this.addTypeSpecificTasks();
@@ -492,9 +537,11 @@ public class EntityFox extends EntityAnimal {
 
     private void setFoxFlag(int mask, boolean value) {
         if (value) {
-            this.dataWatcher.updateObject(FOX_FLAGS, (byte) (this.dataWatcher.getWatchableObjectByte(FOX_FLAGS) | mask));
+            this.dataWatcher
+                .updateObject(FOX_FLAGS, (byte) (this.dataWatcher.getWatchableObjectByte(FOX_FLAGS) | mask));
         } else {
-            this.dataWatcher.updateObject(FOX_FLAGS, (byte) (this.dataWatcher.getWatchableObjectByte(FOX_FLAGS) & ~mask));
+            this.dataWatcher
+                .updateObject(FOX_FLAGS, (byte) (this.dataWatcher.getWatchableObjectByte(FOX_FLAGS) & ~mask));
         }
     }
 
@@ -505,18 +552,19 @@ public class EntityFox extends EntityAnimal {
     public boolean canPickupItem(ItemStack stack) {
         Item item = stack.getItem();
         ItemStack itemStack = this.getEquipmentInSlot(0);
-        return itemStack == null || this.eatingTime > 0 && item instanceof ItemFood && !(itemStack.getItem() instanceof ItemFood);
+        return itemStack == null
+            || this.eatingTime > 0 && item instanceof ItemFood && !(itemStack.getItem() instanceof ItemFood);
     }
 
     private void spit(ItemStack stack) {
         if (stack != null && !this.worldObj.isRemote) {
             Vec3 rv = getRotationVector(this.rotationPitch, this.rotationYaw);
             EntityItem EntityItem = new EntityItem(
-                    this.worldObj,
-                    this.posX + rv.xCoord,
-                    this.posY + 1.0D,
-                    this.posZ + rv.zCoord,
-                    stack);
+                this.worldObj,
+                this.posX + rv.xCoord,
+                this.posY + 1.0D,
+                this.posZ + rv.zCoord,
+                stack);
             EntityItem.delayBeforeCanPickup = 40;
             EntityItem.func_145799_b(getUniqueID().toString()); // is this OK?
             this.playSound(Reference.MCAssetVer + ":entity.fox.spit", 1.0F, 1.0F);
@@ -534,7 +582,9 @@ public class EntityFox extends EntityAnimal {
         if (this.canPickupItem(itemStack)) {
             EntityPlayer dropper = ServerEventHandler.droppedEntityItems.getIfPresent(item);
 
-            if (isBreedingItem(itemStack) && dropper != null && dropper.getUniqueID().equals(getTrustedUuids().get(0))) {
+            if (isBreedingItem(itemStack) && dropper != null
+                && dropper.getUniqueID()
+                    .equals(getTrustedUuids().get(0))) {
                 followOwner = true;
             }
 
@@ -566,13 +616,15 @@ public class EntityFox extends EntityAnimal {
             }
 
             if (this.isWalking() && this.worldObj.rand.nextFloat() < 0.2F) {
-                this.worldObj.playAuxSFX(2001,
+                this.worldObj.playAuxSFX(
+                    2001,
+                    MathHelper.floor_double(posX),
+                    MathHelper.floor_double(posY),
+                    MathHelper.floor_double(posZ),
+                    worldObj.getBlockMetadata(
                         MathHelper.floor_double(posX),
                         MathHelper.floor_double(posY),
-                        MathHelper.floor_double(posZ),
-                        worldObj.getBlockMetadata(MathHelper.floor_double(posX),
-                                MathHelper.floor_double(posY),
-                                MathHelper.floor_double(posZ)));
+                        MathHelper.floor_double(posZ)));
             }
         }
 
@@ -609,7 +661,7 @@ public class EntityFox extends EntityAnimal {
             }
             // todo when glow berries are added
             // if (ConfigBlocksItems.enableGlowBerries) {
-            //     breedingItems.add(ModItems.GLOW_BERRIES.get());
+            // breedingItems.add(ModItems.GLOW_BERRIES.get());
             // }
             if (breedingItems.isEmpty()) {
                 // Fallback if no vanilla option is enabled via config
@@ -649,7 +701,8 @@ public class EntityFox extends EntityAnimal {
 
     @SideOnly(Side.CLIENT)
     public float getHeadRoll(float tickDelta) {
-        return (this.lastHeadRollProgress + tickDelta * (this.headRollProgress - this.lastHeadRollProgress)) * 0.11F * (float) Math.PI;
+        return (this.lastHeadRollProgress + tickDelta * (this.headRollProgress - this.lastHeadRollProgress)) * 0.11F
+            * (float) Math.PI;
     }
 
     @SideOnly(Side.CLIENT)
@@ -708,9 +761,8 @@ public class EntityFox extends EntityAnimal {
             return Reference.MCAssetVer + ":entity.fox.sleep";
         } else {
             if (!this.worldObj.isDaytime() && this.rand.nextFloat() < 0.1F) {
-                List<EntityPlayer> list = this.worldObj.getEntitiesWithinAABB(
-                        EntityPlayer.class,
-                        this.boundingBox.expand(16.0D, 16.0D, 16.0D));
+                List<EntityPlayer> list = this.worldObj
+                    .getEntitiesWithinAABB(EntityPlayer.class, this.boundingBox.expand(16.0D, 16.0D, 16.0D));
                 if (list.isEmpty()) {
                     return Reference.MCAssetVer + ":entity.fox.screech";
                 }
@@ -734,7 +786,8 @@ public class EntityFox extends EntityAnimal {
     }
 
     private boolean canTrust(UUID uuid) {
-        return this.getTrustedUuids().contains(uuid);
+        return this.getTrustedUuids()
+            .contains(uuid);
     }
 
     @Override
@@ -760,10 +813,13 @@ public class EntityFox extends EntityAnimal {
             double h = f == 0.0D ? e * (double) ((float) j / 6.0F) : g / f;
 
             for (int k = 1; k < 4; ++k) {
-                if (!fox.worldObj.getBlock(
+                if (!fox.worldObj
+                    .getBlock(
                         MathHelper.floor_double(fox.posX + h),
                         MathHelper.floor_double(fox.posY + (double) k),
-                        MathHelper.floor_double(fox.posZ + g)).getMaterial().isReplaceable()) {
+                        MathHelper.floor_double(fox.posZ + g))
+                    .getMaterial()
+                    .isReplaceable()) {
                     return false;
                 }
             }
@@ -774,12 +830,13 @@ public class EntityFox extends EntityAnimal {
 
     @Override
     public boolean attackEntityAsMob(Entity target) {
-        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage)
+            .getAttributeValue();
         int i = 0;
 
         if (target instanceof EntityLivingBase) {
-            f += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase)target);
-            i += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase)target);
+            f += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase) target);
+            i += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase) target);
         }
 
         int j = EnchantmentHelper.getFireAspectModifier(this);
@@ -793,8 +850,9 @@ public class EntityFox extends EntityAnimal {
         if (result) {
             if (i > 0) {
                 target.addVelocity(
-                        -MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F, 0.1D,
-                        MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F);
+                    -MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F,
+                    0.1D,
+                    MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F);
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
             }
@@ -816,7 +874,8 @@ public class EntityFox extends EntityAnimal {
     }
 
     public EntityLivingBase getPetOwner() {
-        UUID uUID = EntityFox.this.getTrustedUuids().get(0);
+        UUID uUID = EntityFox.this.getTrustedUuids()
+            .get(0);
 
         if (uUID != null && EntityFox.this.worldObj instanceof WorldServer) {
             // Assuming owner is a player
@@ -851,13 +910,13 @@ public class EntityFox extends EntityAnimal {
     public ItemStack eatFood(World world, ItemStack stack) {
         if (stack.getItem() instanceof ItemFood food) {
             world.playSound(
-                    this.posX,
-                    this.posY,
-                    this.posZ,
-                    this.getEatSound(),
-                    1.0F,
-                    1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.4F,
-                    false);
+                this.posX,
+                this.posY,
+                this.posZ,
+                this.getEatSound(),
+                1.0F,
+                1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.4F,
+                false);
 
             if (!world.isRemote && food.potionId > 0 && world.rand.nextFloat() < food.potionEffectProbability) {
                 this.addPotionEffect(new PotionEffect(food.potionId, food.potionDuration * 20, food.potionAmplifier));
@@ -877,7 +936,7 @@ public class EntityFox extends EntityAnimal {
 
     public void dealDamage(EntityLivingBase attacker, Entity target) {
         if (target instanceof EntityLivingBase) {
-            EnchantmentHelper.func_151384_a((EntityLivingBase)target, attacker);
+            EnchantmentHelper.func_151384_a((EntityLivingBase) target, attacker);
         }
         EnchantmentHelper.func_151385_b(attacker, target);
     }
@@ -944,10 +1003,9 @@ public class EntityFox extends EntityAnimal {
 
         @Override
         protected boolean shouldStayHorizontal() {
-            return !EntityFox.this.isChasing()
-                    && !EntityFox.this.isInSneakingPose()
-                    && !EntityFox.this.isRollingHead()
-                    && !EntityFox.this.isWalking();
+            return !EntityFox.this.isChasing() && !EntityFox.this.isInSneakingPose()
+                && !EntityFox.this.isRollingHead()
+                && !EntityFox.this.isWalking();
         }
     }
 
@@ -966,7 +1024,8 @@ public class EntityFox extends EntityAnimal {
                 if (livingEntity != null && livingEntity.isEntityAlive()) {
                     boolean bl = EntityFox.canJumpChase(EntityFox.this, livingEntity);
                     if (!bl) {
-                        EntityFox.this.getNavigator().tryMoveToEntityLiving(livingEntity, 0);
+                        EntityFox.this.getNavigator()
+                            .tryMoveToEntityLiving(livingEntity, 0);
                         EntityFox.this.setCrouching(false);
                         EntityFox.this.setRollingHead(false);
                     }
@@ -982,10 +1041,8 @@ public class EntityFox extends EntityAnimal {
             EntityLivingBase livingEntity = EntityFox.this.getAttackTarget();
             if (livingEntity != null && livingEntity.isEntityAlive()) {
                 double d = EntityFox.this.motionY;
-                return (d * d >= 0.05D
-                        || Math.abs(EntityFox.this.rotationPitch) >= 15.0F
-                        || !EntityFox.this.onGround)
-                        && !EntityFox.this.isWalking();
+                return (d * d >= 0.05D || Math.abs(EntityFox.this.rotationPitch) >= 15.0F || !EntityFox.this.onGround)
+                    && !EntityFox.this.isWalking();
             } else {
                 return false;
             }
@@ -1002,15 +1059,19 @@ public class EntityFox extends EntityAnimal {
             EntityFox.this.setChasing(true);
             EntityFox.this.setRollingHead(false);
             EntityLivingBase livingEntity = EntityFox.this.getAttackTarget();
-            EntityFox.this.getLookHelper().setLookPositionWithEntity(livingEntity, 60.0F, 30.0F);
-            Vec3 vec3d = Vec3.createVectorHelper(
+            EntityFox.this.getLookHelper()
+                .setLookPositionWithEntity(livingEntity, 60.0F, 30.0F);
+            Vec3 vec3d = Vec3
+                .createVectorHelper(
                     livingEntity.posX - EntityFox.this.posX,
                     livingEntity.posY - EntityFox.this.posY,
-                    livingEntity.posZ - EntityFox.this.posZ).normalize();
+                    livingEntity.posZ - EntityFox.this.posZ)
+                .normalize();
             EntityFox.this.motionX += vec3d.xCoord * 0.8D;
             EntityFox.this.motionY += 0.9D;
             EntityFox.this.motionZ += vec3d.zCoord * 0.8D;
-            EntityFox.this.getNavigator().clearPathEntity();
+            EntityFox.this.getNavigator()
+                .clearPathEntity();
         }
 
         @Override
@@ -1026,11 +1087,13 @@ public class EntityFox extends EntityAnimal {
         public void updateTask() {
             EntityLivingBase livingEntity = EntityFox.this.getAttackTarget();
             if (livingEntity != null) {
-                EntityFox.this.getLookHelper().setLookPositionWithEntity(livingEntity, 60.0F, 30.0F);
+                EntityFox.this.getLookHelper()
+                    .setLookPositionWithEntity(livingEntity, 60.0F, 30.0F);
             }
 
             if (!EntityFox.this.isWalking()) {
-                Vec3 vec3d = Vec3.createVectorHelper(EntityFox.this.motionX, EntityFox.this.motionY, EntityFox.this.motionZ);
+                Vec3 vec3d = Vec3
+                    .createVectorHelper(EntityFox.this.motionX, EntityFox.this.motionY, EntityFox.this.motionZ);
                 if (vec3d.yCoord * vec3d.yCoord < 0.03D && EntityFox.this.rotationPitch != 0.0F) {
                     EntityFox.this.rotationPitch = lerpAngle(EntityFox.this.rotationPitch, 0.0F, 0.2F);
                 } else {
@@ -1042,17 +1105,16 @@ public class EntityFox extends EntityAnimal {
 
             if (livingEntity != null && EntityFox.this.getDistanceToEntity(livingEntity) <= 2.0F) {
                 EntityFox.this.attackEntityAsMob(livingEntity);
-            } else if (EntityFox.this.rotationPitch > 0.0F
-                    && EntityFox.this.onGround
-                    && (float) EntityFox.this.motionY != 0.0F
-                    && EntityFox.this.worldObj.getBlock(
-                            MathHelper.floor_double(posX),
-                            MathHelper.floor_double(posY),
-                            MathHelper.floor_double(posZ)) == Blocks.snow_layer) {
-                EntityFox.this.rotationPitch = 60.0F;
-                EntityFox.this.setAttackTarget(null);
-                EntityFox.this.setWalking(true);
-            }
+            } else if (EntityFox.this.rotationPitch > 0.0F && EntityFox.this.onGround
+                && (float) EntityFox.this.motionY != 0.0F
+                && EntityFox.this.worldObj.getBlock(
+                    MathHelper.floor_double(posX),
+                    MathHelper.floor_double(posY),
+                    MathHelper.floor_double(posZ)) == Blocks.snow_layer) {
+                        EntityFox.this.rotationPitch = 60.0F;
+                        EntityFox.this.setAttackTarget(null);
+                        EntityFox.this.setWalking(true);
+                    }
         }
 
         private static float lerpAngle(float start, float end, float delta) {
@@ -1082,31 +1144,28 @@ public class EntityFox extends EntityAnimal {
     }
 
     /*
-    private class GoToVillageGoal extends net.minecraft.entity.ai.goal.GoToVillageGoal {
-        public GoToVillageGoal(int unused, int searchRange) {
-            super(EntityFox.this, searchRange);
-        }
-
-        public void start() {
-            EntityFox.this.stopActions();
-            super.start();
-        }
-
-        public boolean canStart() {
-            return super.canStart() && this.canGoToVillage();
-        }
-
-        public boolean shouldContinue() {
-            return super.shouldContinue() && this.canGoToVillage();
-        }
-
-        private boolean canGoToVillage() {
-            return !EntityFox.this.isPlayerSleeping()
-                    && !EntityFox.this.isSitting()
-                    && !EntityFox.this.isAggressive()
-                    && EntityFox.this.getAttackTarget() == null;
-        }
-    }*/
+     * private class GoToVillageGoal extends net.minecraft.entity.ai.goal.GoToVillageGoal {
+     * public GoToVillageGoal(int unused, int searchRange) {
+     * super(EntityFox.this, searchRange);
+     * }
+     * public void start() {
+     * EntityFox.this.stopActions();
+     * super.start();
+     * }
+     * public boolean canStart() {
+     * return super.canStart() && this.canGoToVillage();
+     * }
+     * public boolean shouldContinue() {
+     * return super.shouldContinue() && this.canGoToVillage();
+     * }
+     * private boolean canGoToVillage() {
+     * return !EntityFox.this.isPlayerSleeping()
+     * && !EntityFox.this.isSitting()
+     * && !EntityFox.this.isAggressive()
+     * && EntityFox.this.getAttackTarget() == null;
+     * }
+     * }
+     */
 
     private class AIEscapeWhenNotAggressive extends EntityAIPanic {
 
@@ -1136,7 +1195,8 @@ public class EntityFox extends EntityAnimal {
         @Override
         public void resetTask() {
             if (isTimedOut()) {
-                EntityFox.this.getNavigator().clearPathEntity();
+                EntityFox.this.getNavigator()
+                    .clearPathEntity();
             }
             super.resetTask();
         }
@@ -1246,14 +1306,14 @@ public class EntityFox extends EntityAnimal {
         }
 
         private int getInterval(EntityCreature mob) {
-            return 200 + mob.getRNG().nextInt(200);
+            return 200 + mob.getRNG()
+                .nextInt(200);
         }
 
         @Override
         public boolean continueExecuting() {
-            return this.tryingTime >= -this.safeWaitingTime
-                    && this.tryingTime <= 1200
-                    && this.isTargetPos(EntityFox.this.worldObj, this.targetPos);
+            return this.tryingTime >= -this.safeWaitingTime && this.tryingTime <= 1200
+                && this.isTargetPos(EntityFox.this.worldObj, this.targetPos);
         }
 
         @Override
@@ -1262,11 +1322,16 @@ public class EntityFox extends EntityAnimal {
             EntityFox.this.setSitting(false);
             this.startMovingToTarget();
             this.tryingTime = 0;
-            this.safeWaitingTime = EntityFox.this.getRNG().nextInt(EntityFox.this.getRNG().nextInt(1200) + 1200) + 1200;
+            this.safeWaitingTime = EntityFox.this.getRNG()
+                .nextInt(
+                    EntityFox.this.getRNG()
+                        .nextInt(1200) + 1200)
+                + 1200;
         }
 
         private void startMovingToTarget() {
-            EntityFox.this.getNavigator().tryMoveToXYZ(
+            EntityFox.this.getNavigator()
+                .tryMoveToXYZ(
                     (double) ((float) this.targetPos.getX()) + 0.5D,
                     this.targetPos.getY() + 1,
                     (double) ((float) this.targetPos.getZ()) + 0.5D,
@@ -1294,11 +1359,13 @@ public class EntityFox extends EntityAnimal {
             }
 
             BlockPos blockPos = this.getTargetPos();
-            if (EntityFox.this.getDistanceSq(blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= Math.pow(this.getDesiredSquaredDistanceToTarget(), 2)) {
+            if (EntityFox.this.getDistanceSq(blockPos.getX(), blockPos.getY(), blockPos.getZ())
+                >= Math.pow(this.getDesiredSquaredDistanceToTarget(), 2)) {
                 this.reached = false;
                 ++this.tryingTime;
                 if (this.shouldResetPath()) {
-                    EntityFox.this.getNavigator().tryMoveToXYZ(
+                    EntityFox.this.getNavigator()
+                        .tryMoveToXYZ(
                             (double) ((float) blockPos.getX()) + 0.5D,
                             blockPos.getY(),
                             (double) ((float) blockPos.getZ()) + 0.5D,
@@ -1324,15 +1391,15 @@ public class EntityFox extends EntityAnimal {
             int mobZ = MathHelper.floor_double(EntityFox.this.posZ);
             int bx, by, bz;
 
-            for(int k = this.lowestY; k <= this.maxYDifference; k = k > 0 ? -k : 1 - k) {
-                for(int l = 0; l < this.range; ++l) {
-                    for(int m = 0; m <= l; m = m > 0 ? -m : 1 - m) {
-                        for(int n = m < l && m > -l ? l : 0; n <= l; n = n > 0 ? -n : 1 - n) {
+            for (int k = this.lowestY; k <= this.maxYDifference; k = k > 0 ? -k : 1 - k) {
+                for (int l = 0; l < this.range; ++l) {
+                    for (int m = 0; m <= l; m = m > 0 ? -m : 1 - m) {
+                        for (int n = m < l && m > -l ? l : 0; n <= l; n = n > 0 ? -n : 1 - n) {
                             bx = mobX + m;
                             by = mobY + k - 1;
                             bz = mobZ + n;
                             if (EntityFox.this.isWithinHomeDistance(bx, by, bz)
-                                    && this.isTargetPos(EntityFox.this.worldObj, bx, by, bz)) {
+                                && this.isTargetPos(EntityFox.this.worldObj, bx, by, bz)) {
                                 this.targetPos = new BlockPos(bx, by, bz);
                                 return true;
                             }
@@ -1357,7 +1424,8 @@ public class EntityFox extends EntityAnimal {
         }
 
         private void eatSweetBerry() {
-            if (EntityFox.this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+            if (EntityFox.this.worldObj.getGameRules()
+                .getGameRuleBooleanValue("mobGriefing")) {
                 int x = this.targetPos.getX();
                 int y = this.targetPos.getY();
                 int z = this.targetPos.getZ();
@@ -1374,15 +1442,18 @@ public class EntityFox extends EntityAnimal {
 
                     if (j > 0 && !EntityFox.this.worldObj.isRemote) {
                         float f = 0.7F;
-                        double d0 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                        double d1 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                        double d2 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+                        double d0 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f)
+                            + (double) (1.0F - f) * 0.5D;
+                        double d1 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f)
+                            + (double) (1.0F - f) * 0.5D;
+                        double d2 = (double) (EntityFox.this.worldObj.rand.nextFloat() * f)
+                            + (double) (1.0F - f) * 0.5D;
                         EntityItem entityitem = new EntityItem(
-                                EntityFox.this.worldObj,
-                                (double) x + d0,
-                                (double) y + d1,
-                                (double) z + d2,
-                                ModItems.SWEET_BERRIES.newItemStack(j));
+                            EntityFox.this.worldObj,
+                            (double) x + d0,
+                            (double) y + d1,
+                            (double) z + d2,
+                            ModItems.SWEET_BERRIES.newItemStack(j));
                         entityitem.delayBeforeCanPickup = 10;
                         EntityFox.this.worldObj.spawnEntityInWorld(entityitem);
                     }
@@ -1412,14 +1483,14 @@ public class EntityFox extends EntityAnimal {
         }
 
         private boolean isIdle() {
-            return EntityFox.this.getEntityToAttack() == null
-                    && !EntityFox.this.isPlayerSleeping()
-                    && EntityFox.this.getAttackTarget() == null
-                    && EntityFox.this.getNavigator().noPath()
-                    && !EntityFox.this.isChasing()
-                    && !EntityFox.this.isInSneakingPose()
-                    && EntityFox.this.getHealth() > EntityFox.this.getMaxHealth() / 4f
-                    && !this.canNotCalmDown();
+            return EntityFox.this.getEntityToAttack() == null && !EntityFox.this.isPlayerSleeping()
+                && EntityFox.this.getAttackTarget() == null
+                && EntityFox.this.getNavigator()
+                    .noPath()
+                && !EntityFox.this.isChasing()
+                && !EntityFox.this.isInSneakingPose()
+                && EntityFox.this.getHealth() > EntityFox.this.getMaxHealth() / 4f
+                && !this.canNotCalmDown();
         }
 
         @Override
@@ -1432,7 +1503,8 @@ public class EntityFox extends EntityAnimal {
             this.chooseNewAngle();
             this.counter = 2 + EntityFox.this.rand.nextInt(3);
             EntityFox.this.setSitting(true);
-            EntityFox.this.getNavigator().clearPathEntity();
+            EntityFox.this.getNavigator()
+                .clearPathEntity();
         }
 
         @Override
@@ -1448,7 +1520,8 @@ public class EntityFox extends EntityAnimal {
                 this.chooseNewAngle();
             }
 
-            EntityFox.this.getLookHelper().setLookPosition(
+            EntityFox.this.getLookHelper()
+                .setLookPosition(
                     EntityFox.this.posX + this.lookX,
                     EntityFox.this.posY + EntityFox.this.getEyeHeight(),
                     EntityFox.this.posZ + this.lookZ,
@@ -1510,8 +1583,10 @@ public class EntityFox extends EntityAnimal {
             EntityFox.this.setRollingHead(false);
             EntityFox.this.setJumping(false);
             EntityFox.this.setSleeping(true);
-            EntityFox.this.getNavigator().clearPathEntity();
-            EntityFox.this.getMoveHelper().setMoveTo(EntityFox.this.posX, EntityFox.this.posY, EntityFox.this.posZ, 0.0D);
+            EntityFox.this.getNavigator()
+                .clearPathEntity();
+            EntityFox.this.getMoveHelper()
+                .setMoveTo(EntityFox.this.posX, EntityFox.this.posY, EntityFox.this.posZ, 0.0D);
         }
     }
 
@@ -1520,23 +1595,22 @@ public class EntityFox extends EntityAnimal {
         private final TargetPredicate WORRIABLE_ENTITY_PREDICATE;
 
         private AICalmDown() {
-            this.WORRIABLE_ENTITY_PREDICATE = (new TargetPredicate())
-                    .setBaseMaxDistance(12.0D)
-                    .includeHidden()
-                    .setPredicate(EntityFox.this.new WorriableEntityFilter());
+            this.WORRIABLE_ENTITY_PREDICATE = (new TargetPredicate()).setBaseMaxDistance(12.0D)
+                .includeHidden()
+                .setPredicate(EntityFox.this.new WorriableEntityFilter());
         }
 
         protected boolean isAtFavoredLocation() {
             BlockPos blockPos = new BlockPos(EntityFox.this.posX, EntityFox.this.boundingBox.maxY, EntityFox.this.posZ);
-            return !EntityFox.this.worldObj.canBlockSeeTheSky(blockPos.getX(), blockPos.getY(), blockPos.getZ()) &&
-                    EntityFox.this.getBlockPathWeight(blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= 0.0F;
+            return !EntityFox.this.worldObj.canBlockSeeTheSky(blockPos.getX(), blockPos.getY(), blockPos.getZ())
+                && EntityFox.this.getBlockPathWeight(blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= 0.0F;
         }
 
         protected boolean canNotCalmDown() {
             List<EntityLivingBase> list = EntityFox.this.worldObj.selectEntitiesWithinAABB(
-                    EntityLivingBase.class,
-                    EntityFox.this.boundingBox.expand(12.0D, 6.0D, 12.0D),
-                    null);
+                EntityLivingBase.class,
+                EntityFox.this.boundingBox.expand(12.0D, 6.0D, 12.0D),
+                null);
 
             List<EntityLivingBase> list2 = new ArrayList<>();
             for (EntityLivingBase entityLivingBase : list) {
@@ -1555,26 +1629,30 @@ public class EntityFox extends EntityAnimal {
     }
 
     private class WorriableEntityFilter implements Predicate<EntityLivingBase> {
+
         public boolean test(EntityLivingBase livingEntity) {
             if (livingEntity instanceof EntityFox) {
                 return false;
-            } else if (!(livingEntity instanceof EntityChicken) && !(livingEntity instanceof EntityRabbit) && !(livingEntity instanceof EntityMob)) {
-                if (livingEntity instanceof EntityTameable) {
-                    return !((EntityTameable) livingEntity).isTamed();
-                } else if (livingEntity instanceof EntityPlayer player && (SpectatorMode.isSpectator(player) || player.capabilities.isCreativeMode)) {
-                    return false;
-                } else if (EntityFox.this.canTrust(livingEntity.getUniqueID())) {
-                    return false;
+            } else if (!(livingEntity instanceof EntityChicken) && !(livingEntity instanceof EntityRabbit)
+                && !(livingEntity instanceof EntityMob)) {
+                    if (livingEntity instanceof EntityTameable) {
+                        return !((EntityTameable) livingEntity).isTamed();
+                    } else if (livingEntity instanceof EntityPlayer player
+                        && (SpectatorMode.isSpectator(player) || player.capabilities.isCreativeMode)) {
+                            return false;
+                        } else if (EntityFox.this.canTrust(livingEntity.getUniqueID())) {
+                            return false;
+                        } else {
+                            return !livingEntity.isPlayerSleeping() && !livingEntity.isSneaking();
+                        }
                 } else {
-                    return !livingEntity.isPlayerSleeping() && !livingEntity.isSneaking();
+                    return true;
                 }
-            } else {
-                return true;
-            }
         }
     }
 
     private class AIAvoidDaylight extends EntityAIFleeSunExtended {
+
         private int timer = 100;
 
         public AIAvoidDaylight(double speed) {
@@ -1586,23 +1664,23 @@ public class EntityFox extends EntityAnimal {
             if (!EntityFox.this.isPlayerSleeping() && EntityFox.this.getAttackTarget() == null) {
                 if (EntityFox.this.worldObj.isThundering()) {
                     return EntityFox.this.worldObj.canBlockSeeTheSky(
-                            MathHelper.floor_double(posX),
-                            MathHelper.floor_double(posY),
-                            MathHelper.floor_double(posZ))
-                            // todo when points of interest are added
-                            /*&& !EntityFox.this.worldObj.isNearOccupiedPointOfInterest(blockPos)*/
-                            && this.targetShadedPos();
+                        MathHelper.floor_double(posX),
+                        MathHelper.floor_double(posY),
+                        MathHelper.floor_double(posZ))
+                        // todo when points of interest are added
+                        /* && !EntityFox.this.worldObj.isNearOccupiedPointOfInterest(blockPos) */
+                        && this.targetShadedPos();
                 } else if (this.timer > 0) {
                     --this.timer;
                     return false;
                 } else {
                     this.timer = 100;
                     return EntityFox.this.worldObj.isDaytime() && EntityFox.this.worldObj.canBlockSeeTheSky(
-                            MathHelper.floor_double(posX),
-                            MathHelper.floor_double(posY),
-                            MathHelper.floor_double(posZ))
-                            /*&& !EntityFox.this.worldObj.isNearOccupiedPointOfInterest(blockPos)*/
-                            && this.targetShadedPos();
+                        MathHelper.floor_double(posX),
+                        MathHelper.floor_double(posY),
+                        MathHelper.floor_double(posZ))
+                    /* && !EntityFox.this.worldObj.isNearOccupiedPointOfInterest(blockPos) */
+                        && this.targetShadedPos();
                 }
             } else {
                 return false;
@@ -1623,12 +1701,16 @@ public class EntityFox extends EntityAnimal {
         TargetPredicate targetPredicate;
 
         public AIDefendFriend(Class<? extends Entity> targetEntityClass, boolean checkVisibility,
-                              boolean checkCanNavigate, Predicate<EntityLivingBase> targetPredicate) {
-            super(EntityFox.this, targetEntityClass, 10, checkVisibility, checkCanNavigate,
-                    entity -> entity instanceof EntityLivingBase livingBase && targetPredicate.test(livingBase));
-            this.targetPredicate = new TargetPredicate()
-                    .setBaseMaxDistance(this.getTargetDistance())
-                    .setPredicate(targetPredicate);
+            boolean checkCanNavigate, Predicate<EntityLivingBase> targetPredicate) {
+            super(
+                EntityFox.this,
+                targetEntityClass,
+                10,
+                checkVisibility,
+                checkCanNavigate,
+                entity -> entity instanceof EntityLivingBase livingBase && targetPredicate.test(livingBase));
+            this.targetPredicate = new TargetPredicate().setBaseMaxDistance(this.getTargetDistance())
+                .setPredicate(targetPredicate);
 
             if (!checkVisibility) {
                 // Rationale for this: tall grass blocks the view of foxes. since they are so short,
@@ -1639,7 +1721,8 @@ public class EntityFox extends EntityAnimal {
 
         @Override
         public boolean shouldExecute() {
-            if (this.targetChance <= 0 || EntityFox.this.getRNG().nextInt(this.targetChance) == 0) {
+            if (this.targetChance <= 0 || EntityFox.this.getRNG()
+                .nextInt(this.targetChance) == 0) {
                 for (UUID uUID : EntityFox.this.getTrustedUuids()) {
                     if (uUID != null && EntityFox.this.worldObj instanceof WorldServer) {
                         EntityPlayer player = EntityFox.this.worldObj.func_152378_a(uUID); // getPlayerByUuid
@@ -1661,24 +1744,24 @@ public class EntityFox extends EntityAnimal {
             } else if (!targetPredicate.test(EntityFox.this, target)) {
                 return false;
             } else if (!EntityFox.this.isWithinHomeDistance(
-                    MathHelper.floor_double(target.posX),
-                    MathHelper.floor_double(target.posY),
-                    MathHelper.floor_double(target.posZ))) {
-                return false;
-            } else {
-                if (this.nearbyOnly) {
-                    if (--this.targetSearchDelay <= 0) {
-                        this.targetSearchStatus = 0;
-                    }
+                MathHelper.floor_double(target.posX),
+                MathHelper.floor_double(target.posY),
+                MathHelper.floor_double(target.posZ))) {
+                    return false;
+                } else {
+                    if (this.nearbyOnly) {
+                        if (--this.targetSearchDelay <= 0) {
+                            this.targetSearchStatus = 0;
+                        }
 
-                    if (this.targetSearchStatus == 0) {
-                        this.targetSearchStatus = this.canEasilyReach(target) ? 1 : 2;
-                    }
+                        if (this.targetSearchStatus == 0) {
+                            this.targetSearchStatus = this.canEasilyReach(target) ? 1 : 2;
+                        }
 
-                    return this.targetSearchStatus != 2;
+                        return this.targetSearchStatus != 2;
+                    }
+                    return true;
                 }
-                return true;
-            }
         }
 
         @Override
@@ -1743,8 +1826,10 @@ public class EntityFox extends EntityAnimal {
                 babyFox.setLocationAndAngles(EntityFox.this.posX, EntityFox.this.posY, EntityFox.this.posZ, 0.0F, 0.0F);
                 EntityFox.this.worldObj.spawnEntityInWorld(babyFox);
                 EntityFox.this.worldObj.setEntityState(EntityFox.this, (byte) 18);
-                if (EntityFox.this.worldObj.getGameRules().getGameRuleBooleanValue("doMobLoot")) {
-                    EntityFox.this.worldObj.spawnEntityInWorld(new EntityXPOrb(
+                if (EntityFox.this.worldObj.getGameRules()
+                    .getGameRuleBooleanValue("doMobLoot")) {
+                    EntityFox.this.worldObj.spawnEntityInWorld(
+                        new EntityXPOrb(
                             EntityFox.this.worldObj,
                             EntityFox.this.posX,
                             EntityFox.this.posY,
@@ -1775,15 +1860,15 @@ public class EntityFox extends EntityAnimal {
 
         @Override
         public boolean shouldExecute() {
-            return !EntityFox.this.isSitting()
-                    && !EntityFox.this.isPlayerSleeping()
-                    && !EntityFox.this.isInSneakingPose()
-                    && !EntityFox.this.isWalking()
-                    && super.shouldExecute();
+            return !EntityFox.this.isSitting() && !EntityFox.this.isPlayerSleeping()
+                && !EntityFox.this.isInSneakingPose()
+                && !EntityFox.this.isWalking()
+                && super.shouldExecute();
         }
     }
 
     private class AIMoveToHunt extends EntityAIBase {
+
         public AIMoveToHunt() {
             this.setMutexBits(3);
         }
@@ -1794,13 +1879,12 @@ public class EntityFox extends EntityAnimal {
                 return false;
             } else {
                 EntityLivingBase livingEntity = EntityFox.this.getAttackTarget();
-                return livingEntity != null
-                        && livingEntity.isEntityAlive()
-                        && EntityFox.CHICKEN_AND_RABBIT_FILTER.test(livingEntity)
-                        && EntityFox.this.getDistanceSqToEntity(livingEntity) > 36.0D
-                        && !EntityFox.this.isInSneakingPose()
-                        && !EntityFox.this.isRollingHead()
-                        && !EntityFox.this.isJumping;
+                return livingEntity != null && livingEntity.isEntityAlive()
+                    && EntityFox.CHICKEN_AND_RABBIT_FILTER.test(livingEntity)
+                    && EntityFox.this.getDistanceSqToEntity(livingEntity) > 36.0D
+                    && !EntityFox.this.isInSneakingPose()
+                    && !EntityFox.this.isRollingHead()
+                    && !EntityFox.this.isJumping;
             }
         }
 
@@ -1816,8 +1900,10 @@ public class EntityFox extends EntityAnimal {
             if (livingEntity != null && EntityFox.canJumpChase(EntityFox.this, livingEntity)) {
                 EntityFox.this.setRollingHead(true);
                 EntityFox.this.setCrouching(true);
-                EntityFox.this.getNavigator().clearPathEntity();
-                EntityFox.this.getLookHelper().setLookPositionWithEntity(
+                EntityFox.this.getNavigator()
+                    .clearPathEntity();
+                EntityFox.this.getLookHelper()
+                    .setLookPositionWithEntity(
                         livingEntity,
                         (float) EntityFox.this.getBodyYawSpeed(),
                         (float) EntityFox.this.getLookPitchSpeed());
@@ -1831,16 +1917,19 @@ public class EntityFox extends EntityAnimal {
         @Override
         public void updateTask() {
             EntityLivingBase livingEntity = EntityFox.this.getAttackTarget();
-            EntityFox.this.getLookHelper().setLookPositionWithEntity(
+            EntityFox.this.getLookHelper()
+                .setLookPositionWithEntity(
                     livingEntity,
                     (float) EntityFox.this.getBodyYawSpeed(),
                     (float) EntityFox.this.getLookPitchSpeed());
             if (EntityFox.this.getDistanceSqToEntity(livingEntity) <= 36.0D) {
                 EntityFox.this.setRollingHead(true);
                 EntityFox.this.setCrouching(true);
-                EntityFox.this.getNavigator().clearPathEntity();
+                EntityFox.this.getNavigator()
+                    .clearPathEntity();
             } else {
-                EntityFox.this.getNavigator().tryMoveToEntityLiving(livingEntity, 1.5D);
+                EntityFox.this.getNavigator()
+                    .tryMoveToEntityLiving(livingEntity, 1.5D);
             }
 
         }
@@ -1899,9 +1988,9 @@ public class EntityFox extends EntityAnimal {
 
         protected List<EntityItem> getNearbyItemStacks() {
             return EntityFox.this.worldObj.selectEntitiesWithinAABB(
-                    EntityItem.class,
-                    EntityFox.this.boundingBox.expand(8.0D, 8.0D, 8.0D),
-                    EntityFox.PICKABLE_DROP_FILTER);
+                EntityItem.class,
+                EntityFox.this.boundingBox.expand(8.0D, 8.0D, 8.0D),
+                EntityFox.PICKABLE_DROP_FILTER);
         }
 
         protected void moveToNearbyItemStack(boolean onlyIfNotHoldingItem) {
@@ -1909,14 +1998,17 @@ public class EntityFox extends EntityAnimal {
             if (!list.isEmpty()) {
                 EntityItem ei = list.get(0);
                 if (!onlyIfNotHoldingItem || EntityFox.this.getHeldItem() == null) {
-                    EntityFox.this.getNavigator().tryMoveToEntityLiving(ei, getFetchSpeed());
+                    EntityFox.this.getNavigator()
+                        .tryMoveToEntityLiving(ei, getFetchSpeed());
                 }
             }
         }
 
         protected boolean canPickUpNearbyItemStack() {
             List<EntityItem> nearbyItemStacks = getNearbyItemStacks();
-            return !nearbyItemStacks.isEmpty() && EntityFox.this.canPickupItem(nearbyItemStacks.get(0).getEntityItem());
+            return !nearbyItemStacks.isEmpty() && EntityFox.this.canPickupItem(
+                nearbyItemStacks.get(0)
+                    .getEntityItem());
         }
     }
 

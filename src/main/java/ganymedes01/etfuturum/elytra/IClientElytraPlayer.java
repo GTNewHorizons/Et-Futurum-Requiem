@@ -1,15 +1,16 @@
 package ganymedes01.etfuturum.elytra;
 
 public interface IClientElytraPlayer {
-	float getRotateElytraX();
 
-	float getRotateElytraY();
+    float getRotateElytraX();
 
-	float getRotateElytraZ();
+    float getRotateElytraY();
 
-	void setRotateElytraX(float f);
+    float getRotateElytraZ();
 
-	void setRotateElytraY(float f);
+    void setRotateElytraX(float f);
 
-	void setRotateElytraZ(float f);
+    void setRotateElytraY(float f);
+
+    void setRotateElytraZ(float f);
 }

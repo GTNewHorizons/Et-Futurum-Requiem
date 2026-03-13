@@ -1,5 +1,18 @@
 package ganymedes01.etfuturum.configuration;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import net.minecraft.launchwrapper.Launch;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+
+import org.spongepowered.asm.mixin.MixinEnvironment;
+
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
@@ -12,94 +25,85 @@ import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
+import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.mixinplugin.EtFuturumEarlyMixins;
 
-import ganymedes01.etfuturum.lib.Reference;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraftforge.common.config.ConfigCategory;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public abstract class ConfigBase extends Configuration {
-	protected final List<ConfigCategory> configCats = new ArrayList<>();
-	private static final Set<ConfigBase> CONFIGS = new HashSet<>();
 
-	public static final String configDir = "config" + File.separator + Reference.MOD_ID + File.separator;
+    protected final List<ConfigCategory> configCats = new ArrayList<>();
+    private static final Set<ConfigBase> CONFIGS = new HashSet<>();
 
-	public static final ConfigBase EXPERIMENTS = new ConfigExperiments(createConfigFile("experiments"));
+    public static final String configDir = "config" + File.separator + Reference.MOD_ID + File.separator;
 
-	public static final ConfigBase BLOCKS_ITEMS = new ConfigBlocksItems(createConfigFile("blocksitems"));
-	public static final ConfigBase ENCHANTS_POTIONS = new ConfigEnchantsPotions(createConfigFile("enchantspotions"));
-	public static final ConfigBase FUNCTIONS = new ConfigFunctions(createConfigFile("functions"));
-	public static final ConfigBase TWEAKS = new ConfigTweaks(createConfigFile("tweaks"));
-	public static final ConfigBase WORLD = new ConfigWorld(createConfigFile("world"));
-	public static final ConfigBase ENTITIES = new ConfigEntities(createConfigFile("entities"));
-	public static final ConfigBase SOUNDS = new ConfigSounds(createConfigFile("sounds"));
-	public static final ConfigBase MOD_COMPAT = new ConfigModCompat(createConfigFile("modcompat"));
+    public static final ConfigBase EXPERIMENTS = new ConfigExperiments(createConfigFile("experiments"));
 
-	public static final ConfigBase MIXINS = new ConfigMixins(createConfigFile("mixins"));
+    public static final ConfigBase BLOCKS_ITEMS = new ConfigBlocksItems(createConfigFile("blocksitems"));
+    public static final ConfigBase ENCHANTS_POTIONS = new ConfigEnchantsPotions(createConfigFile("enchantspotions"));
+    public static final ConfigBase FUNCTIONS = new ConfigFunctions(createConfigFile("functions"));
+    public static final ConfigBase TWEAKS = new ConfigTweaks(createConfigFile("tweaks"));
+    public static final ConfigBase WORLD = new ConfigWorld(createConfigFile("world"));
+    public static final ConfigBase ENTITIES = new ConfigEntities(createConfigFile("entities"));
+    public static final ConfigBase SOUNDS = new ConfigSounds(createConfigFile("sounds"));
+    public static final ConfigBase MOD_COMPAT = new ConfigModCompat(createConfigFile("modcompat"));
 
-	public ConfigBase(File file) {
-		super(file);
-		CONFIGS.add(this);
-	}
+    public static final ConfigBase MIXINS = new ConfigMixins(createConfigFile("mixins"));
 
-	private static File createConfigFile(String name) {
-		return new File(Launch.minecraftHome, configDir + name + ".cfg");
-	}
+    public ConfigBase(File file) {
+        super(file);
+        CONFIGS.add(this);
+    }
 
-	public static void initializeConfigs() {
-		for (ConfigBase config : CONFIGS) {
-			config.syncConfig();
-		}
-	}
+    private static File createConfigFile(String name) {
+        return new File(Launch.minecraftHome, configDir + name + ".cfg");
+    }
 
-	private void syncConfig() {
-		syncConfigOptions();
+    public static void initializeConfigs() {
+        for (ConfigBase config : CONFIGS) {
+            config.syncConfig();
+        }
+    }
 
-		for (ConfigCategory cat : configCats) {
-			if (EtFuturumEarlyMixins.side == MixinEnvironment.Side.SERVER) {
-				if (cat.getName().toLowerCase().contains("client")) {
-					for (Property prop : cat.getOrderedValues()) {
-						cat.remove(prop.getName());
-					}
-				}
-			}
+    private void syncConfig() {
+        syncConfigOptions();
 
-			if (cat.isEmpty() && !cat.getName().toLowerCase().contains("experiment")) {
-				removeCategory(cat);
-			}
-		}
+        for (ConfigCategory cat : configCats) {
+            if (EtFuturumEarlyMixins.side == MixinEnvironment.Side.SERVER) {
+                if (cat.getName()
+                    .toLowerCase()
+                    .contains("client")) {
+                    for (Property prop : cat.getOrderedValues()) {
+                        cat.remove(prop.getName());
+                    }
+                }
+            }
 
-		if (hasChanged()) {
-			save();
-		}
-	}
+            if (cat.isEmpty() && !cat.getName()
+                .toLowerCase()
+                .contains("experiment")) {
+                removeCategory(cat);
+            }
+        }
 
-	protected abstract void syncConfigOptions();
+        if (hasChanged()) {
+            save();
+        }
+    }
 
-	/**
-	 * Used in case we need to wait till later to initialize some config values.
-	 */
-	protected void initValues() {
-	}
+    protected abstract void syncConfigOptions();
 
-	public static void postInit() {
-		for (ConfigBase config : CONFIGS) {
-			config.initValues();
-		}
-	}
+    /**
+     * Used in case we need to wait till later to initialize some config values.
+     */
+    protected void initValues() {}
 
-	@SubscribeEvent
-	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-		if (Reference.MOD_ID.equals(eventArgs.modID))
-			syncConfig();
-	}
+    public static void postInit() {
+        for (ConfigBase config : CONFIGS) {
+            config.initValues();
+        }
+    }
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
+        if (Reference.MOD_ID.equals(eventArgs.modID)) syncConfig();
+    }
 }

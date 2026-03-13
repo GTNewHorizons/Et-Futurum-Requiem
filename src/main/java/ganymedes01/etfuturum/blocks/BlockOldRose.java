@@ -5,8 +5,8 @@ import ganymedes01.etfuturum.lib.Reference;
 
 public class BlockOldRose extends BaseFlower {
 
-	public BlockOldRose() {
-		setBlockName(Utils.getUnlocalisedName("rose"));
-		setBlockTextureName(Reference.MOD_ID + ":flower_rose");
-	}
+    public BlockOldRose() {
+        setBlockName(Utils.getUnlocalisedName("rose"));
+        setBlockTextureName(Reference.MOD_ID + ":flower_rose");
+    }
 }

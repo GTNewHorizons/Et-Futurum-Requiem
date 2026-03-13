@@ -1,13 +1,10 @@
 package ganymedes01.etfuturum.blocks;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.lib.RenderIDs;
-import ganymedes01.etfuturum.tileentities.TileEntityGlowLichen;
+import static net.minecraftforge.common.util.ForgeDirection.getOrientation;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.IGrowable;
@@ -28,22 +25,28 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.util.ForgeDirection;
+
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import static net.minecraftforge.common.util.ForgeDirection.getOrientation;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.core.utils.Utils;
+import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
+import ganymedes01.etfuturum.lib.RenderIDs;
+import ganymedes01.etfuturum.tileentities.TileEntityGlowLichen;
 
 public class BlockGlowLichen extends BlockContainer implements IShearable, IGrowable {
+
     public BlockGlowLichen() {
         super(Material.vine);
         this.lightValue = 7;
         this.setStepSound(soundTypeGrass)
-                .setHardness(0.2F)
-                .setCreativeTab(EtFuturum.creativeTabBlocks)
-                .setBlockTextureName("glow_lichen")
-                .setBlockName(Utils.getUnlocalisedName("glow_lichen"));
+            .setHardness(0.2F)
+            .setCreativeTab(EtFuturum.creativeTabBlocks)
+            .setBlockTextureName("glow_lichen")
+            .setBlockName(Utils.getUnlocalisedName("glow_lichen"));
     }
 
     @Override
@@ -71,39 +74,33 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     }
 
     @Override
-    public Item getItemDropped(int meta, Random random, int fortune)
-    {
+    public Item getItemDropped(int meta, Random random, int fortune) {
         return null;
     }
 
     @Override
-    public boolean isOpaqueCube()
-    {
+    public boolean isOpaqueCube() {
         return false;
     }
 
     @Override
-    public boolean renderAsNormalBlock()
-    {
+    public boolean renderAsNormalBlock() {
         return false;
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, int x, int y, int z, int side)
-    {
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, int x, int y, int z, int side) {
         return true;
     }
 
     @Override
-    public int getRenderType()
-    {
+    public int getRenderType() {
         return RenderIDs.GLOW_LICHEN;
     }
 
     @SideOnly(Side.CLIENT)
     @Override
-    public IIcon getIcon(int side, int meta)
-    {
+    public IIcon getIcon(int side, int meta) {
         return this.blockIcon;
     }
 
@@ -127,11 +124,9 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new TileEntityGlowLichen();
     }
-    
 
     @Override
-    public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side)
-    {
+    public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side) {
         return isDirectionSolid(world, x, y, z, ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[side]));
     }
 
@@ -147,19 +142,18 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     }
 
     @Override
-    public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
+    public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
+        int metadata) {
         return ForgeDirection.OPPOSITES[side];
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z)
-    {
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z) {
         return null;
     }
 
     @Override
-    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec)
-    {
+    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startVec, Vec3 endVec) {
         TileEntity te = world.getTileEntity(x, y, z);
         if (!(te instanceof TileEntityGlowLichen)) {
             return super.collisionRayTrace(world, x, y, z, startVec, endVec);
@@ -173,11 +167,14 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
         // Define small bounding boxes for each possible face
         AxisAlignedBB[] boxes = new AxisAlignedBB[6];
         if ((sideGrowth & (1)) != 0) boxes[0] = AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 0.0625, z + 1); // Down
-        if ((sideGrowth & (1 << 1)) != 0) boxes[1] = AxisAlignedBB.getBoundingBox(x, y + 0.9375, z, x + 1, y + 1, z + 1); // Up
+        if ((sideGrowth & (1 << 1)) != 0)
+            boxes[1] = AxisAlignedBB.getBoundingBox(x, y + 0.9375, z, x + 1, y + 1, z + 1); // Up
         if ((sideGrowth & (1 << 2)) != 0) boxes[2] = AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 0.0625); // North
-        if ((sideGrowth & (1 << 3)) != 0) boxes[3] = AxisAlignedBB.getBoundingBox(x, y, z + 0.9375, x + 1, y + 1, z + 1); // South
+        if ((sideGrowth & (1 << 3)) != 0)
+            boxes[3] = AxisAlignedBB.getBoundingBox(x, y, z + 0.9375, x + 1, y + 1, z + 1); // South
         if ((sideGrowth & (1 << 4)) != 0) boxes[4] = AxisAlignedBB.getBoundingBox(x, y, z, x + 0.0625, y + 1, z + 1); // West
-        if ((sideGrowth & (1 << 5)) != 0) boxes[5] = AxisAlignedBB.getBoundingBox(x + 0.9375, y, z, x + 1, y + 1, z + 1); // East
+        if ((sideGrowth & (1 << 5)) != 0)
+            boxes[5] = AxisAlignedBB.getBoundingBox(x + 0.9375, y, z, x + 1, y + 1, z + 1); // East
 
         for (AxisAlignedBB box : boxes) {
             if (box != null) {
@@ -191,8 +188,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
                 }
             }
         }
-        if (closestHit!= null)
-        {
+        if (closestHit != null) {
             closestHit.blockX = x;
             closestHit.blockY = y;
             closestHit.blockZ = z;
@@ -201,19 +197,14 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor)
-    {
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
         if (!world.isRemote) {
             TileEntity te = world.getTileEntity(x, y, z);
-            if (te instanceof TileEntityGlowLichen teLichen)
-            {
+            if (te instanceof TileEntityGlowLichen teLichen) {
                 int sideMap = teLichen.getSideMap();
-                for (int i = 0; i < ForgeDirection.VALID_DIRECTIONS.length; i ++)
-                {
-                    if ((sideMap & (1 << i)) != 0)
-                    {
-                        if (!isDirectionSolid(world, x, y, z, getOrientation(i)))
-                        {
+                for (int i = 0; i < ForgeDirection.VALID_DIRECTIONS.length; i++) {
+                    if ((sideMap & (1 << i)) != 0) {
+                        if (!isDirectionSolid(world, x, y, z, getOrientation(i))) {
                             teLichen.setSideMap((sideMap &= ~(1 << i)));
                         }
                     }
@@ -222,8 +213,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
         }
     }
 
-    private boolean isDirectionSolid(World world, int x, int y, int z, ForgeDirection direction)
-    {
+    private boolean isDirectionSolid(World world, int x, int y, int z, ForgeDirection direction) {
         return switch (direction) {
             case DOWN -> world.isSideSolid(x, y - 1, z, ForgeDirection.UP);
             case UP -> world.isSideSolid(x, y + 1, z, ForgeDirection.DOWN);
@@ -241,8 +231,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     }
 
     @Override
-    public ArrayList<ItemStack> onSheared(ItemStack item, IBlockAccess world, int x, int y, int z, int fortune)
-    {
+    public ArrayList<ItemStack> onSheared(ItemStack item, IBlockAccess world, int x, int y, int z, int fortune) {
         ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
         ret.add(new ItemStack(ModBlocks.GLOW_LICHEN.getItem()));
         return ret;
@@ -252,8 +241,7 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
      * MCP name: {@code canFertilize}
      */
     @Override
-    public boolean func_149851_a(World world, int x, int y, int z, boolean unused) 
-    {
+    public boolean func_149851_a(World world, int x, int y, int z, boolean unused) {
         return !findValidSpots(world, x, y, z).isEmpty();
     }
 
@@ -271,117 +259,171 @@ public class BlockGlowLichen extends BlockContainer implements IShearable, IGrow
     @Override
     public void func_149853_b(World world, Random rand, int x, int y, int z) {
         ArrayList<Pair<BlockPos, ForgeDirection>> validSpots = findValidSpots(world, x, y, z);
-        if (!validSpots.isEmpty())
-        {
+        if (!validSpots.isEmpty()) {
             Pair<BlockPos, ForgeDirection> chosenSpot = validSpots.get(rand.nextInt(validSpots.size()));
-            if (world.getBlock(chosenSpot.getLeft().getX(), chosenSpot.getLeft().getY(), chosenSpot.getLeft().getZ()) instanceof BlockGlowLichen)
-            {
-                if (world.getTileEntity(chosenSpot.getLeft().getX(), chosenSpot.getLeft().getY(), chosenSpot.getLeft().getZ()) instanceof TileEntityGlowLichen teToGrowOn)
-                {
-                    teToGrowOn.setSideMap(teToGrowOn.getSideMap() | (1 << chosenSpot.getRight().ordinal()));
+            if (world.getBlock(
+                chosenSpot.getLeft()
+                    .getX(),
+                chosenSpot.getLeft()
+                    .getY(),
+                chosenSpot.getLeft()
+                    .getZ()) instanceof BlockGlowLichen) {
+                if (world.getTileEntity(
+                    chosenSpot.getLeft()
+                        .getX(),
+                    chosenSpot.getLeft()
+                        .getY(),
+                    chosenSpot.getLeft()
+                        .getZ()) instanceof TileEntityGlowLichen teToGrowOn) {
+                    teToGrowOn.setSideMap(
+                        teToGrowOn.getSideMap() | (1 << chosenSpot.getRight()
+                            .ordinal()));
                 }
-            }
-            else
-            {
-                world.setBlock(chosenSpot.getLeft().getX(), chosenSpot.getLeft().getY(), chosenSpot.getLeft().getZ(), ModBlocks.GLOW_LICHEN.get());
-                if (world.getTileEntity(chosenSpot.getLeft().getX(), chosenSpot.getLeft().getY(), chosenSpot.getLeft().getZ()) instanceof TileEntityGlowLichen teToMake)
-                {
-                    teToMake.setSideMap((1 << chosenSpot.getRight().ordinal()));
+            } else {
+                world.setBlock(
+                    chosenSpot.getLeft()
+                        .getX(),
+                    chosenSpot.getLeft()
+                        .getY(),
+                    chosenSpot.getLeft()
+                        .getZ(),
+                    ModBlocks.GLOW_LICHEN.get());
+                if (world.getTileEntity(
+                    chosenSpot.getLeft()
+                        .getX(),
+                    chosenSpot.getLeft()
+                        .getY(),
+                    chosenSpot.getLeft()
+                        .getZ()) instanceof TileEntityGlowLichen teToMake) {
+                    teToMake.setSideMap(
+                        (1 << chosenSpot.getRight()
+                            .ordinal()));
                 }
             }
         }
     }
 
-    private ArrayList<Pair<BlockPos, ForgeDirection>> findValidSpots(World world, int x, int y, int z)
-    {
+    private ArrayList<Pair<BlockPos, ForgeDirection>> findValidSpots(World world, int x, int y, int z) {
         ArrayList<Pair<BlockPos, ForgeDirection>> validSpots = new ArrayList<>();
         TileEntity te = world.getTileEntity(x, y, z);
-        if (!(te instanceof TileEntityGlowLichen glowLichen))
-        {
+        if (!(te instanceof TileEntityGlowLichen glowLichen)) {
             return validSpots;
         }
         int sideMap = glowLichen.getSideMap();
         for (int i = 0; i < ForgeDirection.values().length; i++) {
-            if ((sideMap & (1 << i)) != 0)
-            {
+            if ((sideMap & (1 << i)) != 0) {
                 // directions that aren't valid are the current side and the opposite
                 int validMap = TileEntityGlowLichen.fullSideMap & ~((1 << i) | (1 << ForgeDirection.OPPOSITES[i]));
-                for (int j = 0; j < ForgeDirection.values().length; j++)
-                {
-                    if ((validMap & (1 << j)) != 0)
-                    {
+                for (int j = 0; j < ForgeDirection.values().length; j++) {
+                    if ((validMap & (1 << j)) != 0) {
                         BlockPos loc = new BlockPos(x, y, z);
                         loc = loc.offset(ForgeDirection.getOrientation(j));
-                        if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ()))
-                        {
-                            if (isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(i)))
-                            {
-                                validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(i)));
-                            }
-                            else
-                            {
+                        if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ())) {
+                            if (isDirectionSolid(
+                                world,
+                                loc.getX(),
+                                loc.getY(),
+                                loc.getZ(),
+                                ForgeDirection.getOrientation(i))) {
+                                validSpots.add(
+                                    Pair.of(
+                                        new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                        ForgeDirection.getOrientation(i)));
+                            } else {
                                 loc = loc.offset(ForgeDirection.getOrientation(i));
-                                if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ()) && isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])))
-                                {
-                                    validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
-                                }
-                                else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen && isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])))
-                                {
-                                    if (world.getTileEntity(loc.getX(), loc.getY(), loc.getZ()) instanceof TileEntityGlowLichen offsetTE)
-                                    {
-                                        int offsetSideMap = offsetTE.getSideMap();
-                                        if ((offsetSideMap & (1 << ForgeDirection.OPPOSITES[j])) == 0)
-                                        {
-                                            validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
+                                if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ()) && isDirectionSolid(
+                                    world,
+                                    loc.getX(),
+                                    loc.getY(),
+                                    loc.getZ(),
+                                    ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j]))) {
+                                    validSpots.add(
+                                        Pair.of(
+                                            new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                            ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
+                                } else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen
+                                    && isDirectionSolid(
+                                        world,
+                                        loc.getX(),
+                                        loc.getY(),
+                                        loc.getZ(),
+                                        ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j]))) {
+                                            if (world.getTileEntity(
+                                                loc.getX(),
+                                                loc.getY(),
+                                                loc.getZ()) instanceof TileEntityGlowLichen offsetTE) {
+                                                int offsetSideMap = offsetTE.getSideMap();
+                                                if ((offsetSideMap & (1 << ForgeDirection.OPPOSITES[j])) == 0) {
+                                                    validSpots.add(
+                                                        Pair.of(
+                                                            new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                                            ForgeDirection
+                                                                .getOrientation(ForgeDirection.OPPOSITES[j])));
+                                                }
+                                            }
                                         }
-                                    }
-                                }
                             }
-                        }
-                        else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen)
-                        {
-                            if (isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(i)))
-                            {
-                                if (world.getTileEntity(loc.getX(), loc.getY(), loc.getZ()) instanceof TileEntityGlowLichen offsetTE)
-                                {
+                        } else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen) {
+                            if (isDirectionSolid(
+                                world,
+                                loc.getX(),
+                                loc.getY(),
+                                loc.getZ(),
+                                ForgeDirection.getOrientation(i))) {
+                                if (world.getTileEntity(
+                                    loc.getX(),
+                                    loc.getY(),
+                                    loc.getZ()) instanceof TileEntityGlowLichen offsetTE) {
                                     int offsetSideMap = offsetTE.getSideMap();
                                     if ((offsetSideMap & (1 << i)) == 0) {
-                                        validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(i)));
+                                        validSpots.add(
+                                            Pair.of(
+                                                new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                                ForgeDirection.getOrientation(i)));
                                     }
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 loc = loc.offset(ForgeDirection.getOrientation(i));
-                                if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ()) && isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])))
-                                {
-                                    validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
-                                }
-                                else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen && isDirectionSolid(world, loc.getX(), loc.getY(), loc.getZ(), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])))
-                                {
-                                    if (world.getTileEntity(loc.getX(), loc.getY(), loc.getZ()) instanceof TileEntityGlowLichen offsetTE)
-                                    {
-                                        int offsetSideMap = offsetTE.getSideMap();
-                                        if ((offsetSideMap & (1 << ForgeDirection.OPPOSITES[j])) == 0)
-                                        {
-                                            validSpots.add(Pair.of(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
+                                if (world.isAirBlock(loc.getX(), loc.getY(), loc.getZ()) && isDirectionSolid(
+                                    world,
+                                    loc.getX(),
+                                    loc.getY(),
+                                    loc.getZ(),
+                                    ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j]))) {
+                                    validSpots.add(
+                                        Pair.of(
+                                            new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                            ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j])));
+                                } else if (world.getBlock(loc.getX(), loc.getY(), loc.getZ()) instanceof BlockGlowLichen
+                                    && isDirectionSolid(
+                                        world,
+                                        loc.getX(),
+                                        loc.getY(),
+                                        loc.getZ(),
+                                        ForgeDirection.getOrientation(ForgeDirection.OPPOSITES[j]))) {
+                                            if (world.getTileEntity(
+                                                loc.getX(),
+                                                loc.getY(),
+                                                loc.getZ()) instanceof TileEntityGlowLichen offsetTE) {
+                                                int offsetSideMap = offsetTE.getSideMap();
+                                                if ((offsetSideMap & (1 << ForgeDirection.OPPOSITES[j])) == 0) {
+                                                    validSpots.add(
+                                                        Pair.of(
+                                                            new BlockPos(loc.getX(), loc.getY(), loc.getZ()),
+                                                            ForgeDirection
+                                                                .getOrientation(ForgeDirection.OPPOSITES[j])));
+                                                }
+                                            }
                                         }
-                                    }
-                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
+            } else {
                 int cardinalDirMap = sideMap & ~(1 << ForgeDirection.OPPOSITES[i]);
-                if (isDirectionSolid(world, x, y, z, ForgeDirection.getOrientation(i)))
-                {
-                    for (int k = 0; k < ForgeDirection.values().length; k++)
-                    {
-                        if ((cardinalDirMap & (1 << k)) != 0)
-                        {
+                if (isDirectionSolid(world, x, y, z, ForgeDirection.getOrientation(i))) {
+                    for (int k = 0; k < ForgeDirection.values().length; k++) {
+                        if ((cardinalDirMap & (1 << k)) != 0) {
                             validSpots.add(Pair.of(new BlockPos(x, y, z), ForgeDirection.getOrientation(i)));
                             break;
                         }

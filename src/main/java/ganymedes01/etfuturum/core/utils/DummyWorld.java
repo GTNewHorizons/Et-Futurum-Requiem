@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.core.utils;
 
-import com.google.common.collect.Maps;
-import ganymedes01.etfuturum.api.mappings.RegistryMapping;
-import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
+import java.io.File;
+import java.util.Map;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -18,8 +18,10 @@ import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
-import java.io.File;
-import java.util.Map;
+import com.google.common.collect.Maps;
+
+import ganymedes01.etfuturum.api.mappings.RegistryMapping;
+import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
 
 /**
  * Pulled from GregTech6 with permission from Greg, with modification to support fake block setting
@@ -27,171 +29,173 @@ import java.util.Map;
  * @author roadhog360 GregoriusT
  */
 public class DummyWorld extends World {
-	public static class GT_IteratorRandom extends RandomXoshiro256StarStar {
-		private static final long serialVersionUID = 1L;
 
-		public int mIterationStep = Integer.MAX_VALUE;
+    public static class GT_IteratorRandom extends RandomXoshiro256StarStar {
 
-		@Override
-		public int nextInt(int aParameter) {
-			if (mIterationStep == 0 || mIterationStep > aParameter) {
-				mIterationStep = aParameter;
-			}
-			return --mIterationStep;
-		}
-	}
+        private static final long serialVersionUID = 1L;
 
-	public static final DummyWorld GLOBAL_DUMMY_WORLD = new DummyWorld();
-	public GT_IteratorRandom mRandom = new GT_IteratorRandom();
-	private final Map<BlockPos, RegistryMapping<Block>> FAKE_WORLD_DATA = Maps.newHashMap(); //Stores setblock data for getblock
-	private static final RegistryMapping<Block> AIR = new RegistryMapping<>(Blocks.air, 0);
+        public int mIterationStep = Integer.MAX_VALUE;
 
-	DummyWorld(ISaveHandler par1iSaveHandler, String par2Str, WorldProvider par3WorldProvider, WorldSettings par4WorldSettings, Profiler par5Profiler) {
-		super(par1iSaveHandler, par2Str, par4WorldSettings, par3WorldProvider, par5Profiler);
-		rand = mRandom;
-	}
+        @Override
+        public int nextInt(int aParameter) {
+            if (mIterationStep == 0 || mIterationStep > aParameter) {
+                mIterationStep = aParameter;
+            }
+            return --mIterationStep;
+        }
+    }
 
-	public DummyWorld() {
-		this(
-				new ISaveHandler() {
-					@Override
-					public void saveWorldInfoWithPlayer(WorldInfo var1, NBTTagCompound var2) {/*Do nothing*/}
+    public static final DummyWorld GLOBAL_DUMMY_WORLD = new DummyWorld();
+    public GT_IteratorRandom mRandom = new GT_IteratorRandom();
+    private final Map<BlockPos, RegistryMapping<Block>> FAKE_WORLD_DATA = Maps.newHashMap(); // Stores setblock data for
+                                                                                             // getblock
+    private static final RegistryMapping<Block> AIR = new RegistryMapping<>(Blocks.air, 0);
 
-					@Override
-					public void saveWorldInfo(WorldInfo var1) {/*Do nothing*/}
+    DummyWorld(ISaveHandler par1iSaveHandler, String par2Str, WorldProvider par3WorldProvider,
+        WorldSettings par4WorldSettings, Profiler par5Profiler) {
+        super(par1iSaveHandler, par2Str, par4WorldSettings, par3WorldProvider, par5Profiler);
+        rand = mRandom;
+    }
 
-					@Override
-					public WorldInfo loadWorldInfo() {
-						return null;
-					}
+    public DummyWorld() {
+        this(new ISaveHandler() {
 
-					@Override
-					public IPlayerFileData getSaveHandler() {
-						return null;
-					}
+            @Override
+            public void saveWorldInfoWithPlayer(WorldInfo var1, NBTTagCompound var2) {/* Do nothing */}
 
-					@Override
-					public File getMapFileFromName(String var1) {
-						return null;
-					}
+            @Override
+            public void saveWorldInfo(WorldInfo var1) {/* Do nothing */}
 
-					@Override
-					public IChunkLoader getChunkLoader(WorldProvider var1) {
-						return null;
-					}
+            @Override
+            public WorldInfo loadWorldInfo() {
+                return null;
+            }
 
-					@Override
-					public void flush() {/*Do nothing*/}
+            @Override
+            public IPlayerFileData getSaveHandler() {
+                return null;
+            }
 
-					@Override
-					public void checkSessionLock() {/*Do nothing*/}
+            @Override
+            public File getMapFileFromName(String var1) {
+                return null;
+            }
 
-					@Override
-					public String getWorldDirectoryName() {
-						return null;
-					}
+            @Override
+            public IChunkLoader getChunkLoader(WorldProvider var1) {
+                return null;
+            }
 
-					@Override
-					public File getWorldDirectory() {
-						return null;
-					}
-				},
-				"DUMMY_DIMENSION",
-				new WorldProvider() {
-					@Override
-					public String getDimensionName() {
-						return "DUMMY_DIMENSION";
-					}
-				},
-				new WorldSettings(new WorldInfo(new NBTTagCompound())),
-				new Profiler()
-		);
-	}
+            @Override
+            public void flush() {/* Do nothing */}
 
-	@Override
-	protected IChunkProvider createChunkProvider() {
-		return null;
-	}
+            @Override
+            public void checkSessionLock() {/* Do nothing */}
 
-	@Override
-	public Entity getEntityByID(int aEntityID) {
-		return null;
-	}
+            @Override
+            public String getWorldDirectoryName() {
+                return null;
+            }
 
-	@Override
-	public boolean setBlockMetadataWithNotify(int aX, int aY, int aZ, int aMeta, int flags) {
-		BlockPos pos = new BlockPos(aX, aY, aZ);
-		if (FAKE_WORLD_DATA.containsKey(pos)) {
-			RegistryMapping<Block> block = FAKE_WORLD_DATA.get(pos);
-			setBlock(aX, aY, aZ, block.getObject(), aMeta, 0);
-			return true;
-		}
-		return false;
-	}
+            @Override
+            public File getWorldDirectory() {
+                return null;
+            }
+        }, "DUMMY_DIMENSION", new WorldProvider() {
 
-	@Override
-	public boolean setBlockToAir(int aX, int aY, int aZ) {
-		FAKE_WORLD_DATA.remove(new BlockPos(aX, aY, aZ));
-		return true;
-	}
+            @Override
+            public String getDimensionName() {
+                return "DUMMY_DIMENSION";
+            }
+        }, new WorldSettings(new WorldInfo(new NBTTagCompound())), new Profiler());
+    }
 
-	@Override
-	public boolean setBlock(int x, int y, int z, Block block) {
-		return this.setBlock(x, y, z, block, 0, 0);
-	}
+    @Override
+    protected IChunkProvider createChunkProvider() {
+        return null;
+    }
 
-	@Override
-	public boolean setBlock(int aX, int aY, int aZ, Block aBlock, int aMeta, int aFlags) {
-		BlockPos pos = new BlockPos(aX, aY, aZ);
-		if (aBlock == Blocks.air) {
-			FAKE_WORLD_DATA.remove(pos);
-		} else {
-			FAKE_WORLD_DATA.put(pos, new RegistryMapping<>(aBlock, aMeta));
-		}
-		return true;
-	}
+    @Override
+    public Entity getEntityByID(int aEntityID) {
+        return null;
+    }
 
-	@Override
-	public float getSunBrightnessFactor(float p_72967_1_) {
-		return 1.0F;
-	}
+    @Override
+    public boolean setBlockMetadataWithNotify(int aX, int aY, int aZ, int aMeta, int flags) {
+        BlockPos pos = new BlockPos(aX, aY, aZ);
+        if (FAKE_WORLD_DATA.containsKey(pos)) {
+            RegistryMapping<Block> block = FAKE_WORLD_DATA.get(pos);
+            setBlock(aX, aY, aZ, block.getObject(), aMeta, 0);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public BiomeGenBase getBiomeGenForCoords(int aX, int aZ) {
-		if (aX >= 16 && aZ >= 16 && aX < 32 && aZ < 32) return BiomeGenBase.plains;
-		return BiomeGenBase.ocean;
-	}
+    @Override
+    public boolean setBlockToAir(int aX, int aY, int aZ) {
+        FAKE_WORLD_DATA.remove(new BlockPos(aX, aY, aZ));
+        return true;
+    }
 
-	@Override
-	public int getFullBlockLightValue(int aX, int aY, int aZ) {
-		return 10;
-	}
+    @Override
+    public boolean setBlock(int x, int y, int z, Block block) {
+        return this.setBlock(x, y, z, block, 0, 0);
+    }
 
-	@Override
-	public Block getBlock(int aX, int aY, int aZ) {
-		return FAKE_WORLD_DATA.getOrDefault(new BlockPos(aX, aY, aZ), AIR).getObject();
-	}
+    @Override
+    public boolean setBlock(int aX, int aY, int aZ, Block aBlock, int aMeta, int aFlags) {
+        BlockPos pos = new BlockPos(aX, aY, aZ);
+        if (aBlock == Blocks.air) {
+            FAKE_WORLD_DATA.remove(pos);
+        } else {
+            FAKE_WORLD_DATA.put(pos, new RegistryMapping<>(aBlock, aMeta));
+        }
+        return true;
+    }
 
-	@Override
-	public int getBlockMetadata(int aX, int aY, int aZ) {
-		return FAKE_WORLD_DATA.getOrDefault(new BlockPos(aX, aY, aZ), AIR).getMeta();
-	}
+    @Override
+    public float getSunBrightnessFactor(float p_72967_1_) {
+        return 1.0F;
+    }
 
-	@Override
-	public boolean canBlockSeeTheSky(int aX, int aY, int aZ) {
-		if (aX >= 16 && aZ >= 16 && aX < 32 && aZ < 32) return aY > 64;
-		return true;
-	}
+    @Override
+    public BiomeGenBase getBiomeGenForCoords(int aX, int aZ) {
+        if (aX >= 16 && aZ >= 16 && aX < 32 && aZ < 32) return BiomeGenBase.plains;
+        return BiomeGenBase.ocean;
+    }
 
-	/**
-	 * MCP name: {@code getRenderDistanceChunks}
-	 */
-	@Override
-	protected int func_152379_p() {
-		return 0;
-	}
+    @Override
+    public int getFullBlockLightValue(int aX, int aY, int aZ) {
+        return 10;
+    }
 
-	public void clearBlocksCache() {
-		FAKE_WORLD_DATA.clear();
-	}
+    @Override
+    public Block getBlock(int aX, int aY, int aZ) {
+        return FAKE_WORLD_DATA.getOrDefault(new BlockPos(aX, aY, aZ), AIR)
+            .getObject();
+    }
+
+    @Override
+    public int getBlockMetadata(int aX, int aY, int aZ) {
+        return FAKE_WORLD_DATA.getOrDefault(new BlockPos(aX, aY, aZ), AIR)
+            .getMeta();
+    }
+
+    @Override
+    public boolean canBlockSeeTheSky(int aX, int aY, int aZ) {
+        if (aX >= 16 && aZ >= 16 && aX < 32 && aZ < 32) return aY > 64;
+        return true;
+    }
+
+    /**
+     * MCP name: {@code getRenderDistanceChunks}
+     */
+    @Override
+    protected int func_152379_p() {
+        return 0;
+    }
+
+    public void clearBlocksCache() {
+        FAKE_WORLD_DATA.clear();
+    }
 }

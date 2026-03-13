@@ -1,12 +1,14 @@
 package ganymedes01.etfuturum.client.model;
 
-import ganymedes01.etfuturum.entities.EntityFox;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.MathHelper;
+
 import org.lwjgl.opengl.GL11;
+
+import ganymedes01.etfuturum.entities.EntityFox;
 
 public class ModelFox extends ModelBase {
 
@@ -24,7 +26,7 @@ public class ModelFox extends ModelBase {
 
     private float partialTicks;
 
-    public ModelFox(){
+    public ModelFox() {
         this.textureWidth = 48;
         this.textureHeight = 32;
         this.head = new ModelRenderer(this, 1, 5);
@@ -127,7 +129,8 @@ public class ModelFox extends ModelBase {
         this.partialTicks = h;
     }
 
-    public void render(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_) {
+    public void render(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_,
+        float p_78088_6_, float p_78088_7_) {
         this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, p_78088_7_, p_78088_1_);
 
         float childHeadYOffset = 8.0F;
@@ -163,7 +166,8 @@ public class ModelFox extends ModelBase {
         }
     }
 
-    public void setRotationAngles(float p_78087_1_, float p_78087_2_, float h, float i, float j, float p_78087_6_, Entity entity) {
+    public void setRotationAngles(float p_78087_1_, float p_78087_2_, float h, float i, float j, float p_78087_6_,
+        Entity entity) {
         EntityFox foxEntity = (EntityFox) entity;
 
         if (!foxEntity.isPlayerSleeping() && !foxEntity.isWalking() && !foxEntity.isInSneakingPose()) {

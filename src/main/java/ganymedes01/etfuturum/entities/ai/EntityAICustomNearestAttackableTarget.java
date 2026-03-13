@@ -10,7 +10,8 @@ public class EntityAICustomNearestAttackableTarget extends EntityAINearestAttack
 
     private final IEntitySelector extraSelector;
 
-    public EntityAICustomNearestAttackableTarget(EntityCreature creature, Class<? extends Entity> targetClass, int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, IEntitySelector extraSelector) {
+    public EntityAICustomNearestAttackableTarget(EntityCreature creature, Class<? extends Entity> targetClass,
+        int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, IEntitySelector extraSelector) {
         super(creature, targetClass, reciprocalChance, checkVisibility, checkCanNavigate);
         this.extraSelector = extraSelector;
     }

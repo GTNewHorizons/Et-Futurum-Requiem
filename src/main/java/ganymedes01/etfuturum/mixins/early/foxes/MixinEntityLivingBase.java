@@ -1,14 +1,16 @@
 package ganymedes01.etfuturum.mixins.early.foxes;
 
-import ganymedes01.etfuturum.entities.EntityFox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import ganymedes01.etfuturum.entities.EntityFox;
 
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase {

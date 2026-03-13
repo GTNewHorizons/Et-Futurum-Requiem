@@ -9,47 +9,48 @@ import net.minecraft.potion.Potion;
 import net.minecraft.world.World;
 
 public class ItemHoneyBottle extends BaseItem {
-	public ItemHoneyBottle() {
-		setNames("honey_bottle");
-		setContainerItem(Items.glass_bottle);
-		setMaxStackSize(16);
-		EntityXPOrb.getXPSplit(1);
-	}
 
-	@Override
-	public ItemStack onEaten(ItemStack p_77654_1_, World p_77654_2_, EntityPlayer p_77654_3_) {
-		if (!p_77654_3_.capabilities.isCreativeMode) {
-			--p_77654_1_.stackSize;
-		}
+    public ItemHoneyBottle() {
+        setNames("honey_bottle");
+        setContainerItem(Items.glass_bottle);
+        setMaxStackSize(16);
+        EntityXPOrb.getXPSplit(1);
+    }
 
-		if (!p_77654_2_.isRemote) {
-			p_77654_3_.removePotionEffect(Potion.poison.id);
-		}
+    @Override
+    public ItemStack onEaten(ItemStack p_77654_1_, World p_77654_2_, EntityPlayer p_77654_3_) {
+        if (!p_77654_3_.capabilities.isCreativeMode) {
+            --p_77654_1_.stackSize;
+        }
 
-		if (!p_77654_3_.capabilities.isCreativeMode) {
-			if (p_77654_1_.stackSize <= 0) {
-				return new ItemStack(Items.glass_bottle);
-			}
+        if (!p_77654_2_.isRemote) {
+            p_77654_3_.removePotionEffect(Potion.poison.id);
+        }
 
-			p_77654_3_.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
-		}
+        if (!p_77654_3_.capabilities.isCreativeMode) {
+            if (p_77654_1_.stackSize <= 0) {
+                return new ItemStack(Items.glass_bottle);
+            }
 
-		return p_77654_1_;
-	}
+            p_77654_3_.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
+        }
 
-	@Override
-	public int getMaxItemUseDuration(ItemStack p_77626_1_) {
-		return 32;
-	}
+        return p_77654_1_;
+    }
 
-	@Override
-	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.drink;
-	}
+    @Override
+    public int getMaxItemUseDuration(ItemStack p_77626_1_) {
+        return 32;
+    }
 
-	@Override
-	public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
-		player.setItemInUse(itemStackIn, this.getMaxItemUseDuration(itemStackIn));
-		return itemStackIn;
-	}
+    @Override
+    public EnumAction getItemUseAction(ItemStack stack) {
+        return EnumAction.drink;
+    }
+
+    @Override
+    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
+        player.setItemInUse(itemStackIn, this.getMaxItemUseDuration(itemStackIn));
+        return itemStackIn;
+    }
 }

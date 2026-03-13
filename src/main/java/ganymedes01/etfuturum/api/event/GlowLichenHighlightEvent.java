@@ -1,17 +1,19 @@
 package ganymedes01.etfuturum.api.event;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import ganymedes01.etfuturum.blocks.BlockGlowLichen;
-import ganymedes01.etfuturum.client.renderer.boundingbox.GlowLichenBoundingBoxRenderer;
-import ganymedes01.etfuturum.tileentities.TileEntityGlowLichen;
 import net.minecraft.block.Block;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 
-public class GlowLichenHighlightEvent 
-{
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ganymedes01.etfuturum.blocks.BlockGlowLichen;
+import ganymedes01.etfuturum.client.renderer.boundingbox.GlowLichenBoundingBoxRenderer;
+import ganymedes01.etfuturum.tileentities.TileEntityGlowLichen;
+
+public class GlowLichenHighlightEvent {
+
     public GlowLichenBoundingBoxRenderer boxRenderer = new GlowLichenBoundingBoxRenderer();
+
     @SubscribeEvent
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
         World world = event.player.worldObj;

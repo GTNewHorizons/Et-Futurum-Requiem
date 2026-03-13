@@ -1,10 +1,11 @@
 package ganymedes01.etfuturum.entities.ai;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
-import java.util.function.Predicate;
+
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 
 public class TargetPredicate {
 
@@ -55,8 +56,10 @@ public class TargetPredicate {
     public boolean test(@Nullable EntityLiving baseEntity, EntityLivingBase targetEntity) {
         if (baseEntity == targetEntity) {
             return false;
-      /*} else if (targetEntity.isSpectator()) {
-         return false;*/
+            /*
+             * } else if (targetEntity.isSpectator()) {
+             * return false;
+             */
         } else if (!targetEntity.isEntityAlive()) {
             return false;
         } else if (!this.includeInvulnerable && targetEntity.isEntityInvulnerable()) {
@@ -65,22 +68,25 @@ public class TargetPredicate {
             return false;
         } else {
             if (baseEntity != null) {
-            /*if (!this.ignoreEntityTargetRules) {
-               if (!baseEntity.canTarget(targetEntity)) {
-                  return false;
-               }
-
-               if (!baseEntity.canTarget(targetEntity.getType())) {
-                  return false;
-               }
-            }
-
-            if (!this.includeTeammates && baseEntity.isTeammate(targetEntity)) {
-               return false;
-            }*/
+                /*
+                 * if (!this.ignoreEntityTargetRules) {
+                 * if (!baseEntity.canTarget(targetEntity)) {
+                 * return false;
+                 * }
+                 * if (!baseEntity.canTarget(targetEntity.getType())) {
+                 * return false;
+                 * }
+                 * }
+                 * if (!this.includeTeammates && baseEntity.isTeammate(targetEntity)) {
+                 * return false;
+                 * }
+                 */
 
                 if (this.baseMaxDistance > 0.0D) {
-                    double d = /*this.useDistanceScalingFactor ? targetEntity.getAttackDistanceScalingFactor(baseEntity) : */1.0D;
+                    double d = /*
+                                * this.useDistanceScalingFactor ?
+                                * targetEntity.getAttackDistanceScalingFactor(baseEntity) :
+                                */1.0D;
                     double e = Math.max(this.baseMaxDistance * d, 2.0D);
                     double f = baseEntity.getDistanceSq(targetEntity.posX, targetEntity.posY, targetEntity.posZ);
                     if (f > e * e) {
@@ -88,7 +94,8 @@ public class TargetPredicate {
                     }
                 }
 
-                if (!this.includeHidden && !baseEntity.getEntitySenses().canSee(targetEntity)) {
+                if (!this.includeHidden && !baseEntity.getEntitySenses()
+                    .canSee(targetEntity)) {
                     return false;
                 }
             }

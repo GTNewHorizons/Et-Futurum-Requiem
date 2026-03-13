@@ -5,24 +5,23 @@ import io.netty.buffer.ByteBuf;
 
 public class AttackYawMessage implements IMessage {
 
-	float attackedAtYaw;
+    float attackedAtYaw;
 
-	public AttackYawMessage() {
-	}
+    public AttackYawMessage() {}
 
-	public AttackYawMessage(float yaw) {
-		attackedAtYaw = yaw;
-	}
+    public AttackYawMessage(float yaw) {
+        attackedAtYaw = yaw;
+    }
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		attackedAtYaw = buf.readFloat();
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        attackedAtYaw = buf.readFloat();
 
-	}
+    }
 
-	@Override
-	public void toBytes(ByteBuf buf) {
-		buf.writeFloat(attackedAtYaw);
-	}
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeFloat(attackedAtYaw);
+    }
 
 }

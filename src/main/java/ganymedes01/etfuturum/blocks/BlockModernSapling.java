@@ -1,11 +1,8 @@
 package ganymedes01.etfuturum.blocks;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
-import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
-import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
+import java.util.List;
+import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -18,86 +15,92 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraftforge.event.terraingen.TerrainGen;
 
-import java.util.List;
-import java.util.Random;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
 
 public class BlockModernSapling extends BlockSapling implements ISubBlocksBlock {
-	private final String[] types = new String[]{"mangrove_propagule", "cherry_sapling"};
-	private final IIcon[] icons = new IIcon[types.length];
 
-	public BlockModernSapling() {
-		setStepSound(Block.soundTypeGrass);
-		setCreativeTab(EtFuturum.creativeTabBlocks);
-	}
+    private final String[] types = new String[] { "mangrove_propagule", "cherry_sapling" };
+    private final IIcon[] icons = new IIcon[types.length];
 
-	@Override
-	public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
-		if (ConfigExperiments.enableMangroveBlocks) {
-			list.add(new ItemStack(itemIn, 1, 0));
-		}
-		if (ConfigBlocksItems.enableCherryBlocks) {
-			list.add(new ItemStack(itemIn, 1, 1));
-		}
-	}
+    public BlockModernSapling() {
+        setStepSound(Block.soundTypeGrass);
+        setCreativeTab(EtFuturum.creativeTabBlocks);
+    }
 
-	@Override
-	public IIcon getIcon(int side, int meta) {
-		return icons[(meta & 7) % icons.length];
-	}
+    @Override
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+        if (ConfigExperiments.enableMangroveBlocks) {
+            list.add(new ItemStack(itemIn, 1, 0));
+        }
+        if (ConfigBlocksItems.enableCherryBlocks) {
+            list.add(new ItemStack(itemIn, 1, 1));
+        }
+    }
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister reg) {
-		for (int i = 0; i < icons.length; ++i) {
-			icons[i] = reg.registerIcon(types[i]);
-		}
-	}
+    @Override
+    public IIcon getIcon(int side, int meta) {
+        return icons[(meta & 7) % icons.length];
+    }
 
-	private static final WorldGenAbstractTree cherry = new WorldGenCherryTrees(true);
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerBlockIcons(IIconRegister reg) {
+        for (int i = 0; i < icons.length; ++i) {
+            icons[i] = reg.registerIcon(types[i]);
+        }
+    }
 
-	/**
-	 * MCP name: {@code growTree}
-	 */
-	@Override
-	public void func_149878_d(World p_149878_1_, int p_149878_2_, int p_149878_3_, int p_149878_4_, Random p_149878_5_) {
-		if (!TerrainGen.saplingGrowTree(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_)) {
-			return;
-		}
+    private static final WorldGenAbstractTree cherry = new WorldGenCherryTrees(true);
 
-		int l = p_149878_1_.getBlockMetadata(p_149878_2_, p_149878_3_, p_149878_4_) & 7;
-		WorldGenAbstractTree tree = null;
+    /**
+     * MCP name: {@code growTree}
+     */
+    @Override
+    public void func_149878_d(World p_149878_1_, int p_149878_2_, int p_149878_3_, int p_149878_4_,
+        Random p_149878_5_) {
+        if (!TerrainGen.saplingGrowTree(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_)) {
+            return;
+        }
 
-		switch (l) {
-			case 1:
-				if (ConfigBlocksItems.enableCherryBlocks) {
-					tree = cherry;
-				}
-				break;
-		}
+        int l = p_149878_1_.getBlockMetadata(p_149878_2_, p_149878_3_, p_149878_4_) & 7;
+        WorldGenAbstractTree tree = null;
 
-		if (tree != null) {
-			Block block = p_149878_1_.getBlock(p_149878_2_, p_149878_3_, p_149878_4_);
-			int meta = p_149878_1_.getBlockMetadata(p_149878_2_, p_149878_3_, p_149878_4_);
-			p_149878_1_.setBlock(p_149878_2_, p_149878_3_, p_149878_4_, Blocks.air);
-			boolean success = tree.generate(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_);
-			if (!success) {
-				p_149878_1_.setBlock(p_149878_2_, p_149878_3_, p_149878_4_, block, meta, 2);
-			}
-		}
-	}
+        switch (l) {
+            case 1:
+                if (ConfigBlocksItems.enableCherryBlocks) {
+                    tree = cherry;
+                }
+                break;
+        }
 
-	@Override
-	public IIcon[] getIcons() {
-		return icons;
-	}
+        if (tree != null) {
+            Block block = p_149878_1_.getBlock(p_149878_2_, p_149878_3_, p_149878_4_);
+            int meta = p_149878_1_.getBlockMetadata(p_149878_2_, p_149878_3_, p_149878_4_);
+            p_149878_1_.setBlock(p_149878_2_, p_149878_3_, p_149878_4_, Blocks.air);
+            boolean success = tree.generate(p_149878_1_, p_149878_5_, p_149878_2_, p_149878_3_, p_149878_4_);
+            if (!success) {
+                p_149878_1_.setBlock(p_149878_2_, p_149878_3_, p_149878_4_, block, meta, 2);
+            }
+        }
+    }
 
-	@Override
-	public String[] getTypes() {
-		return types;
-	}
+    @Override
+    public IIcon[] getIcons() {
+        return icons;
+    }
 
-	@Override
-	public String getNameFor(ItemStack stack) {
-		return types[stack.getItemDamage() % types.length];
-	}
+    @Override
+    public String[] getTypes() {
+        return types;
+    }
+
+    @Override
+    public String getNameFor(ItemStack stack) {
+        return types[stack.getItemDamage() % types.length];
+    }
 }
