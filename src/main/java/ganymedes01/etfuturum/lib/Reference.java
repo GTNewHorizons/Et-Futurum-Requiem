@@ -26,5 +26,5 @@ public class Reference {
 	public static final String ENTITY_TEXTURE_PATH = ITEM_BLOCK_TEXTURE_PATH + "textures/entities/";
 
 	public static boolean launchConfigWarning;
-	public static final boolean SNAPSHOT_BUILD = true;
+	public static final boolean SNAPSHOT_BUILD = false;
 }
