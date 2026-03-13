@@ -35,37 +35,27 @@
  */
 dependencies {
     api("com.github.GTNewHorizons:GTNHLib:0.9.41:dev")
-    //Change to "implementation" to test RPLE in dev; change it back when you're done please!
-    compileOnly "com.falsepattern:rple-mc1.7.10:1.1.0"
-
-    // Can use `compileOnly` instead of `compile` if you want to require it at build time,
-    // but not require it in `runClient`/`runServer`
+	compileOnly('curse.maven:rple-1050511:7358368') {transitive=false}
     compileOnly "thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev"
     compileOnly "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
-    /** every file in libs/ gets forcibly compiled, please use another dir */
-    compileOnly files("libs/BaublesExpanded-2.1.2-dev.jar")
-    compileOnly files('libs/CraftTweaker-1.7.10-3.1.0-legacy-deobf.jar')
+    compileOnly('com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH:dev')
+    compileOnly("com.github.GTNewHorizons:CraftTweaker:3.4.2:dev")
     compileOnly "team.chisel:Chisel:2.9.5.12:deobf"
     compileOnly "team.chisel.ctmlib:CTMLib:MC1.7.10-1.4.1.5:deobf"
     compileOnly "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
     compileOnly "codechicken:CodeChickenLib:1.7.10-1.1.3.140:dev"
     compileOnly "codechicken:CodeChickenCore:1.7.10-1.0.7.47:dev"
-    compileOnly 'com.github.GTNewHorizons:ironchest:6.1.6'
-//    compileOnly 'com.github.GTNewHorizons:ironchest:6.1.6'
+    compileOnly 'com.github.GTNewHorizons:ironchest:6.1.11'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
-
-    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.6-GTNH:dev") {
+    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.35-GTNH:dev") {
         transitive = false
     }
-
-    compileOnly("com.github.GTNewHorizons:Angelica:1.0.0-beta64:api") {
+    compileOnly("com.github.GTNewHorizons:Angelica:2.1.3:api") {
         transitive = false
     }
-
-    compileOnly("com.github.GTNewHorizons:lwjgl3ify:2.1.17:api") {
+    compileOnly("com.github.GTNewHorizons:lwjgl3ify:3.0.15:api") {
         transitive = false
     }
-
     shadowImplementation('com.github.makamys:MCLib:0.3.7.7') {
         exclude group: "codechicken"
     }

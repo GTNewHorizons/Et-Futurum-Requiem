@@ -67,25 +67,29 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static ganymedes01.etfuturum.lib.Reference.MOD_GROUP;
+import static ganymedes01.etfuturum.lib.Reference.MOD_ID;
+import static ganymedes01.etfuturum.lib.Reference.MOD_NAME;
+
 @Mod(
-		modid = Reference.MOD_ID,
-		name = Reference.MOD_NAME,
-		version = Reference.VERSION_NUMBER,
+		modid = MOD_ID,
+		name = MOD_NAME,
+		version = Tags.VERSION,
 		dependencies = Reference.DEPENDENCIES
-//		guiFactory = Tags.MOD_GROUP + ".configuration.ConfigGuiFactory"
+
 )
 
 public class EtFuturum {
 
-	@Instance(Tags.MOD_ID)
+	@Instance(MOD_ID)
 	public static EtFuturum instance;
 
-	@SidedProxy(clientSide = Tags.MOD_GROUP + ".core.proxy.ClientProxy", serverSide = Tags.MOD_GROUP + ".core.proxy.CommonProxy")
+	@SidedProxy(clientSide = MOD_GROUP + ".core.proxy.ClientProxy", serverSide = MOD_GROUP + ".core.proxy.CommonProxy")
 	public static CommonProxy proxy;
 
 	public static SimpleNetworkWrapper networkWrapper;
 
-	public static CreativeTabs creativeTabItems = new CreativeTabs(Reference.MOD_ID + ".items") {
+	public static CreativeTabs creativeTabItems = new CreativeTabs(MOD_ID + ".items") {
 		@Override
 		public Item getTabIconItem() {
 			return  ModItems.RAW_ORE.isEnabled() ? ModItems.RAW_ORE.get()
@@ -112,7 +116,7 @@ public class EtFuturum {
 		}
 	};
 
-	public static CreativeTabs creativeTabBlocks = new CreativeTabs(Reference.MOD_ID + ".blocks") {
+	public static CreativeTabs creativeTabBlocks = new CreativeTabs(MOD_ID + ".blocks") {
 		@Override
 		public Item getTabIconItem() {
 			return ModBlocks.COPPER_BLOCK.isEnabled() ? ModBlocks.COPPER_BLOCK.getItem()
@@ -154,7 +158,7 @@ public class EtFuturum {
 	@EventHandler
 	public void onConstruction(FMLConstructionEvent event) {
 		if(Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			Logger.info(Tags.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
+			Logger.info(MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
 		}
 
 		MCLib.init();
@@ -223,7 +227,7 @@ public class EtFuturum {
 		OceanMonument.makeMap();
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(Reference.MOD_ID);
+		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(MOD_ID);
 		networkWrapper.registerMessage(ArmourStandInteractHandler.class, ArmourStandInteractMessage.class, 0, Side.SERVER);
 		networkWrapper.registerMessage(BlackHeartParticlesHandler.class, BlackHeartParticlesMessage.class, 1, Side.CLIENT);
 		networkWrapper.registerMessage(WoodSignOpenHandler.class, WoodSignOpenMessage.class, 3, Side.CLIENT);
@@ -233,7 +237,7 @@ public class EtFuturum {
 		networkWrapper.registerMessage(AttackYawHandler.class, AttackYawMessage.class, 7, Side.CLIENT);
 
 		if (!Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			MCLibModules.updateCheckAPI.submitModTask(Reference.MOD_ID, Reference.VERSION_NUMBER, Reference.VERSION_URL);
+			MCLibModules.updateCheckAPI.submitModTask(MOD_ID, Reference.VERSION_NUMBER, Reference.VERSION_URL);
 		}
 
 		CompatMisc.runModHooksPreInit();
