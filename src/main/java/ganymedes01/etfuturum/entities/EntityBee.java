@@ -13,10 +13,31 @@ import ganymedes01.etfuturum.entities.ai.FlyingPathNavigator;
 import ganymedes01.etfuturum.entities.attributes.EtFuturumEntityAttributes;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntityBeeHive;
-import net.minecraft.block.*;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockCocoa;
+import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockFire;
+import net.minecraft.block.BlockWall;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.*;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITempt;
+import net.minecraft.entity.ai.EntityLookHelper;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -33,7 +54,11 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
