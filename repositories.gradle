@@ -13,7 +13,7 @@ repositories {
         name = "GTMEGA/FalsePattern Maven"
         url = "https://mvn.falsepattern.com/releases/"
     }
-    maven {
-        url 'https://jitpack.io'
-    }
+	maven { url 'https://jitpack.io' }
 }
+
+
