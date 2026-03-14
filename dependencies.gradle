@@ -34,7 +34,7 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    api("com.github.GTNewHorizons:GTNHLib:0.9.41:dev")
+    api("com.github.GTNewHorizons:GTNHLib:0.9.42:dev")
     //Change to "implementation" to test RPLE in dev; change it back when you're done please!
     compileOnly "com.falsepattern:rple-mc1.7.10:1.1.0"
 
@@ -55,7 +55,7 @@ dependencies {
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
     compileOnly 'curse.maven:mb-battlegear-2-59710:2286765'
 
-    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.35-GTNH:dev") {
+    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.37-GTNH:dev") {
         transitive = false
     }
 
@@ -71,7 +71,7 @@ dependencies {
         exclude group: "codechicken"
     }
     
-    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.350:dev") {
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.358:dev") {
         transitive = false
     }
 }
