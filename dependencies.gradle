@@ -34,7 +34,8 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-//Change to "implementation" to test RPLE in dev; change it back when you're done please!
+    api("com.github.GTNewHorizons:GTNHLib:0.9.41:dev")
+    //Change to "implementation" to test RPLE in dev; change it back when you're done please!
     compileOnly "com.falsepattern:rple-mc1.7.10:1.1.0"
 
     // Can use `compileOnly` instead of `compile` if you want to require it at build time,
