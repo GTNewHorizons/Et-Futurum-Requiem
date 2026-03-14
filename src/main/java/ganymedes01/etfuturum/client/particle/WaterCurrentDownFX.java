@@ -1,11 +1,10 @@
 package ganymedes01.etfuturum.client.particle;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.particle.EntityBubbleFX;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class WaterCurrentDownFX extends EntityBubbleFX {
+public class WaterCurrentDownFX extends DeferredBubbleFX {
 
 	private float angle;
 

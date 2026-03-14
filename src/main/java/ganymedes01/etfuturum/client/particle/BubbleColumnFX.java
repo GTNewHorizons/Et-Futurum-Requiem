@@ -1,11 +1,10 @@
 package ganymedes01.etfuturum.client.particle;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.particle.EntityBubbleFX;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class BubbleColumnFX extends EntityBubbleFX {
+public class BubbleColumnFX extends DeferredBubbleFX {
 
 	public BubbleColumnFX(World world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 		super(world, x, y, z, xSpeed, ySpeed, zSpeed);

@@ -17,6 +17,7 @@ import ganymedes01.etfuturum.client.OpenGLHelper;
 import ganymedes01.etfuturum.client.gui.GuiConfigWarning;
 import ganymedes01.etfuturum.client.gui.GuiGamemodeSwitcher;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
+import ganymedes01.etfuturum.client.particle.DeferredBubbleFX;
 import ganymedes01.etfuturum.client.renderer.entity.elytra.LayerBetterElytra;
 import ganymedes01.etfuturum.client.sound.AmbienceLoop;
 import ganymedes01.etfuturum.client.sound.BeeFlySound;
@@ -59,6 +60,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiScreenBook;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
@@ -81,6 +86,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent.SetArmorModel;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -850,6 +856,48 @@ public class ClientEventHandler {
 		if (event.entity instanceof EntityBee) {
 			soundList.add(new BeeFlySound((EntityBee) event.entity));
 		}
+	}
+
+	private static final ResourceLocation particleTextures = new ResourceLocation("textures/particle/particles.png");
+
+	@SubscribeEvent
+	public void onRenderWorldLast(RenderWorldLastEvent event) {
+		if (DeferredBubbleFX.DEFERRED_BUBBLES.isEmpty()) return;
+
+		float pt = event.partialTicks;
+		Entity viewEntity = mc.renderViewEntity;
+		EntityFX.interpPosX = viewEntity.lastTickPosX + (viewEntity.posX - viewEntity.lastTickPosX) * pt;
+		EntityFX.interpPosY = viewEntity.lastTickPosY + (viewEntity.posY - viewEntity.lastTickPosY) * pt;
+		EntityFX.interpPosZ = viewEntity.lastTickPosZ + (viewEntity.posZ - viewEntity.lastTickPosZ) * pt;
+
+		mc.getTextureManager().bindTexture(particleTextures);
+		GL11.glDepthMask(false);
+		OpenGLHelper.enableBlend();
+		OpenGLHelper.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.003921569F);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+		Tessellator tess = Tessellator.instance;
+		tess.startDrawingQuads();
+		tess.setBrightness(0xF000F0);
+
+		float rx = ActiveRenderInfo.rotationX, rxz = ActiveRenderInfo.rotationXZ;
+		float rz = ActiveRenderInfo.rotationZ, ryz = ActiveRenderInfo.rotationYZ;
+		float rxy = ActiveRenderInfo.rotationXY;
+
+		DeferredBubbleFX.isRenderingDeferred = true;
+		Iterator<WeakReference<DeferredBubbleFX>> iter = DeferredBubbleFX.DEFERRED_BUBBLES.iterator();
+		while (iter.hasNext()) {
+			DeferredBubbleFX bubble = iter.next().get();
+			if (bubble == null || bubble.isDead) { iter.remove(); continue; }
+			bubble.renderParticle(tess, pt, rx, rxz, rz, ryz, rxy);
+		}
+		DeferredBubbleFX.isRenderingDeferred = false;
+		tess.draw();
+
+		GL11.glDepthMask(true);
+		OpenGLHelper.disableBlend();
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
 	}
 
 }
