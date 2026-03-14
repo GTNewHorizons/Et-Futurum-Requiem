@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static ganymedes01.etfuturum.lib.Reference.MOD_ID;
+
 @LateMixin
 public class EtFuturumLateMixins implements ILateMixinLoader {
 	@Override
 	public String getMixinConfig() {
-		return "mixins." + Tags.MOD_ID + ".late.json";
+		return "mixins." + MOD_ID + ".late.json";
 	}
 
 	@Override
