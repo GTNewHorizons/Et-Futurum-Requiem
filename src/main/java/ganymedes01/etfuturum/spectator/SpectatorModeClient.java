@@ -10,7 +10,14 @@ import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+
 
 public class SpectatorModeClient extends SpectatorMode {
 	public static final SpectatorModeClient INSTANCE = new SpectatorModeClient();

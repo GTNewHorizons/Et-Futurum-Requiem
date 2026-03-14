@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static ganymedes01.etfuturum.lib.Reference.MOD_ID;
+
 @IFMLLoadingPlugin.Name("EtFuturumEarlyMixins")
 @IFMLLoadingPlugin.MCVersion("1.7.10")
 public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoader {
@@ -27,7 +29,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 	public static final MixinEnvironment.Side side = MixinEnvironment.getCurrentEnvironment().getSide();
 
 	public void initConfigs() {
-		final String configDir = "config" + File.separator + Reference.MOD_ID;
+		final String configDir = "config" + File.separator + MOD_ID;
 
 //	  File from before Et Futurum Requiem (Not in a subdirectory)
 		File olderFile = new File(Launch.minecraftHome, "config" + File.separator + "etfuturum.cfg");
@@ -60,7 +62,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 	@Override
 	public String getMixinConfig() {
-		return "mixins." + Tags.MOD_ID + ".early.json";
+		return "mixins." + MOD_ID + ".early.json";
 	}
 
 	@Override
