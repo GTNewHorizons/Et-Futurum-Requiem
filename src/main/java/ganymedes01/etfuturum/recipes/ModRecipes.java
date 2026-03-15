@@ -14,14 +14,26 @@ import ganymedes01.etfuturum.blocks.ores.modded.BlockGeneralModdedDeepslateOre;
 import ganymedes01.etfuturum.blocks.rawore.modded.BlockGeneralModdedRawOre;
 import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.ItemNewBoat;
 import ganymedes01.etfuturum.items.ItemSuspiciousStew;
 import ganymedes01.etfuturum.items.rawore.modded.ItemGeneralModdedRawOre;
 import ganymedes01.etfuturum.lib.EnumColor;
 import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.recipes.crafting.*;
+
+import ganymedes01.etfuturum.recipes.crafting.RecipeAddPattern;
+import ganymedes01.etfuturum.recipes.crafting.RecipeDuplicatePattern;
+import ganymedes01.etfuturum.recipes.crafting.RecipeDyedShulkerBox;
+import ganymedes01.etfuturum.recipes.crafting.RecipeFixedFireworks;
+import ganymedes01.etfuturum.recipes.crafting.RecipeTippedArrow;
+import ganymedes01.etfuturum.recipes.crafting.ShapedEtFuturumRecipe;
+import ganymedes01.etfuturum.recipes.crafting.ShapelessEtFuturumRecipe;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
