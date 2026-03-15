@@ -4,26 +4,55 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.*;
+
+import cpw.mods.fml.common.event.FMLConstructionEvent;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent;
 import cpw.mods.fml.common.event.FMLInterModComms.IMCMessage;
+import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
-import ganymedes01.etfuturum.api.*;
+
+import ganymedes01.etfuturum.api.BeePlantRegistry;
+import ganymedes01.etfuturum.api.BrewingFuelRegistry;
+import ganymedes01.etfuturum.api.CompostingRegistry;
+import ganymedes01.etfuturum.api.DeepslateOreRegistry;
+import ganymedes01.etfuturum.api.HoeRegistry;
+import ganymedes01.etfuturum.api.MultiBlockSoundRegistry;
+import ganymedes01.etfuturum.api.PistonBehaviorRegistry;
+import ganymedes01.etfuturum.api.RawOreRegistry;
+import ganymedes01.etfuturum.api.StrippedLogRegistry;
 import ganymedes01.etfuturum.api.mappings.BasicMultiBlockSound;
 import ganymedes01.etfuturum.blocks.BlockSculk;
 import ganymedes01.etfuturum.blocks.BlockSculkCatalyst;
+import ganymedes01.etfuturum.blocks.BlockSponge;
 import ganymedes01.etfuturum.client.BuiltInResourcePack;
 import ganymedes01.etfuturum.client.DynamicSoundsResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
-import ganymedes01.etfuturum.compat.*;
+
+import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
+import ganymedes01.etfuturum.compat.CompatMisc;
+import ganymedes01.etfuturum.compat.CompatRPLEEventHandler;
+import ganymedes01.etfuturum.compat.CompatTinkersConstruct;
+import ganymedes01.etfuturum.compat.CompatWaila;
+import ganymedes01.etfuturum.compat.ExternalContent;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.ConfigBase;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.handlers.WorldEventHandler;
 import ganymedes01.etfuturum.core.proxy.CommonProxy;
 import ganymedes01.etfuturum.core.utils.IInitAction;
@@ -31,7 +60,21 @@ import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.entities.ModEntityList;
 import ganymedes01.etfuturum.items.ItemWoodSign;
 import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.network.*;
+
+import ganymedes01.etfuturum.network.ArmourStandInteractHandler;
+import ganymedes01.etfuturum.network.ArmourStandInteractMessage;
+import ganymedes01.etfuturum.network.AttackYawHandler;
+import ganymedes01.etfuturum.network.AttackYawMessage;
+import ganymedes01.etfuturum.network.BlackHeartParticlesHandler;
+import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
+import ganymedes01.etfuturum.network.BoatMoveHandler;
+import ganymedes01.etfuturum.network.BoatMoveMessage;
+import ganymedes01.etfuturum.network.ChestBoatOpenInventoryHandler;
+import ganymedes01.etfuturum.network.ChestBoatOpenInventoryMessage;
+import ganymedes01.etfuturum.network.StartElytraFlyingHandler;
+import ganymedes01.etfuturum.network.StartElytraFlyingMessage;
+import ganymedes01.etfuturum.network.WoodSignOpenHandler;
+import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.recipes.SmithingTableRecipes;
@@ -46,8 +89,19 @@ import makamys.mclib.core.MCLib;
 import makamys.mclib.core.MCLibModules;
 import makamys.mclib.ext.assetdirector.ADConfig;
 import makamys.mclib.ext.assetdirector.AssetDirectorAPI;
-import net.minecraft.block.*;
+
+import net.minecraft.block.Block;
 import net.minecraft.block.Block.SoundType;
+import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockHay;
+import net.minecraft.block.BlockHopper;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockLilyPad;
+import net.minecraft.block.BlockNetherWart;
+import net.minecraft.block.BlockOre;
+import net.minecraft.block.BlockStem;
+import net.minecraft.block.BlockTrapDoor;
+import net.minecraft.block.BlockVine;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -65,27 +119,36 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+
+import static ganymedes01.etfuturum.lib.Reference.MOD_GROUP;
+import static ganymedes01.etfuturum.lib.Reference.MOD_ID;
+import static ganymedes01.etfuturum.lib.Reference.MOD_NAME;
 
 @Mod(
-		modid = Reference.MOD_ID,
-		name = Reference.MOD_NAME,
-		version = Reference.VERSION_NUMBER,
+		modid = MOD_ID,
+		name = MOD_NAME,
+		version = Tags.VERSION,
 		dependencies = Reference.DEPENDENCIES
-//		guiFactory = Tags.MOD_GROUP + ".configuration.ConfigGuiFactory"
+
 )
 
 public class EtFuturum {
 
-	@Instance(Tags.MOD_ID)
+	@Instance(MOD_ID)
 	public static EtFuturum instance;
 
-	@SidedProxy(clientSide = Tags.MOD_GROUP + ".core.proxy.ClientProxy", serverSide = Tags.MOD_GROUP + ".core.proxy.CommonProxy")
+	@SidedProxy(clientSide = MOD_GROUP + ".core.proxy.ClientProxy", serverSide = MOD_GROUP + ".core.proxy.CommonProxy")
 	public static CommonProxy proxy;
 
 	public static SimpleNetworkWrapper networkWrapper;
 
-	public static CreativeTabs creativeTabItems = new CreativeTabs(Reference.MOD_ID + ".items") {
+	public static CreativeTabs creativeTabItems = new CreativeTabs(MOD_ID + ".items") {
 		@Override
 		public Item getTabIconItem() {
 			return  ModItems.RAW_ORE.isEnabled() ? ModItems.RAW_ORE.get()
@@ -112,7 +175,7 @@ public class EtFuturum {
 		}
 	};
 
-	public static CreativeTabs creativeTabBlocks = new CreativeTabs(Reference.MOD_ID + ".blocks") {
+	public static CreativeTabs creativeTabBlocks = new CreativeTabs(MOD_ID + ".blocks") {
 		@Override
 		public Item getTabIconItem() {
 			return ModBlocks.COPPER_BLOCK.isEnabled() ? ModBlocks.COPPER_BLOCK.getItem()
@@ -154,7 +217,7 @@ public class EtFuturum {
 	@EventHandler
 	public void onConstruction(FMLConstructionEvent event) {
 		if(Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			Logger.info(Tags.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
+			Logger.info(MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
 		}
 
 		MCLib.init();
@@ -223,7 +286,7 @@ public class EtFuturum {
 		OceanMonument.makeMap();
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(Reference.MOD_ID);
+		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(MOD_ID);
 		networkWrapper.registerMessage(ArmourStandInteractHandler.class, ArmourStandInteractMessage.class, 0, Side.SERVER);
 		networkWrapper.registerMessage(BlackHeartParticlesHandler.class, BlackHeartParticlesMessage.class, 1, Side.CLIENT);
 		networkWrapper.registerMessage(WoodSignOpenHandler.class, WoodSignOpenMessage.class, 3, Side.CLIENT);
@@ -233,7 +296,7 @@ public class EtFuturum {
 		networkWrapper.registerMessage(AttackYawHandler.class, AttackYawMessage.class, 7, Side.CLIENT);
 
 		if (!Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			MCLibModules.updateCheckAPI.submitModTask(Reference.MOD_ID, Reference.VERSION_NUMBER, Reference.VERSION_URL);
+			MCLibModules.updateCheckAPI.submitModTask(MOD_ID, Reference.VERSION_NUMBER, Reference.VERSION_URL);
 		}
 
 		CompatMisc.runModHooksPreInit();

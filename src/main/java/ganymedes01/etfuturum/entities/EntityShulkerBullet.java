@@ -10,7 +10,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.*;
+
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
