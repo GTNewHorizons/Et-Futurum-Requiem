@@ -9,6 +9,7 @@ import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
@@ -48,15 +49,24 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 	@Override
 	public void randomDisplayTick(World worldIn, int x, int y, int z, Random random) {
 		super.randomDisplayTick(worldIn, x, y, z, random);
+		int particleSetting = Minecraft.getMinecraft().gameSettings.particleSetting;
 		boolean up = isUp(worldIn.getBlockMetadata(x, y, z));
 		if (up) {
-			// One centered + one random
+			// Centered bubble: always spawned regardless of setting
 			CustomParticles.spawnBubbleColumnUp(worldIn, x + 0.5, y, z + 0.5, 0, 0.04, 0);
-			CustomParticles.spawnBubbleColumnUp(worldIn,
-				x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(), 0, 0.04, 0);
-		} else if (random.nextInt(2) == 0) {
-			// One particle at top-center
-			CustomParticles.spawnWaterCurrentDown(worldIn, x + 0.5, y + 0.8, z + 0.5);
+			// Random bubble: always (All), 60% chance (Decreased), skip (Minimal)
+			if (particleSetting == 0 || (particleSetting == 1 && random.nextFloat() < 0.6f)) {
+				CustomParticles.spawnBubbleColumnUp(worldIn,
+					x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(), 0, 0.04, 0);
+			}
+		} else {
+			// All: 50%, Decreased: 40%, Minimal: 25%
+			boolean spawn = particleSetting == 0 ? random.nextInt(2) == 0
+						  : particleSetting == 1 ? random.nextFloat() < 0.4f
+						  : random.nextInt(4) == 0;
+			if (spawn) {
+				CustomParticles.spawnWaterCurrentDown(worldIn, x + 0.5, y + 0.8, z + 0.5);
+			}
 		}
 		if (random.nextInt(200) == 0) {
 			worldIn.playSound(x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(),
