@@ -20,7 +20,14 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -141,7 +148,7 @@ public class ItemStackMap<T> extends AbstractMap<ItemStack, T> {
 	}
 
 	@Override
-	public Set<Map.Entry<ItemStack, T>> entrySet() {
+	public Set<Entry<ItemStack, T>> entrySet() {
 		return new SetView();
 	}
 
@@ -171,7 +178,7 @@ public class ItemStackMap<T> extends AbstractMap<ItemStack, T> {
 		}
 	}
 
-	private static class DetailIter<T> implements Iterator<Map.Entry<ItemStack, T>> {
+	private static class DetailIter<T> implements Iterator<Entry<ItemStack, T>> {
 
 		private final Item owner;
 		private final ItemStackMap<T>.DetailMap backing;
@@ -515,7 +522,7 @@ public class ItemStackMap<T> extends AbstractMap<ItemStack, T> {
 		}
 	}
 
-	private class SetView extends AbstractSet<Map.Entry<ItemStack, T>> {
+	private class SetView extends AbstractSet<Entry<ItemStack, T>> {
 
 		@Override
 		public boolean contains(Object o) {

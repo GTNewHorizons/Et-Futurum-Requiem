@@ -2,8 +2,18 @@ package ganymedes01.etfuturum.configuration;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
+import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.mixinplugin.EtFuturumEarlyMixins;
-import ganymedes01.etfuturum.configuration.configs.*;
+
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.config.ConfigCategory;

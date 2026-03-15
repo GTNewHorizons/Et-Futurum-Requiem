@@ -21,6 +21,7 @@ public class BlockTuff extends BaseSubtypesBlock {
 		setResistance(6.0F);
 		setNames("tuff");
 		setBlockSound(ModSounds.soundTuff);
+		setHarvestLevel("pickaxe", 0);
 		setCreativeTab(EtFuturum.creativeTabBlocks);
 	}
 

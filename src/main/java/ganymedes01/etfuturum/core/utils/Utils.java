@@ -18,7 +18,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -27,7 +32,12 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

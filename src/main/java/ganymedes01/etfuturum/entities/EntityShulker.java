@@ -13,7 +13,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.*;
+
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +28,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;

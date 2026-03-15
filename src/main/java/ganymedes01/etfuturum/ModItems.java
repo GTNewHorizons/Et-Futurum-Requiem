@@ -3,10 +3,44 @@ package ganymedes01.etfuturum;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import ganymedes01.etfuturum.compat.ModsList;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.items.*;
-import ganymedes01.etfuturum.items.equipment.*;
+
+import ganymedes01.etfuturum.items.BaseFood;
+import ganymedes01.etfuturum.items.BaseItem;
+import ganymedes01.etfuturum.items.BaseSubtypesItem;
+import ganymedes01.etfuturum.items.DebugTestItem;
+import ganymedes01.etfuturum.items.ItemArmorStand;
+import ganymedes01.etfuturum.items.ItemArrowTipped;
+import ganymedes01.etfuturum.items.ItemBamboo;
+import ganymedes01.etfuturum.items.ItemBarrelUpgrade;
+import ganymedes01.etfuturum.items.ItemBeetrootSeeds;
+import ganymedes01.etfuturum.items.ItemBeetrootSoup;
+import ganymedes01.etfuturum.items.ItemChorusFruit;
+import ganymedes01.etfuturum.items.ItemEndCrystal;
+import ganymedes01.etfuturum.items.ItemEtFuturumRecord;
+import ganymedes01.etfuturum.items.ItemGlowBerries;
+import ganymedes01.etfuturum.items.ItemHoneyBottle;
+import ganymedes01.etfuturum.items.ItemLingeringPotion;
+import ganymedes01.etfuturum.items.ItemNetheriteIngot;
+import ganymedes01.etfuturum.items.ItemNewBoat;
+import ganymedes01.etfuturum.items.ItemRabbitStew;
+import ganymedes01.etfuturum.items.ItemShulkerBoxUpgrade;
+import ganymedes01.etfuturum.items.ItemSuspiciousStew;
+import ganymedes01.etfuturum.items.ItemSweetBerries;
+import ganymedes01.etfuturum.items.ItemWoodSign;
+import ganymedes01.etfuturum.items.equipment.ItemArmorElytra;
+import ganymedes01.etfuturum.items.equipment.ItemEFRArmour;
+import ganymedes01.etfuturum.items.equipment.ItemEFRAxe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRHoe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRPickaxe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRSpade;
+import ganymedes01.etfuturum.items.equipment.ItemEFRSword;
 import ganymedes01.etfuturum.items.rawore.modded.BaseRawOre;
 import ganymedes01.etfuturum.items.rawore.modded.ItemGeneralModdedRawOre;
 import ganymedes01.etfuturum.lib.Reference;
@@ -143,8 +177,8 @@ public enum ModItems {
 	//Debug Item
 	DEBUGGING_TOOL(Reference.DEV_ENVIRONMENT, new DebugTestItem());
 
-	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT};
-	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT};
+	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT, CHERRY_CHEST_BOAT, BAMBOO_CHEST_RAFT};
+	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT, CHERRY_BOAT, BAMBOO_RAFT};
 	public static final ModItems[] OLD_SIGN_ITEMS = new ModItems[]{ITEM_SIGN_SPRUCE, ITEM_SIGN_BIRCH, ITEM_SIGN_JUNGLE, ITEM_SIGN_ACACIA, ITEM_SIGN_DARK_OAK};
 
 	/*
