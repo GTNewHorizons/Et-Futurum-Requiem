@@ -4,7 +4,13 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
-import ganymedes01.etfuturum.compat.cthandlers.*;
+
+import ganymedes01.etfuturum.compat.cthandlers.CTBlastFurnace;
+import ganymedes01.etfuturum.compat.cthandlers.CTBrewingFuels;
+import ganymedes01.etfuturum.compat.cthandlers.CTComposting;
+import ganymedes01.etfuturum.compat.cthandlers.CTEnchantingFuels;
+import ganymedes01.etfuturum.compat.cthandlers.CTSmithingTable;
+import ganymedes01.etfuturum.compat.cthandlers.CTSmoker;
 import ganymedes01.etfuturum.recipes.BlastFurnaceRecipes;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.recipes.SmokerRecipes;

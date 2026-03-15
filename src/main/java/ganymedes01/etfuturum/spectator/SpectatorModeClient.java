@@ -10,7 +10,14 @@ import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+
 
 public class SpectatorModeClient extends SpectatorMode {
 	public static final SpectatorModeClient INSTANCE = new SpectatorModeClient();
@@ -27,8 +34,15 @@ public class SpectatorModeClient extends SpectatorMode {
 		biped.bipedLeftLeg.showModel = visible;
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
+		EntityPlayer viewer = Minecraft.getMinecraft().thePlayer;
+		if (viewer != null && isSpectator(event.entityPlayer) && event.entityPlayer != viewer
+				&& !isSpectator(viewer) && !viewer.capabilities.isCreativeMode) {
+			event.setCanceled(true);
+			return;
+		}
+
 		if (!SPECTATING_ENTITIES.containsKey(event.entityPlayer)) {
 			if (isSpectator(event.entityPlayer)) {
 				setBipedVisible(event.renderer.modelBipedMain, false);
@@ -42,7 +56,7 @@ public class SpectatorModeClient extends SpectatorMode {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onRenderPlayerArmor(RenderPlayerEvent.Specials.Pre event) {
 		if (isSpectator(event.entityPlayer)) {
 			event.setCanceled(true);
