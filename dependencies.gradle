@@ -34,12 +34,12 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    api("com.github.GTNewHorizons:GTNHLib:0.9.41:dev")
+    api("com.github.GTNewHorizons:GTNHLib:0.9.44:dev")
     compileOnly('curse.maven:rple-1050511:7358368') {transitive=false}
     compileOnly "thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev"
     compileOnly "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
     compileOnly('com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH:dev')
-    compileOnly("com.github.GTNewHorizons:CraftTweaker:3.4.2:dev")
+    compileOnly("com.github.GTNewHorizons:CraftTweaker:3.4.3:dev")
     compileOnly "team.chisel:Chisel:2.9.5.12:deobf"
     compileOnly "team.chisel.ctmlib:CTMLib:MC1.7.10-1.4.1.5:deobf"
     compileOnly "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
@@ -48,11 +48,11 @@ dependencies {
     compileOnly 'com.github.GTNewHorizons:ironchest:6.1.11'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
     compileOnly 'com.github.GTNewHorizons:Battlegear2-for-Backhand:1.6.7-backhand'
-    compileOnly "com.github.GTNewHorizons:ForbiddenMagic:0.9.6-GTNH:dev"
-    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.35-GTNH:dev") {
+    compileOnly "com.github.GTNewHorizons:ForbiddenMagic:0.9.14-GTNH:dev"
+    compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.39-GTNH:dev") {
         transitive = false
     }
-    compileOnly("com.github.GTNewHorizons:Angelica:2.1.3:api") {
+    compileOnly("com.github.GTNewHorizons:Angelica:2.1.4:api") {
         transitive = false
     }
     compileOnly("com.github.GTNewHorizons:lwjgl3ify:3.0.15:api") {
