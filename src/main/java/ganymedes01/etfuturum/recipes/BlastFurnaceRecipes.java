@@ -7,6 +7,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.util.regex.Pattern;
+
 public class BlastFurnaceRecipes {
 	private static final BlastFurnaceRecipes smeltingBase = new BlastFurnaceRecipes();
 	private boolean reloadingCT;
@@ -88,6 +90,7 @@ public class BlastFurnaceRecipes {
 		smeltingBlacklist.add(input);
 	}
 
+	private static final Pattern RAW_ORE_REG = Pattern.compile("^raw[A-Z].*");
 	public boolean canAdd(ItemStack input, ItemStack result) {
 		if (ConfigFunctions.enableAutoAddBlastFurnace) {
 
@@ -98,6 +101,10 @@ public class BlastFurnaceRecipes {
 					if (oreName == null) continue;
 					// Any Type of Ores.
 					if (oreName.startsWith("ore")) {
+						return true;
+					}
+					// Raw Ores
+					if(RAW_ORE_REG.matcher(oreName).matches()) {
 						return true;
 					}
 					// Thaumcraft Ore Cluster Items.
