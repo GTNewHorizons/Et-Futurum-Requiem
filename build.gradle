@@ -54,5 +54,5 @@ minecraft {
 }
 
 minecraft {
-    injectedTags.put("MC_ASSET_VER", "minecraft_1.21")
+    injectedTags.put("MC_ASSET_VER", "minecraft_1.21.10")
 }
