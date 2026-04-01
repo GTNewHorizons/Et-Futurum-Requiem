@@ -46,6 +46,7 @@ container.etfuturum.chest_boat=Boat with Chest
 item.record.pigstep.desc=Lena Raine - Pigstep
 item.record.otherside.desc=Lena Raine - otherside
 
+gui.load_world=Load World
 gui.smithing.upgrade=Upgrade Gear
 gui.warn.continue=Continue...
 gui.warn.dismiss=Don't show me this again.
@@ -54,6 +55,22 @@ gui.warn.configSplit1=Due to the main Et Futurum Requiem config becoming very lo
 gui.warn.configSplit2=When you're done, you can delete or rename the old config file, or tick the box below to stop seeing this warning.
 gui.chat.update=%1$s version %2$s is available!
 gui.chat.update.download=Click here to download the update on %s!
+gui.worldheight.migration.title=World Height Migration
+gui.worldheight.button.migrate=Migrate World
+gui.worldheight.migration.confirm.description.upper=You have %s installed and enabled the Increase World Height feature with an height offset %s set for existing worlds. That means your complete world will be shifted up by this offset. This can serve various purposes i.e. its necessary to use the deep dark caves feature. This feature is experimental so please make a backup of your world (we will also make one for you but better have it twice).
+gui.worldheight.migration.confirm.description.lower=You have %s installed and enabled the Increase World Height feature with an height offset %s set for existing worlds. That means your complete world will be completely shifted down by this offset. Keep in mind that every block below Y:%s gets destroyed. This feature is experimental so please make a backup of your world (we will also make one for you but better have it twice).
+gui.worldheight.migration.confirm.description.disabling=You have disabled the Increase World Height feature but want to load a world with Increased World Height enabled and a max world height of %s. Everything above Y:256 gets destroyed. Please make a backup of your world (we will also make one for you but better have it twice).
+gui.worldheight.migration.confirm.description.smaller=You have %s installed and enabled the Increase World Height feature with an max world height set to %s. But you want to load a world with max world height of %s. Everything above Y:%s gets destroyed. Please make a backup of your world (we will also make one for you but better have it twice).
+gui.worldheight.migration.confirmation=Are you sure you want to migrate your world?
+gui.worldheight.migration.github=If you find any bugs please report it to:
+gui.worldheight.migration.inprogress=World gets migrated to the new height...
+gui.worldheight.migration.backup=Creating backup
+gui.worldheight.migration.region=Migrating region files
+gui.worldheight.migration.players=Migrating players
+gui.worldheight.migration.spawnpoint=Migrating spawn point
+gui.worldheight.migration.successful=Migration completed successfully!
+gui.worldheight.migration.failed=Migration failed!
+gui.worldheight.migration.failed.text=Maybe your world is now corrupt and you should use your backup. Please create an issue for this error at github and upload your fml logs.
 
 # Subtitles
 subtitle.game.tnt.primed=TNT primed

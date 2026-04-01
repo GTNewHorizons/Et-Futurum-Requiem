@@ -19,6 +19,9 @@ public class ConfigExperiments extends ConfigBase {
 	public static boolean enableDripstone;
 	public static boolean enableLightningRod;
 	public static boolean enableBubbleColumns;
+	public static boolean enableIncreasedWorldHeight;
+	public static int maxWorldHeight;
+	public static int worldHeightOffset;
 
 	public static boolean netherDimensionProvider;
 	public static boolean endDimensionProvider;
@@ -49,6 +52,9 @@ public class ConfigExperiments extends ConfigBase {
 		enableMossAzalea = getBoolean("enableMossAzalea", catExperiments, false, "Enables moss and azalea. Currently azalea saplings do not grow.");
 		enableLightningRod = getBoolean("enableLightningRod", catExperiments, false, "Completely nonfunctional.");
 		enableBubbleColumns = getBoolean("enableBubbleColumns", catExperiments, false, "Places in the world but currently does nothing.");
+		enableIncreasedWorldHeight = getBoolean("enableIncreasedWorldHeight", catExperiments, false, "Increases the world height. Overrides the server build limit. Changing these settings could break your world! Not tested for mod compat.");
+		maxWorldHeight = getInt("maxWorldHeight", catExperiments, 512, 256, 512, "Defines the maximum world height. Changing these settings could break your world! Requires enable increased world height.");
+		worldHeightOffset = getInt("worldHeightOffset", catExperiments, 64, -128, 128, "New worlds will be generate higher or lower by this offset. And your existing worlds gets shifted up or down on first loading. This can serve various purposes. For example to have more space below to generate big caves. Must be a multiple of 16! Disable with 0. Requires enable increased world height.");
 
 		netherDimensionProvider = getBoolean("netherDimensionProvider", catExperiments, false, "Enables the Nether dimension provider override needed for supplying custom biomes. This is partially ignored if Netherlicious is installed. Netherlicious has compat to generate Et Futurum Requiem biomes with Netherlicious blocks.\nThis is so you can have vanilla-style biomes in Netherlicious while Requiem is installed. Turning this off or setting each individual biome ID to -1 will prevent my version of Nether biomes from generating. Don't forget to turn off my Nether blocks in blocksitems.cfg since my biomes will generate with Netherlicious blocks if available. [not implemented yet]");
 		endDimensionProvider = getBoolean("endDimensionProvider", catExperiments, false, "Enables outer end island generation from 1.9. Gateways are implemented but currently don't generate, but they work. The new dragon fight is currently not implemented and it does not spawn any gateways.");

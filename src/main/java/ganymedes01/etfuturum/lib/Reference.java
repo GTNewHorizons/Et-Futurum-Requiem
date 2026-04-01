@@ -9,6 +9,8 @@ public class Reference {
 	//May be inlined later
 	public static final String MOD_ID = "etfuturum";
 	public static final String MOD_NAME = "Et Futurum Requiem";
+	public static final String MOD_CONTAINER_ID = MOD_ID + ".container";
+	public static final String MOD_CONTAINER_NAME = MOD_NAME + " Container";
 	public static final String VERSION_NUMBER = Tags.VERSION;
 	public static final String MOD_GROUP = "ganymedes01.etfuturum";
 	public static final String MCAssetVer = "minecraft_1.21";

@@ -5,10 +5,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.configuration.ConfigBase;
-import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
-import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
-import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.*;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -286,6 +283,50 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityWolf");
 		}
 
+		mixins.add("worldheight.MixinFMLClientHandler");
+		mixins.add("worldheight.MixinAnvilChunkLoader");
+
+		if(ConfigExperiments.enableIncreasedWorldHeight) {
+
+			mixins.add("worldheight.AccessorPlayerManager");
+			mixins.add("worldheight.MixinWorldProvider");
+			mixins.add("worldheight.MixinWorld");
+			mixins.add("worldheight.MixinChunk");
+			mixins.add("worldheight.MixinEntityPlayerMP");
+			mixins.add("worldheight.MixinC07PacketPlayerDigging");
+			mixins.add("worldheight.MixinC08PacketPlayerBlockPlacement");
+			mixins.add("worldheight.MixinS21PacketChunkData");
+			mixins.add("worldheight.MixinS22PacketMultiBlockChange");
+			mixins.add("worldheight.MixinS23PacketBlockChange");
+			mixins.add("worldheight.MixinS26PacketMapChunkBulk");
+			mixins.add("worldheight.MixinItemBlock");
+			mixins.add("worldheight.MixinPlayerInstance");
+			mixins.add("worldheight.MixinChunkCache");
+			mixins.add("worldheight.MixinWorldType");
+
+			mixins.add("worldheight.worldgen.MixinBiomeDecorator");
+			mixins.add("worldheight.worldgen.MixinMapGenCaves");
+			mixins.add("worldheight.worldgen.MixinWorldGenCanopyTree");
+			mixins.add("worldheight.worldgen.MixinWorldGenDoublePlant");
+			mixins.add("worldheight.worldgen.MixinWorldGenFlowers");
+			mixins.add("worldheight.worldgen.MixinWorldGenForest");
+			mixins.add("worldheight.worldgen.MixinWorldGenHugeTrees");
+			mixins.add("worldheight.worldgen.MixinWorldGenSavannaTree");
+			mixins.add("worldheight.worldgen.MixinWorldGenSpikes");
+			mixins.add("worldheight.worldgen.MixinWorldGenSwamp");
+			mixins.add("worldheight.worldgen.MixinWorldGenTrees");
+			mixins.add("worldheight.worldgen.MixinWorldGenTaiga1");
+			mixins.add("worldheight.worldgen.MixinWorldGenTaiga2");
+
+			if(side == MixinEnvironment.Side.CLIENT) {
+
+				mixins.add("worldheight.client.MixinChunkCacheClient");
+				mixins.add("worldheight.client.MixinNetHandlerPlayClient");
+				mixins.add("worldheight.client.MixinRenderGlobal");
+				mixins.add("worldheight.client.MixinWorldClient");
+			}
+		}
+
 		return mixins;
 	}
 
@@ -296,7 +337,8 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 	@Override
 	public String getModContainerClass() {
-		return null;
+
+		return "ganymedes01.etfuturum.EtFuturumContainer";
 	}
 
 	@Override

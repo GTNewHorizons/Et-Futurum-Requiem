@@ -81,6 +81,7 @@ import ganymedes01.etfuturum.recipes.SmithingTableRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
+import ganymedes01.etfuturum.world.WorldHeightHandler;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
@@ -112,6 +113,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
@@ -147,6 +149,8 @@ public class EtFuturum {
 	public static CommonProxy proxy;
 
 	public static SimpleNetworkWrapper networkWrapper;
+
+	public static final String githubURL = "https://github.com/Roadhog360/Et-Futurum-Requiem";
 
 	public static CreativeTabs creativeTabItems = new CreativeTabs(MOD_ID + ".items") {
 		@Override
@@ -235,6 +239,9 @@ public class EtFuturum {
 	@EventHandler
 	@SuppressWarnings("unchecked")
 	public void preInit(FMLPreInitializationEvent event) {
+
+		WorldHeightHandler.initWorldHeightHandler();
+
 		try {
 			Field chestInfo = ChestGenHooks.class.getDeclaredField("chestInfo");
 			chestInfo.setAccessible(true);
@@ -655,6 +662,13 @@ public class EtFuturum {
 
 	@EventHandler
 	public void serverStarting(FMLServerStartingEvent event) {
+
+		if (WorldHeightHandler.isIncreasedWorldHeightEnabled()) {
+
+			MinecraftServer server = event.getServer();
+			server.setBuildLimit(WorldHeightHandler.getMaxWorldHeight());
+		}
+
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
 		}
