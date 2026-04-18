@@ -48,7 +48,9 @@ dependencies {
     compileOnly 'com.github.GTNewHorizons:ironchest:6.1.11'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
     compileOnly 'com.github.GTNewHorizons:Battlegear2-for-Backhand:1.6.7-backhand'
-    compileOnly "com.github.GTNewHorizons:ForbiddenMagic:0.9.14-GTNH:dev"
+    compileOnly('com.github.GTNewHorizons:ForbiddenMagic:0.9.14-GTNH:dev') {
+        transitive = false
+    }
     compileOnly("com.github.GTNewHorizons:TinkersConstruct:1.14.35-GTNH:dev") {
         transitive = false
     }
@@ -61,4 +63,10 @@ dependencies {
     shadowImplementation('com.github.makamys:MCLib:0.3.7.7') {
         exclude group: "codechicken"
     }
+}
+
+configurations.configureEach {
+    exclude group: 'com.github.GTNewHorizons', module: 'CodeChickenLib'
+    exclude group: 'com.github.GTNewHorizons', module: 'Hodgepodge'
+    exclude group: 'com.github.GTNewHorizons', module: 'Baubles'
 }
