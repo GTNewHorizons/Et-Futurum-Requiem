@@ -20,10 +20,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
-import roadhog360.hogutils.api.utils.RecipeHelper;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class EtFuturumWorldListener implements IWorldAccess {
 
@@ -88,12 +87,6 @@ public class EtFuturumWorldListener implements IWorldAccess {
 			}
 		}
 
-		// Validate bubble column registrations, ensuring that disabled columns do not get registered.
-		for(Map.Entry<String, BlockBubbleColumn> entry : BUBBLE_COLUMN_TAGS.entrySet()) {
-			if(!RecipeHelper.validateItems(entry.getValue())) {
-				BUBBLE_COLUMN_TAGS.remove(entry.getKey(), entry.getValue());
-			}
-		}
 	}
 
 	@Override
@@ -155,31 +148,29 @@ public class EtFuturumWorldListener implements IWorldAccess {
 	}
 
 
-	public static final Map<String, BlockBubbleColumn> BUBBLE_COLUMN_TAGS = new Reference2ObjectOpenHashMap<>();
+	public static final Map<String, Integer> BUBBLE_COLUMN_TAGS = new HashMap<>();
 
 	/**
 	 * This is only needed to create the initial bubble column above the magma or soul sand or custom column above another block.
 	 * The column itself handles the creation of the remainder of the column, as well as destroying itself.
 	 */
 	private void handleBubbleColumnCreation(int x, int y, int z, Block currentBlock, int currentMeta) {
-		// TODO: This is probably ineffifcient, may rewrite this later
-		if(!world.isRemote && !BUBBLE_COLUMN_TAGS.isEmpty() && !(currentBlock instanceof BlockBubbleColumn)) {
-			Block below = world.getBlock(x, y - 1, z);
-			if(currentBlock.getMaterial().isLiquid() && !below.getMaterial().isLiquid()) {
-				handleBubbleColumnCreation(x, y - 1, z, below, world.getBlockMetadata(x, y - 1, z));
+		if (world.isRemote || BUBBLE_COLUMN_TAGS.isEmpty() || currentBlock instanceof BlockBubbleColumn
+				|| !ModBlocks.BUBBLE_COLUMN.isEnabled()) {
+			return;
+		}
+		Block below = world.getBlock(x, y - 1, z);
+		if (currentBlock.getMaterial().isLiquid() && !below.getMaterial().isLiquid()) {
+			handleBubbleColumnCreation(x, y - 1, z, below, world.getBlockMetadata(x, y - 1, z));
+			return;
+		}
+		if (!BlockBubbleColumn.isFullVanillaWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
+			return;
+		}
+		for (Map.Entry<String, Integer> entry : BUBBLE_COLUMN_TAGS.entrySet()) {
+			if (BlockTags.hasTag(currentBlock, currentMeta, entry.getKey())) {
+				world.setBlock(x, y + 1, z, ModBlocks.BUBBLE_COLUMN.get(), entry.getValue(), 3);
 				return;
-			}
-			Set<String> tags = BlockTags.getTags(currentBlock, currentMeta);
-			for (String tag : tags) {
-				for (Map.Entry<String, BlockBubbleColumn> tag1 : BUBBLE_COLUMN_TAGS.entrySet()) {
-					if (tag1.getKey().equals(tag)) {
-						BlockBubbleColumn column = tag1.getValue();
-						if (column.isCompatibleWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
-							world.setBlock(x, y + 1, z, column, 0, 3);
-						}
-						return;
-					}
-				}
 			}
 		}
 	}

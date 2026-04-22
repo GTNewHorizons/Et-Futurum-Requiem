@@ -302,8 +302,7 @@ public enum ModBlocks {
 	FROSTED_ICE(ConfigEnchantsPotions.enableFrostWalker, new BlockFrostedIce(), null),
 	LAVA_CAULDRON(ConfigBlocksItems.enableLavaCauldrons, new BlockLavaCauldron(), null),
 	POTION_CAULDRON(ConfigBlocksItems.enablePotionCauldron, new BlockPotionCauldron(), null),
-	BUBBLE_COLUMN_UP(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(true, Tags.MOD_ID + ":upward_bubble_column_supports"), null),
-	BUBBLE_COLUMN_DOWN(ConfigExperiments.enableBubbleColumns, new BlockBubbleColumn(false, Tags.MOD_ID + ":downward_bubble_column_supports"), null),
+	BUBBLE_COLUMN(ConfigBlocksItems.enableBubbleColumns, new BlockBubbleColumn(Tags.MOD_ID + ":upward_bubble_column_supports", Tags.MOD_ID + ":downward_bubble_column_supports"), null),
 
 	// barrels + iron barrels
 	BARREL(ConfigBlocksItems.enableBarrel, new BlockBarrel(TileEntityBarrel.BarrelType.WOOD)),
