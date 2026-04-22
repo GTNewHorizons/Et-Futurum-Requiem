@@ -14,6 +14,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
@@ -31,12 +32,12 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 
 	/**
 	 * @param upBlocks   blocks that produce upward columns (meta 0), e.g. soul sand
-	 * @param downBlocks blocks that produce downward/whirlpool columns (meta 1), e.g. magma
+	 * @param downBlocks blocks that produce downward/whirlpool columns (meta 8), e.g. magma
 	 */
 	public BlockBubbleColumn(Block[] upBlocks, Block[] downBlocks) {
 		super(Material.water);
 		for (Block b : upBlocks) supportBlockMeta.put(b, 0);
-		for (Block b : downBlocks) supportBlockMeta.put(b, 1);
+		for (Block b : downBlocks) supportBlockMeta.put(b, 8);
 		setLightOpacity(Blocks.water.getLightOpacity());
 		setBlockName("bubble_column");
 		setBlockBounds(0, 0, 0, 0, 0, 0);
@@ -113,10 +114,14 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 				}
 			}
 		} else {
-			if (isUp) {
-				entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
-			} else {
-				entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+			boolean playerFlying = (entityIn instanceof EntityPlayer player)
+				&& player.capabilities.isFlying;
+			if (!playerFlying) {
+				if (isUp) {
+					entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
+				} else {
+					entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+				}
 			}
 			entityIn.fallDistance = 0;
 
