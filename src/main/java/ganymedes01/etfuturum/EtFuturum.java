@@ -370,6 +370,26 @@ public class EtFuturum {
 			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.OTHERSIDE_RECORD.get(), 0, 1, 1, 1));
 		}
 
+		if (ConfigBlocksItems.enablePrecipice) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.PRECIPICE_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.PRECIPICE_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enableCreatorMusicBox) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.CREATOR_MUSIC_BOX_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.CREATOR_MUSIC_BOX_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enableCreator) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.CREATOR_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.CREATOR_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enable5) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.DISC_FRAGMENT_5.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.DISC_FRAGMENT_5.get(), 0, 1, 1, 1));
+		}
+
 		if (ConfigBlocksItems.enablePigstep) {
 			ChestGenHooks.addItem(NETHER_FORTRESS, new WeightedRandomChestContent(ModItems.PIGSTEP_RECORD.get(), 0, 1, 1, 5));
 
@@ -816,6 +836,12 @@ public class EtFuturum {
 
 		config.addSoundEvent(ver, "music_disc.pigstep", "record");
 		config.addSoundEvent(ver, "music_disc.otherside", "record");
+		config.addSoundEvent(ver, "music_disc.precipice", "record");
+		config.addSoundEvent(ver, "music_disc.creator_music_box", "record");
+		config.addSoundEvent(ver, "music_disc.creator", "record");
+		config.addSoundEvent(ver, "music_disc.tears", "record");
+		config.addSoundEvent(ver, "music_disc.lava_chicken", "record");
+		config.addSoundEvent(ver, "music_disc.5", "record");
 
 		config.addSoundEvent(ver, "item.elytra.flying", "player");
 		config.addSoundEvent(ver, "enchant.thorns.hit", "player");
