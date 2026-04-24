@@ -328,6 +328,8 @@ public class EtFuturum {
 		proxy.registerRenderers();
 
 		CompatMisc.runModHooksInit();
+
+		ModRecipes.registerOreDictionary();
 	}
 
 	@EventHandler
