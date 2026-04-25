@@ -85,7 +85,6 @@ public class ModRecipes {
 		modernWoodTypesEnabled[3] = ConfigBlocksItems.enableCherryBlocks;
 		modernWoodTypesEnabled[4] = ConfigBlocksItems.enableBambooBlocks;
 
-		registerOreDictionary();
 		registerRecipes();
 		tweakRecipes();
 		registerLoot();
@@ -166,7 +165,7 @@ public class ModRecipes {
 		}
 	}
 
-	private static void registerOreDictionary() {
+	public static void registerOreDictionary() {
 		OreDictionary.registerOre("chestWood", new ItemStack(Blocks.chest));
 		OreDictionary.registerOre("bookshelfWood", new ItemStack(Blocks.bookshelf));
 		OreDictionary.registerOre("doorWood", new ItemStack(Items.wooden_door));
