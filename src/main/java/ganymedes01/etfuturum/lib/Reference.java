@@ -13,7 +13,7 @@ public class Reference {
 	public static final String MOD_GROUP = "ganymedes01.etfuturum";
 	public static final String MCAssetVer = "minecraft_1.21.10";
 
-	public static final String DEPENDENCIES = "required-after:Forge@[10.13.4.1614,);required-after:gtnhlib@[0.9.41,);after:Thaumcraft@[4.2.3.5,);after:TwilightForest;after:HardcoreEnderExpansion;after:bluepower;after:MineTweaker3;after:TConstruct;";
+	public static final String DEPENDENCIES = "required-after:Forge@[10.13.4.1614,);required-after:gtnhlib@[0.9.41,);after:Thaumcraft@[4.2.3.5,);after:TwilightForest;after:HardcoreEnderExpansion;after:bluepower;after:MineTweaker3;after:TConstruct;after:witchery;after:BiomesOPlenty";
 	public static final boolean TESTING = Boolean.getBoolean("etfuturum.testing");
 	public static final boolean DEV_ENVIRONMENT = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 	public static final String VERSION_URL = System.getProperty("etfuturum.versionUrl", "https://raw.githubusercontent.com/Roadhog360/Et-Futurum-Requiem/master/updatejson/update.json");
