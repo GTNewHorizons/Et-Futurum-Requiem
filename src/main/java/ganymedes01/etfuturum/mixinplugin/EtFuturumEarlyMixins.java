@@ -106,7 +106,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.avoidDroppingItemsWhenClosing) {
 			mixins.add("closedrops.MixinEntityPlayerMP");
 		}
-        
+
 		if (ConfigMixins.enableElytra) {
 			mixins.add("backlytra.MixinEntityPlayer");
 			mixins.add("backlytra.MixinEntityLivingBase");
@@ -230,12 +230,22 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.fireproofItems) {
 			mixins.add("uninflammableitem.MixinEntityItem");
 		}
-        
+
         if (ConfigMixins.enableJumpClimbing)
         {
             mixins.add("isLadderFix.MixinEntityLivingBase");
         }
-        
+
+		if (ConfigMixins.adjustedLiquidPhysics) {
+			mixins.add("liquidphysics.MixinEntity");
+			mixins.add("liquidphysics.MixinWorld");
+			mixins.add("liquidphysics.MixinBlockLiquid");
+		}
+
+		if (ConfigMixins.liquidItemFloat) {
+			mixins.add("liquidphysics.MixinEntityItem");
+		}
+
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
 		}
