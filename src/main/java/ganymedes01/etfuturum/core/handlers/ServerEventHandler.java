@@ -204,7 +204,7 @@ import java.nio.file.Path;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -214,16 +214,32 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "UnstableApiUsage"})
 public class ServerEventHandler {
 
 	public static final ServerEventHandler INSTANCE = new ServerEventHandler();
-	public static HashSet<EntityPlayerMP> playersClosedContainers = new HashSet<>();
-	private static final Map<EntityPlayer, List<ItemStack>> armorTracker = new WeakHashMap<>();
-	private static final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
-	public static final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().weakKeys().maximumSize(1000).build();
+	public final Set<EntityPlayerMP> playersClosedContainers = new HashSet<>();
+	private final Map<EntityPlayer, List<ItemStack>> armorTracker = new HashMap<>();
+	private final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
+	public final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().maximumSize(128).build();
 
-	private ServerEventHandler() {
+	private ServerEventHandler() {}
+
+	public void onServerStopped() {
+		playersClosedContainers.clear();
+		armorTracker.clear();
+		fallingConcreteBlocks.clear();
+		droppedEntityItems.invalidateAll();
+		loadedChunks.clear();
+	}
+
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		if (!event.world.isRemote) {
+			armorTracker.entrySet().removeIf(e -> e.getKey().worldObj == event.world);
+			fallingConcreteBlocks.removeIf(e -> e.worldObj == event.world);
+		}
+		droppedEntityItems.asMap().entrySet().removeIf(e -> e.getKey().worldObj == event.world);
 	}
 
 	@SubscribeEvent
@@ -414,7 +430,7 @@ public class ServerEventHandler {
 		}
 	}
 
-	private final Set<Chunk> loadedChunks = Collections.newSetFromMap(new WeakHashMap<>());
+	private final Set<Chunk> loadedChunks = new HashSet<>();
 
 	@SubscribeEvent
 	public void chunkLoad(ChunkEvent.Load event) {
