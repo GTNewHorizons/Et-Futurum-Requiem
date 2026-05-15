@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -204,7 +205,7 @@ import java.nio.file.Path;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -214,16 +215,31 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "UnstableApiUsage"})
 public class ServerEventHandler {
 
 	public static final ServerEventHandler INSTANCE = new ServerEventHandler();
-	public static HashSet<EntityPlayerMP> playersClosedContainers = new HashSet<>();
-	private static final Map<EntityPlayer, List<ItemStack>> armorTracker = new WeakHashMap<>();
-	private static final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
-	public static final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().weakKeys().maximumSize(1000).build();
+	public final Set<EntityPlayerMP> playersClosedContainers = new HashSet<>();
+	private final Map<EntityPlayer, List<ItemStack>> armorTracker = new HashMap<>();
+	private final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
+	public final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().maximumSize(128).build();
 
-	private ServerEventHandler() {
+	private ServerEventHandler() {}
+
+	public void onServerStopped() {
+		playersClosedContainers.clear();
+		armorTracker.clear();
+		fallingConcreteBlocks.clear();
+		droppedEntityItems.invalidateAll();
+	}
+
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		if (!event.world.isRemote) {
+			armorTracker.entrySet().removeIf(e -> e.getKey().worldObj == event.world);
+			fallingConcreteBlocks.removeIf(e -> e.worldObj == event.world);
+		}
+		droppedEntityItems.asMap().entrySet().removeIf(e -> e.getKey().worldObj == event.world);
 	}
 
 	@SubscribeEvent
@@ -373,8 +389,6 @@ public class ServerEventHandler {
 	public void entityAdded(EntityJoinWorldEvent event) {
 		if (event.world.isRemote) return;
 
-		Chunk chunk = event.world.getChunkFromChunkCoords(MathHelper.floor_double(event.entity.posX) >> 4, MathHelper.floor_double(event.entity.posZ) >> 4);
-
 		String sound = "";
 		if (ConfigSounds.paintingItemFramePlacing && event.entity instanceof EntityItemFrame) {
 			sound = "item_frame";
@@ -393,49 +407,28 @@ public class ServerEventHandler {
 			if (event.entity.getClass() == EntityBoat.class) {
 				EntityNewBoat boat = new EntityNewBoat(event.world);
 				event.entity.rotationYaw += 90;
-				replaceEntity(event.entity, boat, event.world, chunk);
+				replaceEntity(event.entity, boat, event.world, event);
 				boat.setBoatType("minecraft", "oak");
-				event.setCanceled(true);
 				return;
 			}
 		}
 
 		if (ConfigEntities.enableVillagerZombies && event.entity.getClass() == EntityZombie.class && ((EntityZombie) event.entity).isVillager()) {
-			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, chunk);
-			event.setCanceled(true);
+			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, event);
 			return;
 		}
 
 		if (ConfigEntities.enableShearableSnowGolems && event.entity.getClass() == EntitySnowman.class) {
 			Entity entity = new EntityNewSnowGolem(event.world);
-			replaceEntity(event.entity, entity, event.world, chunk);
+			replaceEntity(event.entity, entity, event.world, event);
 			entity.getDataWatcher().updateObject(12, (byte) 1);
-			event.setCanceled(true);
 		}
 	}
 
-	private final Set<Chunk> loadedChunks = Collections.newSetFromMap(new WeakHashMap<>());
-
-	@SubscribeEvent
-	public void chunkLoad(ChunkEvent.Load event) {
-		loadedChunks.add(event.getChunk());
-	}
-
-	@SubscribeEvent
-	public void chunkUnload(ChunkEvent.Unload event) {
-		loadedChunks.remove(event.getChunk());
-	}
-
-	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Chunk chunk) {
+	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Event event) {
 		newEntity.copyDataFrom(oldEntity, true);
-		if (loadedChunks.contains(chunk)) { // Use this list because somehow chunk.isChunkLoaded is always true here...
-			// World#addLoadedEntities has already run for the chunk, we don't have to worry about conflicting with it
-			world.spawnEntityInWorld(newEntity);
-		} else {
-			// don't add to tracker, because World#addLoadedEntities will also do it
-			chunk.addEntity(newEntity);
-		}
-		oldEntity.setDead();
+		world.spawnEntityInWorld(newEntity);
+		event.setCanceled(true);
 	}
 
 	@SubscribeEvent
@@ -1376,9 +1369,8 @@ public class ServerEventHandler {
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SNOWY)) {
 				EntityStray stray = new EntityStray(world);
-				replaceEntity(entity, stray, world, chunk);
+				replaceEntity(entity, stray, world, event);
 				stray.onSpawnWithEgg(null);
-				event.setCanceled(true);
 				event.setResult(Result.DENY);
 			}
 		} else if (ConfigEntities.enableHusk && !ConfigWorld.oldHuskSpawning && EntityList.getEntityID(entity) == 54 /*Zombie ID*/ && world.rand.nextFloat() < .80F && world.canBlockSeeTheSky(x, y + 1, z)) {
@@ -1386,9 +1378,8 @@ public class ServerEventHandler {
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.HOT) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.DRY) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SANDY)) {
 				EntityHusk husk = new EntityHusk(world);
-				replaceEntity(entity, husk, world, chunk);
+				replaceEntity(entity, husk, world, event);
 				husk.onSpawnWithEgg(null);
-				event.setCanceled(true);
 				event.setResult(Result.DENY);
 			}
 		}
