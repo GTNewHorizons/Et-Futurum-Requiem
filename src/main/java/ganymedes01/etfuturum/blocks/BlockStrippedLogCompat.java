@@ -85,8 +85,6 @@ public class BlockStrippedLogCompat extends BlockNewLog implements ISubBlocksBlo
             } else {
                 if(this.mod.equals("bop")) {
                     this.field_150167_a[i] = iconRegister.registerIcon(modName + ":log_" + icon_names[i] + "_side");
-                } else if(this.mod.equals("thaumcraft")) {
-                    this.field_150167_a[i] = iconRegister.registerIcon(modName + ":" + icon_names[i] + "side");
                 } else {
                     this.field_150167_a[i] = iconRegister.registerIcon(modName + ":log_" + icon_names[i]);
 

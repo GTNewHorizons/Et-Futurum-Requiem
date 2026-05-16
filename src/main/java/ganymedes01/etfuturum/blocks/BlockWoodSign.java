@@ -46,7 +46,7 @@ public class BlockWoodSign extends BlockSign {
 		}
 		this.mod = Utils.getModName(type);
 		this.name = Utils.getTypeName(type);
-		this.signTexture = mod + "textures/entity/signs/" + type;
+		this.signTexture = mod + "textures/entity/signs/" + name;
 		setHardness(1.0F);
 		disableStats();
 		setBlockName(Utils.getUnlocalisedName(type + "_sign"));

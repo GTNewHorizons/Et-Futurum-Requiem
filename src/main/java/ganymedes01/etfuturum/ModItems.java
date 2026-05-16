@@ -157,11 +157,6 @@ public enum ModItems {
 	BOP_MAHOGANY_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mahogany", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 14, false, false)),
 	BOP_MAHOGANY_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mahogany", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 14, true, false)),
 
-	THAUMCRAFT_GREATWOOD_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.THAUMCRAFT.isLoaded(), new ItemNewBoat("thaumcraft", "greatwood", () -> GameRegistry.findItem("Thaumcraft", "blockWoodenDevice"), 6, false, false)),
-	THAUMCRAFT_GREATWOOD_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.THAUMCRAFT.isLoaded(), new ItemNewBoat("thaumcraft", "greatwood", () -> GameRegistry.findItem("Thaumcraft", "blockWoodenDevice"), 6, true, false)),
-	THAUMCRAFT_SILVERWOOD_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.THAUMCRAFT.isLoaded(), new ItemNewBoat("thaumcraft", "silverwood", () -> GameRegistry.findItem("Thaumcraft", "blockWoodenDevice"), 7, false, false)),
-	THAUMCRAFT_SILVERWOOD_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.THAUMCRAFT.isLoaded(), new ItemNewBoat("thaumcraft", "silverwood", () -> GameRegistry.findItem("Thaumcraft", "blockWoodenDevice"), 7, true, false)),
-
 	WITCHERY_ROWAN_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "rowan", () -> GameRegistry.findItem("witchery", "witchwood"), 0, false, false)),
 	WITCHERY_ROWAN_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "rowan", () -> GameRegistry.findItem("witchery", "witchwood"), 0, true, false)),
 	WITCHERY_ALDER_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "alder", () -> GameRegistry.findItem("witchery", "witchwood"), 1, false, false)),
