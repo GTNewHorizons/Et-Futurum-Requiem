@@ -16,7 +16,12 @@ public class NewRenderPlayer extends RenderPlayer {
 	private boolean cachedAlex;
 
 	public static final ResourceLocation STEVE_SKIN = new ResourceLocation(Reference.MOD_ID, "textures/steve.png");
-	private static final ModelPlayer STEVE = new ModelPlayer(0.0F, false), ALEX = new ModelPlayer(0.0F, true);
+	private static final ModelPlayer STEVE = new ModelPlayer(0.0F, false),
+			STEVE_CHESTPLATE = new ModelPlayer(1.0F, false),
+			STEVE_ARMOR = new ModelPlayer(0.5F, false),
+			ALEX = new ModelPlayer(0.0F, true),
+			ALEX_CHESTPLATE = new ModelPlayer(1.0F, true),
+			ALEX_ARMOR = new ModelPlayer(0.5F, true);
 
 	public NewRenderPlayer() {
 		renderManager = RenderManager.instance;
@@ -27,6 +32,14 @@ public class NewRenderPlayer extends RenderPlayer {
 		if (cachedAlex != PlayerModelManager.isPlayerModelAlex(player)) {
 			cachedAlex = PlayerModelManager.isPlayerModelAlex(player);
 			mainModel = modelBipedMain = cachedAlex ? ALEX : STEVE;
+			modelArmorChestplate = cachedAlex ? ALEX_CHESTPLATE : STEVE_CHESTPLATE;
+			modelArmor = cachedAlex ? ALEX_ARMOR : STEVE_ARMOR;
+
+			if (PlayerModelManager.shouldRegenerateModelDelegates((ModelPlayer) mainModel)) {
+				((ModelPlayer) mainModel).regenerateDelegates();
+				((ModelPlayer) modelArmorChestplate).regenerateDelegates();
+				((ModelPlayer) modelArmor).regenerateDelegates();
+			}
 		}
 	}
 
@@ -39,6 +52,7 @@ public class NewRenderPlayer extends RenderPlayer {
 	@Override
 	public void doRender(AbstractClientPlayer player, double x, double y, double z, float someFloat, float partialTickTime) {
 		setModel(player);
+//		bindEntityTexture(player);
 		super.doRender(player, x, y, z, someFloat, partialTickTime);
 	}
 
@@ -49,7 +63,7 @@ public class NewRenderPlayer extends RenderPlayer {
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(AbstractClientPlayer player) {
+	public ResourceLocation getEntityTexture(AbstractClientPlayer player) {
 		if (!ConfigFunctions.enablePlayerSkinOverlay || player.getLocationSkin() == null)
 			return super.getEntityTexture(player);
 		return new ResourceLocation(Reference.MOD_ID, player.getLocationSkin().getResourcePath());

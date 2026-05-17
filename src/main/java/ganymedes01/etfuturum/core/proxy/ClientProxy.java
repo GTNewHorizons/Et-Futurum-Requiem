@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.core.proxy;
 
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -66,8 +65,7 @@ import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityGatewayRendere
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityNewBeaconRenderer;
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityShulkerBoxRenderer;
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityWoodSignRenderer;
-import ganymedes01.etfuturum.client.skins.NewRenderPlayer;
-import ganymedes01.etfuturum.client.skins.NewSkinManager;
+import ganymedes01.etfuturum.client.skins.PlayerModelManager;
 import ganymedes01.etfuturum.client.subtitle.GuiSubtitles;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
@@ -100,19 +98,13 @@ import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
 import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import ganymedes01.etfuturum.world.nether.biome.utils.BiomeFogEventHandler;
 import net.minecraft.block.BlockBed;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.passive.EntityPig;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
-
-import java.io.File;
 
 public class ClientProxy extends CommonProxy {
 
@@ -224,12 +216,7 @@ public class ClientProxy extends CommonProxy {
 //      }
 
 		if (ConfigFunctions.enablePlayerSkinOverlay) {
-			TextureManager texManager = Minecraft.getMinecraft().renderEngine;
-			File skinFolder = new File(Minecraft.getMinecraft().fileAssets, "skins");
-			MinecraftSessionService sessionService = Minecraft.getMinecraft().func_152347_ac(); // getSessionService
-			Minecraft.getMinecraft().field_152350_aA/*skinManager*/ = new NewSkinManager(Minecraft.getMinecraft().func_152342_ad()/*getSkinManager*/, texManager, skinFolder, sessionService);
-
-			RenderManager.instance.entityRenderMap.put(EntityPlayer.class, new NewRenderPlayer());
+			PlayerModelManager.enableNewModels();
 		}
 	}
 }
