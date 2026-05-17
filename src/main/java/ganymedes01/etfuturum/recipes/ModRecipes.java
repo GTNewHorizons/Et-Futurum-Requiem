@@ -72,6 +72,15 @@ public class ModRecipes {
 	private static final boolean[] modernWoodTypesEnabled = new boolean[5];
 
 	public static void init() {
+		modernWoodTypesEnabled[0] = ConfigExperiments.enableCrimsonBlocks;
+		modernWoodTypesEnabled[1] = ConfigExperiments.enableWarpedBlocks;
+		modernWoodTypesEnabled[2] = ConfigExperiments.enableMangroveBlocks;
+		modernWoodTypesEnabled[3] = ConfigBlocksItems.enableCherryBlocks;
+		modernWoodTypesEnabled[4] = ConfigBlocksItems.enableBambooBlocks;
+		registerOreDictionary();
+	}
+
+	public static void postInit() {
 		if (ConfigBlocksItems.enableBanners) {
 			RecipeSorter.register(Reference.MOD_ID + ".RecipeDuplicatePattern", RecipeDuplicatePattern.class, Category.SHAPELESS, "after:minecraft:shapeless");
 			RecipeSorter.register(Reference.MOD_ID + ".RecipeAddPattern", RecipeAddPattern.class, Category.SHAPED, "after:minecraft:shaped");
@@ -79,13 +88,6 @@ public class ModRecipes {
 		RecipeSorter.register(Reference.MOD_ID + ":shaped", ShapedEtFuturumRecipe.class, RecipeSorter.Category.SHAPED, "before:minecraft:shaped");
 		RecipeSorter.register(Reference.MOD_ID + ":shapeless", ShapelessEtFuturumRecipe.class, RecipeSorter.Category.SHAPELESS, "before:minecraft:shapeless");
 
-		modernWoodTypesEnabled[0] = ConfigExperiments.enableCrimsonBlocks;
-		modernWoodTypesEnabled[1] = ConfigExperiments.enableWarpedBlocks;
-		modernWoodTypesEnabled[2] = ConfigExperiments.enableMangroveBlocks;
-		modernWoodTypesEnabled[3] = ConfigBlocksItems.enableCherryBlocks;
-		modernWoodTypesEnabled[4] = ConfigBlocksItems.enableBambooBlocks;
-
-		registerOreDictionary();
 		registerRecipes();
 		tweakRecipes();
 		registerLoot();

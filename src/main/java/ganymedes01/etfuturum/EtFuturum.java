@@ -330,6 +330,8 @@ public class EtFuturum {
 		proxy.registerRenderers();
 
 		CompatMisc.runModHooksInit();
+
+		ModRecipes.init();
 	}
 
 	@EventHandler
@@ -432,7 +434,7 @@ public class EtFuturum {
 
 		EtFuturumLootTables.init();
 
-		ModRecipes.init();
+		ModRecipes.postInit();
 		DeepslateOreRegistry.init();
 		StrippedLogRegistry.init();
 		RawOreRegistry.init();
