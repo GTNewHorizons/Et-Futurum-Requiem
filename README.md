@@ -3,6 +3,9 @@
 **Download: [CurseForge](https://www.curseforge.com/minecraft/mc-mods/et-futurum-requiem/files)
 | [Modrinth](https://modrinth.com/mod/etfuturum/versions)**
 
+## [Legacy Modding Discord Server!](https://discord.gg/jBHQn3Nmsh)
+(check out the _Roadhog360's mods_ category)
+
 WARNING!
 
 Though this project is licensed under the LGPL-3.0 a lot of the code featured here is a direct copy or adaptation of
