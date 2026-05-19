@@ -1,5 +1,6 @@
 package ganymedes01.etfuturum.client.gui.inventory;
 
+import com.gtnewhorizon.gtnhlib.util.font.FontRendering;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -97,7 +98,7 @@ public class GuiEditWoodSign extends GuiScreen {
 			this.tileSign.signText[this.editLine] = this.tileSign.signText[this.editLine].substring(0, this.tileSign.signText[this.editLine].length() - 1);
 		}
 
-		if (ChatAllowedCharacters.isAllowedCharacter(typedChar) && this.tileSign.signText[this.editLine].length() < 15) {
+		if (ChatAllowedCharacters.isAllowedCharacter(typedChar) && this.tileSign.signText[this.editLine].length() < 90 && FontRendering.countVisibleChars(this.tileSign.signText[this.editLine]) < 15) {
 			this.tileSign.signText[this.editLine] = this.tileSign.signText[this.editLine] + typedChar;
 		}
 

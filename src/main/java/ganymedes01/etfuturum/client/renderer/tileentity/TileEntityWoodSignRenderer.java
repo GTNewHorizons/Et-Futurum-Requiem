@@ -78,7 +78,7 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 			String s = colour + sign.signText[i];
 
 			if (i == sign.lineBeingEdited) {
-				s = "> " + s + " <";
+				s = "> " + s + "§r <";
 				fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
 			} else {
 				fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
