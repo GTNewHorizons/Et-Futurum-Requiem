@@ -662,6 +662,27 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.polar_bear.death", "neutral");
 		config.addSoundEvent(ver, "entity.polar_bear.step", "neutral");
 		config.addSoundEvent(ver, "entity.polar_bear.warning", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ram_impact", "neutral");
+		config.addSoundEvent(ver, "entity.goat.horn_break", "neutral");
+		config.addSoundEvent(ver, "entity.goat.step", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ram_impact", "neutral");
+		for (int i = 0; i < 8; ++i) {
+			config.addSoundEvent(ver, "item.goat_horn.sound." + i, "record");
+		}
 		config.addSoundEvent(ver, "entity.wither_skeleton.ambient", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.hurt", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.death", "hostile");

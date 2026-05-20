@@ -20,6 +20,7 @@ public class ConfigEntities extends ConfigBase {
 	public static boolean enableShearableSnowGolems;
 	public static boolean enableBees;
 	public static boolean enablePolarBears;
+	public static boolean enableGoats;
 	public static boolean enableSquidInk;
 	public static boolean enableFoxes;
 
@@ -50,6 +51,7 @@ public class ConfigEntities extends ConfigBase {
 		enableRabbit = getBoolean("enableRabbits", catPassive, true, "");
 		enableBrownMooshroom = getBoolean("enableBrownMooshroom", catPassive, true, "Brown mooshroom variant, the red mooshrooms turn into then when they are hit by lightning.");
 		enableFoxes = getBoolean("enableFoxes", catPassive, true, "");
+		enableGoats = getBoolean("enableGoats", catPassive, true, "Goats spawn in snowy mountain biomes, can be milked, and drop horns when ramming hard blocks.");
 
 		//neutral
 		enableBees = getBoolean("enableBees", catNeutral, true, "");

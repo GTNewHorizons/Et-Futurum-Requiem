@@ -118,6 +118,23 @@ subtitle.entity.polar_bear.ambient_baby=Polar Bear hums
 subtitle.entity.polar_bear.death=Polar Bear dies
 subtitle.entity.polar_bear.hurt=Polar Bear hurts
 subtitle.entity.polar_bear.warning=Polar Bear roars
+subtitle.entity.goat.ambient=Goat bleats
+subtitle.entity.goat.death=Goat dies
+subtitle.entity.goat.eat=Goat eats
+subtitle.entity.goat.hurt=Goat hurts
+subtitle.entity.goat.long_jump=Goat jumps
+subtitle.entity.goat.milk=Goat milked
+subtitle.entity.goat.prepare_ram=Goat stomps
+subtitle.entity.goat.ram_impact=Goat rams
+subtitle.entity.goat.horn_break=Goat horn breaks
+subtitle.item.goat_horn.sound.0=Goat Horn plays
+subtitle.item.goat_horn.sound.1=Goat Horn plays
+subtitle.item.goat_horn.sound.2=Goat Horn plays
+subtitle.item.goat_horn.sound.3=Goat Horn plays
+subtitle.item.goat_horn.sound.4=Goat Horn plays
+subtitle.item.goat_horn.sound.5=Goat Horn plays
+subtitle.item.goat_horn.sound.6=Goat Horn plays
+subtitle.item.goat_horn.sound.7=Goat Horn plays
 subtitle.entity.husk.ambient=Husk groans
 subtitle.entity.husk.hurt=Husk takes damage
 subtitle.entity.husk.death=Husk dies
@@ -349,6 +366,7 @@ entity.etfuturum.elder_guardian.name=Elder Guardian
 entity.etfuturum.polar_bear.name=Polar Bear
 entity.etfuturum.bee.name=Bee
 entity.etfuturum.fox.name=Fox
+entity.etfuturum.goat.name=Goat
 
 # Items
 item.etfuturum.mutton.name=Raw Mutton
@@ -414,6 +432,16 @@ item.etfuturum.amethyst_shard.name=Amethyst Shard
 item.etfuturum.honeycomb.name=Honeycomb
 item.etfuturum.honey_bottle.name=Honey Bottle
 item.etfuturum.bamboo.name=Bamboo
+item.etfuturum.goat_horn.name=Goat Horn
+
+instrument.minecraft.ponder_goat_horn=Ponder Goat Horn
+instrument.minecraft.sing_goat_horn=Sing Goat Horn
+instrument.minecraft.seek_goat_horn=Seek Goat Horn
+instrument.minecraft.feel_goat_horn=Feel Goat Horn
+instrument.minecraft.admire_goat_horn=Admire Goat Horn
+instrument.minecraft.call_goat_horn=Call Goat Horn
+instrument.minecraft.yearn_goat_horn=Yearn Goat Horn
+instrument.minecraft.dream_goat_horn=Dream Goat Horn
 
 # Arrows
 item.etfuturum.tipped_arrow.name=Tipped Arrow

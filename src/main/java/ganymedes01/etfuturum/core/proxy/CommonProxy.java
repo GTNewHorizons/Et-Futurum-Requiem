@@ -239,6 +239,15 @@ public class CommonProxy implements IGuiHandler {
 			EntityRegistry.addSpawn(EntityPolarBear.class, 1, 1, 2, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.SNOWY));
 		}
 
+		if (ConfigEntities.enableGoats) {
+			ModEntityList.registerEntity(EntityGoat.class, "goat", 24, EtFuturum.instance, 80, 3, true, 0xA5947C, 0x55493E);
+			List<BiomeGenBase> goatBiomes = new ArrayList<>(Arrays.asList(BiomeDictionary.getBiomesForType(Type.MOUNTAIN)));
+			goatBiomes.retainAll(Arrays.asList(BiomeDictionary.getBiomesForType(Type.SNOWY)));
+			if (!goatBiomes.isEmpty()) {
+				EntityRegistry.addSpawn(EntityGoat.class, 5, 1, 3, EnumCreatureType.creature, goatBiomes.toArray(new BiomeGenBase[goatBiomes.size()]));
+			}
+		}
+
 		//make magmas slightly more common, hopefully.
 		EntityRegistry.removeSpawn(EntityMagmaCube.class, EnumCreatureType.monster, BiomeGenBase.hell);
 		EntityRegistry.addSpawn(EntityMagmaCube.class, 2, 4, 4, EnumCreatureType.monster, BiomeGenBase.hell);
