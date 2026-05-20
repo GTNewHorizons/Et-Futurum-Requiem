@@ -72,9 +72,10 @@ public class MixinItemRenderer {
 
 		GL11.glPushMatrix();
 		GL11.glTranslatef(0.56F, -0.52F - (1.0F - equipped) * 0.6F, -0.72F);
-		GL11.glTranslatef(-1.0F * 0.0625F, -2.5F * 0.0625F, -7.5F * 0.0625F);
-		GL11.glRotatef(-55.0F, 0.0F, 1.0F, 0.0F);
-		GL11.glRotatef(-5.0F, 0.0F, 0.0F, 1.0F);
+		GL11.glTranslatef(-0.2785682F, 0.18344387F, 0.15731531F);
+		GL11.glRotatef(-13.935F, 1.0F, 0.0F, 0.0F);
+		GL11.glRotatef(-35.3F, 0.0F, 1.0F, 0.0F);
+		GL11.glRotatef(9.785F, 0.0F, 0.0F, 1.0F);
 		GL11.glScalef(0.4F, 0.4F, 0.4F);
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		ItemGoatHornRenderer.renderIcon(stack);
