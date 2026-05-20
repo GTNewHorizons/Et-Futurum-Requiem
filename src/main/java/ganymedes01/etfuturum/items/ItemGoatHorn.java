@@ -5,7 +5,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.Tags;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
@@ -23,7 +22,7 @@ public class ItemGoatHorn extends BaseItem {
 
 	public static final int VARIANT_COUNT = 8;
 	public static final int USE_DURATION = 140;
-	private static final String COOLDOWN_TAG = "GoatHornCooldown";
+	private static final String COOLDOWN_END_TICK_TAG = "EtFuturumGoatHornCooldown";
 	private static final String[] INSTRUMENTS = new String[]{
 			"ponder_goat_horn", "sing_goat_horn", "seek_goat_horn", "feel_goat_horn",
 			"admire_goat_horn", "call_goat_horn", "yearn_goat_horn", "dream_goat_horn"
@@ -58,9 +57,10 @@ public class ItemGoatHorn extends BaseItem {
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (getCooldown(stack) <= 0) {
-			setCooldown(stack, USE_DURATION);
+		if (getCooldown(player) <= 0) {
+			player.clearItemInUse();
 			player.setItemInUse(stack, getMaxItemUseDuration(stack));
+			setCooldown(player, USE_DURATION);
 
 			if (!world.isRemote) {
 				world.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":item.goat_horn.sound." + getVariant(stack), 16.0F, 1.0F);
@@ -68,14 +68,6 @@ public class ItemGoatHorn extends BaseItem {
 		}
 
 		return stack;
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held) {
-		int cooldown = getCooldown(stack);
-		if (cooldown > 0) {
-			setCooldown(stack, cooldown - 1);
-		}
 	}
 
 	@Override
@@ -102,7 +94,7 @@ public class ItemGoatHorn extends BaseItem {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(ItemStack stack, int pass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
-		return usingItem == stack && tootingIcon != null ? tootingIcon : super.getIcon(stack, pass, player, usingItem, useRemaining);
+		return usingItem != null && usingItem.getItem() == this && tootingIcon != null ? tootingIcon : super.getIcon(stack, pass, player, usingItem, useRemaining);
 	}
 
 	@Override
@@ -124,21 +116,28 @@ public class ItemGoatHorn extends BaseItem {
 		return INSTRUMENTS[getVariant(meta)];
 	}
 
-	private static int getCooldown(ItemStack stack) {
-		return stack.hasTagCompound() ? stack.getTagCompound().getInteger(COOLDOWN_TAG) : 0;
+	public static boolean isGoatHorn(ItemStack stack) {
+		return stack != null && stack.getItem() instanceof ItemGoatHorn;
 	}
 
-	private static void setCooldown(ItemStack stack, int cooldown) {
+	private static int getCooldown(EntityPlayer player) {
+		NBTTagCompound data = player.getEntityData();
+		long remaining = data.getLong(COOLDOWN_END_TICK_TAG) - player.worldObj.getTotalWorldTime();
+		if (remaining <= 0) {
+			data.removeTag(COOLDOWN_END_TICK_TAG);
+			return 0;
+		}
+
+		return remaining > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) remaining;
+	}
+
+	private static void setCooldown(EntityPlayer player, int cooldown) {
+		NBTTagCompound data = player.getEntityData();
 		if (cooldown <= 0) {
-			if (stack.hasTagCompound()) {
-				stack.getTagCompound().removeTag(COOLDOWN_TAG);
-			}
+			data.removeTag(COOLDOWN_END_TICK_TAG);
 			return;
 		}
 
-		if (!stack.hasTagCompound()) {
-			stack.setTagCompound(new NBTTagCompound());
-		}
-		stack.getTagCompound().setInteger(COOLDOWN_TAG, cooldown);
+		data.setLong(COOLDOWN_END_TICK_TAG, player.worldObj.getTotalWorldTime() + cooldown);
 	}
 }

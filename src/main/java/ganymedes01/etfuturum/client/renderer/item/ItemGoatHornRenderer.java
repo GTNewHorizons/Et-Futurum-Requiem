@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.client.renderer.item;
 
 import ganymedes01.etfuturum.client.OpenGLHelper;
+import ganymedes01.etfuturum.items.ItemGoatHorn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
@@ -10,13 +11,14 @@ import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 public class ItemGoatHornRenderer implements IItemRenderer {
+
+	private static final float LEGACY_RENDER_SCALE = 1.5F;
 
 	@Override
 	public boolean handleRenderType(ItemStack stack, ItemRenderType type) {
@@ -25,15 +27,17 @@ public class ItemGoatHornRenderer implements IItemRenderer {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack stack, ItemRendererHelper helper) {
-		return false;
+		return helper == ItemRendererHelper.EQUIPPED_BLOCK && (type == ItemRenderType.EQUIPPED || type == ItemRenderType.EQUIPPED_FIRST_PERSON);
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack stack, Object... data) {
 		EntityPlayer player = getPlayer(data);
 		OpenGLHelper.pushMatrix();
-		if (player != null && player.getItemInUse() == stack) {
-			applyUseTransform(type, stack, player);
+		if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
+			applyIdleTransform(type);
+		} else {
+			applyThirdPersonTransform(player != null && isUsingHorn(player, stack));
 		}
 		renderIcon(stack);
 		OpenGLHelper.popMatrix();
@@ -46,24 +50,36 @@ public class ItemGoatHornRenderer implements IItemRenderer {
 		return Minecraft.getMinecraft().thePlayer;
 	}
 
-	private void applyUseTransform(ItemRenderType type, ItemStack stack, EntityPlayer player) {
-		float progress = MathHelper.clamp_float((stack.getMaxItemUseDuration() - player.getItemInUseCount()) / 10.0F, 0.0F, 1.0F);
-		float settle = MathHelper.sin(progress * (float) Math.PI) * 0.03F;
+	private boolean isUsingHorn(EntityPlayer player, ItemStack stack) {
+		return ItemGoatHorn.isGoatHorn(stack) && player.getItemInUseCount() > 0 && ItemGoatHorn.isGoatHorn(player.getItemInUse());
+	}
 
+	private void applyIdleTransform(ItemRenderType type) {
 		if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
-			OpenGLHelper.translate(-0.28F * progress, 0.18F * progress + settle, -0.08F * progress);
-			OpenGLHelper.rotate(-38.0F * progress, 0.0F, 1.0F, 0.0F);
-			OpenGLHelper.rotate(22.0F * progress, 1.0F, 0.0F, 0.0F);
-			OpenGLHelper.rotate(-24.0F * progress, 0.0F, 0.0F, 1.0F);
+			applyDisplayTransform(1.13F, 3.2F, 1.13F, 0.0F, -90.0F, 25.0F, 0.68F);
 		} else {
-			OpenGLHelper.translate(-0.1F * progress, 0.1F * progress, 0.03F * progress);
-			OpenGLHelper.rotate(-55.0F * progress, 0.0F, 1.0F, 0.0F);
-			OpenGLHelper.rotate(25.0F * progress, 1.0F, 0.0F, 0.0F);
-			OpenGLHelper.rotate(18.0F * progress, 0.0F, 0.0F, 1.0F);
+			applyThirdPersonTransform(false);
 		}
 	}
 
-	private void renderIcon(ItemStack stack) {
+	private void applyThirdPersonTransform(boolean using) {
+		if (using) {
+			applyDisplayTransform(-1.0F, 2.0F, 2.0F, 0.0F, -125.0F, 0.0F, 0.5F);
+		} else {
+			applyDisplayTransform(4.0F, 12.0F, -2.0F, 0.0F, 0.0F, 35.0F, 0.85F);
+		}
+	}
+
+	private void applyDisplayTransform(float x, float y, float z, float xRot, float yRot, float zRot, float scale) {
+		OpenGLHelper.translate(x * 0.0625F, y * 0.0625F, z * 0.0625F);
+		OpenGLHelper.rotate(xRot, 1.0F, 0.0F, 0.0F);
+		OpenGLHelper.rotate(yRot, 0.0F, 1.0F, 0.0F);
+		OpenGLHelper.rotate(zRot, 0.0F, 0.0F, 1.0F);
+		scale *= LEGACY_RENDER_SCALE;
+		OpenGLHelper.scale(scale, scale, scale);
+	}
+
+	public static void renderIcon(ItemStack stack) {
 		TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
 		ResourceLocation resource = textureManager.getResourceLocation(stack.getItemSpriteNumber());
 		IIcon icon = stack.getItem().getIcon(stack, 0);

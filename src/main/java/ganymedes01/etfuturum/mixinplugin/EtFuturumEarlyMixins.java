@@ -276,6 +276,12 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityLivingBase");
 			mixins.add("foxes.MixinEntityWolf");
 		}
+
+		if (ConfigEntities.enableGoats && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("goats.client.MixinItemRenderer");
+			mixins.add("goats.client.MixinModelBiped");
+		}
+
 		mixins.add("deepslateores.MixinChunk");
 
 		return mixins;

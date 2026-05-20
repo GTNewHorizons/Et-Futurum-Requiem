@@ -35,6 +35,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
 
 import java.util.List;
 
@@ -61,7 +62,7 @@ public class EntityGoat extends EntityAnimal {
 		setSize(0.9F, 1.3F);
 		getNavigator().setAvoidsWater(true);
 		longJumpCooldown = nextLongJumpCooldown();
-		ramCooldown = nextInitialRamCooldown();
+		ramCooldown = nextRamCooldown();
 
 		tasks.addTask(0, new EntityAISwimming(this));
 		tasks.addTask(1, new EntityGoat.AIRamTarget());
@@ -99,7 +100,6 @@ public class EntityGoat extends EntityAnimal {
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData livingData) {
 		livingData = super.onSpawnWithEgg(livingData);
 		setScreamingGoat(rand.nextDouble() < 0.02D);
-		ramCooldown = nextInitialRamCooldown();
 		updateHornsForAge(true);
 
 		if (!isChild() && rand.nextFloat() < 0.1F) {
@@ -251,12 +251,21 @@ public class EntityGoat extends EntityAnimal {
 	}
 
 	@Override
+	public void setRotationYawHead(float yaw) {
+		float diff = MathHelper.wrapAngleTo180_float(yaw - renderYawOffset);
+		diff = MathHelper.clamp_float(diff, -15.0F, 15.0F);
+		super.setRotationYawHead(renderYawOffset + diff);
+	}
+
+	@Override
 	public boolean getCanSpawnHere() {
 		int x = MathHelper.floor_double(posX);
 		int y = MathHelper.floor_double(boundingBox.minY);
 		int z = MathHelper.floor_double(posZ);
+		Block block = worldObj.getBlock(x, y - 1, z);
+		int meta = worldObj.getBlockMetadata(x, y - 1, z);
 		return worldObj.getBlockLightValue(x, y, z) > 8
-				&& isGoatSpawnableOn(worldObj.getBlock(x, y - 1, z))
+				&& isGoatSpawnableOn(block, meta)
 				&& worldObj.checkNoEntityCollision(boundingBox)
 				&& worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()
 				&& !worldObj.isAnyLiquid(boundingBox);
@@ -393,20 +402,20 @@ public class EntityGoat extends EntityAnimal {
 		return isScreamingGoat() ? 100 + rand.nextInt(201) : 600 + rand.nextInt(5401);
 	}
 
-	private int nextInitialRamCooldown() {
-		return isScreamingGoat() ? 40 + rand.nextInt(61) : 100 + rand.nextInt(101);
-	}
-
 	private int nextFailedRamCooldown() {
-		return isScreamingGoat() ? 40 : 100;
+		return isScreamingGoat() ? 100 : 600;
 	}
 
-	private static boolean isGoatSpawnableOn(Block block) {
-		return block == Blocks.grass || block == Blocks.stone || block == Blocks.snow || block == Blocks.snow_layer || block == Blocks.packed_ice || block == Blocks.gravel;
+	private static boolean isGoatSpawnableOn(Block block, int meta) {
+		return BlockTags.hasTag(block, meta, "minecraft:goats_spawnable_on")
+				|| block == Blocks.grass || block == Blocks.stone || block == Blocks.snow || block == Blocks.snow_layer || block == Blocks.packed_ice || block == Blocks.gravel;
 	}
 
-	private static boolean snapsGoatHorn(Block block) {
-		return block == Blocks.log || block == Blocks.log2 || block == Blocks.stone || block == Blocks.packed_ice
+	private static boolean snapsGoatHorn(World world, int x, int y, int z) {
+		Block block = world.getBlock(x, y, z);
+		int meta = world.getBlockMetadata(x, y, z);
+		return BlockTags.hasTag(block, meta, "minecraft:snaps_goat_horn")
+				|| block == Blocks.log || block == Blocks.log2 || block == Blocks.stone || block == Blocks.packed_ice
 				|| block == Blocks.iron_ore || block == Blocks.coal_ore || block == Blocks.emerald_ore || block == ModBlocks.COPPER_ORE.get();
 	}
 
@@ -505,6 +514,8 @@ public class EntityGoat extends EntityAnimal {
 		private int targetX;
 		private int targetY;
 		private int targetZ;
+		private double ramTargetX;
+		private double ramTargetZ;
 		private int prepareTicks;
 		private int timeout;
 		private boolean charging;
@@ -517,7 +528,14 @@ public class EntityGoat extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			return ramCooldown <= 0 && !isInLove() && findRamCandidate();
+			if (ramCooldown > 0 || isInLove()) {
+				return false;
+			}
+			if (findRamCandidate()) {
+				return true;
+			}
+			ramCooldown = nextFailedRamCooldown();
+			return false;
 		}
 
 		@Override
@@ -550,7 +568,7 @@ public class EntityGoat extends EntityAnimal {
 
 			getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
 			if (!charging) {
-				if (target.getDistanceSq(targetX + 0.5D, targetY, targetZ + 0.5D) > 4.0D) {
+				if (hasTargetMovedBlock()) {
 					if (!chooseStartFor(target)) {
 						finishRam(true);
 						return;
@@ -568,17 +586,13 @@ public class EntityGoat extends EntityAnimal {
 						beginCharge();
 					}
 				} else if (getNavigator().noPath()) {
-					if (chooseCurrentStartFor(target)) {
-						prepareTicks = 0;
-						getNavigator().clearPathEntity();
-					} else {
-						finishRam(true);
-					}
+					finishRam(true);
 				}
 				return;
 			}
 
 			getNavigator().clearPathEntity();
+			faceChargeDirection();
 			motionX += chargeDirX * 0.12D;
 			motionZ += chargeDirZ * 0.12D;
 			limitHorizontalChargeSpeed();
@@ -599,8 +613,8 @@ public class EntityGoat extends EntityAnimal {
 		private void beginCharge() {
 			charging = true;
 			playSound(getPrepareRamSound(), 1.0F, getSoundPitch());
-			double dx = targetX + 0.5D - posX;
-			double dz = targetZ + 0.5D - posZ;
+			double dx = ramTargetX - posX;
+			double dz = ramTargetZ - posZ;
 			double length = MathHelper.sqrt_double(dx * dx + dz * dz);
 			if (length < 0.001D) {
 				finishRam(true);
@@ -609,8 +623,16 @@ public class EntityGoat extends EntityAnimal {
 			chargeDirX = dx / length;
 			chargeDirZ = dz / length;
 			getNavigator().clearPathEntity();
+			faceChargeDirection();
 			motionX = chargeDirX * 0.65D;
 			motionZ = chargeDirZ * 0.65D;
+		}
+
+		private void faceChargeDirection() {
+			float yaw = (float) (Math.atan2(chargeDirZ, chargeDirX) * 180.0D / Math.PI) - 90.0F;
+			rotationYaw = yaw;
+			renderYawOffset = yaw;
+			rotationYawHead = yaw;
 		}
 
 		private void limitHorizontalChargeSpeed() {
@@ -622,9 +644,15 @@ public class EntityGoat extends EntityAnimal {
 		}
 
 		private boolean hasPassedTarget() {
-			double dx = targetX + 0.5D - posX;
-			double dz = targetZ + 0.5D - posZ;
+			double dx = ramTargetX - posX;
+			double dz = ramTargetZ - posZ;
 			return dx * chargeDirX + dz * chargeDirZ < -0.5D;
+		}
+
+		private boolean hasTargetMovedBlock() {
+			return MathHelper.floor_double(target.posX) != targetX
+					|| MathHelper.floor_double(target.boundingBox.minY) != targetY
+					|| MathHelper.floor_double(target.posZ) != targetZ;
 		}
 
 		private void hitTarget(EntityLivingBase living) {
@@ -672,10 +700,6 @@ public class EntityGoat extends EntityAnimal {
 		}
 
 		private boolean chooseStartFor(EntityLivingBase living) {
-			if (chooseCurrentStartFor(living)) {
-				return true;
-			}
-
 			int tx = MathHelper.floor_double(living.posX);
 			int ty = MathHelper.floor_double(living.boundingBox.minY);
 			int tz = MathHelper.floor_double(living.posZ);
@@ -721,43 +745,15 @@ public class EntityGoat extends EntityAnimal {
 				targetX = tx;
 				targetY = ty;
 				targetZ = tz;
+				setRamTargetEdge();
 				return true;
 			}
 			return false;
 		}
 
-		private boolean chooseCurrentStartFor(EntityLivingBase living) {
-			int sx = MathHelper.floor_double(posX);
-			int sy = MathHelper.floor_double(boundingBox.minY);
-			int sz = MathHelper.floor_double(posZ);
-			int tx = MathHelper.floor_double(living.posX);
-			int ty = MathHelper.floor_double(living.boundingBox.minY);
-			int tz = MathHelper.floor_double(living.posZ);
-			int distance = Math.max(Math.abs(tx - sx), Math.abs(tz - sz));
-
-			if (sy != ty || distance < RAM_MIN_DISTANCE || distance > RAM_MAX_DISTANCE || !isStraightPathWalkable(sx, sy, sz, tx, tz)) {
-				return false;
-			}
-
-			startX = sx;
-			startY = sy;
-			startZ = sz;
-			targetX = tx;
-			targetY = ty;
-			targetZ = tz;
-			return true;
-		}
-
-		private boolean isStraightPathWalkable(int sx, int y, int sz, int tx, int tz) {
-			int steps = Math.max(Math.abs(tx - sx), Math.abs(tz - sz));
-			for (int i = 0; i <= steps; ++i) {
-				int x = MathHelper.floor_double(sx + 0.5D + (tx - sx) * (double) i / steps);
-				int z = MathHelper.floor_double(sz + 0.5D + (tz - sz) * (double) i / steps);
-				if (!isWalkable(x, y, z)) {
-					return false;
-				}
-			}
-			return true;
+		private void setRamTargetEdge() {
+			ramTargetX = targetX + 0.5D + 0.5D * Math.signum(targetX - startX);
+			ramTargetZ = targetZ + 0.5D + 0.5D * Math.signum(targetZ - startZ);
 		}
 
 		private boolean isWalkable(int x, int y, int z) {
@@ -773,7 +769,7 @@ public class EntityGoat extends EntityAnimal {
 			int x = MathHelper.floor_double(posX + dirX * 0.8D);
 			int y = MathHelper.floor_double(boundingBox.minY + 0.5D);
 			int z = MathHelper.floor_double(posZ + dirZ * 0.8D);
-			return snapsGoatHorn(worldObj.getBlock(x, y, z)) || snapsGoatHorn(worldObj.getBlock(x, y + 1, z));
+			return snapsGoatHorn(worldObj, x, y, z) || snapsGoatHorn(worldObj, x, y + 1, z);
 		}
 	}
 }
