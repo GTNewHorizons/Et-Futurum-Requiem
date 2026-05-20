@@ -656,6 +656,12 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.snow_golem.ambient", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.hurt", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient_baby", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.step", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.warning", "neutral");
 		config.addSoundEvent(ver, "entity.wither_skeleton.ambient", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.hurt", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.death", "hostile");

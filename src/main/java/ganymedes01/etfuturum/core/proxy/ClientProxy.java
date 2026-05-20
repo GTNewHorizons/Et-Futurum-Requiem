@@ -97,7 +97,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNewBeacon.class, new TileEntityNewBeaconRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityShulkerBox.class, new TileEntityShulkerBoxRenderer(new ModelShulker()));
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGateway.class, new TileEntityGatewayRenderer());
-		if(CompatIronChests.enableCrystalRendering()) {
+		if(ModsList.IRON_CHEST.isLoaded() && CompatIronChests.enableCrystalRendering()) {
 			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBarrel.ClearTE.class, new TileEntityClearChestItemRenderer(key -> {
 				if (key instanceof TileEntityBarrel.ClearTE barrel) {
 					return barrel.getTopItemStacks();
@@ -158,6 +158,7 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityBee.class, new BeeRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityNewSnowGolem.class, new NewSnowGolemRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityFox.class, new FoxRenderer());
+		RenderingRegistry.registerEntityRenderingHandler(EntityPolarBear.class, new PolarBearRenderer());
 
 		RenderingRegistry.registerEntityRenderingHandler(EntityPig.class, new TechnobladeCrownRenderer());
 
