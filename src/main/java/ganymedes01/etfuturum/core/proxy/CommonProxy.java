@@ -134,6 +134,10 @@ public class CommonProxy implements IGuiHandler {
 			ModEntityList.registerEntity(EntityTippedArrow.class, "tipped_arrow", 2, EtFuturum.instance, 64, 20, true);
 		}
 
+		if (ConfigBlocksItems.enableSpectralArrows) {
+			ModEntityList.registerEntity(EntitySpectralArrow.class, "spectral_arrow", 25, EtFuturum.instance, 64, 20, true);
+		}
+
 		if (FMLCommonHandler.instance().getSide() == Side.CLIENT && FMLClientHandler.instance().hasOptifine()) {
 			if (!ConfigWorld.oldHuskSpawning) {
 				Logger.warn("OptiFine detected, old husk spawn logic will be enabled since OptiFine is stupid and breaks the default behavior.");

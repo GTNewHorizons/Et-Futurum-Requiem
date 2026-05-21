@@ -32,6 +32,7 @@ public enum ModItems {
 	CHORUS_FRUIT(ConfigBlocksItems.enableChorusFruit, new ItemChorusFruit()),
 	CHORUS_FRUIT_POPPED(ConfigBlocksItems.enableChorusFruit, new BaseItem("popped_chorus_fruit")),
 	TIPPED_ARROW(ConfigBlocksItems.enableTippedArrows, new ItemArrowTipped()),
+	SPECTRAL_ARROW(ConfigBlocksItems.enableSpectralArrows, new ItemSpectralArrow()),
 	LINGERING_POTION(ConfigBlocksItems.enableLingeringPotions, new ItemLingeringPotion()),
 	DRAGON_BREATH(ConfigBlocksItems.enableLingeringPotions, new BaseItem("dragon_breath").setContainerItem(Items.glass_bottle).setPotionEffect("-14+13")),
 	ELYTRA(ConfigMixins.enableElytra, new ItemArmorElytra()),

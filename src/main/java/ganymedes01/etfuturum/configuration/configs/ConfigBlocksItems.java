@@ -53,6 +53,7 @@ public class ConfigBlocksItems extends ConfigBase {
 	public static boolean enableGrassPath;
 	public static boolean enableTippedArrows;
 	public static boolean enableLingeringPotions;
+	public static boolean enableSpectralArrows;
 	public static boolean enableCryingObsidian;
 	public static boolean enableBrewingStands;
 	public static boolean enableColourfulBeacons;
@@ -319,6 +320,7 @@ public class ConfigBlocksItems extends ConfigBase {
 		enableIronNugget = getBoolean("enableIronNugget", catItemMisc, true, "");
 		enableTippedArrows = getBoolean("enableTippedArrows", catItemMisc, true, "");
 		enableLingeringPotions = getBoolean("enableLingeringPotions", catItemMisc, true, "");
+		enableSpectralArrows = getBoolean("enableSpectralArrows", catItemMisc, true, "");
 		enableRawOres = getBoolean("enableRawOres", catItemMisc, true, "If true, vanilla and Et Futurum copper ores will drop raw ore items.");
 
 		enableTotemUndying = getBoolean("enableTotemUndying", catItemMisc, true, "");

@@ -13,6 +13,8 @@ enchantment.swift_sneak=Swift Sneak
 # Potions
 potion.levitation=Levitation
 potion.levitation.postfix=Potion of Levitation
+potion.glowing=Glowing
+potion.glowing.postfix=Potion of Glowing
 
 # Gamemode selector
 
@@ -445,6 +447,7 @@ instrument.minecraft.dream_goat_horn=Dream Goat Horn
 
 # Arrows
 item.etfuturum.tipped_arrow.name=Tipped Arrow
+item.etfuturum.spectral_arrow.name=Spectral Arrow
 item.etfuturum.tipped_arrow.effect.empty.name=Uncraftable Tipped Arrow
 item.etfuturum.tipped_arrow.potion.nightVision.name=Arrow of Night Vision
 item.etfuturum.tipped_arrow.potion.invisibility.name=Arrow of Invisibility

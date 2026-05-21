@@ -8,6 +8,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.client.model.ModelShulker;
+import ganymedes01.etfuturum.client.renderer.GlowingEffectRenderer;
 import ganymedes01.etfuturum.client.renderer.block.*;
 import ganymedes01.etfuturum.client.renderer.entity.*;
 import ganymedes01.etfuturum.client.renderer.item.*;
@@ -61,6 +62,7 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		MinecraftForge.EVENT_BUS.register(BiomeFogEventHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(new GlowingEffectRenderer());
 
 		FMLCommonHandler.instance().bus().register(BubbleColumnSoundEventHandler.INSTANCE);
 	}
@@ -164,6 +166,7 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityFox.class, new FoxRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityPolarBear.class, new PolarBearRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGoat.class, new GoatRenderer());
+		RenderingRegistry.registerEntityRenderingHandler(EntitySpectralArrow.class, new SpectralArrowRenderer());
 
 		RenderingRegistry.registerEntityRenderingHandler(EntityPig.class, new TechnobladeCrownRenderer());
 
