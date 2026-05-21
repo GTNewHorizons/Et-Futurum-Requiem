@@ -181,6 +181,10 @@ public class BlockBarrel extends BlockContainer {
 
 	}
 
+	public TileEntityBarrel.BarrelType getType() {
+		return type;
+	}
+
 	@Override
 	public boolean hasComparatorInputOverride() {
 		return true;
