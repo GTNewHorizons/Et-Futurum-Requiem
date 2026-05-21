@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -34,11 +35,21 @@ public class GlowingEffectRenderer {
 	private static final int GL_SRC_COLOR = 768;
 	private static final int GL_TEXTURE = 5890;
 	private static final int GL_SRC_ALPHA = 770;
-	private static final int ATTRIB_MASK = GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_LIGHTING_BIT | GL11.GL_TEXTURE_BIT | GL11.GL_VIEWPORT_BIT | GL11.GL_TRANSFORM_BIT | GL11.GL_CURRENT_BIT;
+	private static final int ATTRIB_MASK = GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_LIGHTING_BIT | GL11.GL_TEXTURE_BIT
+			| GL11.GL_VIEWPORT_BIT | GL11.GL_TRANSFORM_BIT | GL11.GL_CURRENT_BIT | GL11.GL_FOG_BIT | GL11.GL_POLYGON_BIT;
+	private static final int BRIGHT_OUTLINE_RADIUS = 4;
+	private static final int BRIGHT_SOLID_RADIUS = 3;
+	private static final int DARK_FRINGE_RADIUS = 6;
+	private static final float BRIGHT_TRANSITION_ALPHA = 0.72F;
+	private static final float DARK_FRINGE_COLOR = 0.04F;
+	private static final float DARK_FRINGE_INNER_ALPHA = 0.70F;
+	private static final float DARK_FRINGE_EDGE_ALPHA = 0.62F;
+	private static final float DARK_FRINGE_OUTER_ALPHA = 0.42F;
 	private static final FloatBuffer OUTLINE_COLOR = BufferUtils.createFloatBuffer(4);
 
 	private Framebuffer outlineFramebuffer;
 	private Framebuffer expandedFramebuffer;
+	private Framebuffer fringeFramebuffer;
 
 	@SubscribeEvent
 	public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -68,8 +79,6 @@ public class GlowingEffectRenderer {
 		if (glowingEntities.isEmpty())
 			return;
 
-		ensureFramebuffer(mc);
-
 		double viewerX = player.prevPosX + (player.posX - player.prevPosX) * event.partialTicks;
 		double viewerY = player.prevPosY + (player.posY - player.prevPosY) * event.partialTicks;
 		double viewerZ = player.prevPosZ + (player.posZ - player.prevPosZ) * event.partialTicks;
@@ -78,8 +87,11 @@ public class GlowingEffectRenderer {
 		double savedRenderPosY = RenderManager.renderPosY;
 		double savedRenderPosZ = RenderManager.renderPosZ;
 		int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
+		GL11.glPushAttrib(ATTRIB_MASK);
 
 		try {
+			ensureFramebuffer(mc);
+
 			RenderManager.renderPosX = viewerX;
 			RenderManager.renderPosY = viewerY;
 			RenderManager.renderPosZ = viewerZ;
@@ -91,33 +103,49 @@ public class GlowingEffectRenderer {
 			outlineFramebuffer.unbindFramebuffer();
 
 			buildExpandedOutline(mc);
+			buildDarkFringe(mc);
 			mc.getFramebuffer().bindFramebuffer(false);
-			compositeOutline(mc);
+			compositeFramebuffer(mc, fringeFramebuffer);
+			compositeFramebuffer(mc, expandedFramebuffer);
 		} finally {
-			expandedFramebuffer.unbindFramebufferTexture();
-			expandedFramebuffer.unbindFramebuffer();
-			outlineFramebuffer.unbindFramebufferTexture();
-			outlineFramebuffer.unbindFramebuffer();
+			if (fringeFramebuffer != null) {
+				fringeFramebuffer.unbindFramebufferTexture();
+				fringeFramebuffer.unbindFramebuffer();
+			}
+			if (expandedFramebuffer != null) {
+				expandedFramebuffer.unbindFramebufferTexture();
+				expandedFramebuffer.unbindFramebuffer();
+			}
+			if (outlineFramebuffer != null) {
+				outlineFramebuffer.unbindFramebufferTexture();
+				outlineFramebuffer.unbindFramebuffer();
+			}
 			mc.getFramebuffer().bindFramebuffer(false);
 			RenderManager.renderPosX = savedRenderPosX;
 			RenderManager.renderPosY = savedRenderPosY;
 			RenderManager.renderPosZ = savedRenderPosZ;
+			GL11.glPopAttrib();
 			restoreRenderState(mc, previousMatrixMode);
 		}
 	}
 
 	private void ensureFramebuffer(Minecraft mc) {
-		if (outlineFramebuffer == null || outlineFramebuffer.framebufferWidth != mc.displayWidth || outlineFramebuffer.framebufferHeight != mc.displayHeight) {
+		if (outlineFramebuffer == null || expandedFramebuffer == null || fringeFramebuffer == null || outlineFramebuffer.framebufferWidth != mc.displayWidth || outlineFramebuffer.framebufferHeight != mc.displayHeight) {
 			if (outlineFramebuffer != null) {
 				outlineFramebuffer.deleteFramebuffer();
 			}
 			if (expandedFramebuffer != null) {
 				expandedFramebuffer.deleteFramebuffer();
 			}
+			if (fringeFramebuffer != null) {
+				fringeFramebuffer.deleteFramebuffer();
+			}
 			outlineFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, true);
 			outlineFramebuffer.setFramebufferFilter(GL11.GL_NEAREST);
 			expandedFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, false);
 			expandedFramebuffer.setFramebufferFilter(GL11.GL_NEAREST);
+			fringeFramebuffer = new Framebuffer(mc.displayWidth, mc.displayHeight, false);
+			fringeFramebuffer.setFramebufferFilter(GL11.GL_NEAREST);
 		}
 	}
 
@@ -165,19 +193,13 @@ public class GlowingEffectRenderer {
 		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
 		GL11.glMatrixMode(previousMatrixMode);
 		GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
-		GL11.glDepthMask(true);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	private void buildExpandedOutline(Minecraft mc) {
 		expandedFramebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
 		expandedFramebuffer.framebufferClear();
 		expandedFramebuffer.bindFramebuffer(true);
+		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
 		outlineFramebuffer.bindFramebufferTexture();
 
 		int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
@@ -188,6 +210,7 @@ public class GlowingEffectRenderer {
 		GL11.glPushMatrix();
 		try {
 			setupScreenQuadState(mc);
+			setupLayerBlendState();
 
 			Tessellator tessellator = Tessellator.instance;
 			float w = mc.displayWidth;
@@ -199,18 +222,10 @@ public class GlowingEffectRenderer {
 			float pixelU = 1.0F / texW;
 			float pixelV = 1.0F / texH;
 
-			for (int i = 0; i < 4; i++) {
-				float offU = 0.0F;
-				float offV = 0.0F;
-				switch (i) {
-					case 0: offU = -pixelU; break;
-					case 1: offU = pixelU; break;
-					case 2: offV = -pixelV; break;
-					case 3: offV = pixelV; break;
-				}
-				drawFramebufferQuad(tessellator, w, h, offU, offV, uMax + offU, vMax + offV);
-			}
+			drawBrightOutlineDilation(tessellator, w, h, pixelU, pixelV, uMax, vMax);
 
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			setupNormalBlendState();
 			GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			drawFramebufferQuad(tessellator, w, h, 0.0F, 0.0F, uMax, vMax);
 		} finally {
@@ -224,9 +239,61 @@ public class GlowingEffectRenderer {
 		}
 	}
 
-	private void compositeOutline(Minecraft mc) {
+	private void buildDarkFringe(Minecraft mc) {
+		fringeFramebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+		fringeFramebuffer.framebufferClear();
+		fringeFramebuffer.bindFramebuffer(true);
+		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+		outlineFramebuffer.bindFramebufferTexture();
+
+		int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
+
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPushMatrix();
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glPushMatrix();
+		try {
+			setupScreenQuadState(mc);
+			setupLayerBlendState();
+
+			Tessellator tessellator = Tessellator.instance;
+			float w = mc.displayWidth;
+			float h = mc.displayHeight;
+			float texW = outlineFramebuffer.framebufferTextureWidth;
+			float texH = outlineFramebuffer.framebufferTextureHeight;
+			float uMax = outlineFramebuffer.framebufferWidth / texW;
+			float vMax = outlineFramebuffer.framebufferHeight / texH;
+			float pixelU = 1.0F / texW;
+			float pixelV = 1.0F / texH;
+
+			drawDarkFringeDilation(tessellator, w, h, pixelU, pixelV, uMax, vMax);
+
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			setupNormalBlendState();
+			GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			drawFramebufferQuad(tessellator, w, h, 0.0F, 0.0F, uMax, vMax);
+
+			outlineFramebuffer.unbindFramebufferTexture();
+			expandedFramebuffer.bindFramebufferTexture();
+			float expandedUMax = (float) expandedFramebuffer.framebufferWidth / (float) expandedFramebuffer.framebufferTextureWidth;
+			float expandedVMax = (float) expandedFramebuffer.framebufferHeight / (float) expandedFramebuffer.framebufferTextureHeight;
+			drawFramebufferQuad(tessellator, w, h, 0.0F, 0.0F, expandedUMax, expandedVMax);
+		} finally {
+			expandedFramebuffer.unbindFramebufferTexture();
+			outlineFramebuffer.unbindFramebufferTexture();
+			fringeFramebuffer.unbindFramebuffer();
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glPopMatrix();
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glPopMatrix();
+			GL11.glMatrixMode(previousMatrixMode);
+		}
+	}
+
+	private void compositeFramebuffer(Minecraft mc, Framebuffer framebuffer) {
 		mc.getFramebuffer().bindFramebuffer(false);
-		expandedFramebuffer.bindFramebufferTexture();
+		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+		framebuffer.bindFramebufferTexture();
 
 		int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
 
@@ -240,11 +307,11 @@ public class GlowingEffectRenderer {
 			Tessellator tessellator = Tessellator.instance;
 			float w = mc.displayWidth;
 			float h = mc.displayHeight;
-			float uMax = (float) expandedFramebuffer.framebufferWidth / (float) expandedFramebuffer.framebufferTextureWidth;
-			float vMax = (float) expandedFramebuffer.framebufferHeight / (float) expandedFramebuffer.framebufferTextureHeight;
+			float uMax = (float) framebuffer.framebufferWidth / (float) framebuffer.framebufferTextureWidth;
+			float vMax = (float) framebuffer.framebufferHeight / (float) framebuffer.framebufferTextureHeight;
 			drawFramebufferQuad(tessellator, w, h, 0.0F, 0.0F, uMax, vMax);
 		} finally {
-			expandedFramebuffer.unbindFramebufferTexture();
+			framebuffer.unbindFramebufferTexture();
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			GL11.glPopMatrix();
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -265,11 +332,69 @@ public class GlowingEffectRenderer {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDepthMask(false);
 		GL11.glEnable(GL11.GL_BLEND);
+		setupNormalBlendState();
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	private static void setupNormalBlendState() {
+		GL14.glBlendEquation(GL14.GL_FUNC_ADD);
+	}
+
+	private static void setupLayerBlendState() {
+		GL14.glBlendEquation(GL14.GL_MAX);
+		GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+	}
+
+	private static void drawBrightOutlineDilation(Tessellator tessellator, float w, float h, float pixelU, float pixelV, float uMax, float vMax) {
+		for (int x = -BRIGHT_OUTLINE_RADIUS; x <= BRIGHT_OUTLINE_RADIUS; x++) {
+			for (int y = -BRIGHT_OUTLINE_RADIUS; y <= BRIGHT_OUTLINE_RADIUS; y++) {
+				if (x == 0 && y == 0)
+					continue;
+
+				int distance = Math.max(Math.abs(x), Math.abs(y));
+				float alpha = getBrightOutlineAlpha(distance);
+				float offU = x * pixelU;
+				float offV = y * pixelV;
+				GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha);
+				drawFramebufferQuad(tessellator, w, h, offU, offV, uMax + offU, vMax + offV);
+			}
+		}
+	}
+
+	private static void drawDarkFringeDilation(Tessellator tessellator, float w, float h, float pixelU, float pixelV, float uMax, float vMax) {
+		for (int x = -DARK_FRINGE_RADIUS; x <= DARK_FRINGE_RADIUS; x++) {
+			for (int y = -DARK_FRINGE_RADIUS; y <= DARK_FRINGE_RADIUS; y++) {
+				if (x == 0 && y == 0)
+					continue;
+
+				int distance = Math.max(Math.abs(x), Math.abs(y));
+				float alpha = getDarkFringeAlpha(distance);
+				float offU = x * pixelU;
+				float offV = y * pixelV;
+				GL11.glColor4f(DARK_FRINGE_COLOR, DARK_FRINGE_COLOR, DARK_FRINGE_COLOR, alpha);
+				drawFramebufferQuad(tessellator, w, h, offU, offV, uMax + offU, vMax + offV);
+			}
+		}
+	}
+
+	private static float getBrightOutlineAlpha(int distance) {
+		if (distance <= 2)
+			return 1.0F;
+		if (distance <= BRIGHT_SOLID_RADIUS)
+			return 0.92F;
+		return BRIGHT_TRANSITION_ALPHA;
+	}
+
+	private static float getDarkFringeAlpha(int distance) {
+		if (distance <= BRIGHT_OUTLINE_RADIUS)
+			return DARK_FRINGE_INNER_ALPHA;
+		if (distance < DARK_FRINGE_RADIUS)
+			return DARK_FRINGE_EDGE_ALPHA;
+		return DARK_FRINGE_OUTER_ALPHA;
 	}
 
 	private static void drawFramebufferQuad(Tessellator tessellator, float w, float h, float minU, float minV, float maxU, float maxV) {

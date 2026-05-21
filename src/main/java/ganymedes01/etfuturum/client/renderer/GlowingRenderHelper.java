@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.client.renderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 
 public class GlowingRenderHelper {
@@ -13,6 +14,13 @@ public class GlowingRenderHelper {
 		Team team = null;
 		if (entity instanceof EntityLivingBase) {
 			team = ((EntityLivingBase) entity).getTeam();
+		}
+		if (!(team instanceof ScorePlayerTeam) && entity.worldObj != null) {
+			Scoreboard scoreboard = entity.worldObj.getScoreboard();
+			team = scoreboard.getPlayersTeam(entity.getCommandSenderName());
+			if (!(team instanceof ScorePlayerTeam) && entity.getUniqueID() != null) {
+				team = scoreboard.getPlayersTeam(entity.getUniqueID().toString());
+			}
 		}
 
 		if (team instanceof ScorePlayerTeam) {
@@ -45,7 +53,7 @@ public class GlowingRenderHelper {
 	}
 
 	private static int resolveColorCode(char code) {
-		switch (code) {
+		switch (Character.toLowerCase(code)) {
 			case '0': return 0x000000;
 			case '1': return 0x0000AA;
 			case '2': return 0x00AA00;
