@@ -40,6 +40,7 @@ import ganymedes01.etfuturum.world.EtFuturumEarlyWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
+import ganymedes01.etfuturum.world.end.gen.EndCityLoot;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -359,6 +360,9 @@ public class EtFuturum {
 		}
 
 		EtFuturumLootTables.init();
+		if (ConfigWorld.enableEndCities) {
+			EndCityLoot.init();
+		}
 		ModRecipes.init();
 		DeepslateOreRegistry.init();
 		StrippedLogRegistry.init();
