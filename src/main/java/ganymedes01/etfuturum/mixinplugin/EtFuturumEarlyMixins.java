@@ -148,6 +148,14 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("sounds.MixinEntityWitch");
 		}
 
+		if (ConfigMixins.modernSkeletonBehavior) {
+			mixins.add("skeleton.MixinEntitySkeleton");
+
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("skeleton.client.MixinModelSkeleton");
+			}
+		}
+
 		if (ConfigMixins.floorCeilingButtons) {
 			mixins.add("floorceilbutton.MixinBlockButton");
 		}
