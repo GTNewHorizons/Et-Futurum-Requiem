@@ -273,6 +273,19 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			if (ConfigMixins.colorGrassBlockItemSides) {
 				mixins.add("coloredgrassitem.client.MixinRenderBlocks");
 			}
+
+			if (ConfigMixins.worldSaveThumbnails) {
+				mixins.add("worldthumbnail.client.MixinGuiSelectWorld");
+				mixins.add("worldthumbnail.client.MixinGuiSelectWorldList");
+			}
+
+			if (ConfigMixins.modernLoadingScreen) {
+				mixins.add("worldthumbnail.client.MixinLoadingScreenRenderer");
+				mixins.add("worldthumbnail.client.MixinGuiDownloadTerrain");
+				mixins.add("worldthumbnail.client.MixinMinecraft_LoadingBridge");
+				mixins.add("worldthumbnail.MixinMinecraftServer");
+				mixins.add("worldthumbnail.MixinChunkProviderServer");
+			}
 		}
 
 		if (ConfigMixins.thinPanes) {
