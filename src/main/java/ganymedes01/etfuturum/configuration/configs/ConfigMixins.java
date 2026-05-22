@@ -46,7 +46,9 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean colorGrassBlockItemSides;
 	public static boolean enablePlayersSleepingPecentageGamerule;
     public static boolean enableJumpClimbing;
-    
+	public static boolean worldSaveThumbnails;
+	public static boolean modernLoadingScreen;
+
 	static final String catBackport = "backported features";
 	static final String catOptimization = "optimizations";
 	static final String catFixes = "fixes";
@@ -73,6 +75,8 @@ public class ConfigMixins extends ConfigBase {
 			adjustedAttenuation = getBoolean("adjustedAttenuation", catBackport, true, "Adjusts the attenuation distance of certain sounds. This needs to be a separate mixin due to the way it works.\nCurrently changes portal abience, and beacon ambience to have an attenuation distance of 8 blocks away, instead of 16.\nModified Client Classes: net.minecraft.client.audio.SoundManager");
 
 			flowerPotFixes = getBoolean("flowerPotFixes", catFixes, true, "Fixes flower pots having several restrictions limiting what they'll render inside of them. Required for crimson roots or azalea to render correctly in the flower pot, among other custom blocks.\nModified Client Classes: net.minecraft.client.renderer.RenderBlock");
+			worldSaveThumbnails = getBoolean("worldSaveThumbnails", catBackport, true, "Saves and displays icon.png thumbnails in the world selection screen, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiSelectWorld");
+			modernLoadingScreen = getBoolean("modernLoadingScreen", catBackport, true, "Modern loading screen with progress bar and chunk grid when entering a world, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiDownloadTerrain");
 		}
 
 		endPortalFix = getBoolean("endPortalFix", catBackport, true, "Makes the End Portal block (the actual portal, not the frame) have an item icon, proper hitbox and will not instantly destroy itself in other dimensions.\nModified classes: net.minecraft.block.BlockEndPortal");
