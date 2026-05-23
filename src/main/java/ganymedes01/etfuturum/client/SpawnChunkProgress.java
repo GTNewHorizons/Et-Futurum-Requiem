@@ -12,11 +12,13 @@ public class SpawnChunkProgress {
     private static final float SPAWN_CHUNK_COUNT = 625.0F;
     private static final ConcurrentHashMap<Long, Byte> chunks = new ConcurrentHashMap<Long, Byte>();
     private static volatile boolean active;
+    private static volatile float lastProgress;
     private static volatile int spawnChunkX;
     private static volatile int spawnChunkZ;
 
     public static void begin(int spawnBlockX, int spawnBlockZ) {
         chunks.clear();
+        lastProgress = 0.0F;
         spawnChunkX = spawnBlockX >> 4;
         spawnChunkZ = spawnBlockZ >> 4;
         active = true;
@@ -46,18 +48,29 @@ public class SpawnChunkProgress {
         return spawnChunkZ;
     }
 
+    public static void setProgress(float progress) {
+        lastProgress = Math.max(lastProgress, Math.max(0.0F, Math.min(1.0F, progress)));
+    }
+
+    public static boolean hasData() {
+        return !chunks.isEmpty() || lastProgress > 0.0F;
+    }
+
     public static float getProgress() {
+        float chunkProgress;
         if (chunks.isEmpty()) {
-            return 0.0F;
+            chunkProgress = 0.0F;
+        } else if (!active) {
+            chunkProgress = 1.0F;
+        } else {
+            chunkProgress = Math.min(1.0F, chunks.size() / SPAWN_CHUNK_COUNT);
         }
-        if (!active) {
-            return 1.0F;
-        }
-        return Math.min(1.0F, chunks.size() / SPAWN_CHUNK_COUNT);
+        return Math.max(lastProgress, chunkProgress);
     }
 
     public static void reset() {
         active = false;
+        lastProgress = 0.0F;
         chunks.clear();
     }
 

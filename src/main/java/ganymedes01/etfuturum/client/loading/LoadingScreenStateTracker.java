@@ -3,12 +3,18 @@ package ganymedes01.etfuturum.client.loading;
 public class LoadingScreenStateTracker {
 
     private static final LoadingScreenSession SESSION = new LoadingScreenSession();
+    private static final int COMPLETION_RESET_DELAY_TICKS = 20;
 
     private static volatile boolean active;
+    private static volatile boolean completionPending;
+    private static volatile boolean downloadTerrainHandoffPending;
 
     public static synchronized void begin() {
         SESSION.reset();
+        LoadingScreenRenderManager.reset();
         active = true;
+        completionPending = false;
+        downloadTerrainHandoffPending = false;
     }
 
     public static synchronized void beginIfNeeded() {
@@ -19,7 +25,10 @@ public class LoadingScreenStateTracker {
 
     public static synchronized void reset() {
         SESSION.reset();
+        LoadingScreenRenderManager.reset();
         active = false;
+        completionPending = false;
+        downloadTerrainHandoffPending = false;
     }
 
     public static void updateTitle(String title) {
@@ -61,11 +70,36 @@ public class LoadingScreenStateTracker {
     public static void markDone() {
         if (active) {
             SESSION.setDone(true);
+            completionPending = true;
+            downloadTerrainHandoffPending = true;
         }
     }
 
     public static boolean isActive() {
         return active;
+    }
+
+    public static boolean shouldDelayReset(int playerTicksExisted) {
+        return completionPending
+                && (playerTicksExisted < COMPLETION_RESET_DELAY_TICKS || isDownloadTerrainHandoffPending());
+    }
+
+    public static void clearCompletionPending() {
+        completionPending = false;
+    }
+
+    public static boolean isDownloadTerrainHandoffPending() {
+        return downloadTerrainHandoffPending;
+    }
+
+    public static boolean shouldPreserveProgressForDownloadTerrain(boolean integratedServer) {
+        return integratedServer && isDownloadTerrainHandoffPending();
+    }
+
+    public static void onDownloadTerrainOpened(boolean integratedServer) {
+        if (integratedServer) {
+            downloadTerrainHandoffPending = false;
+        }
     }
 
     public static LoadingScreenSnapshot snapshot() {

@@ -3,12 +3,12 @@ package ganymedes01.etfuturum.mixins.early.worldthumbnail.client;
 import ganymedes01.etfuturum.client.ChunkLoadingProgress;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
-import ganymedes01.etfuturum.client.loading.LoadingScreenRenderer;
+import ganymedes01.etfuturum.client.loading.LoadingScreenRenderManager;
 import ganymedes01.etfuturum.client.loading.LoadingScreenStateTracker;
+import ganymedes01.etfuturum.client.loading.LoadingScreenText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDownloadTerrain;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,11 +19,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinGuiDownloadTerrain extends GuiScreen {
 
     @Unique
-    private static final LoadingScreenRenderer ETFU$RENDERER = new LoadingScreenRenderer();
+    private static final long ETFU$PREPARING_TERRAIN_DELAY_MS = 1500L;
+
+    @Unique
+    private long etfu$openedAt;
 
     @Inject(method = "initGui", at = @At("HEAD"))
     private void etfu$beginDownloadTerrain(CallbackInfo ci) {
-        LoadingScreenHooks.beginDownloadTerrain();
+        Minecraft mc = Minecraft.getMinecraft();
+        etfu$openedAt = Minecraft.getSystemTime();
+        LoadingScreenHooks.beginDownloadTerrain(mc.getIntegratedServer() != null);
     }
 
     @Inject(method = "drawScreen", at = @At("HEAD"), cancellable = true)
@@ -33,14 +38,25 @@ public abstract class MixinGuiDownloadTerrain extends GuiScreen {
         Minecraft mc = Minecraft.getMinecraft();
         float serverProgress = SpawnChunkProgress.getProgress();
         float clientProgress = ChunkLoadingProgress.getRawProgress();
-        LoadingScreenStateTracker.updateTitle(I18n.format("multiplayer.downloadingTerrain"));
-        LoadingScreenStateTracker.updateSubtitle("");
-        LoadingScreenStateTracker.updateProgress(Math.max(serverProgress, clientProgress));
+        float progress = Math.max(serverProgress, clientProgress);
+
+        if (mc.getIntegratedServer() == null) {
+            LoadingScreenStateTracker.updateTitle(LoadingScreenText.getDownloadingTerrainTitle());
+            LoadingScreenStateTracker.updateSubtitle("");
+        } else {
+            LoadingScreenStateTracker.updateTitle(LoadingScreenText.getLoadingWorldTitle());
+            if (Minecraft.getSystemTime() - etfu$openedAt >= ETFU$PREPARING_TERRAIN_DELAY_MS
+                    && (serverProgress > 0.0F || clientProgress > 0.0F)) {
+                LoadingScreenStateTracker.updateSubtitle(LoadingScreenText.getPreparingTerrainSubtitle());
+            }
+        }
+
+        LoadingScreenStateTracker.updateProgress(progress);
 
         if (serverProgress <= 0.0F) {
             LoadingScreenHooks.updateClientChunkMap(mc);
         }
 
-        ETFU$RENDERER.render(mc, width, height, LoadingScreenStateTracker.snapshot());
+        LoadingScreenRenderManager.getRenderer().render(mc, width, height, LoadingScreenStateTracker.snapshot());
     }
 }

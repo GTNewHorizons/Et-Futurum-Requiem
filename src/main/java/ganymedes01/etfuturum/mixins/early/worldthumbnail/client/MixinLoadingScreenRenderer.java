@@ -8,10 +8,10 @@ import cpw.mods.fml.client.FMLClientHandler;
 import ganymedes01.etfuturum.client.GuiLoadingBridge;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import ganymedes01.etfuturum.client.loading.LoadingScreenStateTracker;
+import ganymedes01.etfuturum.client.loading.LoadingScreenText;
 import net.minecraft.client.LoadingScreenRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,13 +54,16 @@ public class MixinLoadingScreenRenderer {
             return false;
         }
 
-        LoadingScreenStateTracker.updateTitle(I18n.format("multiplayer.downloadingTerrain"));
+        String title = currentlyDisplayedText;
+        if (title == null || title.isEmpty()) {
+            title = LoadingScreenText.getLoadingWorldTitle();
+        }
+        LoadingScreenStateTracker.updateTitle(title);
+
         if (field_73727_a != null && !field_73727_a.isEmpty()) {
             LoadingScreenStateTracker.updateSubtitle(field_73727_a);
-        } else if (currentlyDisplayedText != null && !currentlyDisplayedText.isEmpty()) {
-            LoadingScreenStateTracker.updateSubtitle(currentlyDisplayedText);
         } else {
-            LoadingScreenStateTracker.updateSubtitle("");
+            LoadingScreenStateTracker.updateSubtitle(LoadingScreenText.getBuildingTerrainSubtitle());
         }
 
         IntegratedServer server = mc.getIntegratedServer();
@@ -74,6 +77,7 @@ public class MixinLoadingScreenRenderer {
         }
 
         progress = Math.max(progress, SpawnChunkProgress.getProgress());
+        SpawnChunkProgress.setProgress(progress);
         LoadingScreenStateTracker.updateProgress(progress);
 
         if (!(mc.currentScreen instanceof GuiLoadingBridge)) {

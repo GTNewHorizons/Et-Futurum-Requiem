@@ -3,35 +3,39 @@ package ganymedes01.etfuturum.client.loading;
 import ganymedes01.etfuturum.client.ChunkLoadingProgress;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 
 public class LoadingScreenHooks {
 
-    public static final int CHUNK_COLOR_EMPTY = 0xFF545454;
-    public static final int CHUNK_COLOR_STRUCTURE_STARTS = 0xFF999999;
-    public static final int CHUNK_COLOR_STRUCTURE_REFERENCES = 0xFF5F6191;
-    public static final int CHUNK_COLOR_BIOMES = 0xFF80B252;
-    public static final int CHUNK_COLOR_NOISE = 0xFFD1D1D1;
-    public static final int CHUNK_COLOR_SURFACE = 0xFF726809;
-    public static final int CHUNK_COLOR_CARVERS = 0xFF303572;
-    public static final int CHUNK_COLOR_FEATURES = 0xFF21C600;
-    public static final int CHUNK_COLOR_INITIALIZE_LIGHT = 0xFFCCCCCC;
-    public static final int CHUNK_COLOR_LIGHT = 0xFFFFE0A0;
-    public static final int CHUNK_COLOR_SPAWN = 0xFFF26060;
-    public static final int CHUNK_COLOR_FULL = 0xFFFFFFFF;
+    public static final int CHUNK_COLOR_EMPTY = LoadingScreenChunkStage.EMPTY.getColor();
+    public static final int CHUNK_COLOR_STRUCTURE_STARTS = LoadingScreenChunkStage.STRUCTURE_STARTS.getColor();
+    public static final int CHUNK_COLOR_STRUCTURE_REFERENCES = LoadingScreenChunkStage.STRUCTURE_REFERENCES.getColor();
+    public static final int CHUNK_COLOR_BIOMES = LoadingScreenChunkStage.BIOMES.getColor();
+    public static final int CHUNK_COLOR_NOISE = LoadingScreenChunkStage.NOISE.getColor();
+    public static final int CHUNK_COLOR_SURFACE = LoadingScreenChunkStage.SURFACE.getColor();
+    public static final int CHUNK_COLOR_CARVERS = LoadingScreenChunkStage.CARVERS.getColor();
+    public static final int CHUNK_COLOR_FEATURES = LoadingScreenChunkStage.FEATURES.getColor();
+    public static final int CHUNK_COLOR_INITIALIZE_LIGHT = LoadingScreenChunkStage.INITIALIZE_LIGHT.getColor();
+    public static final int CHUNK_COLOR_LIGHT = LoadingScreenChunkStage.LIGHT.getColor();
+    public static final int CHUNK_COLOR_SPAWN = LoadingScreenChunkStage.SPAWN.getColor();
+    public static final int CHUNK_COLOR_FULL = LoadingScreenChunkStage.FULL.getColor();
 
     public static void beginOther() {
-        LoadingScreenStateTracker.begin();
+        LoadingScreenStateTracker.beginIfNeeded();
     }
 
-    public static void beginDownloadTerrain() {
-        LoadingScreenStateTracker.beginIfNeeded();
-        LoadingScreenStateTracker.updateTitle(I18n.format("multiplayer.downloadingTerrain"));
-        LoadingScreenStateTracker.updateSubtitle("");
+    public static void beginDownloadTerrain(boolean integratedServer) {
+        if (!LoadingScreenStateTracker.shouldPreserveProgressForDownloadTerrain(integratedServer)) {
+            LoadingScreenStateTracker.begin();
+        }
+        LoadingScreenStateTracker.onDownloadTerrainOpened(integratedServer);
     }
 
     public static void reset() {
         LoadingScreenStateTracker.reset();
+    }
+
+    public static void updateServerChunkStage(int chunkX, int chunkZ, LoadingScreenChunkStage stage) {
+        updateServerChunkColor(chunkX, chunkZ, stage.getColor());
     }
 
     public static void updateServerChunkColor(int chunkX, int chunkZ, int color) {

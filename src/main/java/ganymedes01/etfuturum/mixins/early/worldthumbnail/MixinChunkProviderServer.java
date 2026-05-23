@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.mixins.early.worldthumbnail;
 
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
-import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
+import ganymedes01.etfuturum.client.loading.LoadingScreenWorldGenTracker;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -18,9 +18,7 @@ public class MixinChunkProviderServer {
     private void etfu$trackDiskLoaded(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
         Chunk chunk = cir.getReturnValue();
         if (chunk != null && chunk.isTerrainPopulated) {
-            SpawnChunkProgress.markPopulated(chunkX, chunkZ);
-            LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_FULL);
-            LoadingScreenHooks.updateServerChunkProgress();
+            LoadingScreenWorldGenTracker.markFull(chunkX, chunkZ);
         }
     }
 
@@ -32,8 +30,6 @@ public class MixinChunkProviderServer {
             )
     )
     private void etfu$markPopulated(IChunkProvider provider, int chunkX, int chunkZ, CallbackInfo ci) {
-        SpawnChunkProgress.markPopulated(chunkX, chunkZ);
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_FULL);
-        LoadingScreenHooks.updateServerChunkProgress();
+        LoadingScreenWorldGenTracker.markFull(chunkX, chunkZ);
     }
 }

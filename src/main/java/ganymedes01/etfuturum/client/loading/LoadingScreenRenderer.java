@@ -3,7 +3,6 @@ package ganymedes01.etfuturum.client.loading;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.resources.I18n;
 import org.lwjgl.opengl.GL11;
 
 public class LoadingScreenRenderer {
@@ -14,6 +13,10 @@ public class LoadingScreenRenderer {
     private final LoadingScreenBackgroundRenderer backgroundRenderer = new LoadingScreenBackgroundRenderer();
     private final LoadingScreenChunkMapRenderer chunkMapRenderer = new LoadingScreenChunkMapRenderer();
     private float smoothedProgress;
+
+    public void resetProgress() {
+        smoothedProgress = 0.0F;
+    }
 
     public void render(Minecraft mc, int width, int height, LoadingScreenSnapshot snapshot) {
         backgroundRenderer.render(mc, width, height);
@@ -32,7 +35,7 @@ public class LoadingScreenRenderer {
 
         String title = snapshot.getTitle();
         if (title == null || title.isEmpty()) {
-            title = I18n.format("multiplayer.downloadingTerrain");
+            title = LoadingScreenText.getLoadingWorldTitle();
         }
 
         smoothedProgress += (snapshot.getProgress() - smoothedProgress) * 0.2F;

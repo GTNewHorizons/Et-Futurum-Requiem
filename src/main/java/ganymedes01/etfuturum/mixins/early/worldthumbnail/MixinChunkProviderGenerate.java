@@ -1,7 +1,8 @@
 package ganymedes01.etfuturum.mixins.early.worldthumbnail;
 
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
-import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
+import ganymedes01.etfuturum.client.loading.LoadingScreenChunkStage;
+import ganymedes01.etfuturum.client.loading.LoadingScreenWorldGenTracker;
 import net.minecraft.block.Block;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
@@ -18,19 +19,17 @@ public class MixinChunkProviderGenerate {
 
     @Inject(method = "provideChunk", at = @At("HEAD"))
     private void etfu$markBiomes(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        SpawnChunkProgress.markGenerated(chunkX, chunkZ);
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_BIOMES);
-        LoadingScreenHooks.updateServerChunkProgress();
+        LoadingScreenWorldGenTracker.markGenerated(chunkX, chunkZ);
     }
 
     @Inject(method = "func_147424_a", at = @At("RETURN"))
     private void etfu$markNoise(int chunkX, int chunkZ, Block[] blocks, CallbackInfo ci) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_NOISE);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.NOISE);
     }
 
     @Inject(method = "replaceBlocksForBiome", at = @At("RETURN"))
     private void etfu$markSurface(int chunkX, int chunkZ, Block[] blocks, byte[] metadata, BiomeGenBase[] biomes, CallbackInfo ci) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_SURFACE);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.SURFACE);
     }
 
     @Inject(
@@ -42,7 +41,7 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markCarvers(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_CARVERS);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.CARVERS);
     }
 
     @Inject(
@@ -53,7 +52,7 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markStructureStarts(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_STRUCTURE_STARTS);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.STRUCTURE_STARTS);
     }
 
     @Inject(
@@ -65,7 +64,7 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markStructureReferences(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_STRUCTURE_REFERENCES);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.STRUCTURE_REFERENCES);
     }
 
     @Inject(
@@ -76,7 +75,7 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markInitializeLight(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_INITIALIZE_LIGHT);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.INITIALIZE_LIGHT);
     }
 
     @Inject(
@@ -88,12 +87,12 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markLight(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_LIGHT);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.LIGHT);
     }
 
     @Inject(method = "populate", at = @At("HEAD"))
     private void etfu$markFeatures(IChunkProvider provider, int chunkX, int chunkZ, CallbackInfo ci) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_FEATURES);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.FEATURES);
     }
 
     @Inject(
@@ -105,6 +104,6 @@ public class MixinChunkProviderGenerate {
             )
     )
     private void etfu$markSpawn(IChunkProvider provider, int chunkX, int chunkZ, CallbackInfo ci) {
-        LoadingScreenHooks.updateServerChunkColor(chunkX, chunkZ, LoadingScreenHooks.CHUNK_COLOR_SPAWN);
+        LoadingScreenWorldGenTracker.markStage(chunkX, chunkZ, LoadingScreenChunkStage.SPAWN);
     }
 }

@@ -35,7 +35,7 @@ public class LoadingScreenSession {
     }
 
     public void setProgress(float newProgress) {
-        progress = Math.max(0.0F, Math.min(1.0F, newProgress));
+        progress = Math.max(progress, Math.max(0.0F, Math.min(1.0F, newProgress)));
     }
 
     public void setDone(boolean newDone) {
