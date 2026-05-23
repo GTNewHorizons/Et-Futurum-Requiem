@@ -41,6 +41,9 @@ import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
 import ganymedes01.etfuturum.world.end.gen.EndCityLoot;
+import ganymedes01.etfuturum.world.end.gen.EndCityPieces;
+import ganymedes01.etfuturum.world.end.gen.MapGenEndCity;
+import net.minecraft.world.gen.structure.MapGenStructureIO;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -360,8 +363,10 @@ public class EtFuturum {
 		}
 
 		EtFuturumLootTables.init();
-		if (ConfigWorld.enableEndCities) {
+		if (ConfigExperiments.enableEndCities) {
 			EndCityLoot.init();
+			MapGenStructureIO.registerStructure(MapGenEndCity.Start.class, "EndCity");
+			MapGenStructureIO.func_143031_a(EndCityPieces.EndCityPiece.class, "ECP");
 		}
 		ModRecipes.init();
 		DeepslateOreRegistry.init();
@@ -463,6 +468,9 @@ public class EtFuturum {
 	public void serverStarting(FMLServerStartingEvent event) {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
+		}
+		if (ConfigExperiments.enableEndCities) {
+			event.registerServerCommand(new ganymedes01.etfuturum.command.CommandLocateEndCity());
 		}
 	}
 

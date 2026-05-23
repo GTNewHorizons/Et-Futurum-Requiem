@@ -1,23 +1,19 @@
 package ganymedes01.etfuturum.world.end.gen;
 
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.world.end.dimension.ChunkProviderEFREnd;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraft.world.gen.structure.StructureStart;
 
-import java.util.*;
+import java.util.Random;
 
 /**
  * End city structure generator for the outer End islands.
- * Uses vanilla spacing/separation algorithm to determine valid generation positions,
- * then builds the full End city during chunk population.
- * <p>
- * This does NOT extend MapGenStructure for simplicity — instead it uses a direct
- * spacing check similar to how OceanMonument works in EFR. Structures are placed
- * entirely during populate() with no cross-chunk persistence.
+ * Uses vanilla MapGenStructure for chunk boundary safety, bounding box clipping,
+ * and persistence.
  */
-public class MapGenEndCity {
+public class MapGenEndCity extends MapGenStructure {
 
 	// Vanilla End city spacing parameters
 	private static final int SPACING = 20;
@@ -30,50 +26,13 @@ public class MapGenEndCity {
 		this.chunkProvider = chunkProvider;
 	}
 
-	/**
-	 * Check if an End city should generate at the given chunk coordinates and generate it if so.
-	 * Called during populate().
-	 */
-	public void generateIfValid(World world, Random populateRand, int chunkX, int chunkZ) {
-		if (!canSpawnStructureAtCoords(world, chunkX, chunkZ)) return;
-
-		int x = chunkX * 16 + 8;
-		int z = chunkZ * 16 + 8;
-
-		// Check terrain height — need solid ground at reasonable height
-		int groundHeight = getGroundHeight(world, x, z);
-		if (groundHeight < 60) return;
-
-		// Determine rotation (based on world seed + position for determinism)
-		Random structRand = new Random(
-				(long) chunkX * 341873128712L + (long) chunkZ * 132897987541L + world.getSeed() + SALT);
-		int rotation = structRand.nextInt(4);
-
-		BlockPos startPos = new BlockPos(x, groundHeight, z);
-
-		try {
-			// Generate the piece tree
-			List<EndCityPieces.CityTemplate> pieces = new ArrayList<>();
-			EndCityPieces.startHouseTower(startPos, rotation, pieces, structRand);
-
-			// Place all pieces in the world
-			for (EndCityPieces.CityTemplate piece : pieces) {
-				piece.placeInWorld(world, structRand, null);
-			}
-
-			Logger.info("Generated End city at " + x + ", " + groundHeight + ", " + z
-					+ " with " + pieces.size() + " pieces");
-		} catch (Exception e) {
-			Logger.error("Failed to generate End city at " + x + ", " + groundHeight + ", " + z);
-			e.printStackTrace();
-		}
+	@Override
+	public String func_143025_a() {
+		return "EndCity";
 	}
 
-	/**
-	 * Vanilla spacing/separation algorithm for End city placement.
-	 * Matches vanilla 1.10 MapGenEndCity.canSpawnStructureAtCoords().
-	 */
-	private boolean canSpawnStructureAtCoords(World world, int chunkX, int chunkZ) {
+	@Override
+	protected boolean canSpawnStructureAtCoords(int chunkX, int chunkZ) {
 		int cx = chunkX;
 		int cz = chunkZ;
 
@@ -83,7 +42,7 @@ public class MapGenEndCity {
 		int gridX = chunkX / SPACING;
 		int gridZ = chunkZ / SPACING;
 
-		Random random = world.setRandomSeed(gridX, gridZ, SALT);
+		Random random = this.worldObj.setRandomSeed(gridX, gridZ, SALT);
 
 		gridX *= SPACING;
 		gridZ *= SPACING;
@@ -94,20 +53,59 @@ public class MapGenEndCity {
 		if (cx != gridX || cz != gridZ) return false;
 
 		// Check if this is on a valid outer island
-		return chunkProvider.isIslandChunk(cx, cz);
+		if (!chunkProvider.isIslandChunk(cx, cz)) return false;
+
+		int x = cx * 16 + 8;
+		int z = cz * 16 + 8;
+		int groundHeight = getGroundHeight(this.worldObj, x, z);
+		
+		return groundHeight >= 60;
+	}
+
+	@Override
+	protected StructureStart getStructureStart(int chunkX, int chunkZ) {
+		return new Start(this.worldObj, chunkProvider, this.rand, chunkX, chunkZ);
 	}
 
 	/**
-	 * Sample terrain height by checking the highest solid block.
-	 * Uses a 4-point sample similar to vanilla.
+	 * Approximate terrain height to avoid recursive chunk loading during generation.
+	 * Outer End islands generate around Y=60.
 	 */
-	private int getGroundHeight(World world, int x, int z) {
-		int h1 = world.getTopSolidOrLiquidBlock(x, z);
-		int h2 = world.getTopSolidOrLiquidBlock(x + 1, z);
-		int h3 = world.getTopSolidOrLiquidBlock(x, z + 1);
-		int h4 = world.getTopSolidOrLiquidBlock(x + 1, z + 1);
+	public static int getGroundHeight(World world, int x, int z) {
+		return 60;
+	}
 
-		// Take the minimum to ensure there's ground for the structure
-		return Math.min(Math.min(h1, h2), Math.min(h3, h4));
+	public static class Start extends StructureStart {
+		
+		private boolean isCreated;
+
+		public Start() {}
+
+		public Start(World world, ChunkProviderEFREnd provider, Random rand, int chunkX, int chunkZ) {
+			super(chunkX, chunkZ);
+			
+			int x = chunkX * 16 + 8;
+			int z = chunkZ * 16 + 8;
+
+			int groundHeight = getGroundHeight(world, x, z);
+			if (groundHeight < 60) return;
+
+			// Determine rotation (based on world seed + position for determinism)
+			Random structRand = new Random(
+					(long) chunkX * 341873128712L + (long) chunkZ * 132897987541L + world.getSeed() + SALT);
+			int rotation = structRand.nextInt(4);
+
+			BlockPos startPos = new BlockPos(x, groundHeight, z);
+
+			EndCityPieces.startHouseTower(startPos, rotation, this.components, structRand);
+
+			this.updateBoundingBox();
+			this.isCreated = true;
+		}
+
+		@Override
+		public boolean isSizeableStructure() {
+			return this.isCreated;
+		}
 	}
 }

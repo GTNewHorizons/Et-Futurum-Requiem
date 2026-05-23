@@ -14,7 +14,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -77,16 +76,21 @@ public class EndCityTemplate extends NBTStructure {
 
 	/**
 	 * Transform a local block position by a vanilla rotation.
-	 * Matches vanilla's transformedBlockPos with Mirror.NONE.
+	 * Matches vanilla's Template.transform with Mirror.NONE and pivot (0,0).
+	 * <p>
+	 * Vanilla formula (pivot=0, no mirror):
+	 * CW_90:  (0 + 0 - z, y, 0 - 0 + x) = (-z, y, x)
+	 * CW_180: (0 + 0 - x, y, 0 + 0 - z) = (-x, y, -z)
+	 * CCW_90: (0 - 0 + z, y, 0 + 0 - x) = (z, y, -x)
 	 */
-	public static BlockPos transformPos(int x, int y, int z, int rotation, int sizeX, int sizeZ) {
+	public static BlockPos transformPos(int x, int y, int z, int rotation) {
 		switch (rotation) {
-			case 1: // CW_90: (x,y,z) → (-z, y, x) shifted by sizeZ-1
-				return new BlockPos(sizeZ - 1 - z, y, x);
-			case 2: // CW_180: (x,y,z) → (-x, y, -z) shifted by (sizeX-1, sizeZ-1)
-				return new BlockPos(sizeX - 1 - x, y, sizeZ - 1 - z);
-			case 3: // CCW_90: (x,y,z) → (z, y, -x) shifted by sizeX-1
-				return new BlockPos(z, y, sizeX - 1 - x);
+			case 1: // CW_90
+				return new BlockPos(-z, y, x);
+			case 2: // CW_180
+				return new BlockPos(-x, y, -z);
+			case 3: // CCW_90
+				return new BlockPos(z, y, -x);
 			default: // NONE
 				return new BlockPos(x, y, z);
 		}
@@ -95,21 +99,10 @@ public class EndCityTemplate extends NBTStructure {
 	/**
 	 * Rotate an offset/displacement vector by a vanilla rotation.
 	 * Used for computing connected positions between pieces.
+	 * Same as transformPos with pivot=0.
 	 */
 	public static BlockPos rotateOffset(BlockPos offset, int rotation) {
-		int dx = offset.getX();
-		int dy = offset.getY();
-		int dz = offset.getZ();
-		switch (rotation) {
-			case 1: // CW_90
-				return new BlockPos(-dz, dy, dx);
-			case 2: // CW_180
-				return new BlockPos(-dx, dy, -dz);
-			case 3: // CCW_90
-				return new BlockPos(dz, dy, -dx);
-			default: // NONE
-				return offset;
-		}
+		return transformPos(offset.getX(), offset.getY(), offset.getZ(), rotation);
 	}
 
 	/**
@@ -121,42 +114,44 @@ public class EndCityTemplate extends NBTStructure {
 
 	/**
 	 * Compute the bounding box for this template placed at the given position with the given rotation.
-	 * Matches vanilla's StructureComponentTemplate.setBoundingBoxFromTemplate().
+	 * Matches vanilla's Template.getBoundingBox with pivot=(0,0) and no mirror.
+	 * <p>
+	 * Vanilla uses size-1 for the BB dimensions:
+	 * NONE:   BB(0, 0, 0, k, l, i1)
+	 * CW_90:  BB(-k, 0, 0, 0, l, i1)
+	 * CW_180: BB(-k, 0, -i1, 0, l, 0)
+	 * CCW_90: BB(0, 0, -i1, k, l, 0)
+	 * Then offset by templatePosition.
 	 */
 	public StructureBoundingBox computeBoundingBox(BlockPos pos, int rotation) {
 		BlockPos tSize = getTransformedSize(rotation);
-		int tsx = tSize.getX();
-		int tsy = tSize.getY();
-		int tsz = tSize.getZ();
+		int k = tSize.getX() - 1;  // size-1, matching vanilla
+		int l = tSize.getY() - 1;
+		int i1 = tSize.getZ() - 1;
 
-		// Start with BB at origin
-		int minX = 0, minZ = 0;
-		int maxX = tsx, maxZ = tsz;
-
-		// Apply rotation offset (matching vanilla)
+		int minX, minY, minZ, maxX, maxY, maxZ;
 		switch (rotation) {
 			case 1: // CW_90
-				minX = -tsx;
-				maxX = 0;
+				minX = -k; minY = 0; minZ = 0;
+				maxX = 0;  maxY = l; maxZ = i1;
 				break;
 			case 2: // CW_180
-				minX = -tsx;
-				maxX = 0;
-				minZ = -tsz;
-				maxZ = 0;
+				minX = -k; minY = 0; minZ = -i1;
+				maxX = 0;  maxY = l; maxZ = 0;
 				break;
 			case 3: // CCW_90
-				minZ = -tsz;
-				maxZ = 0;
+				minX = 0;  minY = 0; minZ = -i1;
+				maxX = k;  maxY = l; maxZ = 0;
 				break;
-			default:
+			default: // NONE
+				minX = 0;  minY = 0; minZ = 0;
+				maxX = k;  maxY = l; maxZ = i1;
 				break;
 		}
 
-		// Offset by template position
 		return new StructureBoundingBox(
-				pos.getX() + minX, pos.getY(), pos.getZ() + minZ,
-				pos.getX() + maxX, pos.getY() + tsy - 1, pos.getZ() + maxZ
+				pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ,
+				pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ
 		);
 	}
 
@@ -179,15 +174,13 @@ public class EndCityTemplate extends NBTStructure {
 
 		// Separate structure blocks and entities for deferred processing
 		Map<BlockPos, String> structureBlocks = new LinkedHashMap<>();
-		Map<BlockPos, BlockStateContainer> entitySet = new LinkedHashMap<>();
 		Map<BlockPos, BlockStateContainer> normalBlocks = new LinkedHashMap<>();
 
 		// First pass: categorize all blocks
 		for (int i = 0; i < blocksList.tagCount(); i++) {
 			NBTTagCompound comp = blocksList.getCompoundTagAt(i);
 			BlockPos rawPos = getPosFromTagList(comp.getTagList("pos", 3));
-			BlockPos transformedPos = transformPos(rawPos.getX(), rawPos.getY(), rawPos.getZ(),
-					rotation, origSizeX, origSizeZ);
+			BlockPos transformedPos = transformPos(rawPos.getX(), rawPos.getY(), rawPos.getZ(), rotation);
 
 			int stateIdx = comp.getInteger("state");
 			BlockStateContainer state = palette.get(stateIdx);
@@ -207,26 +200,34 @@ public class EndCityTemplate extends NBTStructure {
 			}
 
 			if (!isStructureBlock) {
-				if (state.getType() == BlockStateContainer.BlockStateType.ENTITY) {
-					entitySet.put(transformedPos, state);
-				} else {
-					normalBlocks.put(transformedPos, state);
-				}
+				normalBlocks.put(transformedPos, state);
 			}
 		}
 
-		// Process structure blocks (data markers)
+		// Process structure blocks (data markers) — modifies normalBlocks for chests
+		// Note: shulkers and item frames are spawned directly, not through entity maps
+		List<int[]> shulkerPositions = new ArrayList<>();
+		List<int[]> itemFramePositions = new ArrayList<>();
+
 		for (Map.Entry<BlockPos, String> entry : structureBlocks.entrySet()) {
 			BlockPos localPos = entry.getKey();
 			String data = entry.getValue();
-			BlockStateContainer belowState = localPos.getY() <= 0 ? null : normalBlocks.get(localPos.down());
-			BlockStateContainer result = setStructureBlockAction(localPos, belowState, data, getFacingFromInt(efrPaletteIdx));
-			if (result != null) {
-				if (result.getType() == BlockStateContainer.BlockStateType.ENTITY) {
-					entitySet.put(localPos, result);
-				} else {
-					normalBlocks.put(localPos, result);
+
+			int wx = pos.getX() + localPos.getX();
+			int wy = pos.getY() + localPos.getY();
+			int wz = pos.getZ() + localPos.getZ();
+
+			if (data.startsWith("Chest")) {
+				// Assign loot table to the chest block below this data marker
+				BlockPos belowLocal = localPos.down();
+				BlockStateContainer belowState = normalBlocks.get(belowLocal);
+				if (belowState != null) {
+					belowState.setLootTable(ChestGenHooks.getInfo(EndCityLoot.END_CITY_TREASURE));
 				}
+			} else if (data.startsWith("Sentry")) {
+				shulkerPositions.add(new int[]{wx, wy, wz});
+			} else if (data.startsWith("Elytra")) {
+				itemFramePositions.add(new int[]{wx, wy, wz});
 			}
 		}
 
@@ -247,33 +248,37 @@ public class EndCityTemplate extends NBTStructure {
 			placeBlock(world, wx, wy, wz, state);
 		}
 
-		// Place entities last (so item frames don't pop off, shulkers have blocks to attach to)
-		for (Map.Entry<BlockPos, BlockStateContainer> entry : entitySet.entrySet()) {
-			BlockPos localPos = entry.getKey();
-			BlockStateContainer state = entry.getValue();
-
-			int wx = pos.getX() + localPos.getX();
-			int wy = pos.getY() + localPos.getY();
-			int wz = pos.getZ() + localPos.getZ();
-
-			if (clipBox != null && !clipBox.isVecInside(wx, wy, wz)) continue;
-
-			Entity entity = state.createNewEntity(world);
-			if (entity != null) {
-				if (state.getCompound() != null) {
-					entity.readFromNBT(state.getCompound());
-				}
-				entity.setPosition(wx + 0.5D, wy, wz + 0.5D);
-				if (entity instanceof EntityHanging) {
-					EntityHanging hanging = (EntityHanging) entity;
-					ForgeDirection hangingDir = converter.getItemFrameDirFromRotation(hanging.hangingDirection);
-					hanging.field_146063_b = MathHelper.floor_double(wx) + hangingDir.offsetX;
-					hanging.field_146064_c = MathHelper.floor_double(wy);
-					hanging.field_146062_d = MathHelper.floor_double(wz) + hangingDir.offsetZ;
-				}
-				world.spawnEntityInWorld(entity);
-			}
+		// Spawn shulkers directly (matching vanilla — EntityType.SHULKER.create + setPos + addFreshEntity)
+		for (int[] spos : shulkerPositions) {
+			if (clipBox != null && !clipBox.isVecInside(spos[0], spos[1], spos[2])) continue;
+			spawnShulker(world, spos[0], spos[1], spos[2]);
 		}
+
+		// Place item frames for elytra spots
+		for (int[] fpos : itemFramePositions) {
+			if (clipBox != null && !clipBox.isVecInside(fpos[0], fpos[1], fpos[2])) continue;
+			spawnItemFrame(world, fpos[0], fpos[1], fpos[2], rotation);
+		}
+	}
+
+	/**
+	 * Spawn a shulker at the given world position.
+	 */
+	private void spawnShulker(World world, int x, int y, int z) {
+		EntityShulker shulker = new EntityShulker(world);
+		shulker.setPosition(x + 0.5D, y + 0.5D, z + 0.5D);
+		world.spawnEntityInWorld(shulker);
+	}
+
+	/**
+	 * Spawn an item frame at the given world position (for elytra).
+	 * Always generates the frame, but leaves it empty per user requirement.
+	 */
+	private void spawnItemFrame(World world, int x, int y, int z, int rotation) {
+		// In 1.7.10, item frames need a hanging direction (0=SOUTH, 1=WEST, 2=NORTH, 3=EAST).
+		// This conveniently matches our rotation index (0=NONE/SOUTH, 1=CW_90/WEST, 2=CW_180/NORTH, 3=CCW_90/EAST).
+		EntityItemFrame frame = new EntityItemFrame(world, x, y, z, rotation);
+		world.spawnEntityInWorld(frame);
 	}
 
 	/**
@@ -304,33 +309,5 @@ public class EndCityTemplate extends NBTStructure {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Handle End city structure block data markers.
-	 * "Sentry" → spawn shulker
-	 * "Chest" → assign loot table to chest below
-	 * "Elytra" → place item frame (with elytra if enabled)
-	 */
-	@Override
-	public BlockStateContainer setStructureBlockAction(BlockPos pos, BlockStateContainer below, String data, ForgeDirection facing) {
-		if (data.startsWith("Sentry")) {
-			NBTTagCompound comp = new NBTTagCompound();
-			comp.setByte("Color", (byte) 16); // Undyed
-			return new BlockStateContainer(EntityShulker.class, comp);
-		}
-		if (data.startsWith("Chest")) {
-			if (below != null) {
-				below.setLootTable(ChestGenHooks.getInfo(EndCityLoot.END_CITY_TREASURE));
-			}
-			return new BlockStateContainer(Blocks.air, 0);
-		}
-		if (data.startsWith("Elytra")) {
-			NBTTagCompound comp = new NBTTagCompound();
-			comp.setByte("Direction", (byte) converter.getItemFrameRotationFromDir(facing));
-			BlockStateContainer frameState = new BlockStateContainer(EntityItemFrame.class, comp);
-			return frameState;
-		}
-		return new BlockStateContainer(Blocks.air, 0);
 	}
 }

@@ -30,7 +30,7 @@ public class EndCityPieces {
 
 	private interface IGenerator {
 		void init();
-		boolean generate(int depth, CityTemplate parent, BlockPos entryOffset, List<CityTemplate> pieces, Random rand);
+		boolean generate(int depth, EndCityPiece parent, BlockPos entryOffset, List<StructureComponent> pieces, Random rand);
 	}
 
 	/**
@@ -60,11 +60,11 @@ public class EndCityPieces {
 		public void init() {}
 
 		@Override
-		public boolean generate(int depth, CityTemplate parent, BlockPos entryOffset, List<CityTemplate> pieces, Random rand) {
+		public boolean generate(int depth, EndCityPiece parent, BlockPos entryOffset, List<StructureComponent> pieces, Random rand) {
 			if (depth > 8) return false;
 
 			int rotation = parent.rotation;
-			CityTemplate base = addHelper(pieces, addPiece(parent, entryOffset, "base_floor", rotation, true));
+			EndCityPiece base = addHelper(pieces, addPiece(parent, entryOffset, "base_floor", rotation, true));
 
 			int variant = rand.nextInt(3);
 			if (variant == 0) {
@@ -91,18 +91,18 @@ public class EndCityPieces {
 		public void init() {}
 
 		@Override
-		public boolean generate(int depth, CityTemplate parent, BlockPos entryOffset, List<CityTemplate> pieces, Random rand) {
+		public boolean generate(int depth, EndCityPiece parent, BlockPos entryOffset, List<StructureComponent> pieces, Random rand) {
 			int rotation = parent.rotation;
 
 			// Tower base
-			CityTemplate tower = addHelper(pieces, addPiece(parent,
+			EndCityPiece tower = addHelper(pieces, addPiece(parent,
 					new BlockPos(3 + rand.nextInt(2), -3, 3 + rand.nextInt(2)), "tower_base", rotation, true));
 
 			// First tower piece (always present)
 			tower = addHelper(pieces, addPiece(tower, new BlockPos(0, 7, 0), "tower_piece", rotation, true));
 
 			// Random bridge attachment point
-			CityTemplate bridgeAttach = rand.nextInt(3) == 0 ? tower : null;
+			EndCityPiece bridgeAttach = rand.nextInt(3) == 0 ? tower : null;
 
 			// Additional tower pieces
 			int towerPieces = 1 + rand.nextInt(3);
@@ -119,7 +119,7 @@ public class EndCityPieces {
 					if (rand.nextBoolean()) {
 						int bridgeRot = EndCityTemplate.addRotation(rotation, bridgeData[0]);
 						BlockPos bridgeOffset = new BlockPos(bridgeData[1], bridgeData[2], bridgeData[3]);
-						CityTemplate bridgeEnd = addHelper(pieces, addPiece(bridgeAttach, bridgeOffset, "bridge_end", bridgeRot, true));
+						EndCityPiece bridgeEnd = addHelper(pieces, addPiece(bridgeAttach, bridgeOffset, "bridge_end", bridgeRot, true));
 						recursiveChildren(TOWER_BRIDGE_GENERATOR, depth + 1, bridgeEnd, null, pieces, rand);
 					}
 				}
@@ -146,13 +146,13 @@ public class EndCityPieces {
 		}
 
 		@Override
-		public boolean generate(int depth, CityTemplate parent, BlockPos entryOffset, List<CityTemplate> pieces, Random rand) {
+		public boolean generate(int depth, EndCityPiece parent, BlockPos entryOffset, List<StructureComponent> pieces, Random rand) {
 			int rotation = parent.rotation;
 			int bridgeParts = rand.nextInt(4) + 1;
 
-			CityTemplate bridge = addHelper(pieces, addPiece(parent,
+			EndCityPiece bridge = addHelper(pieces, addPiece(parent,
 					new BlockPos(0, 0, -4), "bridge_piece", rotation, true));
-			bridge.componentType = -1;
+			bridge.setComponentType(-1);
 
 			int heightAccum = 0;
 
@@ -188,7 +188,7 @@ public class EndCityPieces {
 			bridge = addHelper(pieces, addPiece(bridge,
 					new BlockPos(4, heightAccum, 0), "bridge_end",
 					EndCityTemplate.addRotation(rotation, 2), true));
-			bridge.componentType = -1;
+			bridge.setComponentType(-1);
 
 			return true;
 		}
@@ -199,10 +199,10 @@ public class EndCityPieces {
 		public void init() {}
 
 		@Override
-		public boolean generate(int depth, CityTemplate parent, BlockPos entryOffset, List<CityTemplate> pieces, Random rand) {
+		public boolean generate(int depth, EndCityPiece parent, BlockPos entryOffset, List<StructureComponent> pieces, Random rand) {
 			int rotation = parent.rotation;
 
-			CityTemplate fatTower = addHelper(pieces, addPiece(parent,
+			EndCityPiece fatTower = addHelper(pieces, addPiece(parent,
 					new BlockPos(-3, 4, -3), "fat_tower_base", rotation, true));
 			fatTower = addHelper(pieces, addPiece(fatTower,
 					new BlockPos(0, 4, 0), "fat_tower_middle", rotation, true));
@@ -215,7 +215,7 @@ public class EndCityPieces {
 					if (rand.nextBoolean()) {
 						int bridgeRot = EndCityTemplate.addRotation(rotation, bridgeData[0]);
 						BlockPos bridgeOffset = new BlockPos(bridgeData[1], bridgeData[2], bridgeData[3]);
-						CityTemplate bridgeEnd = addHelper(pieces, addPiece(fatTower, bridgeOffset, "bridge_end", bridgeRot, true));
+						EndCityPiece bridgeEnd = addHelper(pieces, addPiece(fatTower, bridgeOffset, "bridge_end", bridgeRot, true));
 						recursiveChildren(TOWER_BRIDGE_GENERATOR, depth + 1, bridgeEnd, null, pieces, rand);
 					}
 				}
@@ -236,7 +236,7 @@ public class EndCityPieces {
 	 * Matches vanilla's addPiece() logic:
 	 *   child.templatePosition = parent.templatePosition + transform(parentRotation, offset)
 	 */
-	private static CityTemplate addPiece(CityTemplate parent, BlockPos offset, String pieceName, int rotation, boolean overwrite) {
+	private static EndCityPiece addPiece(EndCityPiece parent, BlockPos offset, String pieceName, int rotation, boolean overwrite) {
 		// Transform the offset by the parent's rotation
 		BlockPos rotatedOffset = EndCityTemplate.rotateOffset(offset, parent.rotation);
 
@@ -247,30 +247,31 @@ public class EndCityPieces {
 				parent.templatePosition.getZ() + rotatedOffset.getZ()
 		);
 
-		return new CityTemplate(pieceName, childPos, rotation, overwrite);
+		return new EndCityPiece(pieceName, childPos, rotation, overwrite);
 	}
 
-	private static CityTemplate addHelper(List<CityTemplate> pieces, CityTemplate piece) {
+	private static EndCityPiece addHelper(List<StructureComponent> pieces, EndCityPiece piece) {
 		pieces.add(piece);
 		return piece;
 	}
 
 	// ========================== Recursive Generation ==========================
 
-	private static boolean recursiveChildren(IGenerator generator, int depth, CityTemplate parent,
-											 BlockPos entryOffset, List<CityTemplate> existingPieces, Random rand) {
+	private static boolean recursiveChildren(IGenerator generator, int depth, EndCityPiece parent,
+											 BlockPos entryOffset, List<StructureComponent> existingPieces, Random rand) {
 		if (depth > 8) return false;
 
-		List<CityTemplate> newPieces = Lists.newArrayList();
+		List<StructureComponent> newPieces = Lists.newArrayList();
 		if (generator.generate(depth, parent, entryOffset, newPieces, rand)) {
 			boolean overlaps = false;
 			int batchId = rand.nextInt();
 
-			for (CityTemplate newPiece : newPieces) {
-				newPiece.componentType = batchId;
+			for (StructureComponent comp : newPieces) {
+				EndCityPiece newPiece = (EndCityPiece) comp;
+				newPiece.setComponentType(batchId);
 				// Check if this new piece overlaps with any existing piece from a different batch
-				CityTemplate intersecting = findIntersecting(existingPieces, newPiece.boundingBox);
-				if (intersecting != null && intersecting.componentType != parent.componentType) {
+				EndCityPiece intersecting = findIntersecting(existingPieces, newPiece.getBoundingBox());
+				if (intersecting != null && intersecting.getComponentType() != parent.getComponentType()) {
 					overlaps = true;
 					break;
 				}
@@ -287,9 +288,10 @@ public class EndCityPieces {
 	/**
 	 * Find a piece whose bounding box intersects with the given bounding box.
 	 */
-	private static CityTemplate findIntersecting(List<CityTemplate> pieces, StructureBoundingBox bb) {
-		for (CityTemplate piece : pieces) {
-			if (piece.boundingBox != null && intersects(piece.boundingBox, bb)) {
+	private static EndCityPiece findIntersecting(List<StructureComponent> pieces, StructureBoundingBox bb) {
+		for (StructureComponent comp : pieces) {
+			EndCityPiece piece = (EndCityPiece) comp;
+			if (piece.getBoundingBox() != null && intersects(piece.getBoundingBox(), bb)) {
 				return piece;
 			}
 		}
@@ -312,14 +314,15 @@ public class EndCityPieces {
 	 * @param pieces   Output list of pieces
 	 * @param rand     Random
 	 */
-	public static void startHouseTower(BlockPos pos, int rotation, List<CityTemplate> pieces, Random rand) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void startHouseTower(BlockPos pos, int rotation, LinkedList pieces, Random rand) {
 		FAT_TOWER_GENERATOR.init();
 		HOUSE_TOWER_GENERATOR.init();
 		TOWER_BRIDGE_GENERATOR.init();
 		TOWER_GENERATOR.init();
 
 		// Initial base floor
-		CityTemplate base = addHelper(pieces, new CityTemplate("base_floor", pos, rotation, true));
+		EndCityPiece base = addHelper(pieces, new EndCityPiece("base_floor", pos, rotation, true));
 		// Second floor
 		base = addHelper(pieces, addPiece(base, new BlockPos(-1, 0, -1), "second_floor_1", rotation, false));
 		// Third floor
@@ -336,52 +339,71 @@ public class EndCityPieces {
 	 * Represents a single piece in the End city structure.
 	 * Tracks template position, rotation, bounding box, and placement mode.
 	 */
-	public static class CityTemplate {
-		public final String pieceName;
-		public final BlockPos templatePosition;
-		public final int rotation;
-		public final boolean overwrite;
-		public StructureBoundingBox boundingBox;
-		public int componentType;
-		private final EndCityTemplate template;
+	public static class EndCityPiece extends StructureComponent {
+		public String pieceName;
+		public BlockPos templatePosition;
+		public int rotation;
+		public boolean overwrite;
+		private EndCityTemplate template;
 
-		public CityTemplate(String pieceName, BlockPos pos, int rotation, boolean overwrite) {
+		public EndCityPiece() {
+			// Required for NBT instantiation
+		}
+
+		public EndCityPiece(String pieceName, BlockPos pos, int rotation, boolean overwrite) {
+			super(0);
 			this.pieceName = pieceName;
 			this.templatePosition = pos;
 			this.rotation = rotation;
+			this.coordBaseMode = rotation;
 			this.overwrite = overwrite;
-			this.template = getTemplate(pieceName);
+			loadTemplate();
 			this.boundingBox = template.computeBoundingBox(pos, rotation);
 		}
 
-		/**
-		 * Place this piece's blocks in the world.
-		 */
-		public void placeInWorld(World world, Random rand, StructureBoundingBox clipBox) {
-			template.placeInWorld(world, rand, templatePosition, rotation, overwrite, clipBox);
+		public int getComponentType() {
+			return this.componentType;
 		}
 
-		/**
-		 * Serialize to NBT for structure saving.
-		 */
-		public void writeToNBT(NBTTagCompound tag) {
+		public void setComponentType(int type) {
+			this.componentType = type;
+		}
+
+		private void loadTemplate() {
+			if (this.template == null && this.pieceName != null) {
+				this.template = getTemplate(this.pieceName);
+			}
+		}
+
+		@Override
+		protected void func_143012_a(NBTTagCompound tag) {
 			tag.setString("Template", pieceName);
 			tag.setInteger("TPX", templatePosition.getX());
 			tag.setInteger("TPY", templatePosition.getY());
 			tag.setInteger("TPZ", templatePosition.getZ());
 			tag.setInteger("Rot", rotation);
 			tag.setBoolean("OW", overwrite);
+			tag.setInteger("CT", this.componentType);
 		}
 
-		/**
-		 * Deserialize from NBT.
-		 */
-		public static CityTemplate readFromNBT(NBTTagCompound tag) {
-			String name = tag.getString("Template");
-			BlockPos pos = new BlockPos(tag.getInteger("TPX"), tag.getInteger("TPY"), tag.getInteger("TPZ"));
-			int rot = tag.getInteger("Rot");
-			boolean ow = tag.getBoolean("OW");
-			return new CityTemplate(name, pos, rot, ow);
+		@Override
+		protected void func_143011_b(NBTTagCompound tag) {
+			this.pieceName = tag.getString("Template");
+			this.templatePosition = new BlockPos(tag.getInteger("TPX"), tag.getInteger("TPY"), tag.getInteger("TPZ"));
+			this.rotation = tag.getInteger("Rot");
+			this.coordBaseMode = this.rotation;
+			this.overwrite = tag.getBoolean("OW");
+			this.componentType = tag.getInteger("CT");
+			loadTemplate();
+		}
+
+		@Override
+		public boolean addComponentParts(World world, Random rand, StructureBoundingBox clipBox) {
+			loadTemplate();
+			if (this.template != null) {
+				template.placeInWorld(world, rand, templatePosition, rotation, overwrite, clipBox);
+			}
+			return true;
 		}
 	}
 }

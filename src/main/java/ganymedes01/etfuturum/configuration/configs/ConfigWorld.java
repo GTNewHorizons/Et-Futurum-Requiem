@@ -48,7 +48,6 @@ public class ConfigWorld extends ConfigBase {
 	public static boolean enableExtraMesaGold;
 	public static boolean enableMesaMineshaft;
 	public static boolean enableCoarseDirtReplacement;
-	public static boolean enableEndCities;
 	public static boolean enableAmethystGeodes;
 	public static int buddingAmethystMode;
 	public static int amethystRarity;
@@ -165,7 +164,6 @@ public class ConfigWorld extends ConfigBase {
 		enableExtraMesaGold = getBoolean("enableExtraMesaGold", catGeneration, true, "Generate 20 more veins of gold ore from Y 32 to Y 80 in any Mesa biome.");
 		enableMesaMineshaft = getBoolean("enableMesaMineshaft", catGeneration, true, "Generates extra mineshafts in mesa biomes up to y80. If fences are enabled, dark oak wood is used.");
 		enableCoarseDirtReplacement = getBoolean("enableCoarseDirtReplacement", catGeneration, true, "Replaces coarse dirt in biomes it (dirt:1) generates in such as shattered savannas or mesa plateaus.");
-		enableEndCities = getBoolean("enableEndCities", catGeneration, true, "Enables End City structure generation on outer End islands. Requires the endDimensionProvider experimental feature to be enabled.");
 		enableAmethystGeodes = getBoolean("enableAmethystGeodes", catGeneration, true, "");
 		buddingAmethystMode = getInt("buddingAmethystMode", catGeneration, 0, 0, 2, "0 = Budding amethyst cannot be obtained at all even with silk touch. When using this option, attempting to push them using a piston will break it.\n1 = Budding amethyst will drop if you use a silk touch pickaxe.\n2 = Budding amethyst does not need silk touch, just a pickaxe.");
 		Property amethystBlacklistProp = get(catGeneration, "amethystDimensionBlacklist", new int[]{-1, 1});
