@@ -15,6 +15,7 @@ import ganymedes01.etfuturum.api.mappings.MultiBlockSoundContainer;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.client.OpenGLHelper;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
+import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
 import ganymedes01.etfuturum.client.WorldIconManager;
 import ganymedes01.etfuturum.client.gui.GuiConfigWarning;
 import ganymedes01.etfuturum.client.gui.GuiGamemodeSwitcher;
@@ -772,6 +773,7 @@ public class ClientEventHandler {
 		if (ConfigMixins.modernLoadingScreen && event.phase == Phase.END
 				&& mc.theWorld != null && mc.currentScreen == null) {
 			SpawnChunkProgress.reset();
+			LoadingScreenHooks.reset();
 		}
 		if (!ConfigMixins.enableElytra)
 			return;

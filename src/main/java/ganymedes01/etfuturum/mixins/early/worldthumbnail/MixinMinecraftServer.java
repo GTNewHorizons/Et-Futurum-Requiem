@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.mixins.early.worldthumbnail;
 
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
+import ganymedes01.etfuturum.client.loading.LoadingScreenStateTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.WorldServer;
@@ -20,11 +21,14 @@ public class MixinMinecraftServer {
     private void etfu$beginSpawnTracking(CallbackInfo ci) {
         WorldServer world = worldServers[0];
         ChunkCoordinates spawn = world.getSpawnPoint();
+        LoadingScreenStateTracker.beginIfNeeded();
+        LoadingScreenStateTracker.updateChunkRadius(SpawnChunkProgress.SPAWN_CHUNK_RADIUS, false);
         SpawnChunkProgress.begin(spawn.posX, spawn.posZ);
     }
 
     @Inject(method = "initialWorldChunkLoad", at = @At("RETURN"))
     private void etfu$endSpawnTracking(CallbackInfo ci) {
         SpawnChunkProgress.end();
+        LoadingScreenStateTracker.markDone();
     }
 }

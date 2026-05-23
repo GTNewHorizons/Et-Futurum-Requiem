@@ -285,6 +285,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("worldthumbnail.client.MixinMinecraft_LoadingBridge");
 				mixins.add("worldthumbnail.MixinMinecraftServer");
 				mixins.add("worldthumbnail.MixinChunkProviderServer");
+				mixins.add("worldthumbnail.MixinChunkProviderGenerate");
+				mixins.add("worldthumbnail.MixinChunkProviderHell");
+				mixins.add("worldthumbnail.MixinChunkProviderEnd");
 			}
 		}
 

@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.mixins.early.worldthumbnail.client;
 
 import ganymedes01.etfuturum.client.GuiLoadingBridge;
+import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -19,6 +20,7 @@ public class MixinMinecraft_LoadingBridge {
                     target = "Lnet/minecraft/client/Minecraft;displayGuiScreen(Lnet/minecraft/client/gui/GuiScreen;)V",
                     ordinal = 1))
     private void etfu$bridgeLoadingScreen(Minecraft mc, GuiScreen screen) {
+        LoadingScreenHooks.beginOther();
         Framebuffer fb = mc.getFramebuffer();
         if (fb != null) {
             fb.setFramebufferColor(0, 0, 0, 1);

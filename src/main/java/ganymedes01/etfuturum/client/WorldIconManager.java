@@ -27,7 +27,7 @@ public class WorldIconManager {
     private static final int ICON_FILE_SIZE = 64;
     private static final long CAPTURE_COOLDOWN_MS = 30_000;
     private static final long INITIAL_DELAY_MS = 8_000;
-    private static final ResourceLocation MISSING_ICON = new ResourceLocation("etfuturum", "textures/gui/missing_world_icon.png");
+    private static final ResourceLocation MISSING_ICON = new ResourceLocation("minecraft", "textures/misc/unknown_pack.png");
 
     private static final Map<String, ResourceLocation> iconCache = new HashMap<>();
     private static volatile boolean pendingCapture = false;
