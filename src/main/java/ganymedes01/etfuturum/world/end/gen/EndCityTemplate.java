@@ -57,7 +57,35 @@ public class EndCityTemplate extends NBTStructure {
 	private final int origSizeZ;
 
 	public EndCityTemplate(String loc) {
-		super(loc, EFRBlockStateConverter.INSTANCE);
+		super(loc, new EFRBlockStateConverter() {
+			@Override
+			public BlockStateContainer createBlockStateContainer(String blockName, Block block, Map<String, String> blockStates, ForgeDirection dir) {
+				if (dir == ForgeDirection.WEST || dir == ForgeDirection.EAST) {
+					blockStates = swapNorthSouth(blockStates);
+				}
+				return super.createBlockStateContainer(blockName, block, blockStates, dir);
+			}
+
+			private Map<String, String> swapNorthSouth(Map<String, String> blockStates) {
+				Map<String, String> newStates = new HashMap<>(blockStates);
+				for (Map.Entry<String, String> entry : newStates.entrySet()) {
+					if ("north".equals(entry.getValue())) {
+						entry.setValue("south");
+					} else if ("south".equals(entry.getValue())) {
+						entry.setValue("north");
+					}
+				}
+				if (newStates.containsKey("north") || newStates.containsKey("south")) {
+					String n = newStates.get("north");
+					String s = newStates.get("south");
+					if (n != null) newStates.put("south", n);
+					else newStates.remove("south");
+					if (s != null) newStates.put("north", s);
+					else newStates.remove("north");
+				}
+				return newStates;
+			}
+		});
 		BlockPos size = getSize(ForgeDirection.NORTH);
 		this.origSizeX = size.getX();
 		this.origSizeY = size.getY();
@@ -208,6 +236,7 @@ public class EndCityTemplate extends NBTStructure {
 		// Note: shulkers and item frames are spawned directly, not through entity maps
 		List<int[]> shulkerPositions = new ArrayList<>();
 		List<int[]> itemFramePositions = new ArrayList<>();
+		List<int[]> pendingChests = new ArrayList<>();
 
 		for (Map.Entry<BlockPos, String> entry : structureBlocks.entrySet()) {
 			BlockPos localPos = entry.getKey();
@@ -218,11 +247,16 @@ public class EndCityTemplate extends NBTStructure {
 			int wz = pos.getZ() + localPos.getZ();
 
 			if (data.startsWith("Chest")) {
-				// Assign loot table to the chest block below this data marker
+				// We don't modify the shared palette state!
+				// The marker is exactly 1 block above the chest.
 				BlockPos belowLocal = localPos.down();
-				BlockStateContainer belowState = normalBlocks.get(belowLocal);
-				if (belowState != null) {
-					belowState.setLootTable(ChestGenHooks.getInfo(EndCityLoot.END_CITY_TREASURE));
+				int cx = pos.getX() + belowLocal.getX();
+				int cy = pos.getY() + belowLocal.getY();
+				int cz = pos.getZ() + belowLocal.getZ();
+
+				// Only queue for assignment if the chest is actually in this chunk's bounding box
+				if (clipBox == null || clipBox.isVecInside(cx, cy, cz)) {
+					pendingChests.add(new int[]{cx, cy, cz});
 				}
 			} else if (data.startsWith("Sentry")) {
 				shulkerPositions.add(new int[]{wx, wy, wz});
@@ -259,6 +293,20 @@ public class EndCityTemplate extends NBTStructure {
 			if (clipBox != null && !clipBox.isVecInside(fpos[0], fpos[1], fpos[2])) continue;
 			spawnItemFrame(world, fpos[0], fpos[1], fpos[2], rotation);
 		}
+
+		// Process deferred chests
+		for (int[] chestPos : pendingChests) {
+			TileEntity te = world.getTileEntity(chestPos[0], chestPos[1], chestPos[2]);
+			if (te instanceof net.minecraft.inventory.IInventory) {
+				ChestGenHooks info = ChestGenHooks.getInfo(EndCityLoot.END_CITY_TREASURE);
+				WeightedRandomChestContent.generateChestContents(
+						rand, info.getItems(rand),
+						(net.minecraft.inventory.IInventory) te, info.getCount(rand)
+				);
+			} else {
+				System.out.println("EndCityTemplate: Missing or invalid chest TE at " + chestPos[0] + ", " + chestPos[1] + ", " + chestPos[2]);
+			}
+		}
 	}
 
 	/**
@@ -277,7 +325,8 @@ public class EndCityTemplate extends NBTStructure {
 	private void spawnItemFrame(World world, int x, int y, int z, int rotation) {
 		// In 1.7.10, item frames need a hanging direction (0=SOUTH, 1=WEST, 2=NORTH, 3=EAST).
 		// This conveniently matches our rotation index (0=NONE/SOUTH, 1=CW_90/WEST, 2=CW_180/NORTH, 3=CCW_90/EAST).
-		EntityItemFrame frame = new EntityItemFrame(world, x, y, z, rotation);
+		ForgeDirection hangingDir = EFRBlockStateConverter.INSTANCE.getItemFrameDirFromRotation(rotation);
+		EntityItemFrame frame = new EntityItemFrame(world, x + hangingDir.offsetX, y + hangingDir.offsetY, z + hangingDir.offsetZ, rotation);
 		world.spawnEntityInWorld(frame);
 	}
 

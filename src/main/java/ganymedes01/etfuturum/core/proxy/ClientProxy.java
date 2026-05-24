@@ -13,6 +13,7 @@ import ganymedes01.etfuturum.client.renderer.block.*;
 import ganymedes01.etfuturum.client.renderer.entity.*;
 import ganymedes01.etfuturum.client.renderer.item.*;
 import ganymedes01.etfuturum.client.renderer.tileentity.*;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import ganymedes01.etfuturum.client.skins.NewRenderPlayer;
 import ganymedes01.etfuturum.client.skins.NewSkinManager;
 import ganymedes01.etfuturum.client.subtitle.GuiSubtitles;
@@ -100,6 +101,10 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityWoodSign.class, new TileEntityWoodSignRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBanner.class, new TileEntityBannerRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySkull.class, new TileEntityFancySkullRenderer());
+		// Replace the vanilla skull renderer singleton with our dragon-head-aware subclass.
+		// This intercepts worn-on-player skull rendering (called from RenderBiped.renderEquippedItems)
+		// and renders the dragon head model for skull type 5, delegating to vanilla for all other types.
+		// new DragonHeadSkullRenderer().func_147497_a(TileEntityRendererDispatcher.instance);
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNewBeacon.class, new TileEntityNewBeaconRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityShulkerBox.class, new TileEntityShulkerBoxRenderer(new ModelShulker()));
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGateway.class, new TileEntityGatewayRenderer());

@@ -74,7 +74,7 @@ public class CommandLocateEndCity extends CommandBase {
 				chunkX += (random.nextInt(SPACING - SEPARATION) + random.nextInt(SPACING - SEPARATION)) / 2;
 				chunkZ += (random.nextInt(SPACING - SEPARATION) + random.nextInt(SPACING - SEPARATION)) / 2;
 
-				if (endProvider.isIslandChunk(chunkX, chunkZ)) {
+				if (ganymedes01.etfuturum.world.end.gen.MapGenEndCity.isValidCityAt(endProvider, chunkX, chunkZ, world.getSeed())) {
 					int blockX = chunkX * 16 + 8;
 					int blockZ = chunkZ * 16 + 8;
 					

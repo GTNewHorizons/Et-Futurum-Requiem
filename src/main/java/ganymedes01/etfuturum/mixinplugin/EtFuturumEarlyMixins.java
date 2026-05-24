@@ -267,6 +267,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			if(ConfigSounds.newBlockSounds) {
 				mixins.add("sounds.client.MixinBlockStepSounds");
 			}
+			
+			mixins.add("client.MixinRendererLivingEntity");
+			mixins.add("items.MixinRenderBiped");
+			mixins.add("items.MixinRenderPlayer");
 		}
 
 		if (ConfigMixins.thinPanes) {
@@ -289,6 +293,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("goats.client.MixinItemRenderer");
 			mixins.add("goats.client.MixinModelBiped");
 		}
+
+		mixins.add("items.MixinItemSkull");
+		mixins.add("blocks.MixinTileEntitySkull");
 
 		mixins.add("deepslateores.MixinChunk");
 
