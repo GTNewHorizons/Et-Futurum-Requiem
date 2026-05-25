@@ -8,11 +8,13 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.entity.ai.EntityAIArrowAttack;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.EnumDifficulty;
@@ -48,6 +50,7 @@ public class MixinEntitySkeleton extends EntityMob implements ISkeletonSwingingA
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void useModernMoveHelper(World world, CallbackInfo ci) {
 		this.moveHelper = new ExtendedEntityMoveHelper((EntityLiving) (Object) this);
+		this.tasks.addTask(3, new EntityAIAvoidEntity((EntityCreature) (Object) this, EntityWolf.class, 6.0F, 1.0D, 1.2D));
 		this.targetTasks.addTask(3, new EntityAINearestAttackableTarget((EntityCreature) (Object) this, EntityIronGolem.class, 0, true));
 	}
 

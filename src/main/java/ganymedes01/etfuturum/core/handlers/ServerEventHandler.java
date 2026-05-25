@@ -461,8 +461,11 @@ public class ServerEventHandler {
 				event.bow.damageItem(1, event.entityPlayer);
 				event.entityPlayer.worldObj.playSoundAtEntity(event.entityPlayer, "random.bow", 1.0F, 1.0F / (event.entityPlayer.worldObj.rand.nextFloat() * 0.4F + 1.2F) + charge * 0.5F);
 
-				if (--arrow.stackSize <= 0)
+				if (event.entityPlayer.capabilities.isCreativeMode) {
+					arrowEntity.canBePickedUp = 2;
+				} else if (--arrow.stackSize <= 0) {
 					event.entityPlayer.inventory.setInventorySlotContents(i, null);
+				}
 
 				if (!event.entityPlayer.worldObj.isRemote)
 					event.entityPlayer.worldObj.spawnEntityInWorld(arrowEntity);

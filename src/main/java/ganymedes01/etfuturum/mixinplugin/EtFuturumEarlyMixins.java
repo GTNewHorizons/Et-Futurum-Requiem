@@ -156,6 +156,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			}
 		}
 
+		if (ConfigMixins.modernZombieBehavior) {
+			mixins.add("zombie.MixinEntityZombie");
+		}
+
 		if (ConfigMixins.floorCeilingButtons) {
 			mixins.add("floorceilbutton.MixinBlockButton");
 		}

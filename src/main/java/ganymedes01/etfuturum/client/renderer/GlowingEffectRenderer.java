@@ -66,7 +66,7 @@ public class GlowingEffectRenderer {
 		List<Entity> glowingEntities = new ArrayList<>();
 
 		for (Entity entity : allEntities) {
-			if (entity == player || !(entity instanceof EntityLivingBase))
+			if ((entity == player && mc.gameSettings.thirdPersonView == 0) || !(entity instanceof EntityLivingBase))
 				continue;
 			EntityLivingBase living = (EntityLivingBase) entity;
 			if (living.getActivePotionEffect(ModPotions.glowing) == null)
