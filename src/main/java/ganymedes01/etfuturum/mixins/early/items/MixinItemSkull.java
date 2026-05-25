@@ -1,16 +1,12 @@
 package ganymedes01.etfuturum.mixins.early.items;
 
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
 
 import net.minecraft.item.EnumRarity;
 
@@ -30,10 +26,5 @@ public abstract class MixinItemSkull extends Item {
         if (stack.getItemDamage() == 5) {
             cir.setReturnValue(this.getUnlocalizedName() + ".dragon");
         }
-    }
-
-    @Inject(method = "getSubItems", at = @At("TAIL"))
-    private void etfuturum$addDragonHeadToCreative(Item itemIn, CreativeTabs tab, List subItems, CallbackInfo ci) {
-        subItems.add(new ItemStack(itemIn, 1, 5));
     }
 }

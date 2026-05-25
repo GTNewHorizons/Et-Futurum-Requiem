@@ -295,6 +295,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		}
 
 		mixins.add("items.MixinItemSkull");
+		if (side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("items.MixinItemSkullClient");
+		}
 		mixins.add("blocks.MixinTileEntitySkull");
 
 		mixins.add("deepslateores.MixinChunk");
