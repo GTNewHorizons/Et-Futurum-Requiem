@@ -861,6 +861,12 @@ public class ModRecipes {
 			GameRegistry.addRecipe(new RecipeTippedArrow(ModItems.TIPPED_ARROW.newItemStack(), "xxx", "xyx", "xxx", 'x', Items.arrow, 'y', ModItems.LINGERING_POTION.newItemStack(1, OreDictionary.WILDCARD_VALUE)));
 		}
 
+		if (ModItems.SPECTRAL_ARROW.isEnabled()) {
+			RecipeHelper.addShapedRecipe(RecipeHelper.Priority.HIGH, ModItems.SPECTRAL_ARROW.newItemStack(2),
+					" # ", "#X#", " # ",
+					'X', Items.arrow, '#', Items.glowstone_dust);
+		}
+
 		if (!ModsList.GTNH.isLoaded()) {
 			for (int i = 0; i < ModBlocks.BEDS.length; i++) {
 				int j = i == 14 ? 15 : i;

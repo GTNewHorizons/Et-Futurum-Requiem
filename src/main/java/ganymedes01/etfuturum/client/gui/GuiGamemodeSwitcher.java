@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.client.gui;
 
 import com.google.common.collect.Lists;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -52,7 +52,7 @@ public class GuiGamemodeSwitcher extends GuiScreen {
 			}
 			case ADVENTURE: {
 				if (ConfigMixins.enableSpectatorMode)
-					return SpectatorMode.SPECTATOR_GAMETYPE;
+					return SpectatorUtils.SPECTATOR_GAMETYPE;
 				else
 					return WorldSettings.GameType.CREATIVE;
 			}
@@ -93,7 +93,7 @@ public class GuiGamemodeSwitcher extends GuiScreen {
 		map.put(WorldSettings.GameType.SURVIVAL, new ItemStack(Items.iron_sword));
 		map.put(WorldSettings.GameType.ADVENTURE, new ItemStack(Items.map));
 		if (ConfigMixins.enableSpectatorMode)
-			map.put(SpectatorMode.SPECTATOR_GAMETYPE, new ItemStack(Items.ender_eye));
+			map.put(SpectatorUtils.SPECTATOR_GAMETYPE, new ItemStack(Items.ender_eye));
 
 		int i = 0;
 		int totalWidth = map.size() * 31 - 5;

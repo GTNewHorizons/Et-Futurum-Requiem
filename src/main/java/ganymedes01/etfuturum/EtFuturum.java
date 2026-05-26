@@ -40,6 +40,10 @@ import ganymedes01.etfuturum.world.EtFuturumEarlyWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
+import ganymedes01.etfuturum.world.end.gen.EndCityLoot;
+import ganymedes01.etfuturum.world.end.gen.EndCityPieces;
+import ganymedes01.etfuturum.world.end.gen.MapGenEndCity;
+import net.minecraft.world.gen.structure.MapGenStructureIO;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -379,6 +383,11 @@ public class EtFuturum {
 		}
 
 		EtFuturumLootTables.init();
+		if (ConfigExperiments.enableEndCities) {
+			EndCityLoot.init();
+			MapGenStructureIO.registerStructure(MapGenEndCity.Start.class, "EndCity");
+			MapGenStructureIO.func_143031_a(EndCityPieces.EndCityPiece.class, "ECP");
+		}
 		ModRecipes.init();
 		DeepslateOreRegistry.init();
 		StrippedLogRegistry.init();
@@ -479,6 +488,9 @@ public class EtFuturum {
 	public void serverStarting(FMLServerStartingEvent event) {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
+		}
+		if (ConfigExperiments.enableEndCities) {
+			event.registerServerCommand(new ganymedes01.etfuturum.command.CommandLocateEndCity());
 		}
 	}
 
@@ -682,6 +694,33 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.snow_golem.ambient", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.hurt", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient_baby", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.step", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.warning", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ram_impact", "neutral");
+		config.addSoundEvent(ver, "entity.goat.horn_break", "neutral");
+		config.addSoundEvent(ver, "entity.goat.step", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ram_impact", "neutral");
+		for (int i = 0; i < 8; ++i) {
+			config.addSoundEvent(ver, "item.goat_horn.sound." + i, "record");
+		}
 		config.addSoundEvent(ver, "entity.wither_skeleton.ambient", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.hurt", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.death", "hostile");
@@ -759,6 +798,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "item.honey_bottle.drink", "player");
 
 		config.addSoundEvent(ver, "item.armor.equip_leather", "player");
+		config.addSoundEvent(ver, "item.armor.equip_copper", "player");
 		config.addSoundEvent(ver, "item.armor.equip_gold", "player");
 		config.addSoundEvent(ver, "item.armor.equip_chain", "player");
 		config.addSoundEvent(ver, "item.armor.equip_iron", "player");
