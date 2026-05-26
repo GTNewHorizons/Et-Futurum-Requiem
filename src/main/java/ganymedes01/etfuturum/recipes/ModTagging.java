@@ -408,6 +408,15 @@ public class ModTagging {
 		ItemStack ore10 = ModBlocks.COBBLED_DEEPSLATE.newItemStack();
 		RecipeHelper.registerOre("cobblestone", ore10);
 
+		ItemStack oreBasalt = ModBlocks.BASALT.newItemStack();
+		RecipeHelper.registerOre("stone",oreBasalt);
+
+		ItemStack oreDeepslate = ModBlocks.DEEPSLATE.newItemStack();
+		RecipeHelper.registerOre("stone", oreDeepslate);
+
+		ItemStack oreTuff = ModBlocks.TUFF.newItemStack();
+		RecipeHelper.registerOre("stone", oreTuff);
+
 		RecipeHelper.registerOre("record", ModItems.PIGSTEP_RECORD.get());
 		RecipeHelper.registerOre("record", ModItems.OTHERSIDE_RECORD.get());
 
