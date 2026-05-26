@@ -32,6 +32,7 @@ import ganymedes01.etfuturum.gamerule.DoWeatherCycle;
 import ganymedes01.etfuturum.gamerule.PlayersSleepingPercentage;
 import ganymedes01.etfuturum.gamerule.RandomTickSpeed;
 import ganymedes01.etfuturum.items.ItemArrowTipped;
+import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
 import ganymedes01.etfuturum.recipes.ModRecipes;
@@ -299,6 +300,7 @@ public class ServerEventHandler {
 					}
 				}
 			}
+
 		}
 	}
 
@@ -307,17 +309,14 @@ public class ServerEventHandler {
 		if (event.result == null)
 			return;
 		IInventory invt = event.entityPlayer.inventory;
-		for (int i = 0; i < invt.getSizeInventory(); i++) {
-			ItemStack stack = invt.getStackInSlot(i);
-			if (stack == null || stack.stackSize <= 0)
-				continue;
-			if (stack.getItem() == Items.arrow)
-				return;
-			if (stack.getItem() == ModItems.TIPPED_ARROW.get()) {
-				event.setCanceled(true);
-				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result));
-				return;
-			}
+		int arrowSlot = findBowAmmoSlot(invt);
+		if (arrowSlot < 0)
+			return;
+
+		ItemStack stack = invt.getStackInSlot(arrowSlot);
+		if (isCustomArrow(stack)) {
+			event.setCanceled(true);
+			event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result));
 		}
 	}
 
@@ -327,9 +326,10 @@ public class ServerEventHandler {
 			return;
 
 		IInventory invt = event.entityPlayer.inventory;
+		int selectedArrowSlot = findBowAmmoSlot(invt);
 		for (int i = 0; i < invt.getSizeInventory(); i++) {
 			ItemStack arrow = invt.getStackInSlot(i);
-			if (arrow != null && arrow.stackSize > 0 && arrow.getItem() == ModItems.TIPPED_ARROW.get()) {
+			if (i == selectedArrowSlot && arrow != null && arrow.stackSize > 0 && arrow.getItem() == ModItems.TIPPED_ARROW.get()) {
 				float charge = event.charge / 20.0F;
 				charge = (charge * charge + charge * 2.0F) / 3.0F;
 
@@ -358,7 +358,7 @@ public class ServerEventHandler {
 				event.bow.damageItem(1, event.entityPlayer);
 				event.entityPlayer.worldObj.playSoundAtEntity(event.entityPlayer, "random.bow", 1.0F, 1.0F / (event.entityPlayer.worldObj.rand.nextFloat() * 0.4F + 1.2F) + charge * 0.5F);
 
-				if (!event.entityPlayer.capabilities.isCreativeMode && --arrow.stackSize <= 0)
+				if (--arrow.stackSize <= 0)
 					event.entityPlayer.inventory.setInventorySlotContents(i, null);
 
 				if (!event.entityPlayer.worldObj.isRemote)
@@ -367,6 +367,66 @@ public class ServerEventHandler {
 				return;
 			}
 		}
+
+		for (int i = 0; i < invt.getSizeInventory(); i++) {
+			ItemStack arrow = invt.getStackInSlot(i);
+			if (i == selectedArrowSlot && arrow != null && arrow.stackSize > 0 && arrow.getItem() == ModItems.SPECTRAL_ARROW.get()) {
+				float charge = event.charge / 20.0F;
+				charge = (charge * charge + charge * 2.0F) / 3.0F;
+
+				if (charge < 0.1D)
+					return;
+				if (charge > 1.0F)
+					charge = 1.0F;
+
+				EntitySpectralArrow arrowEntity = new EntitySpectralArrow(event.entityPlayer.worldObj, event.entityPlayer, charge * 2.0F);
+
+				if (charge == 1.0F)
+					arrowEntity.setIsCritical(true);
+
+				int power = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, event.bow);
+				if (power > 0)
+					arrowEntity.setDamage(arrowEntity.getDamage() + power * 0.5D + 0.5D);
+
+				int punch = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, event.bow);
+				if (punch > 0)
+					arrowEntity.setKnockbackStrength(punch);
+
+				if (EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, event.bow) > 0)
+					arrowEntity.setFire(100);
+
+				event.bow.damageItem(1, event.entityPlayer);
+				event.entityPlayer.worldObj.playSoundAtEntity(event.entityPlayer, "random.bow", 1.0F, 1.0F / (event.entityPlayer.worldObj.rand.nextFloat() * 0.4F + 1.2F) + charge * 0.5F);
+
+				if (event.entityPlayer.capabilities.isCreativeMode) {
+					arrowEntity.canBePickedUp = 2;
+				} else if (--arrow.stackSize <= 0) {
+					event.entityPlayer.inventory.setInventorySlotContents(i, null);
+				}
+
+				if (!event.entityPlayer.worldObj.isRemote)
+					event.entityPlayer.worldObj.spawnEntityInWorld(arrowEntity);
+				event.setCanceled(true);
+				return;
+			}
+		}
+	}
+
+	private static int findBowAmmoSlot(IInventory inventory) {
+		for (int i = 0; i < inventory.getSizeInventory(); i++) {
+			ItemStack stack = inventory.getStackInSlot(i);
+			if (isBowAmmo(stack))
+				return i;
+		}
+		return -1;
+	}
+
+	private static boolean isBowAmmo(ItemStack stack) {
+		return stack != null && stack.stackSize > 0 && (stack.getItem() == Items.arrow || isCustomArrow(stack));
+	}
+
+	private static boolean isCustomArrow(ItemStack stack) {
+		return stack != null && stack.stackSize > 0 && (stack.getItem() == ModItems.TIPPED_ARROW.get() || stack.getItem() == ModItems.SPECTRAL_ARROW.get());
 	}
 
 	@SubscribeEvent
@@ -1520,6 +1580,9 @@ public class ServerEventHandler {
 	public void livingHurtEvent(LivingHurtEvent event) {
 		EntityLivingBase targetEntity = event.entityLiving;
 		if (targetEntity == null) return;
+		if (ModPotions.glowing != null && event.source instanceof EntityDamageSourceIndirect dmgSrc && dmgSrc.getSourceOfDamage() instanceof EntitySpectralArrow spectralArrow && !spectralArrow.worldObj.isRemote) {
+			targetEntity.addPotionEffect(new PotionEffect(ModPotions.glowing.getId(), spectralArrow.getDuration(), 0));
+		}
 		if (ConfigFunctions.enableHayBaleFalls
 				&& targetEntity.worldObj.getBlock(MathHelper.floor_double(targetEntity.posX), MathHelper.floor_double(targetEntity.posY - 0.20000000298023224D - targetEntity.yOffset), MathHelper.floor_double(targetEntity.posZ)) == Blocks.hay_block
 				&& event.source == DamageSource.fall) {
