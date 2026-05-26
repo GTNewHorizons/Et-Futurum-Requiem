@@ -772,6 +772,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "item.honey_bottle.drink", "player");
 
 		config.addSoundEvent(ver, "item.armor.equip_leather", "player");
+		config.addSoundEvent(ver, "item.armor.equip_copper", "player");
 		config.addSoundEvent(ver, "item.armor.equip_gold", "player");
 		config.addSoundEvent(ver, "item.armor.equip_chain", "player");
 		config.addSoundEvent(ver, "item.armor.equip_iron", "player");

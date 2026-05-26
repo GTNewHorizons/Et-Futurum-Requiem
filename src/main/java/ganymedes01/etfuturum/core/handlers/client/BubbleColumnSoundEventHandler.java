@@ -1,4 +1,4 @@
-package ganymedes01.etfuturum.core.handlers;
+package ganymedes01.etfuturum.core.handlers.client;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;

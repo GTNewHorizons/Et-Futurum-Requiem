@@ -1,5 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.spectator;
 
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +35,7 @@ public class MixinWorld {
 			index = 2
 	)
 	private IEntitySelector getDefaultEntitySelector1(IEntitySelector p_94576_3_) {
-		return SpectatorMode.EXCEPT_SPECTATING;
+		return SpectatorUtils.EXCEPT_SPECTATING;
 	}
 
 	@ModifyArg(
@@ -43,6 +44,6 @@ public class MixinWorld {
 			index = 2
 	)
 	private IEntitySelector getDefaultEntitySelector2(IEntitySelector p_94576_3_) {
-		return SpectatorMode.EXCEPT_SPECTATING;
+		return SpectatorUtils.EXCEPT_SPECTATING;
 	}
 }
