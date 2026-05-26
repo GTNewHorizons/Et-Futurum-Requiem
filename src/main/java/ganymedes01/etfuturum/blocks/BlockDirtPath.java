@@ -41,7 +41,7 @@ public class BlockDirtPath extends Block {
 	 */
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z) {
-		return AxisAlignedBB.getBoundingBox((double) x + this.minX, (double) y + this.minY, (double) z + this.minZ, (double) x + this.maxX, (double) y + 1, (double) z + this.maxZ);
+		return AxisAlignedBB.getBoundingBox((double) x + this.minX, (double) y + this.minY, (double) z + this.minZ, (double) x + this.maxX, (double) y + this.maxY, (double) z + this.maxZ);
 	}
 
 	@Override
@@ -67,6 +67,9 @@ public class BlockDirtPath extends Block {
 
 	@Override
 	public boolean shouldSideBeRendered(IBlockAccess worldIn, int x, int y, int z, int side) {
+		if(side == 1) {
+			return true;
+		}
 		Block block = worldIn.getBlock(x, y, z);
 		if (block instanceof BlockDirtPath || block instanceof BlockFarmland) {
 			return false;

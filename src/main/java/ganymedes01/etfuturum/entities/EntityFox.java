@@ -1694,7 +1694,7 @@ public class EntityFox extends EntityAnimal {
         }
 
         @Override
-        protected void spawnBaby() {
+        public void spawnBaby() {
             EntityFox babyFox = EntityFox.this.createChild(this.targetMate);
             if (babyFox != null) {
                 EntityPlayer serverPlayerEntity = EntityFox.this.func_146083_cb();
