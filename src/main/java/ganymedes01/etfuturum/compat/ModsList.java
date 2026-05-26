@@ -42,6 +42,7 @@ public enum ModsList {
 	NETHERORES("NetherOres"),
 	DRAGON_QUEST("DQMIIINext"),
 	LOTR("lotr"),
+  BATTLEGEAR_2("battlegear2"),
 	ENDER_IO("EnderIO"),
 
 	NOTFINE("notfine"),
