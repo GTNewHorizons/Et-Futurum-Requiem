@@ -42,7 +42,7 @@ public class SpectatorMode {
 
 	@Deprecated
 	public static boolean canSpectatorSelect(TileEntity te) {
-		return SpectatorUtils.canSpectatorSelect(te);
+		return SpectatorUtils.canSpectatorSelectTileEntity(te);
 	}
 
 	// Skeletal dummy map in case any mods

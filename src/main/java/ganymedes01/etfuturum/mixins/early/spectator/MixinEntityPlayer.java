@@ -1,23 +1,15 @@
 package ganymedes01.etfuturum.mixins.early.spectator;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.sugar.Local;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
 import ganymedes01.etfuturum.api.spectator.ISpectatorInfo;
 import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.entities.EntityNewBoatWithChest;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.IInvBasic;
@@ -25,7 +17,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import net.minecraftforge.common.util.FakePlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -34,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EntityPlayer.class)
+@Mixin(value = EntityPlayer.class, priority = 1100)
 public abstract class MixinEntityPlayer extends EntityLivingBase implements ISpectatorInfo {
 
 	@Shadow public InventoryPlayer inventory;
@@ -100,16 +91,12 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements ISpe
 
 	@Unique
     private boolean etfu$checkDismountFollowing() {
-		// Is this player able to continue following the entity?
+		// Is this player able to continue following the entity? (Not sneaking and is still a spectator)
 		if(isSneaking() || !etfu$isSpectator()) {
 			return true;
 		}
-		// Is the entity valid to follow?
-		if(etfu$followEntity != null && (etfu$followEntity.isDead || etfu$followEntity.isSneaking())
-				|| etfu$followEntity instanceof ISpectatorInfo spectatingPlayer && spectatingPlayer.etfu$isSpectator()) {
-			return true;
-		}
-		return false;
+		// Is the following entity dead and if it isn't, is it not a spectator?
+		return etfu$followEntity != null && (etfu$followEntity.isDead || SpectatorUtils.isSpectator(etfu$followEntity));
 	}
 
 	@Inject(method = "onLivingUpdate", at = @At(value = "TAIL"))
@@ -154,14 +141,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements ISpe
 		return !etfu$isSpectator() && original;
 	}
 
-	@ModifyReturnValue(method = "isInvisibleToPlayer", at = @At("RETURN"))
-	private boolean invisibleToSpectators(boolean original, @Local(argsOnly = true) EntityPlayer player) {
-        return original || !(etfu$isSpectator() && player instanceof ISpectatorInfo info && info.etfu$isSpectator());
-    }
-
-	@Inject(method = "getBreakSpeed(Lnet/minecraft/block/Block;ZIIII)F", cancellable = true, remap = false,
-			// Ensure this runs AFTER the client mixin by injecting it later.
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;getCurrentItem()Lnet/minecraft/item/ItemStack;"))
+	@Inject(method = "getBreakSpeed(Lnet/minecraft/block/Block;ZIIII)F", cancellable = true, remap = false,at = @At(value = "HEAD"))
 	private void cancelBreakSpeed(Block p_146096_1_, boolean p_146096_2_, int meta, int x, int y, int z, CallbackInfoReturnable<Float> cir) {
 		if(etfu$isSpectator()) {
 			cir.setReturnValue(0F);
@@ -173,11 +153,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements ISpe
 		if (etfu$isSpectator()) {
 			if(etfu$followEntity == null) {
 				etfu$followEntity = targetEntity;
-				if (worldObj.isRemote) {
-					Minecraft.getMinecraft().ingameGUI.func_110326_a/*setRecordPlaying*/
-							(I18n.format("mount.onboard", GameSettings.getKeyDisplayString(
-									Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode())), false);
-				}
 			}
 			ci.cancel();
 		}
@@ -221,16 +196,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements ISpe
 
 	@Override
 	public boolean etfu$isSpectator() {
-		if((Object) this instanceof EntityPlayerMP player) {
-			if(!(player instanceof FakePlayer) && player.worldObj != null) {
-				return player.theItemInWorldManager.getGameType() == SpectatorUtils.SPECTATOR_GAMETYPE;
-			}
-		} else if (FMLCommonHandler.instance().getSide() == Side.CLIENT) {
-			if(FMLClientHandler.instance().getWorldClient() != null) {
-				return FMLClientHandler.instance().getClient().playerController.currentGameType == SpectatorUtils.SPECTATOR_GAMETYPE;
-			}
-		}
-		return false;
+		return SpectatorUtils.isSpectator(this);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class SpectatorEventHandler {
                     return;
                 }
                 TileEntity te = event.world.getTileEntity(event.x, event.y, event.z);
-                if (!SpectatorUtils.canSpectatorSelect(te)) {
+                if (!SpectatorUtils.canSpectatorSelectTileEntity(te)) {
                     event.setCanceled(true);
                 }
             }
