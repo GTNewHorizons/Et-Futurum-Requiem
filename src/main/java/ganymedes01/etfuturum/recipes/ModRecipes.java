@@ -199,6 +199,9 @@ public class ModRecipes {
 			RecipeHelper.addShapelessRecipe(RecipeHelper.Priority.HIGH, output, "ingotIron");
 		}
 
+		ItemStack output229 = ModItems.FIVE_RECORD.newItemStack();
+		RecipeHelper.addShapedRecipe(RecipeHelper.Priority.HIGH, output229, "xxx", "xxx", "xxx", 'x', ModItems.DISC_FRAGMENT_5.get());
+
 		// Granite
 		ItemStack output228 = ModBlocks.STONE.newItemStack(2, 1);
 		RecipeHelper.addShapelessRecipe(RecipeHelper.Priority.HIGH, output228, "gemQuartz", "stoneDiorite");

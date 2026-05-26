@@ -42,6 +42,12 @@ container.etfuturum.chest_boat=运输船
 
 item.record.pigstep.desc=Lena Raine - pigstep
 item.record.otherside.desc=Lena Raine - otherside
+item.record.precipice.desc=Aaron Cherof - Precipice
+item.record.creator_music_box.desc=Lena Raine - Creator（八音盒）
+item.record.creator.desc=Lena Raine - Creator
+item.record.tears.desc=Amos Roddy - Tears
+item.record.lava_chicken.desc=Hyper Potions - Lava Chicken
+item.record.5.desc=Samuel Åberg - 5
 
 gui.smithing.upgrade=升级装备
 gui.warn.continue=继续……
@@ -353,6 +359,8 @@ item.etfuturum.cherry_chest_boat.name=樱花木运输船
 item.etfuturum.bamboo_chest_raft.name=运输竹筏
 item.etfuturum.shulker_shell.name=潜影壳
 item.etfuturum.amethyst_shard.name=紫水晶碎片
+item.etfuturum.disc_fragment_5.name=唱片残片
+item.etfuturum.disc_fragment_5.desc=音乐唱片 - 5
 item.etfuturum.honeycomb.name=蜜脾
 item.etfuturum.honey_bottle.name=蜂蜜瓶
 item.etfuturum.bamboo.name=竹子
