@@ -1,4 +1,4 @@
-package ganymedes01.etfuturum.core.handlers;
+package ganymedes01.etfuturum.core.handlers.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;

@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.client.renderer.tileentity;
 import com.google.common.primitives.SignedBytes;
 import cpw.mods.fml.client.FMLClientHandler;
 import ganymedes01.etfuturum.compat.CompatIronChests;
+import ganymedes01.etfuturum.compat.ModsList;
 import it.unimi.dsi.fastutil.Function;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -52,7 +53,7 @@ public class TileEntityClearChestItemRenderer extends TileEntitySpecialRenderer 
 
 	@Override
 	public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float partialTicks) {
-		if(!CompatIronChests.enableCrystalRendering()) {
+		if(!ModsList.IRON_CHEST.isLoaded() || !CompatIronChests.enableCrystalRendering()) {
 			return;
 		}
 		if(field_147501_a == null) {

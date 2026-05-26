@@ -21,7 +21,6 @@ import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.entities.*;
 import ganymedes01.etfuturum.inventory.*;
 import ganymedes01.etfuturum.lib.GUIIDs;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.tileentities.*;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityEnderman;
@@ -50,11 +49,6 @@ public class CommonProxy implements IGuiHandler {
 
 		FMLCommonHandler.instance().bus().register(WorldEventHandler.INSTANCE);
 		MinecraftForge.TERRAIN_GEN_BUS.register(WorldEventHandler.INSTANCE);
-
-		if (ConfigMixins.enableSpectatorMode) {
-			FMLCommonHandler.instance().bus().register(SpectatorMode.INSTANCE);
-			MinecraftForge.EVENT_BUS.register(SpectatorMode.INSTANCE);
-		}
 
 		if (ModBlocks.SCULK_CATALYST.isEnabled()) {
 			FMLCommonHandler.instance().bus().register(SculkEventHandler.INSTANCE);

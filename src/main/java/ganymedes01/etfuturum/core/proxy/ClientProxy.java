@@ -17,12 +17,10 @@ import ganymedes01.etfuturum.client.subtitle.GuiSubtitles;
 import ganymedes01.etfuturum.compat.CompatIronChests;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
-import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.core.handlers.BubbleColumnSoundEventHandler;
-import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
+import ganymedes01.etfuturum.core.handlers.client.BubbleColumnSoundEventHandler;
+import ganymedes01.etfuturum.core.handlers.client.ClientEventHandler;
 import ganymedes01.etfuturum.entities.*;
 import ganymedes01.etfuturum.lib.RenderIDs;
-import ganymedes01.etfuturum.spectator.SpectatorModeClient;
 import ganymedes01.etfuturum.tileentities.*;
 import ganymedes01.etfuturum.world.nether.biome.utils.BiomeFogEventHandler;
 import net.minecraft.block.BlockBed;
@@ -49,10 +47,6 @@ public class ClientProxy extends CommonProxy {
 		super.registerEvents();
 		FMLCommonHandler.instance().bus().register(ClientEventHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(ClientEventHandler.INSTANCE);
-		if (ConfigMixins.enableSpectatorMode) {
-			FMLCommonHandler.instance().bus().register(SpectatorModeClient.INSTANCE);
-			MinecraftForge.EVENT_BUS.register(SpectatorModeClient.INSTANCE);
-		}
 
 		if (ConfigFunctions.enableSubtitles) {
 			GuiSubtitles.INSTANCE = new GuiSubtitles(FMLClientHandler.instance().getClient());
@@ -97,13 +91,15 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNewBeacon.class, new TileEntityNewBeaconRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityShulkerBox.class, new TileEntityShulkerBoxRenderer(new ModelShulker()));
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityGateway.class, new TileEntityGatewayRenderer());
-		if(CompatIronChests.enableCrystalRendering()) {
-			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBarrel.ClearTE.class, new TileEntityClearChestItemRenderer(key -> {
-				if (key instanceof TileEntityBarrel.ClearTE barrel) {
-					return barrel.getTopItemStacks();
-				}
-				return null;
-			}));
+		if(ModsList.IRON_CHEST.isLoaded()) {
+			if (CompatIronChests.enableCrystalRendering()) {
+				ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBarrel.ClearTE.class, new TileEntityClearChestItemRenderer(key -> {
+					if (key instanceof TileEntityBarrel.ClearTE barrel) {
+						return barrel.getTopItemStacks();
+					}
+					return null;
+				}));
+			}
 		}
 
 		RenderingRegistry.registerBlockHandler(new BlockExtendedCrossedSquaresRenderer());

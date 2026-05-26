@@ -183,69 +183,6 @@ public class ServerEventHandler {
 				sq.velocityChanged = true;
 			}
 		}
-
-
-		if (ConfigSounds.armorEquip && !entity.worldObj.isRemote && entity instanceof EntityPlayer player && !(entity instanceof FakePlayer)) {
-
-			if (!SpectatorMode.isSpectator(player)) {
-				if (!armorTracker.containsKey(player)) {
-					// Items currently on the player
-					ItemStack playerBoots = player.getEquipmentInSlot(1);
-					ItemStack playerLeggings = player.getEquipmentInSlot(2);
-					ItemStack playerChestplate = player.getEquipmentInSlot(3);
-					ItemStack playerHelmet = player.getEquipmentInSlot(4);
-					armorTracker.put(player, Arrays.asList(playerBoots, playerLeggings, playerChestplate, playerHelmet));
-				} else {
-					List<ItemStack> armorList = armorTracker.get(player);
-
-					String itemEquippedSound = "";
-					ItemStack storedArmor;
-					ItemStack currentArmor;
-					for (int i = 0; i < 4; i++) {
-						storedArmor = armorList.get(i);
-						currentArmor = player.getEquipmentInSlot(i + 1);
-						if (currentArmor != null && (storedArmor == null || (!currentArmor.getItem().equals(storedArmor.getItem()) ||
-								!((currentArmor.stackTagCompound != null || storedArmor.stackTagCompound == null) && (currentArmor.stackTagCompound == null || currentArmor.stackTagCompound.equals(storedArmor.stackTagCompound)))))) {
-							// Equipment is in the slot and either the NBT thinks there's not an item already there, or that the item is different in some way that's not its durability.
-							if (player.inventory.isItemValidForSlot(i, currentArmor)) {
-								String armorString = currentArmor.getUnlocalizedName().toLowerCase();
-								if (EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesNone, armorString)) {
-									continue;
-								} else if (armorString.contains("chain") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesChain, armorString)) {
-									itemEquippedSound = "item.armor.equip_chain";
-								} else if (armorString.contains("diamond") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesDiamond, armorString)) {
-									itemEquippedSound = "item.armor.equip_diamond";
-								} else if (armorString.contains("gold") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesGold, armorString)) {
-									itemEquippedSound = "item.armor.equip_gold";
-								} else if (armorString.contains("iron") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesIron, armorString)) {
-									itemEquippedSound = "item.armor.equip_iron";
-								} else if (armorString.contains("leather") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesLeather, armorString)) {
-									itemEquippedSound = "item.armor.equip_leather";
-								} else if (armorString.contains("netherite") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesNetherite, armorString)) {
-									itemEquippedSound = "item.armor.equip_netherite";
-								} else if (armorString.contains("elytra") || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesElytra, armorString)) {
-									itemEquippedSound = "item.armor.equip_elytra";
-								} else if (EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesTurtle, armorString)) {
-									itemEquippedSound = "item.armor.equip_turtle";
-								} else if (currentArmor.getItem() instanceof ItemArmor || EtFuturum.stringListContainsPhrase(ConfigSounds.newArmorEquipCustomRulesGeneric, armorString)) {
-									itemEquippedSound = "item.armor.equip_generic";//Something not assigned a sound should be silent if it's not gear, and the user didn't specify that sound.
-								}
-							}
-						}
-						armorList.set(i, currentArmor);
-						if (!itemEquippedSound.equals("")) { //We picked a sound, stop iterating.
-							break;
-						}
-					}
-					// Play a sound if one of the equipment pieces changed
-					if (!itemEquippedSound.equals("")) {
-						player.worldObj.playSoundAtEntity(player, Tags.MC_ASSET_VER + ":" + itemEquippedSound, 1, 1);
-					}
-				}
-			} else {
-				armorTracker.remove(player);
-			}
-		}
 	}
 
 	@SubscribeEvent

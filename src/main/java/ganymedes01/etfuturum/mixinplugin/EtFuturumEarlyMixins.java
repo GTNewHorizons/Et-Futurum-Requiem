@@ -83,6 +83,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.enableSpectatorMode) {
 			mixins.add("spectator.MixinGameType");
 			mixins.add("spectator.MixinEntity");
+			mixins.add("spectator.MixinEntityLivingBase");
 			mixins.add("spectator.MixinWorld");
 			mixins.add("spectator.MixinWorldServer");
 			mixins.add("spectator.MixinEntityPlayer");
