@@ -40,10 +40,8 @@ import ganymedes01.etfuturum.world.EtFuturumEarlyWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
-import ganymedes01.etfuturum.world.end.gen.EndCityLoot;
 import ganymedes01.etfuturum.world.end.gen.EndCityPieces;
 import ganymedes01.etfuturum.world.end.gen.MapGenEndCity;
-import net.minecraft.world.gen.structure.MapGenStructureIO;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -64,6 +62,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.world.gen.structure.MapGenStructureIO;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.OreDictionary;
@@ -384,7 +383,6 @@ public class EtFuturum {
 
 		EtFuturumLootTables.init();
 		if (ConfigExperiments.enableEndCities) {
-			EndCityLoot.init();
 			MapGenStructureIO.registerStructure(MapGenEndCity.Start.class, "EndCity");
 			MapGenStructureIO.func_143031_a(EndCityPieces.EndCityPiece.class, "ECP");
 		}

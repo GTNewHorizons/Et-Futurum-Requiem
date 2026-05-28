@@ -1,13 +1,12 @@
 package ganymedes01.etfuturum.world.end.gen;
 
+import ganymedes01.etfuturum.EtFuturumLootTables;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
 import ganymedes01.etfuturum.core.utils.structurenbt.BlockStateContainer;
 import ganymedes01.etfuturum.core.utils.structurenbt.EFRBlockStateConverter;
 import ganymedes01.etfuturum.core.utils.structurenbt.NBTStructure;
 import ganymedes01.etfuturum.entities.EntityShulker;
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
@@ -18,7 +17,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.*;
@@ -299,10 +297,9 @@ public class EndCityTemplate extends NBTStructure {
 		for (int[] chestPos : pendingChests) {
 			TileEntity te = world.getTileEntity(chestPos[0], chestPos[1], chestPos[2]);
 			if (te instanceof net.minecraft.inventory.IInventory) {
-				ChestGenHooks info = ChestGenHooks.getInfo(EndCityLoot.END_CITY_TREASURE);
 				WeightedRandomChestContent.generateChestContents(
-						rand, info.getItems(rand),
-						(net.minecraft.inventory.IInventory) te, info.getCount(rand)
+						rand, EtFuturumLootTables.END_CITY_TREASURE.getItems(rand),
+						(net.minecraft.inventory.IInventory) te, EtFuturumLootTables.END_CITY_TREASURE.getCount(rand)
 				);
 			} else {
 				System.out.println("EndCityTemplate: Missing or invalid chest TE at " + chestPos[0] + ", " + chestPos[1] + ", " + chestPos[2]);
@@ -327,7 +324,7 @@ public class EndCityTemplate extends NBTStructure {
 		// This conveniently matches our rotation index (0=NONE/SOUTH, 1=CW_90/WEST, 2=CW_180/NORTH, 3=CCW_90/EAST).
 		ForgeDirection hangingDir = EFRBlockStateConverter.INSTANCE.getItemFrameDirFromRotation(rotation);
 		EntityItemFrame frame = new EntityItemFrame(world, x + hangingDir.offsetX, y + hangingDir.offsetY, z + hangingDir.offsetZ, rotation);
-		ItemStack displayStack = ChestGenHooks.getInfo(EndCityLoot.END_CITY_ELYTRA).getOneItem(world.rand);
+		ItemStack displayStack = EtFuturumLootTables.END_CITY_ELYTRA.getOneItem(world.rand);
 		if (displayStack != null) {
 			frame.setDisplayedItem(displayStack);
 		}

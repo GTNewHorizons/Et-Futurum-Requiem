@@ -7,6 +7,7 @@ public class Reference {
 	public static final String DEPENDENCIES =
 			"required-after:Forge@[10.13.4.1614,);" +
 					"required-after:hogutils;" +
+					"after:gtnhlib@[0.10.3,);" +
 					"after:Thaumcraft@[4.2.3.5,);" +
 					"after:TwilightForest;" +
 					"after:HardcoreEnderExpansion;" +
@@ -26,4 +27,6 @@ public class Reference {
 
 	@SuppressWarnings("ConstantValue")
 	public static final boolean SNAPSHOT_BUILD = Boolean.parseBoolean(Tags.SNAPSHOT_BUILD);
+	@SuppressWarnings("ConstantValue")
+	public static final boolean STABLE_BUILD = Boolean.parseBoolean(Tags.STABLE_BUILD);
 }
