@@ -154,6 +154,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("skeleton.MixinEntitySkeleton");
 
 			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("skeleton.client.MixinEntityLivingBase");
 				mixins.add("skeleton.client.MixinModelSkeleton");
 			}
 		}

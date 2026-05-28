@@ -11,6 +11,7 @@ import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -320,13 +321,16 @@ public class EndCityTemplate extends NBTStructure {
 
 	/**
 	 * Spawn an item frame at the given world position (for elytra).
-	 * Always generates the frame, but leaves it empty per user requirement.
 	 */
 	private void spawnItemFrame(World world, int x, int y, int z, int rotation) {
 		// In 1.7.10, item frames need a hanging direction (0=SOUTH, 1=WEST, 2=NORTH, 3=EAST).
 		// This conveniently matches our rotation index (0=NONE/SOUTH, 1=CW_90/WEST, 2=CW_180/NORTH, 3=CCW_90/EAST).
 		ForgeDirection hangingDir = EFRBlockStateConverter.INSTANCE.getItemFrameDirFromRotation(rotation);
 		EntityItemFrame frame = new EntityItemFrame(world, x + hangingDir.offsetX, y + hangingDir.offsetY, z + hangingDir.offsetZ, rotation);
+		ItemStack displayStack = ChestGenHooks.getInfo(EndCityLoot.END_CITY_ELYTRA).getOneItem(world.rand);
+		if (displayStack != null) {
+			frame.setDisplayedItem(displayStack);
+		}
 		world.spawnEntityInWorld(frame);
 	}
 

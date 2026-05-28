@@ -31,6 +31,8 @@ public class MixinEntitySkeleton extends EntityMob implements ISkeletonSwingingA
 
 	@Unique
 	private static final int ETFU$SWINGING_ARMS_DATA_WATCHER_ID = 14;
+	@Unique
+	private static final int ETFU$BOW_USE_TIME_DATA_WATCHER_ID = 15;
 
 	@Unique
 	private EntityAIModernSkeletonBowAttack etfu$modernBowAttack;
@@ -57,6 +59,7 @@ public class MixinEntitySkeleton extends EntityMob implements ISkeletonSwingingA
 	@Inject(method = "entityInit", at = @At("RETURN"))
 	private void addSwingingArmsDataWatcher(CallbackInfo ci) {
 		this.dataWatcher.addObject(ETFU$SWINGING_ARMS_DATA_WATCHER_ID, (byte) 0);
+		this.dataWatcher.addObject(ETFU$BOW_USE_TIME_DATA_WATCHER_ID, (byte) 0);
 	}
 
 	@Inject(method = "setCombatTask", at = @At("HEAD"), cancellable = true)
@@ -106,6 +109,16 @@ public class MixinEntitySkeleton extends EntityMob implements ISkeletonSwingingA
 	@Override
 	public void etfu$setSwingingArms(boolean swingingArms) {
 		this.dataWatcher.updateObject(ETFU$SWINGING_ARMS_DATA_WATCHER_ID, (byte) (swingingArms ? 1 : 0));
+	}
+
+	@Override
+	public int etfu$getBowUseTime() {
+		return this.dataWatcher.getWatchableObjectByte(ETFU$BOW_USE_TIME_DATA_WATCHER_ID) & 255;
+	}
+
+	@Override
+	public void etfu$setBowUseTime(int bowUseTime) {
+		this.dataWatcher.updateObject(ETFU$BOW_USE_TIME_DATA_WATCHER_ID, (byte) Math.max(0, Math.min(255, bowUseTime)));
 	}
 
 	@Unique

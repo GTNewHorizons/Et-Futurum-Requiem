@@ -54,6 +54,7 @@ public class EntityAIModernSkeletonBowAttack extends EntityAIBase {
 	public void startExecuting() {
 		super.startExecuting();
 		this.setSwingingArms(true);
+		this.setBowUseTime(0);
 	}
 
 	@Override
@@ -64,6 +65,7 @@ public class EntityAIModernSkeletonBowAttack extends EntityAIBase {
 		this.attackTime = -1;
 		this.strafingTime = -1;
 		this.bowUseTime = 0;
+		this.setBowUseTime(0);
 	}
 
 	@Override
@@ -124,17 +126,21 @@ public class EntityAIModernSkeletonBowAttack extends EntityAIBase {
 		if (this.bowUseTime > 0) {
 			if (!canSee && this.seeTime < -60) {
 				this.bowUseTime = 0;
+				this.setBowUseTime(0);
 			} else if (canSee) {
 				++this.bowUseTime;
+				this.setBowUseTime(this.bowUseTime);
 
 				if (this.bowUseTime >= 20) {
 					this.rangedAttackEntityHost.attackEntityWithRangedAttack(attackTarget, getArrowVelocity(this.bowUseTime));
 					this.bowUseTime = 0;
+					this.setBowUseTime(0);
 					this.attackTime = this.attackCooldown;
 				}
 			}
 		} else if (--this.attackTime <= 0 && this.seeTime >= -60) {
 			this.bowUseTime = 1;
+			this.setBowUseTime(this.bowUseTime);
 		}
 	}
 
@@ -154,6 +160,12 @@ public class EntityAIModernSkeletonBowAttack extends EntityAIBase {
 	private void setSwingingArms(boolean swingingArms) {
 		if (this.entityHost instanceof ISkeletonSwingingArms) {
 			((ISkeletonSwingingArms) this.entityHost).etfu$setSwingingArms(swingingArms);
+		}
+	}
+
+	private void setBowUseTime(int bowUseTime) {
+		if (this.entityHost instanceof ISkeletonSwingingArms) {
+			((ISkeletonSwingingArms) this.entityHost).etfu$setBowUseTime(bowUseTime);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ganymedes01.etfuturum.world.end.gen;
 
+import ganymedes01.etfuturum.ModItems;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.WeightedRandomChestContent;
@@ -12,11 +13,19 @@ import net.minecraftforge.common.ChestGenHooks;
 public class EndCityLoot {
 
 	public static final String END_CITY_TREASURE = "endCityTreasure";
+	public static final String END_CITY_ELYTRA = "endCityElytra";
 
 	public static void init() {
 		ChestGenHooks info = ChestGenHooks.getInfo(END_CITY_TREASURE);
 		info.setMin(2);
 		info.setMax(6);
+
+		ChestGenHooks elytra = ChestGenHooks.getInfo(END_CITY_ELYTRA);
+		elytra.setMin(1);
+		elytra.setMax(1);
+		if (ModItems.ELYTRA.isEnabled()) {
+			elytra.addItem(new WeightedRandomChestContent(ModItems.ELYTRA.newItemStack(), 1, 1, 1));
+		}
 
 		// Basic treasures
 		info.addItem(new WeightedRandomChestContent(new ItemStack(Items.diamond), 2, 7, 5));
