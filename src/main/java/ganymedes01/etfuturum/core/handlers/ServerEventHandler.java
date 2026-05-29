@@ -69,6 +69,10 @@ import ganymedes01.etfuturum.tileentities.TileEntityGateway;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEndPortalFrame;
 import net.minecraft.block.BlockFarmland;
@@ -150,6 +154,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
@@ -425,10 +430,63 @@ public class ServerEventHandler {
 		}
 	}
 
+	// Map of dim ID -> packed chunk coords
+	private final Int2ObjectMap<LongSet> loadedChunks = new Int2ObjectLinkedOpenHashMap<>();
+
+	@SubscribeEvent
+	public void chunkLoad(ChunkEvent.Load event) {
+		getLongSet(event.world.provider.dimensionId).add(toLongCoords(event.getChunk()));
+	}
+
+	@SubscribeEvent
+	public void chunkUnload(ChunkEvent.Unload event) {
+		getLongSet(event.world.provider.dimensionId).remove(toLongCoords(event.getChunk()));
+	}
+
+	@SubscribeEvent
+	public void worldUnload(WorldEvent.Unload event) {
+		loadedChunks.remove(event.world.provider.dimensionId);
+	}
+
+	private long toLongCoords(Chunk chunk){
+		return ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition);
+	}
+
+	private LongSet getLongSet(int dim){
+		return loadedChunks.computeIfAbsent(dim, ($) -> new LongOpenHashSet());
+	}
+
+	private boolean isChunkLoaded(int dim, int chunkX, int chunkZ){
+		LongSet set = loadedChunks.get(dim);
+		return set != null && set.contains(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ));
+	}
+
 	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Event event) {
-		newEntity.copyDataFrom(oldEntity, true);
-		world.spawnEntityInWorld(newEntity);
+		if(event.isCanceled() || oldEntity.isDead)
+			return;
 		event.setCanceled(true);
+		// Accounts for a bug where entities can be saved to the wrong chunk
+		int chunkX = oldEntity.chunkCoordX;
+		int chunkZ = oldEntity.chunkCoordZ;
+		// Newly spawned entity, so we get chunk coords from position
+		if(!oldEntity.addedToChunk){
+			chunkX = MathHelper.floor_double(oldEntity.posX) >> 4;
+			chunkZ = MathHelper.floor_double(oldEntity.posZ) >> 4;
+		}
+		newEntity.copyDataFrom(oldEntity, true);
+
+		// We only call world.spawnEntityInWorld if the chunk is already loaded or else
+		// the entity will be added to the EntityTracker twice which will cause issues
+		if(isChunkLoaded(world.provider.dimensionId, chunkX, chunkZ)){
+			world.spawnEntityInWorld(newEntity);
+		}else{
+			IChunkProvider chunkProv = world.getChunkProvider();
+			if(chunkProv.chunkExists(chunkX, chunkZ)){
+				Chunk chunk = chunkProv.loadChunk(chunkX, chunkZ);
+				chunk.addEntity(newEntity);
+				chunk.removeEntity(oldEntity);
+			}
+		}
 	}
 
 	@SubscribeEvent
