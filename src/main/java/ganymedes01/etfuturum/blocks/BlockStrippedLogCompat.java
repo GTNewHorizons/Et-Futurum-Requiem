@@ -84,7 +84,11 @@ public class BlockStrippedLogCompat extends BlockNewLog implements ISubBlocksBlo
                 this.field_150167_a[i] = iconRegister.registerIcon(modName + ":stripped_" + icon_names[i] + "_log");
             } else {
                 if(this.mod.equals("bop")) {
-                    this.field_150167_a[i] = iconRegister.registerIcon(modName + ":log_" + icon_names[i] + "_side");
+                    if(this.icon_names[i].equals("bigflowerstem")) {
+                        this.field_150167_a[i] = iconRegister.registerIcon(modName + ":" + icon_names[i] + "_side");
+                    } else {
+                        this.field_150167_a[i] = iconRegister.registerIcon(modName + ":log_" + icon_names[i] + "_side");
+                    }
                 } else {
                     this.field_150167_a[i] = iconRegister.registerIcon(modName + ":log_" + icon_names[i]);
 
