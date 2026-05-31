@@ -1,6 +1,6 @@
 [
 {
-  "modid": "etfuturum",
+  "modid": "${modId}",
   "name": "${modName}",
   "description": "Brings the future to now, for real this time.",
   "version": "${modVersion}",

@@ -12,7 +12,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-import java.awt.*;
+
+import java.awt.Color;
 import java.io.IOException;
 
 public class EntityTippedArrow extends EntityArrow implements IEntityAdditionalSpawnData {

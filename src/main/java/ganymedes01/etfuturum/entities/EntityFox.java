@@ -532,7 +532,7 @@ public class EntityFox extends EntityAnimal {
     protected void loot(EntityItem item) {
         ItemStack itemStack = item.getEntityItem();
         if (this.canPickupItem(itemStack)) {
-            EntityPlayer dropper = ServerEventHandler.droppedEntityItems.getIfPresent(item);
+            EntityPlayer dropper = ServerEventHandler.INSTANCE.droppedEntityItems.getIfPresent(item);
 
             if (isBreedingItem(itemStack) && dropper != null && dropper.getUniqueID().equals(getTrustedUuids().get(0))) {
                 followOwner = true;

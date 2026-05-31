@@ -108,6 +108,16 @@ public class CustomParticles {
 		return spawnParticle(world, particle);
 	}
 
+	public static EntityFX spawnBubbleColumnUp(World world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+		EntityFX particle = new BubbleColumnFX(world, x, y, z, xSpeed, ySpeed, zSpeed);
+		return spawnParticle(world, particle);
+	}
+
+	public static EntityFX spawnWaterCurrentDown(World world, double x, double y, double z) {
+		EntityFX particle = new WaterCurrentDownFX(world, x, y, z);
+		return spawnParticle(world, particle);
+	}
+
 	protected static EntityFX spawnParticle(World world, EntityFX entityFX) {
 		if (world.isRemote) {
 			Minecraft.getMinecraft().effectRenderer.addEffect(entityFX);

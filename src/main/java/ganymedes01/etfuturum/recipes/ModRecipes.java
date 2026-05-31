@@ -14,14 +14,26 @@ import ganymedes01.etfuturum.blocks.ores.modded.BlockGeneralModdedDeepslateOre;
 import ganymedes01.etfuturum.blocks.rawore.modded.BlockGeneralModdedRawOre;
 import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.ItemNewBoat;
 import ganymedes01.etfuturum.items.ItemSuspiciousStew;
 import ganymedes01.etfuturum.items.rawore.modded.ItemGeneralModdedRawOre;
 import ganymedes01.etfuturum.lib.EnumColor;
 import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.recipes.crafting.*;
+
+import ganymedes01.etfuturum.recipes.crafting.RecipeAddPattern;
+import ganymedes01.etfuturum.recipes.crafting.RecipeDuplicatePattern;
+import ganymedes01.etfuturum.recipes.crafting.RecipeDyedShulkerBox;
+import ganymedes01.etfuturum.recipes.crafting.RecipeFixedFireworks;
+import ganymedes01.etfuturum.recipes.crafting.RecipeTippedArrow;
+import ganymedes01.etfuturum.recipes.crafting.ShapedEtFuturumRecipe;
+import ganymedes01.etfuturum.recipes.crafting.ShapelessEtFuturumRecipe;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -60,6 +72,15 @@ public class ModRecipes {
 	private static final boolean[] modernWoodTypesEnabled = new boolean[5];
 
 	public static void init() {
+		modernWoodTypesEnabled[0] = ConfigExperiments.enableCrimsonBlocks;
+		modernWoodTypesEnabled[1] = ConfigExperiments.enableWarpedBlocks;
+		modernWoodTypesEnabled[2] = ConfigExperiments.enableMangroveBlocks;
+		modernWoodTypesEnabled[3] = ConfigBlocksItems.enableCherryBlocks;
+		modernWoodTypesEnabled[4] = ConfigBlocksItems.enableBambooBlocks;
+		registerOreDictionary();
+	}
+
+	public static void postInit() {
 		if (ConfigBlocksItems.enableBanners) {
 			RecipeSorter.register(Reference.MOD_ID + ".RecipeDuplicatePattern", RecipeDuplicatePattern.class, Category.SHAPELESS, "after:minecraft:shapeless");
 			RecipeSorter.register(Reference.MOD_ID + ".RecipeAddPattern", RecipeAddPattern.class, Category.SHAPED, "after:minecraft:shaped");
@@ -67,13 +88,6 @@ public class ModRecipes {
 		RecipeSorter.register(Reference.MOD_ID + ":shaped", ShapedEtFuturumRecipe.class, RecipeSorter.Category.SHAPED, "before:minecraft:shaped");
 		RecipeSorter.register(Reference.MOD_ID + ":shapeless", ShapelessEtFuturumRecipe.class, RecipeSorter.Category.SHAPELESS, "before:minecraft:shapeless");
 
-		modernWoodTypesEnabled[0] = ConfigExperiments.enableCrimsonBlocks;
-		modernWoodTypesEnabled[1] = ConfigExperiments.enableWarpedBlocks;
-		modernWoodTypesEnabled[2] = ConfigExperiments.enableMangroveBlocks;
-		modernWoodTypesEnabled[3] = ConfigBlocksItems.enableCherryBlocks;
-		modernWoodTypesEnabled[4] = ConfigBlocksItems.enableBambooBlocks;
-
-		registerOreDictionary();
 		registerRecipes();
 		tweakRecipes();
 		registerLoot();
@@ -318,8 +332,18 @@ public class ModRecipes {
 
 		registerOre("cobblestone", ModBlocks.COBBLED_DEEPSLATE.newItemStack());
 
+		registerOre("stone", ModBlocks.BASALT.newItemStack());
+		registerOre("stone", ModBlocks.DEEPSLATE.newItemStack());
+		registerOre("stone", ModBlocks.TUFF.newItemStack());
+
 		registerOre("record", ModItems.PIGSTEP_RECORD.get());
 		registerOre("record", ModItems.OTHERSIDE_RECORD.get());
+		registerOre("record", ModItems.PRECIPICE_RECORD.get());
+		registerOre("record", ModItems.CREATOR_MUSIC_BOX_RECORD.get());
+		registerOre("record", ModItems.CREATOR_RECORD.get());
+		registerOre("record", ModItems.TEARS_RECORD.get());
+		registerOre("record", ModItems.LAVA_CHICKEN_RECORD.get());
+		registerOre("record", ModItems.FIVE_RECORD.get());
 
 		registerOre("gemAmethyst", ModItems.AMETHYST_SHARD.get());
 		registerOre("blockGlassTinted", ModBlocks.TINTED_GLASS.newItemStack());
@@ -1188,6 +1212,8 @@ public class ModRecipes {
 			addShapedRecipe(ModBlocks.POLISHED_BLACKSTONE_BUTTON.newItemStack(1), "x", 'x', ModBlocks.BLACKSTONE.newItemStack(1, 1));
 			addShapedRecipe(ModBlocks.POLISHED_BLACKSTONE_PRESSURE_PLATE.newItemStack(1), "xx", 'x', ModBlocks.BLACKSTONE.newItemStack(1, 1));
 		}
+
+		addShapedRecipe(ModItems.FIVE_RECORD.newItemStack(), "xxx", "xxx", "xxx", 'x', ModItems.DISC_FRAGMENT_5.get());
 
 		addShapedRecipe(ModBlocks.BASALT.newItemStack(4, 1), "xx", "xx", 'x', ModBlocks.BASALT.newItemStack());
 		addSmelting(ModBlocks.BASALT.newItemStack(), ModBlocks.SMOOTH_BASALT.newItemStack(), 0.1F);

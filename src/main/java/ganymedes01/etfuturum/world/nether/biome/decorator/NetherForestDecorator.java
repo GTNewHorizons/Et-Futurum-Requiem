@@ -2,7 +2,12 @@ package ganymedes01.etfuturum.world.nether.biome.decorator;
 
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockNylium;
-import ganymedes01.etfuturum.world.generate.decorate.*;
+
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenBlockSplatter;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenHugeFungus;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenNetherGrass;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenTwistingVines;
+import ganymedes01.etfuturum.world.generate.decorate.WorldGenWeepingVines;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;

@@ -1,107 +1,146 @@
 package ganymedes01.etfuturum.blocks;
 
-import com.google.common.collect.Lists;
+import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.core.utils.IInitAction;
-import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.particle.EntityFX;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 
-	public IIcon[] inner_icons;
-	public IIcon[] outer_icons;
-	public IIcon[] top_icons;
+	private static final int[][] HORIZONTAL_OFFSETS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-	public final List<Block> supportBlocks = Lists.newArrayList();
-	protected final boolean isUp;
+	private final Map<Block, Integer> supportBlockMeta = new Object2IntOpenHashMap<>();
+	private int lastColumnSoundTick = -1;
 
-	public BlockBubbleColumn(boolean up, Block... blocks) {
+	/**
+	 * @param upBlocks   blocks that produce upward columns (meta 0), e.g. soul sand
+	 * @param downBlocks blocks that produce downward/whirlpool columns (meta 8), e.g. magma
+	 */
+	public BlockBubbleColumn(Block[] upBlocks, Block[] downBlocks) {
 		super(Material.water);
-		supportBlocks.addAll(Arrays.asList(blocks));
-		isUp = up;
+		for (Block b : upBlocks) supportBlockMeta.put(b, 0);
+		for (Block b : downBlocks) supportBlockMeta.put(b, 8);
 		setLightOpacity(Blocks.water.getLightOpacity());
-		setBlockName("bubble_column_" + (up ? "up" : "down"));
-		setBlockTextureName("bubble_column");
+		setBlockName("bubble_column");
 		setBlockBounds(0, 0, 0, 0, 0, 0);
 	}
 
-	protected int innerIconCount() {
-		return 1;
-	}
-
-	protected int outerIconCount() {
-		return 4;
-	}
-
-	protected int topIconCount() {
-		return 4;
-	}
-
-	@Override
-	public void registerBlockIcons(IIconRegister reg) {
-		int largest = Collections.max(Arrays.asList(innerIconCount(), outerIconCount(), topIconCount()));
-		inner_icons = new IIcon[innerIconCount()];
-		outer_icons = new IIcon[outerIconCount()];
-		top_icons = new IIcon[topIconCount()];
-		int i = 0;
-		for (char a = 'a'; i < largest && a < 'z'; a++, i++) {
-			if (i < innerIconCount()) {
-				inner_icons[i] = reg.registerIcon(getTextureName() + "_inner_" + (char) (a + (isUp ? innerIconCount() : 0)));
-			}
-			if (i < outerIconCount()) {
-				outer_icons[i] = reg.registerIcon(getTextureName() + "_outer_" + (char) (a + (isUp ? outerIconCount() : 0)));
-			}
-			if (i < topIconCount()) {
-				top_icons[i] = reg.registerIcon(getTextureName() + "_" + (isUp ? "up" : "down") + "_top_" + a);
-			}
-		}
-	}
-
-	public ThreadLocal<Boolean> renderingInner = ThreadLocal.withInitial(() -> false);
-
-	@Override
-	public IIcon getIcon(int side, int meta) {
-		return outer_icons[0];
-	}
-
-	@Override
-	public IIcon getIcon(IBlockAccess worldIn, int x, int y, int z, int side) {
-		int pseudoRand = (int) Utils.cantor(x, z);
-		if (side < 2) {
-			return top_icons[pseudoRand % top_icons.length];
-		} else {
-			return renderingInner.get() ? inner_icons[pseudoRand % inner_icons.length] : outer_icons[pseudoRand % outer_icons.length];
-		}
+	public boolean isUp(int meta) {
+		return meta == 0;
 	}
 
 	@Override
 	public void randomDisplayTick(World worldIn, int x, int y, int z, Random random) {
 		super.randomDisplayTick(worldIn, x, y, z, random);
-		if (random.nextInt(256) == 0) {
+		int particleSetting = Minecraft.getMinecraft().gameSettings.particleSetting;
+		boolean up = isUp(worldIn.getBlockMetadata(x, y, z));
+		if (up) {
+			// Centered bubble: always spawned regardless of setting
+			CustomParticles.spawnBubbleColumnUp(worldIn, x + 0.5, y, z + 0.5, 0, 0.04, 0);
+			// Random bubble: always (All), 60% chance (Decreased), skip (Minimal)
+			if (particleSetting == 0 || (particleSetting == 1 && random.nextFloat() < 0.6f)) {
+				CustomParticles.spawnBubbleColumnUp(worldIn,
+					x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(), 0, 0.04, 0);
+			}
+		} else {
+			// All: 50%, Decreased: 40%, Minimal: 25%
+			boolean spawn = particleSetting == 0 ? random.nextInt(2) == 0
+						  : particleSetting == 1 ? random.nextFloat() < 0.4f
+						  : random.nextInt(4) == 0;
+			if (spawn) {
+				CustomParticles.spawnWaterCurrentDown(worldIn, x + 0.5, y + 0.8, z + 0.5);
+			}
+		}
+		if (random.nextInt(200) == 0) {
 			worldIn.playSound(x + random.nextFloat(), y + random.nextFloat(), z + random.nextFloat(),
-					getBubblingNoise(worldIn, x, y, z, random), 1, 1, false);
+					getBubblingNoise(worldIn, x, y, z, up ? 0 : 1, random), 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
 		}
 	}
 
-	protected String getBubblingNoise(World world, int x, int y, int z, Random random) {
-		return Reference.MCAssetVer + ":" + "block.bubble_column." + (isUp ? "upwards" : "whirlpool") + "_ambient";
+	@Override
+	public void onEntityCollidedWithBlock(World worldIn, int x, int y, int z, Entity entityIn) {
+		// dont have particles trigger this; gets a little too crazy
+		if (worldIn.isRemote && entityIn instanceof EntityFX) return;
+
+		int meta = worldIn.getBlockMetadata(x, y, z);
+		boolean isUp = isUp(meta);
+
+		Block blockAbove = worldIn.getBlock(x, y + 1, z);
+		if (blockAbove == Blocks.air) {
+			if (isUp) {
+				entityIn.motionY = Math.min(1.8D, entityIn.motionY + 0.1D);
+				entityIn.fallDistance = 0;
+			} else {
+				entityIn.motionY = Math.max(-0.9D, entityIn.motionY - 0.03D);
+			}
+
+			// handle splash effects
+			if (worldIn.isRemote) {
+				for (int i = 0; i < 2; i++) {
+					worldIn.spawnParticle("splash",
+							x + worldIn.rand.nextDouble(),
+						y + 1,
+							z + worldIn.rand.nextDouble(),
+						0,
+						0,
+						0
+					);
+					worldIn.spawnParticle("bubble",
+							x + worldIn.rand.nextDouble(),
+							y + 1,
+							z + worldIn.rand.nextDouble(),
+							0,
+							0,
+							0
+					);
+				}
+			}
+		} else {
+			boolean playerFlying = (entityIn instanceof EntityPlayer player)
+				&& player.capabilities.isFlying;
+			if (!playerFlying) {
+				if (isUp) {
+					entityIn.motionY = Math.min(0.7D, entityIn.motionY + 0.6D);
+				} else {
+					entityIn.motionY = Math.max(-0.3D, entityIn.motionY - 0.3D);
+				}
+			}
+			entityIn.fallDistance = 0;
+
+			if (worldIn.isRemote && entityIn instanceof EntityPlayerSP player) {
+				if (lastColumnSoundTick == -1 || entityIn.ticksExisted - lastColumnSoundTick > 1) {
+					player.playSound(Reference.MCAssetVer + ":" + "block.bubble_column." + (isUp ? "upwards" : "whirlpool") + "_inside",
+							1, 1);
+				}
+				lastColumnSoundTick = entityIn.ticksExisted;
+			}
+		}
+
+		if (entityIn instanceof EntityLivingBase) {
+			entityIn.setAir(300);
+		}
+	}
+
+	protected String getBubblingNoise(World world, int x, int y, int z, int meta, Random random) {
+		return Reference.MCAssetVer + ":" + "block.bubble_column." + (isUp(meta) ? "upwards" : "whirlpool") + "_ambient";
 	}
 
 	@Override
@@ -125,11 +164,37 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 	}
 
 	protected void manageColumn(World world, int x, int y, int z) {
+		int meta = world.getBlockMetadata(x, y, z);
 		Block below = world.getBlock(x, y - 1, z);
-		if (below != this && !supportBlocks.contains(below)) {
+		if (below == this) {
+			// Inherit metadata from column below
+			int belowMeta = world.getBlockMetadata(x, y - 1, z);
+			if (belowMeta != meta) {
+				world.setBlockMetadataWithNotify(x, y, z, belowMeta, 3);
+				meta = belowMeta;
+			}
+		} else if (supportBlockMeta.containsKey(below)) {
+			// Validate metadata matches the support block
+			int expectedMeta = supportBlockMeta.get(below);
+			if (expectedMeta != meta) {
+				world.setBlockMetadataWithNotify(x, y, z, expectedMeta, 3);
+				meta = expectedMeta;
+			}
+		} else {
+			// No valid support below
 			world.setBlock(x, y, z, Blocks.water);
-		} else if (isFullVanillaWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
-			world.setBlock(x, y + 1, z, this, 0, 3);
+			return;
+		}
+		if (isFullVanillaWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
+			world.setBlock(x, y + 1, z, this, meta, 3);
+		}
+
+		// Spread water to adjacent air blocks
+		for (int[] offset : HORIZONTAL_OFFSETS) {
+			Block adjacent = world.getBlock(x + offset[0], y, z + offset[1]);
+			if (adjacent == Blocks.air) {
+				world.setBlock(x + offset[0], y, z + offset[1], Blocks.flowing_water, 1, 3);
+			}
 		}
 	}
 
@@ -138,8 +203,13 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 	}
 
 	@Override
+	public boolean canRenderInPass(int pass) {
+		return pass == 1;
+	}
+
+	@Override
 	public int getRenderBlockPass() {
-		return ForgeHooksClient.getWorldRenderPass() == 1 ? 1 : 0;
+		return 1;
 	}
 
 	@Override
@@ -155,7 +225,11 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 	@Override
 	public void postInitAction() {
 		if (ModRecipes.validateItems(this)) {
-			supportBlocks.stream().filter(ModRecipes::validateItems).forEach(block -> EtFuturumWorldListener.bubbleColumnMap.put(block, this));
+			supportBlockMeta.forEach((block, meta) -> {
+				if (ModRecipes.validateItems(block)) {
+					EtFuturumWorldListener.bubbleColumnMap.put(block, meta);
+				}
+			});
 		}
 	}
 

@@ -27,7 +27,7 @@ public class EtFuturumWorldListener implements IWorldAccess {
 
 	private final World world;
 	private static final Map<Block, Block> replacements = Maps.newHashMap();
-	public static final Map<Block, Block> bubbleColumnMap = Maps.newHashMap();
+	public static final Map<Block, Integer> bubbleColumnMap = Maps.newHashMap();
 
 	public EtFuturumWorldListener(World theWorld) {
 		world = theWorld;
@@ -155,9 +155,9 @@ public class EtFuturumWorldListener implements IWorldAccess {
 	private void handleBubbleColumnCreation(int x, int y, int z) {
 		if (!bubbleColumnMap.isEmpty() && world.blockExists(x, y, z)) {
 			if (BlockBubbleColumn.isFullVanillaWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
-				Block block = bubbleColumnMap.get(world.getBlock(x, y, z));
-				if (block != null) {
-					world.setBlock(x, y + 1, z, block, 0, 3);
+				Integer meta = bubbleColumnMap.get(world.getBlock(x, y, z));
+				if (meta != null && ModBlocks.BUBBLE_COLUMN.isEnabled()) {
+					world.setBlock(x, y + 1, z, ModBlocks.BUBBLE_COLUMN.get(), meta, 3);
 				}
 			}
 		}

@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -25,13 +26,34 @@ import ganymedes01.etfuturum.blocks.BlockMagma;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
+import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
 import ganymedes01.etfuturum.core.utils.ItemStackSet;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.elytra.IElytraEntityTrackerEntry;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
-import ganymedes01.etfuturum.entities.*;
+
+import ganymedes01.etfuturum.entities.EntityBoostingFireworkRocket;
+import ganymedes01.etfuturum.entities.EntityBrownMooshroom;
+import ganymedes01.etfuturum.entities.EntityEndermite;
+import ganymedes01.etfuturum.entities.EntityFox;
+import ganymedes01.etfuturum.entities.EntityHusk;
+import ganymedes01.etfuturum.entities.EntityLingeringEffect;
+import ganymedes01.etfuturum.entities.EntityNewBoat;
+import ganymedes01.etfuturum.entities.EntityNewSnowGolem;
+import ganymedes01.etfuturum.entities.EntityRabbit;
+import ganymedes01.etfuturum.entities.EntityShulker;
+import ganymedes01.etfuturum.entities.EntityStray;
+import ganymedes01.etfuturum.entities.EntityTippedArrow;
+import ganymedes01.etfuturum.entities.EntityZombieVillager;
 import ganymedes01.etfuturum.entities.ai.EntityAIOpenCustomDoor;
 import ganymedes01.etfuturum.gamerule.DoWeatherCycle;
 import ganymedes01.etfuturum.gamerule.PlayersSleepingPercentage;
@@ -46,26 +68,71 @@ import ganymedes01.etfuturum.storage.EtFuturumPlayer;
 import ganymedes01.etfuturum.tileentities.TileEntityGateway;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
-import net.minecraft.block.*;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEndPortalFrame;
+import net.minecraft.block.BlockFarmland;
+import net.minecraft.block.BlockLilyPad;
+import net.minecraft.block.BlockSoulSand;
+import net.minecraft.block.BlockTrapDoor;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.*;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityFlying;
+import net.minecraft.entity.EntityLeashKnot;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIOpenDoor;
 import net.minecraft.entity.ai.EntityAITargetNonTamed;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
 import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.entity.item.*;
-import net.minecraft.entity.monster.*;
-import net.minecraft.entity.passive.*;
+
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityMooshroom;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.*;
+
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemHoe;
+import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemShears;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
@@ -74,8 +141,20 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionHelper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.*;
+
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
+import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.StatCollector;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
@@ -91,11 +170,28 @@ import net.minecraftforge.event.FuelBurnTimeEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.*;
+
+import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingPackSizeEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.SpecialSpawn;
-import net.minecraftforge.event.entity.player.*;
+
+import net.minecraftforge.event.entity.player.ArrowLooseEvent;
+import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.BonemealEvent;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -111,19 +207,44 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "UnstableApiUsage"})
 public class ServerEventHandler {
 
 	public static final ServerEventHandler INSTANCE = new ServerEventHandler();
-	public static HashSet<EntityPlayerMP> playersClosedContainers = new HashSet<>();
-	private static final Map<EntityPlayer, List<ItemStack>> armorTracker = new WeakHashMap<>();
-	private static final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
-	public static final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().weakKeys().maximumSize(1000).build();
+	public final Set<EntityPlayerMP> playersClosedContainers = new HashSet<>();
+	private final Map<EntityPlayer, List<ItemStack>> armorTracker = new HashMap<>();
+	private final Set<EntityFallingBlock> fallingConcreteBlocks = new HashSet<>();
+	public final Cache<EntityItem, EntityPlayer> droppedEntityItems = CacheBuilder.newBuilder().maximumSize(128).build();
 
-	private ServerEventHandler() {
+	private ServerEventHandler() {}
+
+	public void onServerStopped() {
+		playersClosedContainers.clear();
+		armorTracker.clear();
+		fallingConcreteBlocks.clear();
+		droppedEntityItems.invalidateAll();
+	}
+
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		if (!event.world.isRemote) {
+			armorTracker.entrySet().removeIf(e -> e.getKey().worldObj == event.world);
+			fallingConcreteBlocks.removeIf(e -> e.worldObj == event.world);
+		}
+		droppedEntityItems.asMap().entrySet().removeIf(e -> e.getKey().worldObj == event.world);
 	}
 
 	@SubscribeEvent
@@ -273,8 +394,6 @@ public class ServerEventHandler {
 	public void entityAdded(EntityJoinWorldEvent event) {
 		if (event.world.isRemote) return;
 
-		Chunk chunk = event.world.getChunkFromChunkCoords(MathHelper.floor_double(event.entity.posX) >> 4, MathHelper.floor_double(event.entity.posZ) >> 4);
-
 		String sound = "";
 		if (ConfigSounds.paintingItemFramePlacing && event.entity instanceof EntityItemFrame) {
 			sound = "item_frame";
@@ -293,49 +412,81 @@ public class ServerEventHandler {
 			if (event.entity.getClass() == EntityBoat.class) {
 				EntityNewBoat boat = new EntityNewBoat(event.world);
 				event.entity.rotationYaw += 90;
-				replaceEntity(event.entity, boat, event.world, chunk);
+				replaceEntity(event.entity, boat, event.world, event);
 				boat.setBoatType("minecraft", "oak");
-				event.setCanceled(true);
 				return;
 			}
 		}
 
 		if (ConfigEntities.enableVillagerZombies && event.entity.getClass() == EntityZombie.class && ((EntityZombie) event.entity).isVillager()) {
-			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, chunk);
-			event.setCanceled(true);
+			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, event);
 			return;
 		}
 
 		if (ConfigEntities.enableShearableSnowGolems && event.entity.getClass() == EntitySnowman.class) {
 			Entity entity = new EntityNewSnowGolem(event.world);
-			replaceEntity(event.entity, entity, event.world, chunk);
+			replaceEntity(event.entity, entity, event.world, event);
 			entity.getDataWatcher().updateObject(12, (byte) 1);
-			event.setCanceled(true);
 		}
 	}
 
-	private final Set<Chunk> loadedChunks = Collections.newSetFromMap(new WeakHashMap<>());
+	// Map of dim ID -> packed chunk coords
+	private final Int2ObjectMap<LongSet> loadedChunks = new Int2ObjectLinkedOpenHashMap<>();
 
 	@SubscribeEvent
 	public void chunkLoad(ChunkEvent.Load event) {
-		loadedChunks.add(event.getChunk());
+		getLongSet(event.world.provider.dimensionId).add(toLongCoords(event.getChunk()));
 	}
 
 	@SubscribeEvent
 	public void chunkUnload(ChunkEvent.Unload event) {
-		loadedChunks.remove(event.getChunk());
+		getLongSet(event.world.provider.dimensionId).remove(toLongCoords(event.getChunk()));
 	}
 
-	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Chunk chunk) {
-		newEntity.copyDataFrom(oldEntity, true);
-		if (loadedChunks.contains(chunk)) { // Use this list because somehow chunk.isChunkLoaded is always true here...
-			// World#addLoadedEntities has already run for the chunk, we don't have to worry about conflicting with it
-			world.spawnEntityInWorld(newEntity);
-		} else {
-			// don't add to tracker, because World#addLoadedEntities will also do it
-			chunk.addEntity(newEntity);
+	@SubscribeEvent
+	public void worldUnload(WorldEvent.Unload event) {
+		loadedChunks.remove(event.world.provider.dimensionId);
+	}
+
+	private long toLongCoords(Chunk chunk){
+		return ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition);
+	}
+
+	private LongSet getLongSet(int dim){
+		return loadedChunks.computeIfAbsent(dim, ($) -> new LongOpenHashSet());
+	}
+
+	private boolean isChunkLoaded(int dim, int chunkX, int chunkZ){
+		LongSet set = loadedChunks.get(dim);
+		return set != null && set.contains(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ));
+	}
+
+	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Event event) {
+		if(event.isCanceled() || oldEntity.isDead)
+			return;
+		event.setCanceled(true);
+		// Accounts for a bug where entities can be saved to the wrong chunk
+		int chunkX = oldEntity.chunkCoordX;
+		int chunkZ = oldEntity.chunkCoordZ;
+		// Newly spawned entity, so we get chunk coords from position
+		if(!oldEntity.addedToChunk){
+			chunkX = MathHelper.floor_double(oldEntity.posX) >> 4;
+			chunkZ = MathHelper.floor_double(oldEntity.posZ) >> 4;
 		}
-		oldEntity.setDead();
+		newEntity.copyDataFrom(oldEntity, true);
+
+		// We only call world.spawnEntityInWorld if the chunk is already loaded or else
+		// the entity will be added to the EntityTracker twice which will cause issues
+		if(isChunkLoaded(world.provider.dimensionId, chunkX, chunkZ)){
+			world.spawnEntityInWorld(newEntity);
+		}else{
+			IChunkProvider chunkProv = world.getChunkProvider();
+			if(chunkProv.chunkExists(chunkX, chunkZ)){
+				Chunk chunk = chunkProv.loadChunk(chunkX, chunkZ);
+				chunk.addEntity(newEntity);
+				chunk.removeEntity(oldEntity);
+			}
+		}
 	}
 
 	@SubscribeEvent
@@ -1276,9 +1427,8 @@ public class ServerEventHandler {
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SNOWY)) {
 				EntityStray stray = new EntityStray(world);
-				replaceEntity(entity, stray, world, chunk);
+				replaceEntity(entity, stray, world, event);
 				stray.onSpawnWithEgg(null);
-				event.setCanceled(true);
 				event.setResult(Result.DENY);
 			}
 		} else if (ConfigEntities.enableHusk && !ConfigWorld.oldHuskSpawning && EntityList.getEntityID(entity) == 54 /*Zombie ID*/ && world.rand.nextFloat() < .80F && world.canBlockSeeTheSky(x, y + 1, z)) {
@@ -1286,9 +1436,8 @@ public class ServerEventHandler {
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.HOT) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.DRY) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SANDY)) {
 				EntityHusk husk = new EntityHusk(world);
-				replaceEntity(entity, husk, world, chunk);
+				replaceEntity(entity, husk, world, event);
 				husk.onSpawnWithEgg(null);
-				event.setCanceled(true);
 				event.setResult(Result.DENY);
 			}
 		}

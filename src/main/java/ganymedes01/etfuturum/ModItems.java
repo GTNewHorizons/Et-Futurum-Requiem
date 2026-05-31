@@ -3,10 +3,44 @@ package ganymedes01.etfuturum;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import ganymedes01.etfuturum.compat.ModsList;
-import ganymedes01.etfuturum.configuration.configs.*;
+
+import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.items.*;
-import ganymedes01.etfuturum.items.equipment.*;
+
+import ganymedes01.etfuturum.items.BaseFood;
+import ganymedes01.etfuturum.items.BaseItem;
+import ganymedes01.etfuturum.items.BaseSubtypesItem;
+import ganymedes01.etfuturum.items.DebugTestItem;
+import ganymedes01.etfuturum.items.ItemArmorStand;
+import ganymedes01.etfuturum.items.ItemArrowTipped;
+import ganymedes01.etfuturum.items.ItemBamboo;
+import ganymedes01.etfuturum.items.ItemBarrelUpgrade;
+import ganymedes01.etfuturum.items.ItemBeetrootSeeds;
+import ganymedes01.etfuturum.items.ItemBeetrootSoup;
+import ganymedes01.etfuturum.items.ItemChorusFruit;
+import ganymedes01.etfuturum.items.ItemEndCrystal;
+import ganymedes01.etfuturum.items.ItemEtFuturumRecord;
+import ganymedes01.etfuturum.items.ItemGlowBerries;
+import ganymedes01.etfuturum.items.ItemHoneyBottle;
+import ganymedes01.etfuturum.items.ItemLingeringPotion;
+import ganymedes01.etfuturum.items.ItemNetheriteIngot;
+import ganymedes01.etfuturum.items.ItemNewBoat;
+import ganymedes01.etfuturum.items.ItemRabbitStew;
+import ganymedes01.etfuturum.items.ItemShulkerBoxUpgrade;
+import ganymedes01.etfuturum.items.ItemSuspiciousStew;
+import ganymedes01.etfuturum.items.ItemSweetBerries;
+import ganymedes01.etfuturum.items.ItemWoodSign;
+import ganymedes01.etfuturum.items.equipment.ItemArmorElytra;
+import ganymedes01.etfuturum.items.equipment.ItemEFRArmour;
+import ganymedes01.etfuturum.items.equipment.ItemEFRAxe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRHoe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRPickaxe;
+import ganymedes01.etfuturum.items.equipment.ItemEFRSpade;
+import ganymedes01.etfuturum.items.equipment.ItemEFRSword;
 import ganymedes01.etfuturum.items.rawore.modded.BaseRawOre;
 import ganymedes01.etfuturum.items.rawore.modded.ItemGeneralModdedRawOre;
 import ganymedes01.etfuturum.lib.Reference;
@@ -59,6 +93,13 @@ public enum ModItems {
 	SHULKER_SHELL(ConfigBlocksItems.enableShulkerBoxes, new BaseItem("shulker_shell")),
 	PIGSTEP_RECORD(ConfigBlocksItems.enablePigstep, new ItemEtFuturumRecord("pigstep")),
 	OTHERSIDE_RECORD(ConfigBlocksItems.enableOtherside, new ItemEtFuturumRecord("otherside")),
+	PRECIPICE_RECORD(ConfigBlocksItems.enablePrecipice, new ItemEtFuturumRecord("precipice")),
+	CREATOR_MUSIC_BOX_RECORD(ConfigBlocksItems.enableCreatorMusicBox, new ItemEtFuturumRecord("creator_music_box")),
+	CREATOR_RECORD(ConfigBlocksItems.enableCreator, new ItemEtFuturumRecord("creator")),
+	TEARS_RECORD(ConfigBlocksItems.enableTears, new ItemEtFuturumRecord("tears")),
+	LAVA_CHICKEN_RECORD(ConfigBlocksItems.enableLavaChicken, new ItemEtFuturumRecord("lava_chicken")),
+	FIVE_RECORD(ConfigBlocksItems.enable5, new ItemEtFuturumRecord("5")),
+	DISC_FRAGMENT_5(ConfigBlocksItems.enable5, new BaseItem("disc_fragment_5", true)),
 	AMETHYST_SHARD(ConfigBlocksItems.enableAmethyst, new BaseItem("amethyst_shard")),
 	SHULKER_BOX_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.shulkerBoxesIronChest, new ItemShulkerBoxUpgrade()),
 	BARREL_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.barrelIronChest, new ItemBarrelUpgrade()),
@@ -85,6 +126,44 @@ public enum ModItems {
 	BAMBOO_RAFT(ConfigBlocksItems.enableNewBoats, new ItemNewBoat("minecraft", "bamboo", ModBlocks.WOOD_PLANKS::getItem, 4, false, true)),
 	BAMBOO_CHEST_RAFT(ConfigBlocksItems.enableNewBoats, new ItemNewBoat("minecraft", "bamboo", ModBlocks.WOOD_PLANKS::getItem, 4, true, true)),
 
+	BOP_SACREDOAK_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "sacredoak", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 0, false, false)),
+	BOP_SACREDOAK_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "sacredoak", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 0, true, false)),
+	BOP_CHERRY_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "cherry", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 1, false, false)),
+	BOP_CHERRY_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "cherry", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 1, true, false)),
+	BOP_DARK_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "dark", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 2, false, false)),
+	BOP_DARK_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "dark", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 2, true, false)),
+	BOP_FIR_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "fir", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 3, false, false)),
+	BOP_FIR_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "fir", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 3, true, false)),
+	BOP_ETHEREAL_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "ethereal", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 4, false, false)),
+	BOP_ETHEREAL_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "ethereal", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 4, true, false)),
+	BOP_MAGIC_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "magic", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 5, false, false)),
+	BOP_MAGIC_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "magic", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 5, true, false)),
+	BOP_MANGROVE_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mangrove", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 6, false, false)),
+	BOP_MANGROVE_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mangrove", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 6, true, false)),
+	BOP_PALM_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "palm", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 7, false, false)),
+	BOP_PALM_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "palm", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 7, true, false)),
+	BOP_REDWOOD_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "redwood", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 8, false, false)),
+	BOP_REDWOOD_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "redwood", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 8, true, false)),
+	BOP_WILLOW_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "willow", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 9, false, false)),
+	BOP_WILLOW_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "willow", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 9, true, false)),
+	BOP_BAMBOO_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "bamboo", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 10, false, true)),
+	BOP_BAMBOO_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "bamboo", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 10, true, true)),
+	BOP_PINE_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "pine", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 11, false, false)),
+	BOP_PINE_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "pine", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 11, true, false)),
+	BOP_HELLBARK_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "hellbark", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 12, false, false)),
+	BOP_HELLBARK_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "hellbark", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 12, true, false)),
+	BOP_JACARANDA_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "jacaranda", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 13, false, false)),
+	BOP_JACARANDA_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "jacaranda", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 13, true, false)),
+	BOP_MAHOGANY_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mahogany", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 14, false, false)),
+	BOP_MAHOGANY_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.BIOMES_O_PLENTY.isLoaded(), new ItemNewBoat("biomesoplenty", "mahogany", () -> GameRegistry.findItem("BiomesOPlenty", "planks"), 14, true, false)),
+
+	WITCHERY_ROWAN_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "rowan", () -> GameRegistry.findItem("witchery", "witchwood"), 0, false, false)),
+	WITCHERY_ROWAN_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "rowan", () -> GameRegistry.findItem("witchery", "witchwood"), 0, true, false)),
+	WITCHERY_ALDER_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "alder", () -> GameRegistry.findItem("witchery", "witchwood"), 1, false, false)),
+	WITCHERY_ALDER_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "alder", () -> GameRegistry.findItem("witchery", "witchwood"), 1, true, false)),
+	WITCHERY_HAWTHORN_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "hawthorn", () -> GameRegistry.findItem("witchery", "witchwood"), 2, false, false)),
+	WITCHERY_HAWTHORN_CHEST_BOAT(ConfigBlocksItems.enableNewBoats && ModsList.WITCHERY.isLoaded(), new ItemNewBoat("witchery", "hawthorn", () -> GameRegistry.findItem("witchery", "witchwood"), 2, true, false)),
+
 	//legacy sign items -- new signs use their ItemBlock as the sign item instead
 	ITEM_SIGN_SPRUCE(ConfigBlocksItems.enableVanillaSigns, new ItemWoodSign((BlockWoodSign) ModBlocks.SIGN_SPRUCE.get())),
 	ITEM_SIGN_BIRCH(ConfigBlocksItems.enableVanillaSigns, new ItemWoodSign((BlockWoodSign) ModBlocks.SIGN_BIRCH.get())),
@@ -100,8 +179,8 @@ public enum ModItems {
 	//Debug Item
 	DEBUGGING_TOOL(Reference.DEV_ENVIRONMENT, new DebugTestItem());
 
-	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT};
-	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT};
+	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT, CHERRY_CHEST_BOAT, BAMBOO_CHEST_RAFT};
+	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT, CHERRY_BOAT, BAMBOO_RAFT};
 	public static final ModItems[] OLD_SIGN_ITEMS = new ModItems[]{ITEM_SIGN_SPRUCE, ITEM_SIGN_BIRCH, ITEM_SIGN_JUNGLE, ITEM_SIGN_ACACIA, ITEM_SIGN_DARK_OAK};
 
 	/*

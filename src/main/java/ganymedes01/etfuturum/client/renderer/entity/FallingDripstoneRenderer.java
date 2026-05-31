@@ -49,6 +49,7 @@ public class FallingDripstoneRenderer extends Render {
 			field_147920_a.drawCrossedSquares(ModBlocks.POINTED_DRIPSTONE.get().getIcon(0, p_76986_1_.field_145814_a), i, j, k, 1.0F);
 			tessellator.setTranslation(0.0D, 0.0D, 0.0D);
 			tessellator.draw();
+			this.field_147920_a.blockAccess = null;
 
 			GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glPopMatrix();

@@ -10,6 +10,7 @@ public enum ModsList {
 	AETHER_LEGACY("aether_legacy"),
 	WAILA("Waila"),
 	THAUMCRAFT("Thaumcraft"),
+	FORBIDDEN_MAGIC("ForbiddenMagic"),
 	BLUEPOWER("bluepower"),
 	PROJECT_RED_EXPLORATION("ProjRed|Exploration"),
 	NETHERITEPLUS("netheriteplus"),
@@ -30,6 +31,7 @@ public enum ModsList {
 	MOREPLAYERMODELS("moreplayermodels"),
 	DRAGON_BLOCK_C("jinryuudragonblockc"),
 	BIOMES_O_PLENTY("BiomesOPlenty"),
+	WITCHERY("witchery"),
 	EXTRA_UTILITIES("ExtraUtilities"),
 	APPLIED_ENERGISTICS_2("appliedenergistics2"),
 	ARS_MAGICA_2("arsmagica2"),
@@ -40,6 +42,7 @@ public enum ModsList {
 	SIMPLEORES("simpleores"),
 	DRAGON_QUEST("DQMIIINext"),
 	LOTR("lotr"),
+    BATTLEGEAR_2("battlegear2"),
 
 	NOTFINE("notfine"),
 	NOT_ENOUGH_IDS("neid"),

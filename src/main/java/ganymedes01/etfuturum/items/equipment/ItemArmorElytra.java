@@ -3,6 +3,8 @@ package ganymedes01.etfuturum.items.equipment;
 import baubles.api.BaubleType;
 import baubles.api.expanded.BaubleItemHelper;
 import baubles.api.expanded.IBaubleExpanded;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
@@ -25,6 +27,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+@Optional.Interface(modid = "Baubles|Expanded", iface = "baubles.api.expanded.IBaubleExpanded")
 public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 
 	private IIcon broken;
@@ -122,15 +125,18 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 		}
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public BaubleType getBaubleType(ItemStack itemstack) {
 		return null;
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public void onWornTick(ItemStack itemstack, EntityLivingBase player) {
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public void onEquipped(ItemStack itemstack, EntityLivingBase player) {
 		if (ConfigSounds.armorEquip) {
@@ -138,20 +144,24 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 		}
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public void onUnequipped(ItemStack itemstack, EntityLivingBase player) {
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public boolean canEquip(ItemStack itemstack, EntityLivingBase player) {
 		return getElytra(player) == null;
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public boolean canUnequip(ItemStack itemstack, EntityLivingBase player) {
 		return true;
 	}
 
+	@Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public String[] getBaubleTypes(ItemStack itemstack) {
 		if (ConfigModCompat.elytraBaublesExpandedCompat == 0) {
