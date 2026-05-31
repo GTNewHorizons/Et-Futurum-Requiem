@@ -19,7 +19,7 @@ public abstract class MixinBlockLiquid {
          * Inverse linear mapping from [0,7] to [minSpeed,maxSpeed]
          */
 
-        double minSpeed = 0.1;
+        double minSpeed = 0.4;
         double maxSpeed = 1.0;
         power = power == 8 ? 1 : maxSpeed - (power / 7) * (maxSpeed - minSpeed);
 
