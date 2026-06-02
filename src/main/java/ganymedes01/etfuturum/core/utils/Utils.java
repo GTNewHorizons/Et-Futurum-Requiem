@@ -2,13 +2,13 @@ package ganymedes01.etfuturum.core.utils;
 
 import cpw.mods.fml.common.Loader;
 import ganymedes01.etfuturum.Tags;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -479,6 +479,6 @@ public class Utils {
 	 * @return
 	 */
 	public static List<EntityPlayer> getListWithoutSpectators(List<EntityPlayer> list) {
-		return list.stream().filter(entity -> !SpectatorMode.isSpectator(entity)).collect(Collectors.toList());
+		return list.stream().filter(entity -> !SpectatorUtils.isSpectator(entity)).collect(Collectors.toList());
 	}
 }

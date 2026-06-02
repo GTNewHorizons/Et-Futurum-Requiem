@@ -4,13 +4,13 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.compat.CompatIronChests;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.lib.GUIIDs;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox.ShulkerBoxType;
 import net.minecraft.block.Block;
@@ -218,7 +218,7 @@ public class BlockShulkerBox extends BlockContainer {
 	}
 
 	private boolean canOpen(AxisAlignedBB bb, World world, TileEntity tile, EntityPlayer player) {
-		if(SpectatorMode.isSpectator(player)) {
+        if(SpectatorUtils.isSpectator(player)) {
 			return true;
 		}
 		List<AxisAlignedBB> boxes = new ArrayList<>();

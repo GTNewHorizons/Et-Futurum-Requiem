@@ -45,7 +45,7 @@ public class SpectatorMode {
 		return SpectatorUtils.canSpectatorSelectTileEntity(te);
 	}
 
-	// Skeletal dummy map in case any mods
+	// Skeletal dummy map in case any mods actually checked for spectating entity data.
 	private static class FakeSpectatorMap extends AbstractMap<EntityPlayer, Entity> {
 
 		@Override

@@ -15,6 +15,7 @@ import ganymedes01.etfuturum.*;
 import ganymedes01.etfuturum.api.RawOreRegistry;
 import ganymedes01.etfuturum.api.StrippedLogRegistry;
 import ganymedes01.etfuturum.api.mappings.RawOreDropMapping;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.blocks.BlockHoney;
 import ganymedes01.etfuturum.blocks.BlockMagma;
 import ganymedes01.etfuturum.client.sound.ModSounds;
@@ -32,11 +33,10 @@ import ganymedes01.etfuturum.gamerule.DoWeatherCycle;
 import ganymedes01.etfuturum.gamerule.PlayersSleepingPercentage;
 import ganymedes01.etfuturum.gamerule.RandomTickSpeed;
 import ganymedes01.etfuturum.items.ItemArrowTipped;
-import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
+import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.recipes.ModRecipes;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.storage.EtFuturumPlayer;
 import ganymedes01.etfuturum.tileentities.TileEntityGateway;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
@@ -573,7 +573,7 @@ public class ServerEventHandler {
 	public void captureLastSideHit(PlayerInteractEvent event) {
 		//I need this because onPlaceBlock doesn't tell us what side we hit.
 		//Using a MovingObjectPosition doesn't work either because that event fires AFTER the trapdoor is placed, so the MOP hits the trapdoor.
-		if (ConfigFunctions.enableFloatingTrapDoors && event.action == Action.RIGHT_CLICK_BLOCK && !SpectatorMode.isSpectator(event.entityPlayer)) {
+		if (ConfigFunctions.enableFloatingTrapDoors && event.action == Action.RIGHT_CLICK_BLOCK && !SpectatorUtils.isSpectator(event.entityPlayer)) {
 			sideHit.set(event.face);
 		}
 	}
@@ -633,7 +633,7 @@ public class ServerEventHandler {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		EntityPlayer player = event.entityPlayer;
-		if ((event.action == Action.RIGHT_CLICK_BLOCK || event.action == Action.RIGHT_CLICK_AIR) && !SpectatorMode.isSpectator(player)) {
+		if ((event.action == Action.RIGHT_CLICK_BLOCK || event.action == Action.RIGHT_CLICK_AIR) && !SpectatorUtils.isSpectator(player)) {
 			if (player != null) {
 				final ItemStack heldStack = player.getHeldItem();
 				final World world = event.world;

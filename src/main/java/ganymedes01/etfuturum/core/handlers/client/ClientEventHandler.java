@@ -14,6 +14,7 @@ import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.api.MultiBlockSoundRegistry;
 import ganymedes01.etfuturum.api.mappings.MultiBlockSoundContainer;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.client.OpenGLHelper;
 import ganymedes01.etfuturum.client.gui.GuiConfigWarning;
@@ -82,8 +83,6 @@ import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.io.File;
 import java.util.*;
-
-import static ganymedes01.etfuturum.spectator.SpectatorMode.isSpectator;
 
 public class ClientEventHandler {
 
@@ -388,7 +387,7 @@ public class ClientEventHandler {
 			LayerBetterElytra.doRenderLayer(event.entityLiving, event.entityPlayer.limbSwing, event.entityPlayer.limbSwingAmount, Minecraft.getMinecraft().timer.renderPartialTicks, event.entityPlayer.getAge(), 0.0625F);
 		}
 
-		if (isSpectator(event.entityPlayer)) {
+		if (SpectatorUtils.isSpectator(event.entityPlayer)) {
 			event.result = 0;
 		} else if (ConfigFunctions.enableTransparentAmour) {
 			OpenGLHelper.enableBlend();

@@ -5,7 +5,7 @@ import com.gtnewhorizon.gtnhlib.eventbus.EventBusSubscriber;
 import com.gtnewhorizon.gtnhlib.eventbus.Phase;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ganymedes01.etfuturum.api.ArmorSoundsRegistry;
-import ganymedes01.etfuturum.api.spectator.ISpectatorInfo;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import net.minecraft.item.ItemStack;
 
@@ -21,7 +21,7 @@ public class ArmorSoundEventHandler {
 	@SubscribeEvent
 	public static void handleArmorSounds(LivingEquipmentChangeEvent event) {
 		if (!event.isInitial() && event.getSlot() > 0) {
-			if(event.entityLiving instanceof ISpectatorInfo info && (info.etfu$isSpectator() || info.etfu$wasSpectator())) {
+			if(SpectatorUtils.isSpectator(event.entity) || SpectatorUtils.wasSpectator(event.entity)) {
 				return;
 			}
 			ItemStack from = event.getFrom();

@@ -41,7 +41,7 @@ dependencies {
     api files("libs/hogutils-0.0.0-nightly-5782dbbe51-dev.jar")
 
 
-    implementation("com.github.GTNewHorizons:GTNHLib:0.10.3")
+    implementation("com.github.GTNewHorizons:GTNHLib:0.11.4")
 
     // Can use `compileOnly` instead of `compile` if you want to require it at build time,
     // but not require it in `runClient`/`runServer`

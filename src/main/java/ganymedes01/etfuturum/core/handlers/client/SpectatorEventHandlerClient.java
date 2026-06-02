@@ -9,8 +9,6 @@ import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.entity.RenderBiped;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -25,32 +23,7 @@ public abstract class SpectatorEventHandlerClient {
         return ConfigMixins.enableSpectatorMode;
     }
 
-    private static void setBipedVisible(ModelBiped biped, boolean visible) {
-        biped.bipedHead.showModel = visible;
-        biped.bipedHeadwear.showModel = visible;
-        biped.bipedBody.showModel = visible;
-        biped.bipedRightArm.showModel = visible;
-        biped.bipedLeftArm.showModel = visible;
-        biped.bipedRightLeg.showModel = visible;
-        biped.bipedLeftLeg.showModel = visible;
-    }
-
-    @SubscribeEvent
-    public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
-        if (SpectatorUtils.getSpectatingEntity(event.entityPlayer) == null) {
-            if (SpectatorUtils.isSpectator(event.entityPlayer)) {
-                setBipedVisible(event.renderer.modelBipedMain, false);
-                event.renderer.modelBipedMain.bipedHead.showModel = true;
-                event.renderer.modelBipedMain.bipedHeadwear.showModel = true;
-            } else {
-                setBipedVisible(event.renderer.modelBipedMain, true);
-            }
-        } else {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRenderPlayerArmor(RenderPlayerEvent.Specials.Pre event) {
         if (SpectatorUtils.isSpectator(event.entityPlayer)) {
             event.setCanceled(true);
@@ -60,8 +33,8 @@ public abstract class SpectatorEventHandlerClient {
     @SubscribeEvent
     public static void onRenderEntity(RenderLivingEvent.Pre event) {
         EntityPlayer player = FMLClientHandler.instance().getClientPlayerEntity();
-        Entity entity2 = SpectatorUtils.getSpectatingEntity(player);
-        if (SpectatorUtils.isSpectator(player) && entity2 != null && entity2.equals(event.entity) && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
+        Entity following = SpectatorUtils.getSpectatingEntity(player);
+        if (SpectatorUtils.isSpectator(player) && event.entity.equals(following) && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
             event.setCanceled(true);
         }
     }
@@ -95,16 +68,12 @@ public abstract class SpectatorEventHandlerClient {
         EntityPlayer player = FMLClientHandler.instance().getClientPlayerEntity();
         if (SpectatorUtils.isSpectator(player)) {
             event.setCanceled(true);
-        } else if (SpectatorUtils.wasSpectator(player)) {
-            if(RenderManager.instance.getEntityRenderObject(player) instanceof RenderBiped biped) {
-                setBipedVisible(biped.modelBipedMain, true);
-            }
         }
     }
 
     @SubscribeEvent
     public static void onFireRender(RenderBlockOverlayEvent event) {
-        if (SpectatorUtils.isSpectator(FMLClientHandler.instance().getClientPlayerEntity())) {
+        if (SpectatorUtils.isSpectator(event.player)) {
             event.setCanceled(true);
         }
     }
@@ -112,13 +81,9 @@ public abstract class SpectatorEventHandlerClient {
     /* TODO look into increasing the distance instead of outright disabling it */
     @SubscribeEvent
     public static void onRenderFogDensity(EntityViewRenderEvent.FogDensity event) {
-        if (event.entity instanceof EntityPlayer) {
-            if (SpectatorUtils.isSpectator(event.entity)) {
-                if (event.block.getMaterial().isLiquid()) {
-                    event.setCanceled(true);
-                    event.density = 0;
-                }
-            }
+        if (SpectatorUtils.isSpectator(event.entity) && event.block.getMaterial().isLiquid()) {
+            event.setCanceled(true);
+            event.density = 0;
         }
     }
 
@@ -129,6 +94,32 @@ public abstract class SpectatorEventHandlerClient {
             if (!SpectatorUtils.canSpectatorSelectTileEntity(te)) {
                 event.setCanceled(true);
             }
+        }
+    }
+
+    private static void toggleVisibility(ModelBiped biped, boolean visible) {
+        biped.bipedBody.showModel = visible;
+        biped.bipedRightArm.showModel = visible;
+        biped.bipedLeftArm.showModel = visible;
+        biped.bipedRightLeg.showModel = visible;
+        biped.bipedLeftLeg.showModel = visible;
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
+        if(SpectatorUtils.isSpectator(event.entityPlayer)) {
+            if(SpectatorUtils.getSpectatingEntity(event.entityPlayer) != null) {
+                event.setCanceled(true);
+            } else {
+                toggleVisibility(event.renderer.modelBipedMain, false);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onRenderPlayerPost(RenderPlayerEvent.Post event) {
+        if(SpectatorUtils.wasSpectator(event.entityPlayer)) {
+            toggleVisibility(event.renderer.modelBipedMain, true);
         }
     }
 }

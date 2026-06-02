@@ -25,10 +25,6 @@ public class SpectatorEventHandler {
             if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
                 event.setCanceled(true);
             } else {
-                if (!event.world.blockExists(event.x, event.y, event.z)) {
-                    event.setCanceled(true); //I don't trust other mods not to do weird shit in this scenario
-                    return;
-                }
                 TileEntity te = event.world.getTileEntity(event.x, event.y, event.z);
                 if (!SpectatorUtils.canSpectatorSelectTileEntity(te)) {
                     event.setCanceled(true);
@@ -38,7 +34,7 @@ public class SpectatorEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onInteract(BlockEvent.PlaceEvent event) {
+    public static void onPlace(BlockEvent.PlaceEvent event) {
         if (SpectatorUtils.isSpectator(event.player)) {
             event.setCanceled(true);
         }

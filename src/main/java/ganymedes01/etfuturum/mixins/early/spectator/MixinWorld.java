@@ -1,7 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.spectator;
 
 import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinWorld {
 	@Redirect(method = "getClosestPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;getDistanceSq(DDD)D"))
 	private double ignoreSpectatorsForClosest(EntityPlayer instance, double x, double y, double z) {
-		if (SpectatorMode.isSpectator(instance)) {
+        if (SpectatorUtils.isSpectator(instance)) {
 			return Double.MAX_VALUE;
 		}
 		return instance.getDistanceSq(x, y, z);
@@ -24,10 +23,10 @@ public class MixinWorld {
 
 	@Inject(method = "getClosestPlayer", at = @At("TAIL"), cancellable = true)
 	private void neverReturnSpectator(double x, double y, double z, double distance, CallbackInfoReturnable<EntityPlayer> cir) {
-		if (cir.getReturnValue() != null && SpectatorMode.isSpectator(cir.getReturnValue())) {
-			cir.setReturnValue(null);
-		}
-	}
+        if (cir.getReturnValue() != null && SpectatorUtils.isSpectator(cir.getReturnValue())) {
+            cir.setReturnValue(null);
+        }
+    }
 
 	@ModifyArg(
 			method = "getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;",
