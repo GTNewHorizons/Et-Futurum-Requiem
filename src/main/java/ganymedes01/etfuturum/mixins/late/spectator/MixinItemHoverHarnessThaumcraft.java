@@ -2,15 +2,12 @@ package ganymedes01.etfuturum.mixins.late.spectator;
 
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import tconstruct.armor.ArmorProxyClient;
 import thaumcraft.common.items.armor.ItemHoverHarness;
 
 @Mixin(value = ItemHoverHarness.class, remap = false)
