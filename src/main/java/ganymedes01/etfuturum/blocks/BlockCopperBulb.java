@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.blocks;
 
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -100,7 +100,7 @@ public class BlockCopperBulb extends BlockCopper {
 		int meta = world.getBlockMetadata(x, y, z);
 		boolean lit = isLit(world, x, y, z, meta);
 		if (!powered) {
-			world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":block.copper_bulb.turn_" + (lit ? "off" : "on"), 1, 1);
+			world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":block.copper_bulb.turn_" + (lit ? "off" : "on"), 1, 1);
 			if (lit) {
 				meta -= 4;
 			} else {

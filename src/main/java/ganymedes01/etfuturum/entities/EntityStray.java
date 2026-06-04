@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.entities;
 
 import ganymedes01.etfuturum.ModItems;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -23,8 +23,6 @@ import java.util.Calendar;
 
 public class EntityStray extends EntitySkeleton {
 
-	private final EntityAIArrowAttack aiArrowAttack = new EntityAIArrowAttack(this, 1.0D, 20, 60, 15.0F);
-
 	public EntityStray(final World p_i1741_1_) {
 		super(p_i1741_1_);
 		this.tasks.addTask(1, new EntityAISwimming(this));
@@ -43,7 +41,6 @@ public class EntityStray extends EntitySkeleton {
 	@Override
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData p_110161_1_) {
 		p_110161_1_ = super.onSpawnWithEgg(p_110161_1_);
-		this.tasks.addTask(4, this.aiArrowAttack);
 		this.addRandomArmor();
 		this.enchantEquipment();
 
@@ -125,17 +122,17 @@ public class EntityStray extends EntitySkeleton {
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.stray.ambient";
+		return Tags.MC_ASSET_VER + ":entity.stray.ambient";
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.stray.hurt";
+		return Tags.MC_ASSET_VER + ":entity.stray.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.stray.death";
+		return Tags.MC_ASSET_VER + ":entity.stray.death";
 	}
 
 	/**
@@ -143,7 +140,7 @@ public class EntityStray extends EntitySkeleton {
 	 */
 	@Override
 	protected void func_145780_a(final int x, final int y, final int z, final Block blockIn) {
-		this.playSound(Reference.MCAssetVer + ":entity.stray.step", 0.15f, 1.0f);
+		this.playSound(Tags.MC_ASSET_VER + ":entity.stray.step", 0.15f, 1.0f);
 	}
 
 	@Override

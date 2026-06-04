@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.client.particle;
 
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.world.World;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 public class BeeNectarFX extends EntityFX {
 
@@ -13,7 +13,7 @@ public class BeeNectarFX extends EntityFX {
 
 	public BeeNectarFX(World worldIn, double p_i1203_2_, double p_i1203_4_, double p_i1203_6_) {
 		super(worldIn, p_i1203_2_, p_i1203_4_, p_i1203_6_, 0, 0, 0);
-		rand = new RandomXoshiro256StarStar();
+		rand = new FastRandom();
 		setRBGColorF(red, green, blue);
 		this.motionX = this.motionY = this.motionZ = 0.0D;
 

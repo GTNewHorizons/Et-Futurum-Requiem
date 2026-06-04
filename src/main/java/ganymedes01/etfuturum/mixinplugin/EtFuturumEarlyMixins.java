@@ -2,21 +2,17 @@ package ganymedes01.etfuturum.mixinplugin;
 
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.configuration.ConfigBase;
-import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
-import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
-import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.*;
 import ganymedes01.etfuturum.lib.Reference;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +24,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 	public static final MixinEnvironment.Side side = MixinEnvironment.getCurrentEnvironment().getSide();
 
 	public void initConfigs() {
-		final String configDir = "config" + File.separator + Reference.MOD_ID;
+		final String configDir = "config" + File.separator + Tags.MOD_ID;
 
 //	  File from before Et Futurum Requiem (Not in a subdirectory)
 		File olderFile = new File(Launch.minecraftHome, "config" + File.separator + "etfuturum.cfg");
@@ -69,7 +65,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		initConfigs();
 
-		List<String> mixins = new ArrayList<>();
+		List<String> mixins = new ObjectArrayList<>();
 
 		if (ConfigMixins.endPortalFix) {
 			mixins.add("endportal.MixinBlockEndPortal");
@@ -87,6 +83,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.enableSpectatorMode) {
 			mixins.add("spectator.MixinGameType");
 			mixins.add("spectator.MixinEntity");
+			mixins.add("spectator.MixinEntityLivingBase");
 			mixins.add("spectator.MixinWorld");
 			mixins.add("spectator.MixinWorldServer");
 			mixins.add("spectator.MixinEntityPlayer");
@@ -94,8 +91,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("spectator.MixinInventoryPlayer");
 			mixins.add("spectator.MixinContainerChest");
 			mixins.add("spectator.MixinSlot");
+			mixins.add("spectator.MixinCommandGameMode");
 			if (side == MixinEnvironment.Side.CLIENT) {
 				mixins.add("spectator.client.MixinEntityRenderer");
+				mixins.add("spectator.client.MixinEntity");
 				mixins.add("spectator.client.MixinEntityPlayer");
 				mixins.add("spectator.client.MixinWorldRenderer");
 			}
@@ -110,9 +109,6 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("backlytra.MixinEntityLivingBase");
 			mixins.add("backlytra.MixinNetHandlerPlayServer");
 			mixins.add("backlytra.MixinEntityTrackerEntry");
-			if (loadedCoreMods.stream().anyMatch(name -> name.contains("thaumcraft"))) {
-				mixins.add("backlytra.thaumcraft.MixinEventHandlerEntity");
-			}
 			if (side == MixinEnvironment.Side.CLIENT) {
 				mixins.add("backlytra.client.MixinAbstractClientPlayer");
 				mixins.add("backlytra.client.MixinEntityPlayerSP");
@@ -129,6 +125,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigMixins.enableRandomTickSpeed) {
 			mixins.add("randomtickspeed.MixinWorldServer");
+			mixins.add("randomtickspeed.MixinGameRules");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {
@@ -151,6 +148,19 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("sounds.MixinEntitySkeleton");
 			mixins.add("sounds.MixinEntitySquid");
 			mixins.add("sounds.MixinEntityWitch");
+		}
+
+		if (ConfigMixins.modernSkeletonBehavior) {
+			mixins.add("skeleton.MixinEntitySkeleton");
+
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("skeleton.client.MixinEntityLivingBase");
+				mixins.add("skeleton.client.MixinModelSkeleton");
+			}
+		}
+
+		if (ConfigMixins.modernZombieBehavior) {
+			mixins.add("zombie.MixinEntityZombie");
 		}
 
 		if (ConfigMixins.floorCeilingButtons) {
@@ -228,11 +238,22 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("uninflammableitem.MixinEntityItem");
 		}
         
-        if (ConfigMixins.enableJumpClimbing)
-        {
-            mixins.add("isLadderFix.MixinEntityLivingBase");
-        }
+    if (ConfigMixins.enableJumpClimbing)
+    {
+      mixins.add("isLadderFix.MixinEntityLivingBase");
+    }
         
+
+		if (ConfigMixins.adjustedLiquidPhysics) {
+			mixins.add("liquidphysics.MixinEntity");
+			mixins.add("liquidphysics.MixinWorld");
+			mixins.add("liquidphysics.MixinBlockLiquid");
+		}
+
+		if (ConfigMixins.liquidItemFloat) {
+			mixins.add("liquidphysics.MixinEntityItem");
+		}
+
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
 		}
@@ -265,6 +286,14 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			if (ConfigMixins.colorGrassBlockItemSides) {
 				mixins.add("coloredgrassitem.client.MixinRenderBlocks");
 			}
+
+			if(ConfigSounds.newBlockSounds) {
+				mixins.add("sounds.client.MixinBlockStepSounds");
+			}
+			
+			mixins.add("client.MixinRendererLivingEntity");
+			mixins.add("items.MixinRenderBiped");
+			mixins.add("items.MixinRenderPlayer");
 		}
 
 		if (ConfigMixins.thinPanes) {
@@ -277,6 +306,24 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.enablePlayersSleepingPecentageGamerule) {
 			mixins.add("playerssleepingpercentage.MixinWorldServer");
 		}
+
+		if (ConfigEntities.enableFoxes) {
+			mixins.add("foxes.MixinEntityLivingBase");
+			mixins.add("foxes.MixinEntityWolf");
+		}
+
+		if (ConfigEntities.enableGoats && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("goats.client.MixinItemRenderer");
+			mixins.add("goats.client.MixinModelBiped");
+		}
+
+		mixins.add("items.MixinItemSkull");
+		if (side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("items.MixinItemSkullClient");
+		}
+		mixins.add("blocks.MixinTileEntitySkull");
+
+		mixins.add("deepslateores.MixinChunk");
 
 		return mixins;
 	}

@@ -10,6 +10,7 @@ public enum ModsList {
 	AETHER_LEGACY("aether_legacy"),
 	WAILA("Waila"),
 	THAUMCRAFT("Thaumcraft"),
+	FORBIDDEN_MAGIC("ForbiddenMagic"),
 	BLUEPOWER("bluepower"),
 	PROJECT_RED_EXPLORATION("ProjRed|Exploration"),
 	NETHERITEPLUS("netheriteplus"),
@@ -38,8 +39,11 @@ public enum ModsList {
 	BIG_REACTORS("BigReactors"),
 	FISKS_SUPERHEROES("fiskheroes"),
 	SIMPLEORES("simpleores"),
+	NETHERORES("NetherOres"),
 	DRAGON_QUEST("DQMIIINext"),
 	LOTR("lotr"),
+  BATTLEGEAR_2("battlegear2"),
+	ENDER_IO("EnderIO"),
 
 	NOTFINE("notfine"),
 	NOT_ENOUGH_IDS("neid"),
@@ -53,8 +57,7 @@ public enum ModsList {
 
 	RPLE("rple"),
 
-	GTNH("dreamcraft"),
-	;
+	GTNH("dreamcraft");
 
 	private final String modID;
 	private Boolean isLoaded;

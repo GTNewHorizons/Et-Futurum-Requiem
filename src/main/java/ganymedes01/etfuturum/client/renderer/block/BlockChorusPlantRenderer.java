@@ -3,18 +3,18 @@ package ganymedes01.etfuturum.client.renderer.block;
 import com.gtnewhorizons.angelica.api.ThreadSafeISBRH;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockChorusPlant;
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.util.Random;
 
 @ThreadSafeISBRH(perThread = false)
 public class BlockChorusPlantRenderer extends BlockChorusFlowerRenderer {
 
-	private final Random rand = new RandomXoshiro256StarStar();
+	private final Random rand = new FastRandom();
 
 	public BlockChorusPlantRenderer(int modelID) {
 		super(modelID);

@@ -1,75 +1,79 @@
 package ganymedes01.etfuturum.api;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.ItemStackSet;
 import ganymedes01.etfuturum.core.utils.Logger;
-import ganymedes01.etfuturum.recipes.ModRecipes;
 import net.minecraft.block.Block;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
+import roadhog360.hogutils.api.blocksanditems.utils.base.ObjMetaPair;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
 import java.util.List;
 
+@Deprecated
 public class EnchantingFuelRegistry {
 
-	private static final ItemStackSet FUEL_REGISTRY = new ItemStackSet();
-
-	static {
-		FUEL_REGISTRY.add(new ItemStack(Items.dye, 1, 4));
-	}
-
+	@Deprecated
 	public static void registerFuel(Object itemObj) {
-		if (ModRecipes.validateItems(itemObj)) {
-			if (itemObj instanceof ItemStack) {
-				FUEL_REGISTRY.add(((ItemStack) itemObj).copy());
-			} else if (itemObj instanceof String) {
-				for (ItemStack oreStack : OreDictionary.getOres((String) itemObj)) {
-					FUEL_REGISTRY.add(oreStack.copy());
-				}
-			} else if (itemObj instanceof Item) {
-				FUEL_REGISTRY.add(new ItemStack((Item) itemObj, 1, OreDictionary.WILDCARD_VALUE));
-			} else if (itemObj instanceof Block && Item.getItemFromBlock((Block) itemObj) != null) {
-				FUEL_REGISTRY.add(new ItemStack(Item.getItemFromBlock((Block) itemObj), 1, OreDictionary.WILDCARD_VALUE));
-			} else {
-				throw new IllegalArgumentException("Tried to add " + itemObj + " as an enchanting fuel, which is not an Itemstack, item, block or string.");
+		if (itemObj instanceof ItemStack stack) {
+			ItemTags.addTags(stack.getItem(), stack.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel");
+		} else if (itemObj instanceof String) {
+			for (ItemStack oreStack : OreDictionary.getOres((String) itemObj)) {
+				ItemTags.addTags(oreStack.getItem(), oreStack.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel");
 			}
+		} else if (itemObj instanceof Item item) {
+			ItemTags.addTags(item, Tags.MOD_ID + ":enchantment_fuel");
+		} else if (itemObj instanceof Block block && Item.getItemFromBlock(block) != null) {
+			ItemTags.addTags(Item.getItemFromBlock(block), Tags.MOD_ID + ":enchantment_fuel");
+		} else {
+			throw new IllegalArgumentException("Tried to add " + itemObj + " as an enchanting fuel, which is not an Itemstack, item, block or string.");
 		}
 	}
 
+	@Deprecated
 	public static void registerFuel(List<Object> list, int count) {
 		list.forEach(EnchantingFuelRegistry::registerFuel);
 	}
 
+	@Deprecated
 	public static void remove(String fuelOreDict) {
 		for (ItemStack stack : OreDictionary.getOres(fuelOreDict)) {
 			remove(stack);
 		}
 	}
 
+	@Deprecated
 	public static void remove(ItemStack fuel) {
-		FUEL_REGISTRY.remove(fuel);
+		ItemTags.removeTags(fuel.getItem(), fuel.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel");
 	}
 
+	@Deprecated
 	public static boolean isFuel(String fuelOreDict) {
 		for (ItemStack stack : OreDictionary.getOres(fuelOreDict)) {
-			if (isFuel(stack)) return true;
+			if (ItemTags.hasTag(stack.getItem(), stack.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel")) return true;
 		}
 		return false;
 	}
 
+	@Deprecated
 	public static boolean isFuel(ItemStack fuel) {
-		return FUEL_REGISTRY.isEmpty() || FUEL_REGISTRY.contains(fuel);
+		return ItemTags.hasTag(fuel.getItem(), fuel.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel");
 	}
 
+	@Deprecated
 	public static ItemStackSet getFuels() {
-		return FUEL_REGISTRY;
+		ItemStackSet set = new ItemStackSet();
+		ItemTags.getInTag(Tags.MOD_ID + ":enchantment_fuel").stream().map(ObjMetaPair::newItemStack).forEach(set::add);
+		return set;
 	}
 
 	/**
-	 * Print all entries in composting registry. Used for debugging purposes.
+	 * Print all entries in enchanting fuel registry. Used for debugging purposes.
 	 */
+	@Deprecated
 	public void printFuels() {
-		getFuels().forEach((key, value) -> Logger.info("Enchanting fuel entry: " + Item.itemRegistry.getNameForObject(key.getItem()) + " Meta: " + (key.getItemDamage() == OreDictionary.WILDCARD_VALUE ? "any" : key.getItemDamage())));
+		getFuels().forEach((key, value) -> Logger.info("Enchanting fuel entry: " + key.getItem().delegate.name() + " Meta: " + (key.getItemDamage() == OreDictionary.WILDCARD_VALUE ? "any" : key.getItemDamage())));
 	}
 }

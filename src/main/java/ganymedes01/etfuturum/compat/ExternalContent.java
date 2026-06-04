@@ -49,6 +49,28 @@ public class ExternalContent {
 
 		IRON_CHEST("IronChest", "BlockIronChest"),
 
+		UTD_WHITE_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_white"),
+		UTD_ORANGE_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_orange"),
+		UTD_MAGENTA_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_magenta"),
+		UTD_LIGHT_BLUE_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_light_blue"),
+		UTD_YELLOW_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_yellow"),
+		UTD_LIME_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_lime"),
+		UTD_PINK_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_PINK"),
+		UTD_GRAY_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_gray"),
+		UTD_LIGHT_GRAY_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_light_gray"),
+		UTD_CYAN_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_cyan"),
+		UTD_PURPLE_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_purple"),
+		UTD_BLUE_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_blue"),
+		UTD_BROWN_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_brown"),
+		UTD_GREEN_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_green"),
+		UTD_RED_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_red"),
+		UTD_BLACK_GLAZED_TERRACOTTA("uptodate", "glazed_terracotta_black"),
+
+		VN_GLAZED_TERRACOTTA_1("VillageNames", "glazedTerracotta"),
+		VN_GLAZED_TERRACOTTA_2("VillageNames", "glazedTerracotta2"),
+		VN_GLAZED_TERRACOTTA_3("VillageNames", "glazedTerracotta3"),
+		VN_GLAZED_TERRACOTTA_4("VillageNames", "glazedTerracotta4"),
+
 		ARS_MAGICA_2_ORE("arsmagica2", "vinteumOre"),
 
 		THAUMCRAFT_ORE("Thaumcraft", "blockCustomOre"),
@@ -155,10 +177,10 @@ public class ExternalContent {
 		;
 
 		private Item item;
-		private final Supplier<Item> blockSupplier;
+		private final Supplier<Item> itemSupplier;
 
-		Items(Supplier<Item> blockSupplier) {
-			this.blockSupplier = blockSupplier;
+		Items(Supplier<Item> itemSupplier) {
+			this.itemSupplier = itemSupplier;
 		}
 
 		Items(String modID, String itemID) {
@@ -167,7 +189,7 @@ public class ExternalContent {
 
 		public Item get() {
 			if (item == null) {
-				item = blockSupplier.get();
+				item = itemSupplier.get();
 			}
 			return item;
 		}

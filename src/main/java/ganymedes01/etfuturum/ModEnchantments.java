@@ -1,6 +1,9 @@
 package ganymedes01.etfuturum;
 
+import baubles.common.lib.PlayerHandler;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
+import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.enchantment.FrostWalker;
 import ganymedes01.etfuturum.enchantment.Mending;
 import ganymedes01.etfuturum.enchantment.SwiftSneak;
@@ -12,10 +15,13 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -83,15 +89,23 @@ public class ModEnchantments {
 		if (!ConfigEnchantsPotions.enableMending)
 			return;
 
-		ItemStack[] stacks = new ItemStack[5];
-		stacks[0] = player.getCurrentEquippedItem(); // held
-		stacks[1] = player.getEquipmentInSlot(1); // boots
-		stacks[2] = player.getEquipmentInSlot(2); // leggings
-		stacks[3] = player.getEquipmentInSlot(3); // chestplate
-		stacks[4] = player.getEquipmentInSlot(4); // helmet
+		ArrayList<ItemStack> stacks = new ArrayList<>();
+		stacks.add(player.getCurrentEquippedItem()); // held
+		stacks.add(player.getEquipmentInSlot(1)); // boots
+		stacks.add(player.getEquipmentInSlot(2)); // leggings
+		stacks.add(player.getEquipmentInSlot(3)); // chestplate
+		stacks.add(player.getEquipmentInSlot(4)); // helmet
+		if (ModsList.BAUBLES.isLoaded() && ConfigModCompat.baublesMending) {
+			ItemStack[] baubles = PlayerHandler.getPlayerBaubles(player).stackList;
+			if (baubles != null) {
+				Collections.addAll(stacks, baubles);
+			}
+		}
 
 		for (ItemStack stack : stacks)
 			if (stack != null && stack.getItemDamage() > 0 && EnchantmentHelper.getEnchantmentLevel(mending.effectId, stack) > 0) {
+				Item item = stack.getItem();
+				if (item == null || !item.isRepairable()) continue;
 				int xp = orb.xpValue;
 				while (xp > 0 && stack.getItemDamage() > 0) {
 					stack.setItemDamage(stack.getItemDamage() - 2);

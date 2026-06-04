@@ -3,8 +3,8 @@ package ganymedes01.etfuturum.client.skins;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.api.client.ISkinDownloadCallback;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -41,7 +41,7 @@ public class NewSkinManager extends SkinManager {
 
 		final boolean isSpecialCallBack = callBack instanceof ISkinDownloadCallback;
 		final ResourceLocation resLocationOld = new ResourceLocation("skins/" + texture.getHash());
-		final ResourceLocation resLocation = new ResourceLocation(Reference.MOD_ID, resLocationOld.getResourcePath());
+		final ResourceLocation resLocation = new ResourceLocation(Tags.MOD_ID, resLocationOld.getResourcePath());
 		ITextureObject itextureobject = textureManager.getTexture(resLocation);
 
 		if (itextureobject != null) {

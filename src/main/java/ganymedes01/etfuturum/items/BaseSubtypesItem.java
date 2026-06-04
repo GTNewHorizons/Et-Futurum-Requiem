@@ -2,7 +2,7 @@ package ganymedes01.etfuturum.items;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -55,6 +55,6 @@ public class BaseSubtypesItem extends BaseItem {
 
 	@Override
 	public String getNameDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 }

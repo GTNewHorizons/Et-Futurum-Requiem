@@ -1,8 +1,7 @@
 package ganymedes01.etfuturum.inventory;
 
 import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.api.EnchantingFuelRegistry;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.storage.EtFuturumPlayer;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -13,6 +12,7 @@ import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
 import java.util.List;
 import java.util.Random;
@@ -60,7 +60,7 @@ public class ContainerEnchantment extends Container {
 		enchantmentIds = new int[]{-1, -1, -1};
 		this.world = world;
 		enchantmentSeed = getEnchantSeed(inventory.player);
-		noFuel = EnchantingFuelRegistry.getFuels().isEmpty();
+		noFuel = ItemTags.getInTag(Tags.MOD_ID + ":enchantment_fuel").isEmpty();
 		addSlotToContainer(new Slot(tableInventory, 0, noFuel ? 25 : 15, 47) {
 
 			@Override
@@ -72,7 +72,7 @@ public class ContainerEnchantment extends Container {
 			addSlotToContainer(new Slot(tableInventory, 1, 35, 47) {
 				@Override
 				public boolean isItemValid(ItemStack stack) {
-					return EnchantingFuelRegistry.isFuel(stack);
+					return ItemTags.hasTag(stack.getItem(), stack.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel");
 				}
 			});
 		}
@@ -224,7 +224,7 @@ public class ContainerEnchantment extends Container {
 
 				if (var6 != null) {
 					chargeForEnchant(player, rand, var5);
-					world.playSoundEffect(posX + 0.5F, posY + 0.5F, posZ + 0.5F, Reference.MCAssetVer + ":block.enchantment_table.use", 1.0F, world.rand.nextFloat() * 0.1F + 0.9F);
+					world.playSoundEffect(posX + 0.5F, posY + 0.5F, posZ + 0.5F, Tags.MC_ASSET_VER + ":block.enchantment_table.use", 1.0F, world.rand.nextFloat() * 0.1F + 0.9F);
 
 					if (var7)
 						slot0.func_150996_a(Items.enchanted_book); // setItem
@@ -309,7 +309,7 @@ public class ContainerEnchantment extends Container {
 			} else if (!noFuel && index == 1) {
 				if (!mergeItemStack(var5, 2, 38, true))
 					return null;
-			} else if (!noFuel && EnchantingFuelRegistry.isFuel(var5)) {
+			} else if (!noFuel && ItemTags.hasTag(var5.getItem(), var5.getItemDamage(), Tags.MOD_ID + ":enchantment_fuel")) {
 				if (!mergeItemStack(var5, 1, 2, true))
 					return null;
 			} else {

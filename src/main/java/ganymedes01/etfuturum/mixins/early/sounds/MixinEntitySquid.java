@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.world.World;
@@ -18,17 +18,17 @@ public class MixinEntitySquid extends EntityWaterMob {
 
 	@Inject(method = "getHurtSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewHurtSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.squid.hurt");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.squid.hurt");
 	}
 
 	@Inject(method = "getDeathSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewDeathSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.squid.death");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.squid.death");
 	}
 
 	@Inject(method = "getLivingSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewLivingSound(CallbackInfoReturnable<String> cir) {
-		cir.setReturnValue(Reference.MCAssetVer + ":entity.squid.ambient");
+		cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.squid.ambient");
 	}
 
 }

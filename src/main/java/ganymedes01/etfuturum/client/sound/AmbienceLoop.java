@@ -1,19 +1,19 @@
 package ganymedes01.etfuturum.client.sound;
 
 import cpw.mods.fml.client.FMLClientHandler;
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.util.Random;
 
 public class AmbienceLoop extends MovingSound {
 
-	private final Random rand = new RandomXoshiro256StarStar();
+	private final Random rand = new FastRandom();
 	private final String name;
 
 	public boolean isStopping;
@@ -29,7 +29,7 @@ public class AmbienceLoop extends MovingSound {
 	private final Minecraft mc = FMLClientHandler.instance().getClient();
 
 	public AmbienceLoop(String loc, int minAmbienceDelay, int maxAmbienceDelay) {
-		super(new ResourceLocation(Reference.MCAssetVer + ":ambient." + loc + ".loop"));
+		super(new ResourceLocation(Tags.MC_ASSET_VER + ":ambient." + loc + ".loop"));
 		repeat = true;
 		field_147666_i = ISound.AttenuationType.NONE; // attenuationType
 		this.field_147665_h = 0; // repeatDelay
@@ -98,7 +98,7 @@ public class AmbienceLoop extends MovingSound {
 		if (volume == 1) {
 			if (hasAdditions && ambienceDelay-- <= 0) {
 				ambienceDelay = MathHelper.getRandomIntegerInRange(rand, minAmbienceDelay, maxAmbienceDelay);
-				mc.getSoundHandler().playSound(new AmbienceAdditionSound(Reference.MCAssetVer + ":ambient." + name + ".additions"));
+				mc.getSoundHandler().playSound(new AmbienceAdditionSound(Tags.MC_ASSET_VER + ":ambient." + name + ".additions"));
 			}
 		}
 	}

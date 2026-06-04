@@ -1,94 +1,83 @@
 package ganymedes01.etfuturum.api;
 
-import com.google.common.collect.Lists;
-import ganymedes01.etfuturum.ModBlocks;
-import ganymedes01.etfuturum.api.mappings.RegistryMapping;
-import ganymedes01.etfuturum.blocks.BlockBerryBush;
-import ganymedes01.etfuturum.blocks.BlockChorusFlower;
-import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
-import ganymedes01.etfuturum.recipes.ModRecipes;
-import net.minecraft.block.*;
-import net.minecraft.init.Blocks;
+import ganymedes01.etfuturum.api.crops.IBeeGrowable;
+import ganymedes01.etfuturum.core.utils.Logger;
+import net.minecraft.block.Block;
+import net.minecraft.block.IGrowable;
+import net.minecraft.item.Item;
 import net.minecraftforge.oredict.OreDictionary;
+import org.jetbrains.annotations.ApiStatus;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
-import java.util.List;
-
+/// This class is deprecated and its functions are all now stubs that redirect to the new tag system.
+@Deprecated
 public class BeePlantRegistry {
-
-	private static final List<RegistryMapping<Block>> BEE_FLOWERS = Lists.newArrayList();
-	private static final List<Block> BEE_CROPS = Lists.newArrayList();
-
-	/**
-	 * When adding a BlockDoublePlant, note that any meta above 7 will be rejected. Bees are supposed to go to the top half of the flower, but the bottom metas are unique.
-	 * Provide the bottom meta; when bees search for a flower in the world they'll go to the top half of your BlockDoublePlant. No need to add the top half metas manually.
-	 *
-	 * @param block
-	 */
+	/// Deprecated; Use HogUtils tagging
+	///
+	/// Tags: `minecraft:bee_food` (item) and `minecraft:bee_attractive` (block)
+	@Deprecated
 	public static void addFlower(Block block, int meta) {
-		if (block instanceof BlockDoublePlant && BlockDoublePlant.func_149887_c(meta) && meta != OreDictionary.WILDCARD_VALUE) {
-			throw new IllegalArgumentException("BlockDoublePlant can't have meta using bit 8, it is for the top half. Bees will go to the top half if the bottom meta is valid.");
-		}
-		if (ModRecipes.validateItems(block)) {
-			BEE_FLOWERS.add(new RegistryMapping<>(block, meta));
+		BlockTags.addTags(block, meta, "minecraft:bee_attractive");
+		Item item = Item.getItemFromBlock(block);
+		if(item != null) {
+			ItemTags.addTags(item, meta, "minecraft:bee_food");
 		}
 	}
 
+	/// Deprecated; Use HogUtils tagging
+	///
+	/// Tags: `minecraft:bee_growables` (block)
+	@Deprecated
 	public static void addCrop(Block block) {
-		if (!(block instanceof IGrowable)) {
-			throw new IllegalArgumentException("Bee crops must be instance of IGrowable!");
+		if (!(block instanceof IGrowable) && !(block instanceof IBeeGrowable)) {
+			Logger.warn("Bee crops can only be instance of IGrowable or IBeeGrowable; this entry will do nothing!");
 		}
-		BEE_CROPS.add(block);
+		BlockTags.addTags(block, OreDictionary.WILDCARD_VALUE, "minecraft:bee_growables");
 	}
 
+	/// Deprecated; Use HogUtils tagging
+	///
+	/// Tags: `minecraft:bee_food` (item) and `minecraft:bee_attractive` (block)
+	@Deprecated
 	public static void removeFlower(Block block, int meta) {
-		BEE_FLOWERS.remove(RegistryMapping.getKeyFor(block, meta));
-	}
-
-	public static void removeCrop(Block block) {
-		BEE_CROPS.remove(block);
-	}
-
-	public static boolean isFlower(Block block, int meta) {
-		return BEE_FLOWERS.contains(RegistryMapping.getKeyFor(block, meta));
-	}
-
-	public static boolean isCrop(Block block) {
-		return BEE_CROPS.contains(block);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void init() {
-		if (ConfigEntities.enableBees) {
-			for (Block block : (Iterable<Block>) Block.blockRegistry) {
-				if (block instanceof BlockFlower || block instanceof BlockChorusFlower) {
-					addFlower(block, OreDictionary.WILDCARD_VALUE);
-				}
-				if (block instanceof BlockCrops || block instanceof BlockStem || block instanceof BlockBerryBush) {
-					addCrop(block);
-					//TODO: Add cave vines as a pollinatable crop, when they get added
-				}
-			}
-			addFlower(Blocks.double_plant, 0);
-			addFlower(Blocks.double_plant, 1);
-			addFlower(Blocks.double_plant, 4);
-			addFlower(Blocks.double_plant, 5);
-
-			addFlower(ModBlocks.AZALEA.get(), 1);
-			addFlower(ModBlocks.AZALEA.get(), 9);
-			addFlower(ModBlocks.AZALEA_LEAVES.get(), 1);
-			addFlower(ModBlocks.AZALEA_LEAVES.get(), 5);
-			addFlower(ModBlocks.AZALEA_LEAVES.get(), 9);
-			addFlower(ModBlocks.AZALEA_LEAVES.get(), 13);
-
-			addFlower(ModBlocks.SAPLING.get(), 0); //Mangrove propagule
-			addFlower(ModBlocks.SAPLING.get(), 8);
-
-			addFlower(ModBlocks.LEAVES.get(), 1); //Cherry leaves
-			addFlower(ModBlocks.LEAVES.get(), 5);
-			addFlower(ModBlocks.LEAVES.get(), 9);
-			addFlower(ModBlocks.LEAVES.get(), 13);
-
-			//TODO: This should have pink petals, and spore blossoms as flowers, when added
+		BlockTags.removeTags(block, meta, "minecraft:bee_attractive");
+		Item item = Item.getItemFromBlock(block);
+		if(item != null) {
+			ItemTags.removeTags(item, meta, "minecraft:bee_food");
 		}
+	}
+
+	/// Deprecated; Use HogUtils tagging
+	///
+	/// Tags: `minecraft:bee_growables` (block)
+	@Deprecated
+	public static void removeCrop(Block block) {
+		BlockTags.removeTags(block, OreDictionary.WILDCARD_VALUE, "minecraft:bee_growables");
+	}
+
+	/// Deprecated; Use HogUtils tagging
+	/// Returns `TRUE` if this is either a bee food OR bee flower.
+	/// This is because the previous registry did not have separate lists for bee breedables, and pollinateable flowers.
+	///
+	/// Tags: `minecraft:bee_food` (item) and `minecraft:bee_attractive` (block)
+	@Deprecated
+	public static boolean isFlower(Block block, int meta) {
+		Item item = Item.getItemFromBlock(block);
+		if(item != null && ItemTags.hasTag(item, meta, "minecraft:bee_food")) {
+			return true;
+		}
+		return BlockTags.hasTag(block, meta, "minecraft:bee_attractive");
+	}
+
+	/// Deprecated; Use HogUtils tagging
+	@Deprecated
+	public static boolean isCrop(Block block) {
+		return BlockTags.hasTag(block, OreDictionary.WILDCARD_VALUE, "minecraft:bee_growables");
+	}
+
+	@Deprecated
+	@ApiStatus.Internal
+	public static void init() {
 	}
 }

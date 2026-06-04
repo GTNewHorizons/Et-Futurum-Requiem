@@ -3,15 +3,14 @@ package ganymedes01.etfuturum.items.equipment;
 import baubles.api.BaubleType;
 import baubles.api.expanded.BaubleItemHelper;
 import baubles.api.expanded.IBaubleExpanded;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
-import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.BaseItem;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.resources.I18n;
@@ -25,6 +24,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+@Optional.Interface(iface = "baubles.api.expanded.IBaubleExpanded", modid = "Baubles|Expanded")
 public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 
 	private IIcon broken;
@@ -56,7 +56,7 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 		if (ModsList.BAUBLES_EXPANDED.isLoaded() && ConfigModCompat.elytraBaublesExpandedCompat != 0) {
 			itemStackIn = BaubleItemHelper.onBaubleRightClick(itemStackIn, worldIn, playerIn);
 		}
-		if ((!ModsList.BAUBLES_EXPANDED.isLoaded() || ConfigModCompat.elytraBaublesExpandedCompat != 2) && itemStackIn.stackSize > 0 && getElytra(playerIn) == null) {
+		if ((!ModsList.BAUBLES_EXPANDED.isLoaded() || ConfigModCompat.elytraBaublesExpandedCompat != 2) && itemStackIn.stackSize > 0) {
 			ItemStack itemStack = playerIn.getEquipmentInSlot(3);
 			if (itemStack == null) {
 				playerIn.setCurrentItemOrArmor(3, itemStackIn.copy());
@@ -133,9 +133,6 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 
 	@Override
 	public void onEquipped(ItemStack itemstack, EntityLivingBase player) {
-		if (ConfigSounds.armorEquip) {
-			player.worldObj.playSoundAtEntity(player, Reference.MCAssetVer + ":item.armor.equip_elytra", 1, 1);
-		}
 	}
 
 	@Override

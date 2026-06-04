@@ -5,10 +5,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.EtFuturumLootTables;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.api.CompostingRegistry;
 import ganymedes01.etfuturum.api.inventory.FakeTileEntityProvider;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.tileentities.fake.TileEntityFakeInventory;
 import net.minecraft.block.Block;
@@ -103,12 +103,12 @@ public class BlockComposter extends Block implements FakeTileEntityProvider {
 			int fillAmount = (int) (chance * .01F) + (world.rand.nextInt(100) < chance % 100 ? 1 : 0);
 			if (fillAmount > 0) {
 				world.setBlockMetadataWithNotify(x, y, z, Math.min(meta + fillAmount, FULL_META), 3);
-				world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.composter.fill_success", 1, 1);
+				world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.composter.fill_success", 1, 1);
 				if (fillAmount + meta >= FULL_META) {
 					world.scheduleBlockUpdate(x, y, z, ModBlocks.COMPOSTER.get(), world.rand.nextInt(10) + 10);
 				}
 			} else {
-				world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.composter.fill", 1, 1);
+				world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.composter.fill", 1, 1);
 			}
 			return true;
 		}
@@ -141,7 +141,7 @@ public class BlockComposter extends Block implements FakeTileEntityProvider {
 				item.motionZ = world.rand.nextDouble() * 0.5D;
 				world.spawnEntityInWorld(item);
 			}
-			world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.composter.empty", 1, 1, true);
+			world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.composter.empty", 1, 1, true);
 			world.setBlockMetadataWithNotify(x, y, z, 0, 3);
 			return true;
 		}
@@ -151,7 +151,7 @@ public class BlockComposter extends Block implements FakeTileEntityProvider {
 	@Override
 	public void updateTick(World world, int x, int y, int z, Random rand) {
 		if (world.getBlockMetadata(x, y, z) == FULL_META) {
-			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.composter.ready", 1, 1);
+			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.composter.ready", 1, 1);
 			world.setBlockMetadataWithNotify(x, y, z, HARVESTABLE_META, 3);
 		}
 	}
@@ -272,7 +272,7 @@ public class BlockComposter extends Block implements FakeTileEntityProvider {
 		@Override
 		public boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, int p_102008_3_) {
 			if (p_102008_3_ == 0) {
-				world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.composter.empty", 1, 1, true);
+				world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Tags.MC_ASSET_VER + ":block.composter.empty", 1, 1, true);
 				world.setBlockMetadataWithNotify(x, y, z, 0, 3);
 				return true;
 			}

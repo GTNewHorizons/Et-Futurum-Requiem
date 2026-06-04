@@ -1,16 +1,16 @@
 package ganymedes01.etfuturum.client.particle;
 
-import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import roadhog360.hogutils.api.utils.FastRandom;
 
 import java.util.Random;
 
 public class CustomParticles {
 
-	protected static Random rand = new RandomXoshiro256StarStar();
+	protected static Random rand = new FastRandom();
 
 	public static EntityFX spawnInvisibleBlockParticle(World world, double x, double y, double z) {
 		EntityFX particle = new InnerBlockParticleFX(world, x, y, z);

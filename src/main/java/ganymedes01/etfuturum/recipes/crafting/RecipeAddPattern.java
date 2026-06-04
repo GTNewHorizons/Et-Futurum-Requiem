@@ -7,7 +7,6 @@ import ganymedes01.etfuturum.lib.EnumColor;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner.EnumBannerPattern;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,7 +22,7 @@ public class RecipeAddPattern implements IRecipe {
 		for (int i = 0; i < grid.getSizeInventory(); i++) {
 			ItemStack slot = grid.getStackInSlot(i);
 
-			if (slot != null && slot.getItem() == Item.getItemFromBlock(ModBlocks.BANNER.get())) {
+			if (slot != null && slot.getItem() == ModBlocks.BANNER.getItem()) {
 				if (flag)
 					return false;
 				if (TileEntityBanner.getPatterns(slot) >= 6)
@@ -44,7 +43,7 @@ public class RecipeAddPattern implements IRecipe {
 		for (int i = 0; i < grid.getSizeInventory(); i++) {
 			ItemStack slot = grid.getStackInSlot(i);
 
-			if (slot != null && slot.getItem() == Item.getItemFromBlock(ModBlocks.BANNER.get())) {
+			if (slot != null && slot.getItem() == ModBlocks.BANNER.getItem()) {
 				banner = slot.copy();
 				banner.stackSize = 1;
 				break;
@@ -121,7 +120,7 @@ public class RecipeAddPattern implements IRecipe {
 
 					for (int i = 0; i < grid.getSizeInventory() && flag; i++) {
 						ItemStack slot = grid.getStackInSlot(i);
-						if (slot != null && slot.getItem() != Item.getItemFromBlock(ModBlocks.BANNER.get()))
+						if (slot != null && slot.getItem() != ModBlocks.BANNER.getItem())
 							if (isDye(slot)) {
 								if (flag2) {
 									flag = false;
@@ -150,7 +149,7 @@ public class RecipeAddPattern implements IRecipe {
 						int i = l / 3;
 						int j1 = l % 3;
 						ItemStack slot = grid.getStackInSlot(l);
-						if (slot != null && slot.getItem() != Item.getItemFromBlock(ModBlocks.BANNER.get())) {
+						if (slot != null && slot.getItem() != ModBlocks.BANNER.getItem()) {
 							if (!isDye(slot)) {
 								flag = false;
 								break;

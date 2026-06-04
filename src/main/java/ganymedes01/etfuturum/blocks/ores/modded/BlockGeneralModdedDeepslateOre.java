@@ -1,13 +1,12 @@
 package ganymedes01.etfuturum.blocks.ores.modded;
 
 import com.google.common.collect.Lists;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BaseSubtypesBlock;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
-import ganymedes01.etfuturum.core.utils.DummyWorld;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -17,6 +16,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.StringUtils;
+import roadhog360.hogutils.api.world.DummyWorld;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class BlockGeneralModdedDeepslateOre extends BaseSubtypesBlock implements
 
 	@Override
 	public String getTextureDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 
 	@Override
@@ -95,6 +95,6 @@ public class BlockGeneralModdedDeepslateOre extends BaseSubtypesBlock implements
 				resistances[i] = Blocks.iron_ore.blockResistance;
 			}
 		}
-		world.clearBlocksCache();
+		world.clearFakeData();
 	}
 }

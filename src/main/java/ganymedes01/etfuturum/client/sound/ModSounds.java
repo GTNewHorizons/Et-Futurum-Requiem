@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.client.sound;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.block.Block.SoundType;
 
@@ -40,18 +40,18 @@ public class ModSounds {
 
 		@Override
 		public String func_150496_b() {
-			return Reference.MCAssetVer + ":item." + soundName + ".plant";
+			return Tags.MC_ASSET_VER + ":item." + soundName + ".plant";
 		}
 	}.setDisabledSound(Block.soundTypeGrass);
 	public static final SoundType soundCropWarts = new CustomSound("nether_wart") {
 		@Override
 		public String getStepResourcePath() {
-			return Reference.MCAssetVer + ":block.fungus.step";
+			return Tags.MC_ASSET_VER + ":block.fungus.step";
 		}
 
 		@Override
 		public String func_150496_b() {
-			return Reference.MCAssetVer + ":item." + soundName + ".plant";
+			return Tags.MC_ASSET_VER + ":item." + soundName + ".plant";
 		}
 	}.setDisabledSound(Block.soundTypeStone);
 	public static final SoundType soundCopper = new CustomSound("copper").setDisabledSound(Block.soundTypeMetal);
@@ -140,7 +140,7 @@ public class ModSounds {
 	public static final SoundType soundPainting = new CustomSound("painting") {
 		@Override
 		public String getBreakSound() {
-			return Reference.MCAssetVer + ":entity.painting.break";
+			return Tags.MC_ASSET_VER + ":entity.painting.break";
 		}
 
 		@Override
@@ -150,7 +150,7 @@ public class ModSounds {
 
 		@Override
 		public String func_150496_b() {
-			return Reference.MCAssetVer + ":entity.painting.place";
+			return Tags.MC_ASSET_VER + ":entity.painting.place";
 		}
 	}.setDisabledSound(Block.soundTypeWood);
 
@@ -180,12 +180,12 @@ public class ModSounds {
 
 		@Override
 		public String getBreakSound() {
-			return Reference.MCAssetVer + ":block." + soundName + ".break";
+			return Tags.MC_ASSET_VER + ":block." + soundName + ".break";
 		}
 
 		@Override
 		public String getStepResourcePath() {
-			return Reference.MCAssetVer + ":block." + soundName + ".step";
+			return Tags.MC_ASSET_VER + ":block." + soundName + ".step";
 		}
 
 		/**
@@ -193,7 +193,7 @@ public class ModSounds {
 		 */
 		@Override
 		public String func_150496_b() {
-			return placeSound ? Reference.MCAssetVer + ":block." + soundName + ".place" : this.getBreakSound();
+			return placeSound ? Tags.MC_ASSET_VER + ":block." + soundName + ".place" : this.getBreakSound();
 		}
 
 		public SoundType getDisabledSound() {

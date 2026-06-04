@@ -1,9 +1,9 @@
 package ganymedes01.etfuturum;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent;
@@ -14,9 +14,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import ganymedes01.etfuturum.api.*;
-import ganymedes01.etfuturum.api.mappings.BasicMultiBlockSound;
-import ganymedes01.etfuturum.blocks.BlockSculk;
-import ganymedes01.etfuturum.blocks.BlockSculkCatalyst;
 import ganymedes01.etfuturum.client.BuiltInResourcePack;
 import ganymedes01.etfuturum.client.DynamicSoundsResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
@@ -25,6 +22,7 @@ import ganymedes01.etfuturum.command.CommandFill;
 import ganymedes01.etfuturum.compat.*;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 import ganymedes01.etfuturum.configuration.configs.*;
+import ganymedes01.etfuturum.core.handlers.RegistryIterateEventHandler;
 import ganymedes01.etfuturum.core.handlers.WorldEventHandler;
 import ganymedes01.etfuturum.core.proxy.CommonProxy;
 import ganymedes01.etfuturum.core.utils.IInitAction;
@@ -35,11 +33,15 @@ import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.*;
 import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.recipes.ModRecipes;
+import ganymedes01.etfuturum.recipes.ModTagging;
 import ganymedes01.etfuturum.recipes.SmithingTableRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
+import ganymedes01.etfuturum.world.EtFuturumEarlyWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
+import ganymedes01.etfuturum.world.end.gen.EndCityPieces;
+import ganymedes01.etfuturum.world.end.gen.MapGenEndCity;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 import ganymedes01.etfuturum.world.nether.dimension.DimensionProviderEFRNether;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -47,8 +49,8 @@ import makamys.mclib.core.MCLib;
 import makamys.mclib.core.MCLibModules;
 import makamys.mclib.ext.assetdirector.ADConfig;
 import makamys.mclib.ext.assetdirector.AssetDirectorAPI;
-import net.minecraft.block.*;
-import net.minecraft.block.Block.SoundType;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockTrapDoor;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -60,8 +62,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.WeightedRandomChestContent;
-import net.minecraft.world.World;
+import net.minecraft.world.gen.structure.MapGenStructureIO;
 import net.minecraftforge.common.ChestGenHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -69,9 +72,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @Mod(
-		modid = Reference.MOD_ID,
-		name = Reference.MOD_NAME,
-		version = Reference.VERSION_NUMBER,
+		modid = Tags.MOD_ID,
+		name = Tags.MOD_NAME,
+		version = Tags.VERSION,
 		dependencies = Reference.DEPENDENCIES
 //		guiFactory = Tags.MOD_GROUP + ".configuration.ConfigGuiFactory"
 )
@@ -86,7 +89,7 @@ public class EtFuturum {
 
 	public static SimpleNetworkWrapper networkWrapper;
 
-	public static CreativeTabs creativeTabItems = new CreativeTabs(Reference.MOD_ID + ".items") {
+	public static CreativeTabs creativeTabItems = new CreativeTabs(Tags.MOD_ID + ".items") {
 		@Override
 		public Item getTabIconItem() {
 			return  ModItems.RAW_ORE.isEnabled() ? ModItems.RAW_ORE.get()
@@ -113,7 +116,7 @@ public class EtFuturum {
 		}
 	};
 
-	public static CreativeTabs creativeTabBlocks = new CreativeTabs(Reference.MOD_ID + ".blocks") {
+	public static CreativeTabs creativeTabBlocks = new CreativeTabs(Tags.MOD_ID + ".blocks") {
 		@Override
 		public Item getTabIconItem() {
 			return ModBlocks.COPPER_BLOCK.isEnabled() ? ModBlocks.COPPER_BLOCK.getItem()
@@ -155,9 +158,10 @@ public class EtFuturum {
 	@EventHandler
 	public void onConstruction(FMLConstructionEvent event) {
 		if(Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			Logger.info(Reference.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
+			Logger.info(Tags.MOD_ID + " is in snapshot mode. Disabling update checker... Other features may also be different.");
 		}
 
+		ConfigBase.onConstructing();
 		MCLib.init();
 
 		ADConfig config = new ADConfig();
@@ -165,6 +169,11 @@ public class EtFuturum {
 		getSounds(config);
 
 		AssetDirectorAPI.register(config);
+
+		FMLCommonHandler.instance().bus().register(RegistryIterateEventHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(RegistryIterateEventHandler.INSTANCE);
+
+		ModTagging.registerEarlyHogTags();
 	}
 
 	static final String NETHER_FORTRESS = "netherFortress";
@@ -173,6 +182,9 @@ public class EtFuturum {
 	@EventHandler
 	@SuppressWarnings("unchecked")
 	public void preInit(FMLPreInitializationEvent event) {
+		if(ModsList.IRON_CHEST.isLoaded()) {
+			CompatIronChests.init();
+		}
 		try {
 			Field chestInfo = ChestGenHooks.class.getDeclaredField("chestInfo");
 			chestInfo.setAccessible(true);
@@ -186,6 +198,12 @@ public class EtFuturum {
 			e.printStackTrace();
 		}
 
+		ModBlocks.init();
+		ModItems.init();
+		ModEnchantments.init();
+		ModPotions.init();
+		SpectatorMode.init();
+
 		for (ModBlocks block : ModBlocks.values()) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).preInitAction();
@@ -196,12 +214,6 @@ public class EtFuturum {
 				((IInitAction) item.get()).preInitAction();
 			}
 		}
-
-		ModBlocks.init();
-		ModItems.init();
-		ModEnchantments.init();
-		ModPotions.init();
-		SpectatorMode.init();
 
 		if (event.getSide() == Side.CLIENT) {
 
@@ -218,13 +230,14 @@ public class EtFuturum {
 			NetherBiomeManager.init();
 		}
 
+		GameRegistry.registerWorldGenerator(EtFuturumEarlyWorldGenerator.INSTANCE, Integer.MIN_VALUE);
 		GameRegistry.registerWorldGenerator(EtFuturumWorldGenerator.INSTANCE, 0);
 		GameRegistry.registerWorldGenerator(EtFuturumLateWorldGenerator.INSTANCE, Integer.MAX_VALUE);
 
 		OceanMonument.makeMap();
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
-		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(Reference.MOD_ID);
+		networkWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MOD_ID);
 		networkWrapper.registerMessage(ArmourStandInteractHandler.class, ArmourStandInteractMessage.class, 0, Side.SERVER);
 		networkWrapper.registerMessage(BlackHeartParticlesHandler.class, BlackHeartParticlesMessage.class, 1, Side.CLIENT);
 		networkWrapper.registerMessage(WoodSignOpenHandler.class, WoodSignOpenMessage.class, 3, Side.CLIENT);
@@ -234,7 +247,7 @@ public class EtFuturum {
 		networkWrapper.registerMessage(AttackYawHandler.class, AttackYawMessage.class, 7, Side.CLIENT);
 
 		if (!Reference.SNAPSHOT_BUILD && !Reference.DEV_ENVIRONMENT) {
-			MCLibModules.updateCheckAPI.submitModTask(Reference.MOD_ID, Reference.VERSION_NUMBER, Reference.VERSION_URL);
+			MCLibModules.updateCheckAPI.submitModTask(Tags.MOD_ID, Tags.VERSION, Reference.VERSION_URL);
 		}
 
 		CompatMisc.runModHooksPreInit();
@@ -266,6 +279,8 @@ public class EtFuturum {
 		proxy.registerRenderers();
 
 		CompatMisc.runModHooksInit();
+
+		ConfigBase.init();
 	}
 
 	@EventHandler
@@ -308,6 +323,26 @@ public class EtFuturum {
 			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.OTHERSIDE_RECORD.get(), 0, 1, 1, 1));
 		}
 
+		if (ConfigBlocksItems.enablePrecipice) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.PRECIPICE_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.PRECIPICE_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enableCreatorMusicBox) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.CREATOR_MUSIC_BOX_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.CREATOR_MUSIC_BOX_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enableCreator) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.CREATOR_RECORD.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.CREATOR_RECORD.get(), 0, 1, 1, 1));
+		}
+
+		if (ConfigBlocksItems.enable5) {
+			ChestGenHooks.addItem(ChestGenHooks.STRONGHOLD_CORRIDOR, new WeightedRandomChestContent(ModItems.DISC_FRAGMENT_5.get(), 0, 1, 1, 1));
+			ChestGenHooks.addItem(ChestGenHooks.DUNGEON_CHEST, new WeightedRandomChestContent(ModItems.DISC_FRAGMENT_5.get(), 0, 1, 1, 1));
+		}
+
 		if (ConfigBlocksItems.enablePigstep) {
 			ChestGenHooks.addItem(NETHER_FORTRESS, new WeightedRandomChestContent(ModItems.PIGSTEP_RECORD.get(), 0, 1, 1, 5));
 
@@ -347,7 +382,10 @@ public class EtFuturum {
 		}
 
 		EtFuturumLootTables.init();
-
+		if (ConfigExperiments.enableEndCities) {
+			MapGenStructureIO.registerStructure(MapGenEndCity.Start.class, "EndCity");
+			MapGenStructureIO.func_143031_a(EndCityPieces.EndCityPiece.class, "ECP");
+		}
 		ModRecipes.init();
 		DeepslateOreRegistry.init();
 		StrippedLogRegistry.init();
@@ -376,8 +414,6 @@ public class EtFuturum {
 			}
 		}
 
-		ConfigBase.postInit();
-
 		EtFuturumWorldGenerator.INSTANCE.postInit();
 		WorldEventHandler.INSTANCE.postInit();
 
@@ -405,32 +441,6 @@ public class EtFuturum {
 			Blocks.bed.setStepSound(Block.soundTypeWood);
 		}
 
-		//Block registry iterator
-		for (Block block : (Iterable<Block>) Block.blockRegistry) {
-			if (ConfigFunctions.enableHoeMining) {
-				if (block instanceof BlockLeaves || block instanceof BlockHay || block instanceof BlockSponge || block instanceof BlockNetherWart
-						|| block instanceof BlockSculk || block instanceof BlockSculkCatalyst) {
-					HoeRegistry.addToHoeArray(block);
-				}
-				HoeRegistry.addToHoeArray(ModBlocks.SHROOMLIGHT.get());
-				HoeRegistry.addToHoeArray(ModBlocks.SPONGE.get());
-			}
-
-			if (ConfigSounds.newBlockSounds) {
-				/*
-				 * SOUNDS
-				 */
-				String blockID = Block.blockRegistry.getNameForObject(block).split(":")[1].toLowerCase();
-
-				SoundType sound = getCustomStepSound(block, blockID);
-				if (sound != null) {
-					block.setStepSound(sound);
-				}
-
-				setupMultiBlockSoundRegistry();
-			}
-		}
-
 		CompatMisc.runModHooksLoadComplete();
 
 		if (ConfigExperiments.netherDimensionProvider && !ModsList.NETHERLICIOUS.isLoaded()) {
@@ -442,100 +452,30 @@ public class EtFuturum {
 		}
 	}
 
-	private void setupMultiBlockSoundRegistry() {
-		MultiBlockSoundRegistry.addBasic(Blocks.stone_slab, ModSounds.soundNetherBricks, 6, 14);
-		MultiBlockSoundRegistry.addBasic(Blocks.double_stone_slab, ModSounds.soundNetherBricks, 6, 14);
-
-		MultiBlockSoundRegistry.addBasic(ExternalContent.Blocks.TCON_MULTIBRICK.get(), ModSounds.soundNetherrack, 2);
-		MultiBlockSoundRegistry.addBasic(ExternalContent.Blocks.TCON_MULTIBRICK.get(), ModSounds.soundBoneBlock, 9);
-		MultiBlockSoundRegistry.addBasic(ExternalContent.Blocks.TCON_MULTIBRICK_FANCY.get(), ModSounds.soundNetherrack, 2);
-		MultiBlockSoundRegistry.addBasic(ExternalContent.Blocks.TCON_MULTIBRICK_FANCY.get(), ModSounds.soundBoneBlock, 9);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DEEPSLATE_BRICK_WALL.get(), ModSounds.soundDeepslateTiles, 1);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DEEPSLATE_BRICKS.get(), ModSounds.soundDeepslateTiles, 2, 3);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DEEPSLATE_BRICK_SLAB.get(), ModSounds.soundDeepslateTiles, 1, 9);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF.get(), ModSounds.soundPolishedTuff, 1);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF.get(), ModSounds.soundTuffBricks, 2, 4);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF_WALL.get(), ModSounds.soundPolishedTuff, 1);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF_WALL.get(), ModSounds.soundTuffBricks, 2);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF_SLAB.get(), ModSounds.soundPolishedTuff, 1, 9);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.TUFF_SLAB.get(), ModSounds.soundTuffBricks, 2, 10);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DOUBLE_TUFF_SLAB.get(), ModSounds.soundPolishedTuff, 1, 9);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DOUBLE_TUFF_SLAB.get(), ModSounds.soundTuffBricks, 2, 10);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.AMETHYST_CLUSTER_1.get(), ModSounds.soundAmethystBudSmall, 0, 1, 2, 3, 4, 5, 6);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.AMETHYST_CLUSTER_2.get(), ModSounds.soundAmethystBudLrg, 0, 1, 2, 3, 4, 5, 6);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.SPONGE.get(), ModSounds.soundWetSponge, 1);
-		MultiBlockSoundRegistry.addBasic(Blocks.sponge, ModSounds.soundWetSponge, 1);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.SAPLING.get(), ModSounds.soundCherrySapling, 1, 9);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.LEAVES.get(), ModSounds.soundCherryLeaves, 1, 5, 9, 13);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_PLANKS.get(), ModSounds.soundNetherWood, 0, 1);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_PLANKS.get(), ModSounds.soundCherryWood, 3);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_PLANKS.get(), ModSounds.soundBambooWood, 4);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_FENCE.get(), ModSounds.soundNetherWood, 0, 1);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_FENCE.get(), ModSounds.soundCherryWood, 3);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_FENCE.get(), ModSounds.soundBambooWood, 4);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_SLAB.get(), ModSounds.soundNetherWood, 0, 1, 8, 9);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_SLAB.get(), ModSounds.soundCherryWood, 3, 11);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.WOOD_SLAB.get(), ModSounds.soundBambooWood, 4, 12);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DOUBLE_WOOD_SLAB.get(), ModSounds.soundNetherWood, 0, 1, 8, 9);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DOUBLE_WOOD_SLAB.get(), ModSounds.soundCherryWood, 3, 11);
-		MultiBlockSoundRegistry.addBasic(ModBlocks.DOUBLE_WOOD_SLAB.get(), ModSounds.soundBambooWood, 4, 12);
-
-		MultiBlockSoundRegistry.addBasic(ModBlocks.PACKED_MUD.get(), ModSounds.soundMudBricks, 1);
-
-		if(ModsList.IRON_CHEST.isLoaded() && ModsList.IRON_CHEST.isVersionNewerOrEqual("6.0.78")) { // Version netherite chests were added in
-			MultiBlockSoundRegistry.addBasic(ExternalContent.Blocks.IRON_CHEST.get(), ModSounds.soundNetherite, 8);
-		}
-
-		if (ExternalContent.Blocks.TCON_METAL.get() != null) {
-			{
-				BasicMultiBlockSound mbs = new BasicMultiBlockSound() {
-					@Override
-					public float getPitch(World world, int x, int y, int z, float pitch, MultiBlockSoundRegistry.BlockSoundType type) {
-						if (type != MultiBlockSoundRegistry.BlockSoundType.WALK) {
-							return pitch * .67F;
-						}
-						return 1;
-					}
-				};
-				mbs.setTypes(ModSounds.soundCopper, 3);
-				mbs.setTypes(ModSounds.soundCopper, 5);
-				MultiBlockSoundRegistry.multiBlockSounds.put(ExternalContent.Blocks.TCON_METAL.get(), mbs);
-			}
-		}
-	}
-
-	/**
-	 * As of 2.5.0, I removed some ItemBlocks that are just technical blocks (EG, lit EFR furnaces)
-	 * We need to use this event since unregistering specifically an ItemBlock from a block makes Forge mistakenly think a save is corrupted.
-	 * I add the EFR name check at the beginning just as a safety precaution.
-	 * <p>
-	 * Forge does some bad checks on if the item is an ItemBlock before letting you run ignoreItemBlock, leading to erroneous errors.
-	 * It doesn't look much different than what I do above but their code rarely spits out "Cannot skip an ItemBlock that doesn't have a Block"
-	 * Which makes no sense since if the block != null then we're skipping an ItemBlock that DOES have a block, if my block check != null then what else would it be?
-	 * So their check must be wrong. Some of Forge's many registry finders are a little faulty at times.
-	 * I already know we're running this on an item, and the only other requirement has a broken check.
-	 * So I use reflection to force my way. It's rare for a save to actually throw an error, but just in case....
-	 * They really should have just had an ITEMBLOCK mapping type to avoid all these hacky checks.
-	 * <p>
-	 * All this because Forge falsely declares a world corrupt if you remove an ItemBlock from an existing block.
-	 * Gee, all that for removing ItemBlocks.
-	 * I wrote this bad code to get around Forge's bad code, only to reveal EVEN MORE bad code in Forge I have to write even worse code to avoid.
-	 */
-
 	@EventHandler
 	public void onMissingMapping(FMLMissingMappingsEvent e) {
 		for (FMLMissingMappingsEvent.MissingMapping mapping : e.getAll()) {
 			if (mapping.name.startsWith("etfuturum")) {
-				if (Block.getBlockById(mapping.id) != null && mapping.type == GameRegistry.Type.ITEM) {
-					mapping.ignore();
-					ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
+				if(mapping.type == GameRegistry.Type.ITEM) {
+					if (Block.getBlockById(mapping.id) != null) {
+						// As of 2.5.0, I removed some ItemBlocks that are just technical blocks (EG, lit EFR furnaces)
+						// We need to use this event since unregistering specifically an ItemBlock from a block makes Forge mistakenly think a save is corrupted.
+						// I add the EFR name check at the beginning just as a safety precaution.
+						//
+						// Forge does some bad checks on if the item is an ItemBlock before letting you run ignoreItemBlock, leading to erroneous errors.
+						// It doesn't look much different than what I do above but their code rarely spits out "Cannot skip an ItemBlock that doesn't have a Block"
+						// Which makes no sense since if the block != null then we're skipping an ItemBlock that DOES have a block, if my block check != null then what else would it be?
+						// So their check must be wrong. Some of Forge's many registry finders are a little faulty at times.
+						// I already know we're running this on an item, and the only other requirement has a broken check.
+						// So I use reflection to force my way. It's rare for a save to actually throw an error, but just in case....
+						// They really should have just had an ITEMBLOCK mapping type to avoid all these hacky checks.
+						//
+						// All this because Forge falsely declares a world corrupt if you remove an ItemBlock from an existing block.
+						// Gee, all that for removing ItemBlocks.
+						// I wrote this bad code to get around Forge's bad code, only to reveal EVEN MORE bad code in Forge I have to write even worse code to avoid.
+						mapping.ignore();
+						ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
+					}
 				}
 			}
 			if (mapping.name.equals("etfuturum:glow_berries")) {
@@ -545,56 +485,13 @@ public class EtFuturum {
 	}
 
 
-	public SoundType getCustomStepSound(Block block, String namespace) {
-		if (block.stepSound == Block.soundTypePiston || block.stepSound == Block.soundTypeStone) {
-			if (namespace.contains("nether") && namespace.contains("brick")) {
-				return ModSounds.soundNetherBricks;
-			} else if (namespace.contains("netherrack") || namespace.contains("hellfish")) {
-				return ModSounds.soundNetherrack;
-			} else if (block == Blocks.quartz_ore || (namespace.contains("nether") && (block instanceof BlockOre || namespace.contains("ore")))) {
-				return ModSounds.soundNetherOre;
-			} else if (namespace.contains("deepslate")) {
-				return namespace.contains("brick") ? ModSounds.soundDeepslateBricks : ModSounds.soundDeepslate;
-			} else if (block instanceof BlockNetherWart || (namespace.contains("nether") && namespace.contains("wart"))) {
-				return ModSounds.soundCropWarts;
-			} else if (namespace.contains("bone") || namespace.contains("ivory")) {
-				return ModSounds.soundBoneBlock;
-			}
-		}
-
-		if (block.stepSound == Block.soundTypeGrass) {
-			if (block instanceof BlockVine) {
-				return ModSounds.soundVines;
-			}
-
-			if (block instanceof BlockLilyPad) {
-				return ModSounds.soundWetGrass;
-			}
-		}
-
-		if (block instanceof BlockCrops || block instanceof BlockStem) {
-			return ModSounds.soundCrops;
-		}
-
-		if (block.stepSound == Block.soundTypeSand && namespace.contains("soul") && namespace.contains("sand")) {
-			return ModSounds.soundSoulSand;
-		}
-
-		if (block.stepSound == Block.soundTypeMetal && (namespace.contains("copper") || namespace.contains("tin"))) {
-			return ModSounds.soundCopper;
-		}
-
-		if (block.getMaterial() == Material.iron && block instanceof BlockHopper) {
-			return Block.soundTypeMetal;
-		}
-
-		return null;
-	}
-
 	@EventHandler
 	public void serverStarting(FMLServerStartingEvent event) {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
+		}
+		if (ConfigExperiments.enableEndCities) {
+			event.registerServerCommand(new ganymedes01.etfuturum.command.CommandLocateEndCity());
 		}
 	}
 
@@ -716,7 +613,7 @@ public class EtFuturum {
 	}
 
 	private static void getSounds(ADConfig config) {
-		String ver = Reference.MCAssetVer.split("_")[1];
+		String ver = Tags.MC_ASSET_VER.split("_")[1];
 		config.addObject(ver, "minecraft/sounds/ambient/cave/cave14.ogg");
 		config.addObject(ver, "minecraft/sounds/ambient/cave/cave15.ogg");
 		config.addObject(ver, "minecraft/sounds/ambient/cave/cave16.ogg");
@@ -754,6 +651,12 @@ public class EtFuturum {
 
 		config.addSoundEvent(ver, "music_disc.pigstep", "record");
 		config.addSoundEvent(ver, "music_disc.otherside", "record");
+		config.addSoundEvent(ver, "music_disc.precipice", "record");
+		config.addSoundEvent(ver, "music_disc.creator_music_box", "record");
+		config.addSoundEvent(ver, "music_disc.creator", "record");
+		config.addSoundEvent(ver, "music_disc.tears", "record");
+		config.addSoundEvent(ver, "music_disc.lava_chicken", "record");
+		config.addSoundEvent(ver, "music_disc.5", "record");
 
 		config.addSoundEvent(ver, "item.elytra.flying", "player");
 		config.addSoundEvent(ver, "enchant.thorns.hit", "player");
@@ -792,6 +695,33 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.snow_golem.ambient", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.hurt", "neutral");
 		config.addSoundEvent(ver, "entity.snow_golem.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.ambient_baby", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.death", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.step", "neutral");
+		config.addSoundEvent(ver, "entity.polar_bear.warning", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.ram_impact", "neutral");
+		config.addSoundEvent(ver, "entity.goat.horn_break", "neutral");
+		config.addSoundEvent(ver, "entity.goat.step", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.death", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.eat", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.long_jump", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.milk", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.prepare_ram", "neutral");
+		config.addSoundEvent(ver, "entity.goat.screaming.ram_impact", "neutral");
+		for (int i = 0; i < 8; ++i) {
+			config.addSoundEvent(ver, "item.goat_horn.sound." + i, "record");
+		}
 		config.addSoundEvent(ver, "entity.wither_skeleton.ambient", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.hurt", "hostile");
 		config.addSoundEvent(ver, "entity.wither_skeleton.death", "hostile");
@@ -827,6 +757,16 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.bee.death", "neutral");
 		config.addSoundEvent(ver, "entity.bee.pollinate", "neutral");
 		config.addSoundEvent(ver, "entity.bee.sting", "neutral");
+		config.addSoundEvent(ver, "entity.fox.eat", "neutral");
+		config.addSoundEvent(ver, "entity.fox.aggro", "neutral");
+		config.addSoundEvent(ver, "entity.fox.spit", "neutral");
+		config.addSoundEvent(ver, "entity.fox.screech", "neutral");
+		config.addSoundEvent(ver, "entity.fox.sleep", "neutral");
+		config.addSoundEvent(ver, "entity.fox.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.fox.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.fox.death", "neutral");
+		config.addSoundEvent(ver, "entity.fox.bite", "neutral");
+		config.addSoundEvent(ver, "entity.fox.sniff", "neutral");
 
 
 		config.addSoundEvent(ver, "entity.player.hurt_on_fire", "player");
@@ -859,6 +799,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "item.honey_bottle.drink", "player");
 
 		config.addSoundEvent(ver, "item.armor.equip_leather", "player");
+		config.addSoundEvent(ver, "item.armor.equip_copper", "player");
 		config.addSoundEvent(ver, "item.armor.equip_gold", "player");
 		config.addSoundEvent(ver, "item.armor.equip_chain", "player");
 		config.addSoundEvent(ver, "item.armor.equip_iron", "player");
@@ -980,14 +921,14 @@ public class EtFuturum {
 		//Then we remove the mc version prefix and register that sound.
 
 		for (ModSounds.CustomSound sound : ModSounds.getSounds()) {
-			if (sound.getStepResourcePath().startsWith(Reference.MCAssetVer)) { //Step sound
-				config.addSoundEvent(ver, sound.getStepResourcePath().substring(Reference.MCAssetVer.length() + 1), "neutral");
+			if (sound.getStepResourcePath().startsWith(Tags.MC_ASSET_VER)) { //Step sound
+				config.addSoundEvent(ver, sound.getStepResourcePath().substring(Tags.MC_ASSET_VER.length() + 1), "neutral");
 			}
-			if (sound.func_150496_b/*getPlaceSound*/().startsWith(Reference.MCAssetVer)) { //Place sound
-				config.addSoundEvent(ver, sound.func_150496_b/*getPlaceSound*/().substring(Reference.MCAssetVer.length() + 1), "block");
+			if (sound.func_150496_b/*getPlaceSound*/().startsWith(Tags.MC_ASSET_VER)) { //Place sound
+				config.addSoundEvent(ver, sound.func_150496_b/*getPlaceSound*/().substring(Tags.MC_ASSET_VER.length() + 1), "block");
 			}
-			if (sound.getBreakSound().startsWith(Reference.MCAssetVer)) { //Break sound
-				config.addSoundEvent(ver, sound.getBreakSound().substring(Reference.MCAssetVer.length() + 1), "block");
+			if (sound.getBreakSound().startsWith(Tags.MC_ASSET_VER)) { //Break sound
+				config.addSoundEvent(ver, sound.getBreakSound().substring(Tags.MC_ASSET_VER.length() + 1), "block");
 			}
 		}
 	}

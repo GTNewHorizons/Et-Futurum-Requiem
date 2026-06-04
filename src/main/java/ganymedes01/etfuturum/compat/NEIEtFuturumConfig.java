@@ -6,12 +6,12 @@ import codechicken.nei.recipe.FurnaceRecipeHandler;
 import codechicken.nei.recipe.GuiCraftingRecipe;
 import codechicken.nei.recipe.GuiUsageRecipe;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.nei.BannerPatternHandler;
 import ganymedes01.etfuturum.compat.nei.BlastFurnaceRecipeHandler;
 import ganymedes01.etfuturum.compat.nei.ComposterHandler;
 import ganymedes01.etfuturum.compat.nei.SmokerRecipeHandler;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -99,11 +99,11 @@ public class NEIEtFuturumConfig implements IConfigureNEI {
 
 	@Override
 	public String getName() {
-		return Reference.MOD_NAME;
+		return Tags.MOD_NAME;
 	}
 
 	@Override
 	public String getVersion() {
-		return Reference.VERSION_NUMBER;
+		return Tags.VERSION;
 	}
 }

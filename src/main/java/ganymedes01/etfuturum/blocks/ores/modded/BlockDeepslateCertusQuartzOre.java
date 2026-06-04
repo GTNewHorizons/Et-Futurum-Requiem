@@ -1,13 +1,12 @@
 package ganymedes01.etfuturum.blocks.ores.modded;
 
-import ganymedes01.etfuturum.blocks.IEmissiveLayerBlock;
 import ganymedes01.etfuturum.blocks.ores.BaseSubtypesDeepslateOre;
 import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import net.minecraft.block.Block;
 import net.minecraft.util.IIcon;
 
-public class BlockDeepslateCertusQuartzOre extends BaseSubtypesDeepslateOre implements IEmissiveLayerBlock {
+public class BlockDeepslateCertusQuartzOre extends BaseSubtypesDeepslateOre {
 
 	public BlockDeepslateCertusQuartzOre() {
 		super("deepslate_certus_quartz_ore", "deepslate_charged_certus_quartz_ore");
@@ -27,18 +26,12 @@ public class BlockDeepslateCertusQuartzOre extends BaseSubtypesDeepslateOre impl
 	}
 
 	@Override
-	public IIcon getSecondLayerIcon(int side, int meta) {
-		return getBase(meta).getIcon(side, getBaseMeta(meta));
-	}
-
-	//Not sure how to make this work rn
-	@Override
-	public int getEmissiveMinBrightness(int meta) {
-		return 1;
+	public IIcon getIcon(int side, int meta) {
+		return getBase(meta).getIcon(side, meta);
 	}
 
 	@Override
 	public int getRenderType() {
-		return RenderIDs.EMISSIVE_DOUBLE_LAYER;
+		return RenderIDs.DEEPSLATE_CERTUS_QUARTZ_ORE;
 	}
 }

@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.world;
 
-import com.google.common.collect.Maps;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockBubbleColumn;
@@ -8,6 +7,7 @@ import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -19,71 +19,79 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import roadhog360.hogutils.api.hogtags.helpers.BlockTags;
+import roadhog360.hogutils.api.utils.RecipeHelper;
 
 import java.util.Map;
+import java.util.Set;
 
 public class EtFuturumWorldListener implements IWorldAccess {
 
 	private final World world;
-	private static final Map<Block, Block> replacements = Maps.newHashMap();
-	public static final Map<Block, Block> bubbleColumnMap = Maps.newHashMap();
+	private static final Map<Block, Block> REPLACEMENTS = new Reference2ObjectOpenHashMap<>();
 
 	public EtFuturumWorldListener(World theWorld) {
 		world = theWorld;
 		if (ModBlocks.BREWING_STAND.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode == 0) {
-				replacements.put(Blocks.brewing_stand, ModBlocks.BREWING_STAND.get());
+				REPLACEMENTS.put(Blocks.brewing_stand, ModBlocks.BREWING_STAND.get());
 			} else if (ConfigWorld.tileReplacementMode == 1) {
-				replacements.put(ModBlocks.BREWING_STAND.get(), Blocks.brewing_stand);
+				REPLACEMENTS.put(ModBlocks.BREWING_STAND.get(), Blocks.brewing_stand);
 			}
 		}
 
 
 		if (ModBlocks.BEACON.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode == 0) {
-				replacements.put(Blocks.beacon, ModBlocks.BEACON.get());
+				REPLACEMENTS.put(Blocks.beacon, ModBlocks.BEACON.get());
 			} else if (ConfigWorld.tileReplacementMode == 1) {
-				replacements.put(ModBlocks.BEACON.get(), Blocks.beacon);
+				REPLACEMENTS.put(ModBlocks.BEACON.get(), Blocks.beacon);
 			}
 		}
 
 		if (ModBlocks.ENCHANTMENT_TABLE.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode == 0) {
-				replacements.put(Blocks.enchanting_table, ModBlocks.ENCHANTMENT_TABLE.get());
+				REPLACEMENTS.put(Blocks.enchanting_table, ModBlocks.ENCHANTMENT_TABLE.get());
 			} else if (ConfigWorld.tileReplacementMode == 1) {
-				replacements.put(ModBlocks.ENCHANTMENT_TABLE.get(), Blocks.enchanting_table);
+				REPLACEMENTS.put(ModBlocks.ENCHANTMENT_TABLE.get(), Blocks.enchanting_table);
 			}
 		}
 
 		if (ModBlocks.ANVIL.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode == 0) {
-				replacements.put(Blocks.anvil, ModBlocks.ANVIL.get());
+				REPLACEMENTS.put(Blocks.anvil, ModBlocks.ANVIL.get());
 			} else if (ConfigWorld.tileReplacementMode == 1) {
-				replacements.put(ModBlocks.ANVIL.get(), Blocks.anvil);
+				REPLACEMENTS.put(ModBlocks.ANVIL.get(), Blocks.anvil);
 			}
 		}
 
 		if (ModBlocks.SPONGE.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode == 0) {
-				replacements.put(Blocks.sponge, ModBlocks.SPONGE.get());
+				REPLACEMENTS.put(Blocks.sponge, ModBlocks.SPONGE.get());
 			} else if (ConfigWorld.tileReplacementMode == 1) {
-				replacements.put(ModBlocks.SPONGE.get(), Blocks.sponge);
+				REPLACEMENTS.put(ModBlocks.SPONGE.get(), Blocks.sponge);
 			}
 		}
 
 		if (ModBlocks.DAYLIGHT_DETECTOR.isEnabled()) {
 			if (ConfigWorld.tileReplacementMode != -1) {
-				replacements.put(ModBlocks.DAYLIGHT_DETECTOR.get(), Blocks.daylight_detector);
+				REPLACEMENTS.put(ModBlocks.DAYLIGHT_DETECTOR.get(), Blocks.daylight_detector);
 			}
 		}
 
 		if (ModsList.BACK_IN_SLIME.isLoaded() && ConfigMixins.betterPistons) {
-			replacements.put(GameRegistry.findBlock("bis", "SlimePistonBase"), Blocks.piston);
-			replacements.put(GameRegistry.findBlock("bis", "StickySlimePistonBase"), Blocks.sticky_piston);
-			replacements.put(GameRegistry.findBlock("bis", "SlimePistonHead"), Blocks.piston_head);
+			REPLACEMENTS.put(GameRegistry.findBlock("bis", "SlimePistonBase"), Blocks.piston);
+			REPLACEMENTS.put(GameRegistry.findBlock("bis", "StickySlimePistonBase"), Blocks.sticky_piston);
+			REPLACEMENTS.put(GameRegistry.findBlock("bis", "SlimePistonHead"), Blocks.piston_head);
 			if (ModBlocks.SLIME.isEnabled()) {
-				replacements.put(GameRegistry.findBlock("bis", "SlimeBlock"), ModBlocks.SLIME.get());
+				REPLACEMENTS.put(GameRegistry.findBlock("bis", "SlimeBlock"), ModBlocks.SLIME.get());
+			}
+		}
+
+		// Validate bubble column registrations, ensuring that disabled columns do not get registered.
+		for(Map.Entry<String, BlockBubbleColumn> entry : BUBBLE_COLUMN_TAGS.entrySet()) {
+			if(!RecipeHelper.validateItems(entry.getValue())) {
+				BUBBLE_COLUMN_TAGS.remove(entry.getKey(), entry.getValue());
 			}
 		}
 	}
@@ -91,18 +99,15 @@ public class EtFuturumWorldListener implements IWorldAccess {
 	@Override
 	public void markBlockForUpdate(int x, int y, int z) {
 
-		if (replacements.isEmpty() || !world.blockExists(x, y, z) /*|| !world.getChunkFromBlockCoords(x, z).isChunkLoaded*/)
-			return;
-
-		handleBasaltFromLava(x, y, z);
-		for (ForgeDirection dir : Utils.FORGE_DIRECTIONS) {
-			handleBubbleColumnCreation(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
-		}
+		Block currentBlock = world.getBlock(x, y, z);
+		int currentMeta = world.getBlockMetadata(x, y, z);
+		handleBasaltFromLava(x, y, z, currentBlock);
+		handleBubbleColumnCreation(x, y, z, currentBlock, currentMeta);
 
 		Block replacement;
 		TileEntity tile;
 
-		if ((replacement = replacements.get(world.getBlock(x, y, z))) == null)
+		if (REPLACEMENTS.isEmpty() || (replacement = REPLACEMENTS.get(currentBlock)) == null)
 			return;
 
 		tile = world.getTileEntity(x, y, z);
@@ -126,12 +131,13 @@ public class EtFuturumWorldListener implements IWorldAccess {
 
 	}
 
-	private void handleBasaltFromLava(int x, int y, int z) { //Don't support Netherlicious blocks, this can be handled on their end
+	Block soulsand = ModBlocks.SOUL_SOIL.isEnabled() ? ModBlocks.SOUL_SOIL.get() : Blocks.soul_sand;
+	Block ice = ModBlocks.BLUE_ICE.isEnabled() ? ModBlocks.BLUE_ICE.get() : Blocks.packed_ice;
+
+	private void handleBasaltFromLava(int x, int y, int z, Block currentBlock) { //Don't support Netherlicious blocks, this can be handled on their end
 		if (ModBlocks.BASALT.isEnabled()) {
-			if (world.getBlock(x, y, z).getMaterial() == Material.lava) {
-				Block soulsand = ModBlocks.SOUL_SOIL.isEnabled() ? ModBlocks.SOUL_SOIL.get() : Blocks.soul_sand;
+			if (currentBlock.getMaterial() == Material.lava) {
 				if (world.getBlock(x, y - 1, z) == soulsand) {
-					Block ice = ModBlocks.BLUE_ICE.isEnabled() ? ModBlocks.BLUE_ICE.get() : Blocks.packed_ice;
 					for (EnumFacing facing : Utils.ENUM_FACING_VALUES) {
 						if (facing == EnumFacing.DOWN) continue;
 						if (world.getBlock(x + facing.getFrontOffsetX(), y + facing.getFrontOffsetY(), z + facing.getFrontOffsetZ()) == ice) {
@@ -148,16 +154,31 @@ public class EtFuturumWorldListener implements IWorldAccess {
 		}
 	}
 
+
+	public static final Map<String, BlockBubbleColumn> BUBBLE_COLUMN_TAGS = new Reference2ObjectOpenHashMap<>();
+
 	/**
 	 * This is only needed to create the initial bubble column above the magma or soul sand or custom column above another block.
 	 * The column itself handles the creation of the remainder of the column, as well as destroying itself.
 	 */
-	private void handleBubbleColumnCreation(int x, int y, int z) {
-		if (!bubbleColumnMap.isEmpty() && world.blockExists(x, y, z)) {
-			if (BlockBubbleColumn.isFullVanillaWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
-				Block block = bubbleColumnMap.get(world.getBlock(x, y, z));
-				if (block != null) {
-					world.setBlock(x, y + 1, z, block, 0, 3);
+	private void handleBubbleColumnCreation(int x, int y, int z, Block currentBlock, int currentMeta) {
+		// TODO: This is probably ineffifcient, may rewrite this later
+		if(!world.isRemote && !BUBBLE_COLUMN_TAGS.isEmpty() && !(currentBlock instanceof BlockBubbleColumn)) {
+			Block below = world.getBlock(x, y - 1, z);
+			if(currentBlock.getMaterial().isLiquid() && !below.getMaterial().isLiquid()) {
+				handleBubbleColumnCreation(x, y - 1, z, below, world.getBlockMetadata(x, y - 1, z));
+				return;
+			}
+			Set<String> tags = BlockTags.getTags(currentBlock, currentMeta);
+			for (String tag : tags) {
+				for (Map.Entry<String, BlockBubbleColumn> tag1 : BUBBLE_COLUMN_TAGS.entrySet()) {
+					if (tag1.getKey().equals(tag)) {
+						BlockBubbleColumn column = tag1.getValue();
+						if (column.isCompatibleWater(world.getBlock(x, y + 1, z), world.getBlockMetadata(x, y + 1, z))) {
+							world.setBlock(x, y + 1, z, column, 0, 3);
+						}
+						return;
+					}
 				}
 			}
 		}

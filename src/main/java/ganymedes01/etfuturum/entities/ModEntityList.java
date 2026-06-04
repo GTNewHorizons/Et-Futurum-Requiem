@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.entities;
 
 import cpw.mods.fml.common.registry.EntityRegistry;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityList.EntityEggInfo;
@@ -46,7 +46,7 @@ public class ModEntityList {
 		EntityData data = getData(id);
 		if (data == null)
 			return null;
-		return Reference.MOD_ID + "." + data.name;
+		return Tags.MOD_ID + "." + data.name;
 	}
 
 	public static EntityData getData(int id) {

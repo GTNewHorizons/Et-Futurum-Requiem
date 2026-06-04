@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.inventory;
 
-import ganymedes01.etfuturum.api.BrewingFuelRegistry;
 import ganymedes01.etfuturum.tileentities.TileEntityNewBrewingStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -12,6 +11,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.AchievementList;
+import roadhog360.hogutils.api.hogtags.helpers.ItemTags;
 
 public class ContainerNewBrewingStand extends Container {
 
@@ -39,15 +39,13 @@ public class ContainerNewBrewingStand extends Container {
 	public void detectAndSendChanges() {
 		super.detectAndSendChanges();
 
-		for (Object crafter : crafters) {
-			ICrafting icrafting = (ICrafting) crafter;
-
+		for (ICrafting crafter : crafters) {
 			if (prevBrewTime != tile.getBrewTime())
-				icrafting.sendProgressBarUpdate(this, 0, tile.getBrewTime());
+				crafter.sendProgressBarUpdate(this, 0, tile.getBrewTime());
 			if (prevFuel != tile.getFuel())
-				icrafting.sendProgressBarUpdate(this, 1, tile.getFuel());
+				crafter.sendProgressBarUpdate(this, 1, tile.getFuel());
 			if (prevCurrentFuel != tile.getCurrentFuel())
-				icrafting.sendProgressBarUpdate(this, 2, tile.getCurrentFuel());
+				crafter.sendProgressBarUpdate(this, 2, tile.getCurrentFuel());
 		}
 		prevBrewTime = tile.getBrewTime();
 		prevFuel = tile.getFuel();
@@ -72,7 +70,7 @@ public class ContainerNewBrewingStand extends Container {
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
 		ItemStack itemstack = null;
-		Slot slot = (Slot) this.inventorySlots.get(slotIndex);
+		Slot slot = this.inventorySlots.get(slotIndex);
 
 		if (slot != null && slot.getHasStack()) {
 			ItemStack itemstack1 = slot.getStack();
@@ -136,7 +134,7 @@ public class ContainerNewBrewingStand extends Container {
 
 		@Override
 		public boolean isItemValid(ItemStack stack) {
-			return BrewingFuelRegistry.isFuel(stack);
+			return ItemTags.hasTag(stack.getItem(), stack.getItemDamage(), "minecraft:brewing_fuel");
 		}
 	}
 

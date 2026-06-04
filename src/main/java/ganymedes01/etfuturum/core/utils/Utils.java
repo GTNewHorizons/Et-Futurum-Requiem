@@ -1,13 +1,14 @@
 package ganymedes01.etfuturum.core.utils;
 
 import cpw.mods.fml.common.Loader;
+import ganymedes01.etfuturum.Tags;
+import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.lib.Reference;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,7 +44,7 @@ public class Utils {
 	public static final float SQRT_2 = MathHelper.sqrt_float(2.0F);
 
 	public static String getUnlocalisedName(String name) {
-		return Reference.MOD_ID + "." + name;
+		return Tags.MOD_ID + "." + name;
 	}
 
 	public static String getBlockTexture(String name) {
@@ -54,12 +55,8 @@ public class Utils {
 		return Reference.ITEM_BLOCK_TEXTURE_PATH + name;
 	}
 
-	public static ResourceLocation getResource(String path) {
-		return new ResourceLocation(path);
-	}
-
 	public static String getConainerName(String name) {
-		return "container." + Reference.MOD_ID + "." + name;
+		return "container." + Tags.MOD_ID + "." + name;
 	}
 
 	public static String getModContainer() {
@@ -83,13 +80,11 @@ public class Utils {
 	}
 
 	public static void loadItemStacksFromNBT(NBTTagList tag, ItemStack[] stacks) {
-		for (int i = 0; i < tag.tagCount(); ++i) {
+		int count = Math.min(tag.tagCount(), stacks.length);
+		for (int i = 0; i < count; ++i) {
 			NBTTagCompound nbttagcompound1 = tag.getCompoundTagAt(i);
 			int j = nbttagcompound1.getByte("Slot") & 255;
-
-			if (j < stacks.length) {
-				stacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-			}
+			stacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
 		}
 	}
 
@@ -383,41 +378,6 @@ public class Utils {
 		return list;
 	}
 
-	private static Integer maxMeta;
-	private static Integer minMeta;
-
-	public static int getMaxMetadata() {
-		if (maxMeta == null) {
-			if (ModsList.NOT_ENOUGH_IDS.isLoaded() && ModsList.NOT_ENOUGH_IDS.isVersionNewerOrEqual("2.0.0")) {
-				maxMeta = (int) Short.MAX_VALUE;
-			} else if (ModsList.ENDLESS_IDS_BLOCKITEM.isLoaded()) {
-				maxMeta = 65536;
-			} else {
-				maxMeta = 15;
-			}
-		}
-		return maxMeta;
-	}
-
-	public static int getMinMetadata() {
-		if (minMeta == null) {
-			if (ModsList.NOT_ENOUGH_IDS.isLoaded() && ModsList.NOT_ENOUGH_IDS.isVersionNewerOrEqual("2.0.0")) {
-				minMeta = (int) Short.MIN_VALUE;
-			} else { //EIDs has min meta 0 too, so we don't need to check for it
-				minMeta = 0;
-			}
-		}
-		return minMeta;
-	}
-
-	public static boolean isMetaInBlockBounds(int meta) {
-		return meta <= getMaxMetadata() && meta >= getMinMetadata();
-	}
-
-	public static boolean isMetaInBlockBoundsIgnoreWildcard(int meta) {
-		return meta == OreDictionary.WILDCARD_VALUE || isMetaInBlockBounds(meta);
-	}
-
 	public static void copyAttribs(Block to, Block from) {
 		to.setHardness(from.blockHardness);
 		to.setResistance(from.blockResistance);
@@ -519,6 +479,6 @@ public class Utils {
 	 * @return
 	 */
 	public static List<EntityPlayer> getListWithoutSpectators(List<EntityPlayer> list) {
-		return list.stream().filter(entity -> !SpectatorMode.isSpectator(entity)).collect(Collectors.toList());
+		return list.stream().filter(entity -> !SpectatorUtils.isSpectator(entity)).collect(Collectors.toList());
 	}
 }

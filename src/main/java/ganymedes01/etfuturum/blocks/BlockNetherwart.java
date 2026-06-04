@@ -1,7 +1,6 @@
 package ganymedes01.etfuturum.blocks;
 
 import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.api.HoeRegistry;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
@@ -22,7 +21,6 @@ public class BlockNetherwart extends BaseSubtypesBlock {
 		setBlockSound(ModSounds.soundWartBlock);
 		setNames("wart_block");
 		setCreativeTab(EtFuturum.creativeTabBlocks);
-		HoeRegistry.addToHoeArray(this);
 	}
 
 	@Override

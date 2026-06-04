@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntitySnowman;
 import net.minecraft.world.World;
@@ -15,16 +15,16 @@ public class MixinEntitySnowman extends EntityGolem {
 
 	@Override
 	protected String getHurtSound() {
-		return Reference.MCAssetVer + ":entity.snow_golem.hurt";
+		return Tags.MC_ASSET_VER + ":entity.snow_golem.hurt";
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return Reference.MCAssetVer + ":entity.snow_golem.death";
+		return Tags.MC_ASSET_VER + ":entity.snow_golem.death";
 	}
 
 	@Override
 	protected String getLivingSound() {
-		return Reference.MCAssetVer + ":entity.snow_golem.ambient";
+		return Tags.MC_ASSET_VER + ":entity.snow_golem.ambient";
 	}
 }

@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.sounds;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,12 +28,12 @@ public abstract class MixinTileEntityBeacon extends TileEntity {
 			if (!worldObj.isRemote) {
 				if (field_146015_k != etfuturum$wasOn) {
 					String suffix = field_146015_k ? "activate" : "deactivate";
-					worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Reference.MCAssetVer + ":block.beacon." + suffix, 1, 1);
+					worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Tags.MC_ASSET_VER + ":block.beacon." + suffix, 1, 1);
 				}
 				etfuturum$wasOn = field_146015_k;
 			}
 			if (field_146015_k) {
-				worldObj.playSound(xCoord + .5D, yCoord + .5D, zCoord + .5D, Reference.MCAssetVer + ":block.beacon.ambient", 1, 1, false);
+				worldObj.playSound(xCoord + .5D, yCoord + .5D, zCoord + .5D, Tags.MC_ASSET_VER + ":block.beacon.ambient", 1, 1, false);
 			}
 		}
 	}
@@ -42,7 +42,7 @@ public abstract class MixinTileEntityBeacon extends TileEntity {
 	private void playPowerSelectNoise(CallbackInfo ci) {
 		//Somehow worldObj can be null, probably due to the weird stuff the client is doing to its own TileEntityBeacon instance while in the GUI
 		if (!etfuturum$isNetherliciousBeacon && worldObj != null && !worldObj.isRemote) {
-			worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Reference.MCAssetVer + ":block.beacon.power_select", 1, 1);
+			worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Tags.MC_ASSET_VER + ":block.beacon.power_select", 1, 1);
 		}
 	}
 
@@ -60,7 +60,7 @@ public abstract class MixinTileEntityBeacon extends TileEntity {
 	@Override
 	public void invalidate() {
 		if (!etfuturum$isNetherliciousBeacon && !worldObj.isRemote && worldObj.getTileEntity(xCoord, yCoord, zCoord) == null) {
-			worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Reference.MCAssetVer + ":block.beacon.deactivate", 1, 1);
+			worldObj.playSoundEffect(xCoord + 0.5F, yCoord + 0.5F, zCoord + 0.5F, Tags.MC_ASSET_VER + ":block.beacon.deactivate", 1, 1);
 		}
 		super.invalidate();
 	}

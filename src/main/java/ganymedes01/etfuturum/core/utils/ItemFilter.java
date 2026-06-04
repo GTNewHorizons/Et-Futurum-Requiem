@@ -6,6 +6,6 @@ public interface ItemFilter {
 	boolean matches(ItemStack var1);
 
 	interface ItemFilterProvider {
-		codechicken.nei.api.ItemFilter getFilter();
+		ItemFilter getFilter();
 	}
 }

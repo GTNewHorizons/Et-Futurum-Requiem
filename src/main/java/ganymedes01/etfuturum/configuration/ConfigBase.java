@@ -2,9 +2,9 @@ package ganymedes01.etfuturum.configuration;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import ganymedes01.etfuturum.mixinplugin.EtFuturumEarlyMixins;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.*;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.mixinplugin.EtFuturumEarlyMixins;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
@@ -21,7 +21,7 @@ public abstract class ConfigBase extends Configuration {
 	protected final List<ConfigCategory> configCats = new ArrayList<>();
 	private static final Set<ConfigBase> CONFIGS = new HashSet<>();
 
-	public static final String configDir = "config" + File.separator + Reference.MOD_ID + File.separator;
+	public static final String configDir = "config" + File.separator + Tags.MOD_ID + File.separator;
 
 	public static final ConfigBase EXPERIMENTS = new ConfigExperiments(createConfigFile("experiments"));
 
@@ -76,20 +76,32 @@ public abstract class ConfigBase extends Configuration {
 	protected abstract void syncConfigOptions();
 
 	/**
-	 * Used in case we need to wait till later to initialize some config values.
+	 * Used in case we need to wait until after preInit to initialize values.
 	 */
 	protected void initValues() {
 	}
 
-	public static void postInit() {
+	public static void init() {
 		for (ConfigBase config : CONFIGS) {
 			config.initValues();
 		}
 	}
 
+	/**
+	 * Used in case we need to wait until after mixin phase to initialize values.
+	 */
+	protected void onConstructingValues() {
+	}
+
+	public static void onConstructing() {
+		for (ConfigBase config : CONFIGS) {
+			config.onConstructingValues();
+		}
+	}
+
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-		if (Reference.MOD_ID.equals(eventArgs.modID))
+		if (Tags.MOD_ID.equals(eventArgs.modID))
 			syncConfig();
 	}
 }

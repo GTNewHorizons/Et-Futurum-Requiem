@@ -1,14 +1,16 @@
 package ganymedes01.etfuturum.tileentities;
 
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockShulkerBox;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.core.utils.EtFuturumResources;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.inventory.ContainerChestGeneric;
-import ganymedes01.etfuturum.lib.Reference;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,11 +24,14 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	private int ticksSinceSync;
@@ -34,21 +39,14 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	public ItemStack[] chestContents;
 	public int numPlayersUsing;
 	protected boolean brokenInCreative = false;
-	public boolean destroyed = false;
 	public byte color = 0;
 	public byte facing = 0;
 	public ShulkerBoxType type;
-
-	private boolean firstTick = true;
 
 	public TileEntityShulkerBox() {
 		this.animationStatus = TileEntityShulkerBox.AnimationStatus.CLOSED;
 		this.topStacks = new ItemStack[8];
 		type = ShulkerBoxType.VANILLA;
-	}
-
-	public void touch() {
-		inventoryTouched = true;
 	}
 
 	@Override
@@ -75,22 +73,11 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 			this.chestContents = new ItemStack[this.getSizeInventory()];
 		}
 
-		NBTTagList nbttaglist = nbt.getTagList("Items", 10);
-		if (nbttaglist.tagCount() > 0) {
-			Utils.loadItemStacksFromNBT(nbttaglist, this.chestContents);
-		}
+		Utils.loadItemStacksFromNBT(nbt.getTagList("Items", 10), this.chestContents);
 
-		if (type.getIsClear()) {
-			NBTTagList displaynbt = nbt.getTagList("Display", 10);
-			this.topStacks = new ItemStack[8];
-			for (int i = 0; i < displaynbt.tagCount(); ++i) {
-				NBTTagCompound nbttagcompound1 = displaynbt.getCompoundTagAt(i);
-				int j = nbttagcompound1.getByte("Slot") & 255;
-
-				if (j >= 0 && j < this.topStacks.length) {
-					this.topStacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-				}
-			}
+		if (type.isClear()) {
+			Arrays.fill(topStacks, null);
+			Utils.loadItemStacksFromNBT(nbt.getTagList("Display", 10), this.topStacks);
 		}
 
 		if (ConfigBlocksItems.enableDyedShulkerBoxes) {
@@ -104,7 +91,6 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		if (nbt.hasKey("CustomName", 8)) {
 			this.customName = nbt.getString("CustomName");
 		}
-		sortTopStacks();
 	}
 
 	@Override
@@ -123,12 +109,6 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		if (this.hasCustomInventoryName()) {
 			nbt.setString("CustomName", this.customName);
 		}
-	}
-
-	@Override
-	public ItemStack getStackInSlot(int slotIn) {
-		inventoryTouched = true;
-		return this.chestContents[slotIn];
 	}
 
 	/**
@@ -213,21 +193,14 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 				}
 			}
 		}
-
-		if (!worldObj.isRemote && inventoryTouched) {
-			inventoryTouched = false;
+		if(type.isClear() && isContainerDirty(false)) {
 			sortTopStacks();
-		}
-
-		if (firstTick) {
-			markDirty();
-			firstTick = false;
 		}
 	}
 
 	@Override
 	public String getInventoryName() {
-		return this.hasCustomInventoryName() ? this.customName : "container." + Reference.MOD_ID + ".shulker_box";
+		return this.hasCustomInventoryName() ? this.customName : "container." + Tags.MOD_ID + ".shulker_box";
 	}
 
 	@Override
@@ -266,7 +239,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		++this.numPlayersUsing;
 
 		if (this.numPlayersUsing == 1) {
-			this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Reference.MCAssetVer + ":block.shulker_box.open", 1, 1);
+			this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Tags.MC_ASSET_VER + ":block.shulker_box.open", 1, 1);
 		}
 		this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 		this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
@@ -278,11 +251,14 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		if (this.getBlockType() instanceof BlockShulkerBox) {
 			--this.numPlayersUsing;
 			if (this.numPlayersUsing <= 0) {
-				this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Reference.MCAssetVer + ":block.shulker_box.close", 1, 1);
+				this.worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, Tags.MC_ASSET_VER + ":block.shulker_box.close", 1, 1);
 			}
 			this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
 			this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
 			this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
+		}
+		if(type.isClear() && isContainerDirty(true)) {
+			sortTopStacks();
 		}
 	}
 
@@ -477,10 +453,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	 * <tr><td><pre><code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).contract(0, 1, -1)</code></pre></td><td><pre><samp>box[5.0, 5.0, 6.0 -> 7.0, 6.0, 7.0]</samp></pre></td></tr>
 	 * <tr><td><pre><code>new AxisAlignedBB(-2, -2, -2, 2, 2, 2).contract(4, -4, 0)</code></pre></td><td><pre><samp>box[-8.0, 2.0, -2.0 -> -2.0, 8.0, 2.0]</samp></pre></td></tr>
 	 * </table>
-	 * 
-	 * @see {@link #expand(double, double, double)} - like this, except for expanding.</li>
-	 * @see {@link #grow(double, double, double)} and {@link #grow(double)} - expands in all directions.</li>
-	 * @see {@link #shrink(double)} - contracts in all directions (like {@link #grow(double)})</li>
+	 *
 	 * 
 	 * @return A new modified bounding box.
 	 */
@@ -521,19 +494,8 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 
 		nbt.setByte("Type", (byte) this.type.ordinal());
 
-		if (type.getIsClear()) {
-			NBTTagList nbttaglist = new NBTTagList();
-
-			for (int i = 0; i < this.topStacks.length; ++i) {
-				if (this.topStacks[i] != null) {
-					NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-					nbttagcompound1.setByte("Slot", (byte) i);
-					this.topStacks[i].writeToNBT(nbttagcompound1);
-					nbttaglist.appendTag(nbttagcompound1);
-				}
-			}
-
-			nbt.setTag("Display", nbttaglist);
+		if(type.isClear()) {
+			nbt.setTag("Display", Utils.writeItemStacksToNBT(topStacks));
 		}
 
 		nbt.setByte("Color", this.color);
@@ -573,14 +535,14 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	}
 
 	public enum ShulkerBoxType {
-		VANILLA(27, 9, false, 184, 168, null),
-		IRON(54, 9, false, 184, 202, "ironcontainer"),
-		GOLD(81, 9, false, 184, 256, "goldcontainer"),
-		DIAMOND(108, 12, false, 238, 256, "diamondcontainer"),
-		COPPER(45, 9, false, 184, 184, "coppercontainer"),
-		SILVER(72, 9, false, 184, 238, "silvercontainer"),
-		CRYSTAL(108, 12, true, 238, 256, "diamondcontainer"),
-		OBSIDIAN(108, 12, false, 238, 256, "diamondcontainer");
+		VANILLA(27, 9, false, 184, 166, null, EtFuturumResources.SHULKERS),
+		IRON(54, 9, false, 184, 202, "ironcontainer", EtFuturumResources.IRON_SHULKERS),
+		GOLD(81, 9, false, 184, 256, "goldcontainer", EtFuturumResources.GOLD_SHULKERS),
+		DIAMOND(108, 12, false, 238, 256, "diamondcontainer", EtFuturumResources.DIAMOND_SHULKERS),
+		COPPER(45, 9, false, 184, 184, "coppercontainer", EtFuturumResources.COPPER_SHULKERS),
+		SILVER(72, 9, false, 184, 238, "silvercontainer", EtFuturumResources.SILVER_SHULKERS),
+		CRYSTAL(108, 12, true, 238, 256, "diamondcontainer", EtFuturumResources.CRYSTAL_SHULKERS),
+		OBSIDIAN(108, 12, false, 238, 256, "diamondcontainer", EtFuturumResources.OBSIDIAN_SHULKERS);
 
 		public static final ShulkerBoxType[] VALUES = values();
 
@@ -590,14 +552,24 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		private final int xSize;
 		private final int ySize;
 		private final String guiTextureName;
+		private final ResourceLocation[] boxTextures;
+		public static final Map<String, ShulkerBoxType> map;
+		static {
+			Object2ObjectLinkedOpenHashMap<String, ShulkerBoxType> temp = new Object2ObjectLinkedOpenHashMap<>();
+			for(ShulkerBoxType type : values()) {
+				temp.put(type.name(), type);
+			}
+			map = Collections.unmodifiableMap(temp);
+		}
 
-		ShulkerBoxType(int size, int rowSize, boolean isClear, int xSize, int ySize, String guiTextureName) {
+		ShulkerBoxType(int size, int rowSize, boolean isClear, int xSize, int ySize, String guiTextureName, ResourceLocation[] boxTextures) {
 			this.size = size;
 			this.rowSize = rowSize;
 			this.isClear = isClear;
 			this.xSize = xSize;
 			this.ySize = ySize;
 			this.guiTextureName = guiTextureName;
+			this.boxTextures = boxTextures;
 		}
 
 		public int getSize() {
@@ -608,7 +580,7 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 			return rowSize;
 		}
 
-		public boolean getIsClear() {
+		public boolean isClear() {
 			return isClear;
 		}
 
@@ -620,8 +592,13 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 			return ySize;
 		}
 
+		@Nullable
 		public String getGuiTextureName() {
 			return guiTextureName;
+		}
+
+		public ResourceLocation[] getBoxTextures() {
+			return boxTextures;
 		}
 	}
 
@@ -640,27 +617,38 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 	 */
 
 	private ItemStack[] topStacks;
-	private boolean hadStuff;
-	private boolean inventoryTouched;
-	public static final String[] tiers = new String[]{"iron", "gold", "diamond", "copper", "silver", "crystal", "obsidian"};
+	private ItemStack[] prevContents;
 
 	@Override
-	public void markDirty() {
-		super.markDirty();
-		sortTopStacks();
+	public ItemStack getStackInSlot(int slotIn) {
+		return this.chestContents[slotIn];
 	}
 
 	public ItemStack[] getTopItemStacks() {
 		return topStacks;
 	}
 
-	protected void sortTopStacks() {
-		if (!type.getIsClear() || (worldObj != null && worldObj.isRemote)) {
+	public boolean isContainerDirty(boolean checkImmediately) {
+		if(prevContents == null || prevContents.length != chestContents.length) {
+			return true;
+		} else if(checkImmediately || (numPlayersUsing > 0 && worldObj.getWorldTime() % 5 == 0)) {
+			for (int i = 0; i < this.chestContents.length; i++) {
+				if (!ItemStack.areItemStacksEqual(chestContents[i], prevContents[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void sortTopStacks() {
+		if ((worldObj == null || worldObj.isRemote)) {
 			return;
 		}
+		prevContents = chestContents.clone();
+		Arrays.fill(topStacks, null);
 		ItemStack[] tempCopy = new ItemStack[getSizeInventory()];
-		ItemStack[] contents = chestContents.clone();
-		boolean hasStuff = false;
+		ItemStack[] contents = chestContents;
 		int compressedIdx = 0;
 		mainLoop:
 		for (int i = 0; i < getSizeInventory(); i++) {
@@ -674,36 +662,21 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 					}
 				}
 				tempCopy[compressedIdx++] = contents[i].copy();
-				hasStuff = true;
 			}
 		}
-		if (!hasStuff && hadStuff) {
-			hadStuff = false;
-			for (int i = 0; i < topStacks.length; i++) {
-				topStacks[i] = null;
-			}
-			if (worldObj != null) {
-				worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-			}
-			return;
-		}
-		hadStuff = true;
-		Arrays.sort(tempCopy, new Comparator<ItemStack>() {
-			@Override
-			public int compare(ItemStack o1, ItemStack o2) {
-				if (o1 == null) {
-					return 1;
-				} else if (o2 == null) {
-					return -1;
-				} else {
-					return o2.stackSize - o1.stackSize;
-				}
+		Arrays.sort(tempCopy, (o1, o2) -> {
+			if (o1 == null) {
+				return 1;
+			} else if (o2 == null) {
+				return -1;
+			} else {
+				return o2.stackSize - o1.stackSize;
 			}
 		});
 		int p = 0;
-		for (int i = 0; i < tempCopy.length; i++) {
-			if (tempCopy[i] != null && tempCopy[i].stackSize > 0) {
-				topStacks[p++] = tempCopy[i];
+		for (ItemStack itemStack : tempCopy) {
+			if (itemStack != null && itemStack.stackSize > 0) {
+				topStacks[p++] = itemStack;
 				if (p == topStacks.length) {
 					break;
 				}
@@ -712,36 +685,6 @@ public class TileEntityShulkerBox extends TileEntity implements IInventory {
 		for (int i = p; i < topStacks.length; i++) {
 			topStacks[i] = null;
 		}
-		if (worldObj != null) {
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-		}
-	}
-
-	public void handlePacketData(int typeData, ItemStack[] intData) {
-		TileEntityShulkerBox chest = this;
-		if (blockMetadata != typeData) {
-			chest = updateFromMetadata(typeData);
-		}
-		if (blockMetadata == 6 && intData != null) {
-			int pos = 0;
-			for (int i = 0; i < chest.topStacks.length; i++) {
-				if (intData[pos] != null) {
-					chest.topStacks[i] = intData[pos];
-				} else {
-					chest.topStacks[i] = null;
-				}
-				pos++;
-			}
-		}
-	}
-
-	public TileEntityShulkerBox updateFromMetadata(int l) {
-		if (worldObj != null && worldObj.isRemote) {
-			if (l != blockMetadata) {
-//                worldObj.setTileEntity(xCoord, yCoord, zCoord, IronChestType.makeEntity(l));
-				return (TileEntityShulkerBox) worldObj.getTileEntity(xCoord, yCoord, zCoord);
-			}
-		}
-		return this;
+		worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 	}
 }

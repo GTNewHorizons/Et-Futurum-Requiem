@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.items.rawore.modded;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.items.BaseItem;
-import ganymedes01.etfuturum.lib.Reference;
 
 public class BaseRawOre extends BaseItem {
 	private final String subfolder;
@@ -18,7 +18,7 @@ public class BaseRawOre extends BaseItem {
 
 	@Override
 	public String getTextureDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package ganymedes01.etfuturum.mixins.early.sounds;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.world.World;
@@ -22,27 +22,27 @@ public class MixinEntitySkeleton extends EntityMob {
 	@Inject(method = "getLivingSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewLivingSound(CallbackInfoReturnable<String> cir) {
 		if (getSkeletonType() == 1) {
-			cir.setReturnValue(Reference.MCAssetVer + ":entity.wither_skeleton.ambient");
+			cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.wither_skeleton.ambient");
 		}
 	}
 
 	@Inject(method = "getHurtSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewHurtSound(CallbackInfoReturnable<String> cir) {
 		if (getSkeletonType() == 1) {
-			cir.setReturnValue(Reference.MCAssetVer + ":entity.wither_skeleton.hurt");
+			cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.wither_skeleton.hurt");
 		}
 	}
 
 	@Inject(method = "getDeathSound", at = @At(value = "HEAD"), cancellable = true)
 	protected void getNewDeathSound(CallbackInfoReturnable<String> cir) {
 		if (getSkeletonType() == 1) {
-			cir.setReturnValue(Reference.MCAssetVer + ":entity.wither_skeleton.death");
+			cir.setReturnValue(Tags.MC_ASSET_VER + ":entity.wither_skeleton.death");
 		}
 	}
 
 	@WrapOperation(method = "func_145780_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntitySkeleton;playSound(Ljava/lang/String;FF)V"))
 	protected void playStepSound_inject(EntitySkeleton instance, String s, float volume, float pitch, Operation<Void> original) {
-		original.call(instance, getSkeletonType() == 1 ? Reference.MCAssetVer + ":entity.wither_skeleton.step" : s, volume, pitch);
+		original.call(instance, getSkeletonType() == 1 ? Tags.MC_ASSET_VER + ":entity.wither_skeleton.step" : s, volume, pitch);
 	}
 
 	@Shadow

@@ -1,14 +1,12 @@
 package ganymedes01.etfuturum.world;
 
-import com.google.common.collect.Lists;
 import cpw.mods.fml.common.IWorldGenerator;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.blocks.BlockChorusFlower;
-import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.world.end.dimension.WorldProviderEFREnd;
-import ganymedes01.etfuturum.world.generate.WorldGenDeepslateLayerBlob;
 import ganymedes01.etfuturum.world.generate.WorldGenMinableCustom;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenBamboo;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenCaveVines;
@@ -33,8 +31,8 @@ import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.apache.commons.lang3.ArrayUtils;
+import roadhog360.hogutils.api.hogtags.helpers.BiomeTags;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -43,7 +41,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	public static final EtFuturumWorldGenerator INSTANCE = new EtFuturumWorldGenerator();
 
-	protected final List<WorldGenMinable> stoneGen = new LinkedList<WorldGenMinable>();
+	protected final List<WorldGenMinable> stoneGen = new LinkedList<>();
 
 	protected final WorldGenMinable copperGen = new WorldGenMinable(ModBlocks.COPPER_ORE.get(), ConfigWorld.maxCopperPerCluster);
 
@@ -52,9 +50,6 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected final WorldGenMinable debrisGen = new WorldGenMinableCustom(ModBlocks.ANCIENT_DEBRIS.get(), ConfigWorld.debrisMax, Blocks.netherrack);
 	protected final WorldGenMinable smallDebrisGen = new WorldGenMinableCustom(ModBlocks.ANCIENT_DEBRIS.get(), ConfigWorld.smallDebrisMax, Blocks.netherrack);
 	protected final WorldGenMinable mesaGoldGen = new WorldGenMinable(Blocks.gold_ore, 8);
-
-	protected final WorldGenMinable deepslateBlobGen = new WorldGenDeepslateLayerBlob(ConfigWorld.maxDeepslatePerCluster, false);
-	protected final WorldGenMinable tuffGen = new WorldGenDeepslateLayerBlob(ConfigWorld.maxTuffPerCluster, true);
 
 	protected WorldGenerator amethystGen;
 	protected WorldGenerator fossilGen;
@@ -67,16 +62,8 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
 
-	private List<BiomeGenBase> fossilBiomes;
-	private List<BiomeGenBase> berryBushBiomes;
-	private List<BiomeGenBase> cornflowerBiomes;
-	private List<BiomeGenBase> lilyValleyBiomes;
-	private List<BiomeGenBase> bambooBiomes;
-	private List<BiomeGenBase> mudBiomes;
-
 	//trees
 	protected WorldGenAbstractTree cherryTreeGen;
-	private List<BiomeGenBase> cherryBiomes;
 
 	protected EtFuturumWorldGenerator() {
 		stoneGen.add(new WorldGenMinableCustom(ModBlocks.STONE.get(), 1, ConfigWorld.maxStonesPerCluster, Blocks.stone));
@@ -101,12 +88,16 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			}
 			fossilBiomesArray = ArrayUtils.addAll(fossilBiomesArray, BiomeDictionary.getBiomesForType(Type.SWAMP));
 			fossilBiomesArray = Utils.excludeBiomesFromTypes(fossilBiomesArray, Type.NETHER, Type.END);
-			fossilBiomes = Arrays.asList(fossilBiomesArray);
+			for(BiomeGenBase biome : fossilBiomesArray) {
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_feature/fossil");
+			}
 			fossilGen = new WorldGenFossil();
 		}
 
 		if (ModBlocks.SWEET_BERRY_BUSH.isEnabled()) {
-			berryBushBiomes = Arrays.asList(Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.CONIFEROUS)));
+			for(BiomeGenBase biome : Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.CONIFEROUS))) {
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/sweet_berry_bushes");
+			}
 			berryBushGen = new WorldGenFlowers(ModBlocks.SWEET_BERRY_BUSH.get());
 			((WorldGenFlowers) berryBushGen).func_150550_a(ModBlocks.SWEET_BERRY_BUSH.get(), 3);
 		}
@@ -114,7 +105,9 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 		if (ModBlocks.LILY_OF_THE_VALLEY.isEnabled()) {
 			BiomeGenBase[] lilyValleyBiomeArray = BiomeDictionary.getBiomesForType(Type.FOREST);
 			lilyValleyBiomeArray = Utils.excludeBiomesFromTypes(lilyValleyBiomeArray, Type.JUNGLE, Type.DRY, Type.HOT, Type.SNOWY, Type.COLD);
-			lilyValleyBiomes = Arrays.asList(lilyValleyBiomeArray);
+			for(BiomeGenBase biome : lilyValleyBiomeArray) {
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/lilies_of_the_valley");
+			}
 			lilyValleyGen = new WorldGenFlowers(ModBlocks.LILY_OF_THE_VALLEY.get());
 		}
 
@@ -122,23 +115,22 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			BiomeGenBase[] cornflowerBiomeArray = BiomeDictionary.getBiomesForType(Type.PLAINS);
 			cornflowerBiomeArray = Utils.excludeBiomesFromTypes(cornflowerBiomeArray, Type.SAVANNA, Type.SNOWY, Type.SAVANNA);
 			cornflowerBiomeArray = ArrayUtils.add(cornflowerBiomeArray, BiomeGenBase.getBiome(BiomeGenBase.forest.biomeID + 128));
-			cornflowerBiomes = Arrays.asList(cornflowerBiomeArray);
+			for(BiomeGenBase biome : cornflowerBiomeArray) {
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/cornflowers");
+			}
 			cornflowerGen = new WorldGenFlowers(ModBlocks.CORNFLOWER.get());
-			for (BiomeGenBase biome : cornflowerBiomes) {
+			for (BiomeGenBase biome : cornflowerBiomeArray) {
+				// Affects bone meal only, not actual worldgen.
 				biome.addFlower(ModBlocks.CORNFLOWER.get(), 0, 5);
 			}
 		}
 
 		if (ModBlocks.BAMBOO.isEnabled() && ConfigWorld.bambooWorldgen) {
-			if (ModsList.BIOMES_O_PLENTY.isLoaded()) { //BoP replaces vanilla jungles with a BoP version but forgets to tag them
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(21), Type.JUNGLE); //Gets biomes by ID so we get the BOP version
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(22), Type.JUNGLE);
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(23), Type.JUNGLE);
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(149), Type.JUNGLE);
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(151), Type.JUNGLE);
-			}
 			bambooGen = new WorldGenBamboo(ModBlocks.BAMBOO.get());
-			bambooBiomes = Arrays.asList(Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.JUNGLE)));
+			for(BiomeGenBase biome : Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.JUNGLE))) {
+				String type = ArrayUtils.contains(BiomeDictionary.getTypesForBiome(biome), Type.SPARSE) ? "sparse_bamboo" : "dense_bamboo";
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/" + type);
+			}
 		}
 
 		if (ModBlocks.GLOW_LICHEN.isEnabled())
@@ -152,32 +144,34 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 		}
         
 		if (ModBlocks.CHERRY_LOG.isEnabled() && ModBlocks.LEAVES.isEnabled()) {
+		{
 			BiomeGenBase[] cherryBiomeArray = BiomeDictionary.getBiomesForType(Type.MOUNTAIN);
 			cherryBiomeArray = Utils.excludeBiomesFromTypesWithDefaults(cherryBiomeArray, Type.SNOWY, Type.HOT, Type.SANDY, Type.MESA, Type.SPARSE, Type.JUNGLE);
-			cherryBiomes = Arrays.asList(cherryBiomeArray);
-			cherryTreeGen = new WorldGenCherryTrees(false);
-		}
+			if (ModBlocks.CHERRY_LOG.isEnabled() && ModBlocks.LEAVES.isEnabled()) {
+				for(BiomeGenBase biome : cherryBiomeArray) {
+					BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/cherry_tree");
+				}
+				cherryTreeGen = new WorldGenCherryTrees(false);
+			}
 
-		if (ModBlocks.PINK_PETALS.isEnabled()) {
-			pinkPetalsGen = new WorldGenPinkPetals(ModBlocks.PINK_PETALS.get());
-			for (BiomeGenBase biome : cherryBiomes) {
-				biome.addFlower(ModBlocks.PINK_PETALS.get(), 0, 1);
-				biome.addFlower(ModBlocks.PINK_PETALS.get(), 4, 1);
-				biome.addFlower(ModBlocks.PINK_PETALS.get(), 8, 1);
-				biome.addFlower(ModBlocks.PINK_PETALS.get(), 12, 1);
+			if (ModBlocks.PINK_PETALS.isEnabled()) {
+				pinkPetalsGen = new WorldGenPinkPetals(ModBlocks.PINK_PETALS.get());
+				for (BiomeGenBase biome : cherryBiomeArray) {
+					// Affects bone meal only, not actual worldgen.
+					biome.addFlower(ModBlocks.PINK_PETALS.get(), 0, 1);
+					biome.addFlower(ModBlocks.PINK_PETALS.get(), 4, 1);
+					biome.addFlower(ModBlocks.PINK_PETALS.get(), 8, 1);
+					biome.addFlower(ModBlocks.PINK_PETALS.get(), 12, 1);
+				}
 			}
 		}
 
 		if (ModBlocks.MUD.isEnabled()) {
 			mudGen = new WorldGenClay(4);
 			((WorldGenClay) mudGen).field_150546_a/*block*/ = ModBlocks.MUD.get();
-
-			if (ModsList.BIOMES_O_PLENTY.isLoaded()) { //BoP replaces vanilla swamps with a BoP version but forgets to tag them
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(6), Type.SWAMP); //Gets biomes by ID so we get the BOP version
-				BiomeDictionary.registerBiomeType(BiomeGenBase.getBiome(134), Type.SWAMP);
+			for(BiomeGenBase biome : BiomeDictionary.getBiomesForType(Type.SWAMP)) {
+				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/mud_blob");
 			}
-
-			mudBiomes = Lists.newArrayList(BiomeDictionary.getBiomesForType(Type.SWAMP));
 		}
 	}
 
@@ -209,7 +203,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			if (lilyValleyGen != null) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
-				if (world.getHeightValue(x, z) > 0 && lilyValleyBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+				if (world.getHeightValue(x, z) > 0 && BiomeTags.hasTag(world.getBiomeGenForCoords(x, z), Tags.MOD_ID + ":has_decorator/lilies_of_the_valley")) {
 					lilyValleyGen.generate(world, rand, x, nextHeightInt(rand, world.getHeightValue(x, z) * 2), z);
 				}
 			}
@@ -217,7 +211,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			if (cornflowerGen != null) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
-				if (world.getHeightValue(x, z) > 0 && cornflowerBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+				if (world.getHeightValue(x, z) > 0 && BiomeTags.hasTag((world.getBiomeGenForCoords(x, z)), Tags.MOD_ID + ":has_decorator/cornflowers")) {
 					cornflowerGen.generate(world, rand, x, nextHeightInt(rand, world.getHeightValue(x, z) * 2), z);
 				}
 			}
@@ -225,7 +219,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			if (berryBushGen != null) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
-				if (world.getHeightValue(x, z) > 0 && berryBushBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+				if (world.getHeightValue(x, z) > 0 && BiomeTags.hasTag((world.getBiomeGenForCoords(x, z)), Tags.MOD_ID + ":has_decorator/sweet_berry_bushes")) {
 					berryBushGen.generate(world, rand, x, nextHeightInt(rand, world.getHeightValue(x, z) * 2), z);
 				}
 			}
@@ -234,9 +228,12 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
 				int y = world.getHeightValue(x, z);
-				if (y > 0 && bambooBiomes.contains(world.getBiomeGenForCoords(x, z))) {
-					int count = rand.nextInt(256);
-					count = count < 240 ? 16 : count;
+				// null = no bamboo, neither tag present
+				BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
+				Boolean dense = BiomeTags.hasTag(biome, Tags.MOD_ID + ":has_decorator/dense_bamboo")
+						? BiomeTags.hasTag(biome, Tags.MOD_ID + ":has_decorator/sparse_bamboo") : null;
+				if (y > 0 && dense != null) {
+					int count = dense && rand.nextInt(16) == 0 ? 256 : 16;
 					for (int i = 0; i < count; i++) {
 						int xoff = x + rand.nextInt(10) - rand.nextInt(10);
 						int yoff = y + rand.nextInt(4) - rand.nextInt(4);
@@ -270,19 +267,19 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
                 }
 			}
 
-			if (cherryTreeGen != null) {
+			if (cherryTreeGen != null && ConfigWorld.cherryTreeRarity > 0) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
-				int y = world.getHeightValue(x, z);
-				Block block = world.getBlock(x, y - 1, z);
-				if (y > 0 && block.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) ModBlocks.SAPLING.get())) {
-					BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
-					int rng = cherryBiomes.contains(biome) ? ConfigWorld.cherryTreeRarity : 0;
-					if (rng > 0 && rand.nextInt(rng) == 0) {
-						if (cherryTreeGen.generate(world, rand, x, y, z)) {
-							cherryTreeGen.func_150524_b(world, rand, x, y, z);
-							if (pinkPetalsGen != null) {
-								pinkPetalsGen.generate(world, rand, x, y, z);
+				if(BiomeTags.hasTag(world.getBiomeGenForCoords(x, z), Tags.MOD_ID + ":has_decorator/cherry_tree")) {
+					int y = world.getHeightValue(x, z);
+					Block block = world.getBlock(x, y - 1, z);
+					if (y > 0 && block.canSustainPlant(world, x, y - 1, z, ForgeDirection.UP, (IPlantable) ModBlocks.SAPLING.get())) {
+						if (rand.nextInt(ConfigWorld.cherryTreeRarity) == 0) {
+							if (cherryTreeGen.generate(world, rand, x, y, z)) {
+								cherryTreeGen.func_150524_b(world, rand, x, y, z);
+								if (pinkPetalsGen != null) {
+									pinkPetalsGen.generate(world, rand, x, y, z);
+								}
 							}
 						}
 					}
@@ -293,7 +290,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
 				int y = world.getHeightValue(x, z);
-				if (y > 0 && mudBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+				if (y > 0 && BiomeTags.hasTag((world.getBiomeGenForCoords(x, z)), Tags.MOD_ID + ":has_decorator/mud_blob")) {
 					mudGen.generate(world, rand, x, world.getTopSolidOrLiquidBlock(x, z), z);
 				}
 			}
@@ -301,7 +298,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			if (fossilGen != null && rand.nextInt(64) == 0 && ArrayUtils.contains(ConfigWorld.fossilDimensionBlacklist, world.provider.dimensionId) == ConfigWorld.fossilDimensionBlacklistAsWhitelist) {
 				x = (chunkX << 4) + rand.nextInt(16) + 8;
 				z = (chunkZ << 4) + rand.nextInt(16) + 8;
-				if (fossilBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+				if (BiomeTags.hasTag((world.getBiomeGenForCoords(x, z)), Tags.MOD_ID + ":has_feature/fossil")) {
 					fossilGen.generate(world, rand, x, MathHelper.getRandomIntegerInRange(rand, 40, 49), z);
 				}
 			}
@@ -391,7 +388,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 		return rand.nextInt(i);
 	}
 
-	protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
+	public static boolean isFlatWorld(IChunkProvider chunkProvider) {
 		return chunkProvider instanceof ChunkProviderFlat && !chunkProvider.getClass().getName().equals("com.rwtema.extrautils.worldgen.Underdark.ChunkProviderUnderdark");
 	}
 }

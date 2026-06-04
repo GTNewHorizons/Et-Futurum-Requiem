@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.blocks;
 
 import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -73,6 +73,6 @@ public class BaseBlock extends Block {
 	}
 
 	public String getNameDomain() {
-		return Reference.MOD_ID;
+		return Tags.MOD_ID;
 	}
 }

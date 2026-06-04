@@ -10,6 +10,7 @@ import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.client.gui.inventory.*;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.*;
 import ganymedes01.etfuturum.core.handlers.EntityEventHandler;
 import ganymedes01.etfuturum.core.handlers.SculkEventHandler;
@@ -20,16 +21,13 @@ import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.entities.*;
 import ganymedes01.etfuturum.inventory.*;
 import ganymedes01.etfuturum.lib.GUIIDs;
-import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.tileentities.*;
-import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -52,11 +50,6 @@ public class CommonProxy implements IGuiHandler {
 		FMLCommonHandler.instance().bus().register(WorldEventHandler.INSTANCE);
 		MinecraftForge.TERRAIN_GEN_BUS.register(WorldEventHandler.INSTANCE);
 
-		if (ConfigMixins.enableSpectatorMode) {
-			FMLCommonHandler.instance().bus().register(SpectatorMode.INSTANCE);
-			MinecraftForge.EVENT_BUS.register(SpectatorMode.INSTANCE);
-		}
-
 		if (ModBlocks.SCULK_CATALYST.isEnabled()) {
 			FMLCommonHandler.instance().bus().register(SculkEventHandler.INSTANCE);
 			MinecraftForge.EVENT_BUS.register(SculkEventHandler.INSTANCE);
@@ -76,6 +69,9 @@ public class CommonProxy implements IGuiHandler {
 		}
 		if (ModBlocks.BARREL.isEnabled()) {
 			GameRegistry.registerTileEntity(TileEntityBarrel.class, Utils.getUnlocalisedName("barrel"));
+			if(ModsList.IRON_CHEST.isLoaded()) {
+				GameRegistry.registerTileEntity(TileEntityBarrel.ClearTE.class, Utils.getUnlocalisedName("clear_barrel"));
+			}
 		}
 		if (ModBlocks.SMOKER.isEnabled()) {
 			GameRegistry.registerTileEntity(TileEntitySmoker.class, Utils.getUnlocalisedName("smoker"));
@@ -114,7 +110,7 @@ public class CommonProxy implements IGuiHandler {
 		if (ConfigEntities.enableRabbit) {
 			ModEntityList.registerEntity(EntityRabbit.class, "rabbit", 3, EtFuturum.instance, 80, 3, true, 0x995F40, 0x734831);
 
-			EntityRegistry.addSpawn(EntityRabbit.class, 5, 3, 3, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.SANDY));
+			EntityRegistry.addSpawn(EntityRabbit.class, 3, 1, 3, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.SANDY));
 			BiomeGenBase[] array = BiomeDictionary.getBiomesForType(Type.SNOWY);
 			array = ArrayUtils.addAll(array, BiomeDictionary.getBiomesForType(Type.PLAINS));
 			array = ArrayUtils.addAll(array, BiomeDictionary.getBiomesForType(Type.FOREST));
@@ -123,7 +119,7 @@ public class CommonProxy implements IGuiHandler {
 					ArrayUtils.removeElement(array, biome);
 				}
 			}
-			EntityRegistry.addSpawn(EntityRabbit.class, 10, 3, 3, EnumCreatureType.creature, array);
+			EntityRegistry.addSpawn(EntityRabbit.class, 6, 1, 3, EnumCreatureType.creature, array);
 		}
 
 		if (ConfigBlocksItems.enableArmourStand) {
@@ -136,6 +132,10 @@ public class CommonProxy implements IGuiHandler {
 
 		if (ConfigBlocksItems.enableTippedArrows) {
 			ModEntityList.registerEntity(EntityTippedArrow.class, "tipped_arrow", 2, EtFuturum.instance, 64, 20, true);
+		}
+
+		if (ConfigBlocksItems.enableSpectralArrows) {
+			ModEntityList.registerEntity(EntitySpectralArrow.class, "spectral_arrow", 25, EtFuturum.instance, 64, 20, true);
 		}
 
 		if (FMLCommonHandler.instance().getSide() == Side.CLIENT && FMLClientHandler.instance().hasOptifine()) {
@@ -233,6 +233,25 @@ public class CommonProxy implements IGuiHandler {
 			ModEntityList.registerEntity(EntityBee.class, "bee", 21, EtFuturum.instance, 80, 1, true, 0xEDC343, 0x43241B);
 		}
 
+		if (ConfigEntities.enableFoxes) {
+			ModEntityList.registerEntity(EntityFox.class, "fox", 22, EtFuturum.instance, 64, 1, true, 0xD5B69F, 0xCC6920);
+			EntityRegistry.addSpawn(EntityFox.class, 8, 2, 4, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.CONIFEROUS));
+		}
+
+		if (ConfigEntities.enablePolarBears) {
+			ModEntityList.registerEntity(EntityPolarBear.class, "polar_bear", 23, EtFuturum.instance, 80, 3, true, 0xF2F2F2, 0x959590);
+			EntityRegistry.addSpawn(EntityPolarBear.class, 1, 1, 2, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.SNOWY));
+		}
+
+		if (ConfigEntities.enableGoats) {
+			ModEntityList.registerEntity(EntityGoat.class, "goat", 24, EtFuturum.instance, 80, 3, true, 0xA5947C, 0x55493E);
+			List<BiomeGenBase> goatBiomes = new ArrayList<>(Arrays.asList(BiomeDictionary.getBiomesForType(Type.MOUNTAIN)));
+			goatBiomes.retainAll(Arrays.asList(BiomeDictionary.getBiomesForType(Type.SNOWY)));
+			if (!goatBiomes.isEmpty()) {
+				EntityRegistry.addSpawn(EntityGoat.class, 5, 1, 3, EnumCreatureType.creature, goatBiomes.toArray(new BiomeGenBase[goatBiomes.size()]));
+			}
+		}
+
 		//make magmas slightly more common, hopefully.
 		EntityRegistry.removeSpawn(EntityMagmaCube.class, EnumCreatureType.monster, BiomeGenBase.hell);
 		EntityRegistry.addSpawn(EntityMagmaCube.class, 2, 4, 4, EnumCreatureType.monster, BiomeGenBase.hell);
@@ -245,7 +264,8 @@ public class CommonProxy implements IGuiHandler {
 			case GUIIDs.ANVIL -> new ContainerAnvil(player, world, x, y, z);
 			case GUIIDs.BREWING_STAND ->
 					new ContainerNewBrewingStand(player.inventory, (TileEntityNewBrewingStand) world.getTileEntity(x, y, z));
-			case GUIIDs.BARREL -> new ContainerChest(player.inventory, (TileEntityBarrel) world.getTileEntity(x, y, z));
+			case GUIIDs.BARREL ->
+					new ContainerChestGeneric(player.inventory, (TileEntityBarrel) world.getTileEntity(x, y, z), ((TileEntityBarrel) world.getTileEntity(x, y, z)).getRowSize(), ((TileEntityBarrel) world.getTileEntity(x, y, z)).getSizeInventory() != 27);
 			case GUIIDs.SMOKER ->
 					new ContainerSmoker(player.inventory, (TileEntitySmoker) world.getTileEntity(x, y, z));
 			case GUIIDs.BLAST_FURNACE ->
@@ -264,7 +284,7 @@ public class CommonProxy implements IGuiHandler {
 			case GUIIDs.ANVIL -> new GuiAnvil(player, world, x, y, z);
 			case GUIIDs.BREWING_STAND ->
 					new GuiNewBrewingStand(player.inventory, (TileEntityNewBrewingStand) world.getTileEntity(x, y, z));
-			case GUIIDs.BARREL -> new GuiChest(player.inventory, (TileEntityBarrel) world.getTileEntity(x, y, z));
+			case GUIIDs.BARREL -> new GuiBarrel(player.inventory, (TileEntityBarrel) world.getTileEntity(x, y, z));
 			case GUIIDs.SMOKER -> new GuiSmoker(player.inventory, (TileEntitySmoker) world.getTileEntity(x, y, z));
 			case GUIIDs.BLAST_FURNACE ->
 					new GuiBlastFurnace(player.inventory, (TileEntityBlastFurnace) world.getTileEntity(x, y, z));

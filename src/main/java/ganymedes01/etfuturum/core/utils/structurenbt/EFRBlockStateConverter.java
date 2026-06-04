@@ -12,10 +12,31 @@ public class EFRBlockStateConverter extends BlockStateConverter {
 
 	public static final BlockStateConverter INSTANCE = new EFRBlockStateConverter();
 
+	private static final String[] DYE_COLORS = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};
+
+	@Override
+	public BlockStateContainer createBlockStateContainer(String blockName, Block block, Map<String, String> blockStates, ForgeDirection dir) {
+		BlockStateContainer container = super.createBlockStateContainer(blockName, block, blockStates, dir);
+		if (container.getType() == BlockStateContainer.BlockStateType.BLOCK_ENTITY && blockName.contains("banner")) {
+			net.minecraft.nbt.NBTTagCompound nbt = new net.minecraft.nbt.NBTTagCompound();
+			int color = 0;
+			for (int i = 0; i < DYE_COLORS.length; i++) {
+				if (blockName.contains(DYE_COLORS[i])) {
+					color = i;
+					break;
+				}
+			}
+			nbt.setInteger("Base", color);
+			nbt.setBoolean("IsStanding", !blockName.endsWith("_wall_banner") && !blockName.equals("minecraft:wall_banner"));
+			container.setCompound(nbt);
+		}
+		return container;
+	}
+
 	@Override
 	public int getMetaFromState(String blockName, Map<String, String> blockStates, ForgeDirection dir) {
 		if (blockName.equals("minecraft:bone_block") && ConfigWorld.fossilBlock != null) {
-			if (ConfigWorld.fossilBlock.getObject() == Blocks.quartz_block && ConfigWorld.fossilBlock.getMeta() == 2) {
+			if (ConfigWorld.fossilBlock.get() == Blocks.quartz_block && ConfigWorld.fossilBlock.getMeta() == 2) {
 				return super.getMetaFromState("minecraft:quartz_pillar", blockStates, dir);
 			}
 		}
@@ -30,7 +51,7 @@ public class EFRBlockStateConverter extends BlockStateConverter {
 		switch (truncatedName) {
 			case "bone_block":
 				if (ConfigWorld.fossilBlock != null) {
-					if (ConfigWorld.fossilBlock.getObject() == Blocks.quartz_block && ConfigWorld.fossilBlock.getMeta() == 2) {
+					if (ConfigWorld.fossilBlock.get() == Blocks.quartz_block && ConfigWorld.fossilBlock.getMeta() == 2) {
 						return meta;
 					}
 					return meta + ConfigWorld.fossilBlock.getMeta();
@@ -47,18 +68,14 @@ public class EFRBlockStateConverter extends BlockStateConverter {
 		String truncatedName = blockName.substring(blockName.indexOf(":") + 1);
 		String nameToFind = truncatedName;
 
-		switch (truncatedName) { //Blocks we don't have but are used in a structure.
-			case "dragon_head":
-			case "dragon_wall_head":
-				return Blocks.air;
-		}
+		// Removed explicit mapping to Blocks.air for dragon heads
 
 		switch (truncatedName) {
 			case "stone":
 				return Blocks.stone;
 			case "bone_block":
 				if (ConfigWorld.fossilBlock != null) {
-					return ConfigWorld.fossilBlock.getObject();
+					return ConfigWorld.fossilBlock.get();
 				}
 				break;
 			case "end_stone_bricks":

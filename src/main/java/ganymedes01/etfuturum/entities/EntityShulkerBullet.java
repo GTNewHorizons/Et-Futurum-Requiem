@@ -1,10 +1,10 @@
 package ganymedes01.etfuturum.entities;
 
 import com.google.common.collect.Lists;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.potion.ModPotions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -354,7 +354,7 @@ public class EntityShulkerBullet extends Entity {
 	protected void bulletHit(MovingObjectPosition result) {
 		if (result.entityHit == null) {
 			this.worldObj.spawnParticle("largeexplode", this.posX + .5D, this.posY + .5D, this.posZ + .5D, 0.2D, 0.2D, 0.2D);
-			this.playSound(Reference.MOD_ID + ":entity.shulker_bullet.hit", 1, 1);
+			this.playSound(Tags.MOD_ID + ":entity.shulker_bullet.hit", 1, 1);
 		} else if (!worldObj.isRemote) {
 			boolean flag = result.entityHit.attackEntityFrom(new EntityDamageSourceIndirect("mob", this, this.owner), 4.0F);
 
@@ -388,7 +388,7 @@ public class EntityShulkerBullet extends Entity {
 			this.worldObj.spawnParticle("crit", this.posX + (double) (this.rand.nextFloat() * bound * 2.0F) - (double) bound, this.posY + (double) (this.rand.nextFloat() * bound), this.posZ + (double) (this.rand.nextFloat() * bound * 2.0F) - (double) bound, 0, 0, 0);
 		}
 		if (!this.worldObj.isRemote) {
-			this.playSound(Reference.MOD_ID + ":entity.shulker_bullet.hurt", 1.0F, 1.0F);
+			this.playSound(Tags.MOD_ID + ":entity.shulker_bullet.hurt", 1.0F, 1.0F);
 			this.setDead();
 		}
 

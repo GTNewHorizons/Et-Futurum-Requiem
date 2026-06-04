@@ -3,12 +3,13 @@ package ganymedes01.etfuturum.blocks;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.world.WorldCoord;
+import lombok.NonNull;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -20,10 +21,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.apache.commons.lang3.ArrayUtils;
+import roadhog360.hogutils.api.blocksanditems.block.IMultiBlockSound;
 
 import java.util.*;
 
-public class BlockSponge extends BaseSubtypesBlock {
+public class BlockSponge extends BaseSubtypesBlock implements IMultiBlockSound {
 
 	public BlockSponge() {
 		super(Material.sponge, "sponge", "wet_sponge");
@@ -55,7 +57,7 @@ public class BlockSponge extends BaseSubtypesBlock {
 			if (!wet && absorb(worldIn, x, y, z)) {
 				worldIn.setBlockMetadataWithNotify(x, y, z, 1, 2);
 				if (ConfigSounds.newBlockSounds) {
-					worldIn.playSoundEffect(x + .5D, y + .5D, z + .5D, Reference.MCAssetVer + ":block.sponge.absorb", 1, 1);
+					worldIn.playSoundEffect(x + .5D, y + .5D, z + .5D, Tags.MC_ASSET_VER + ":block.sponge.absorb", 1, 1);
 				}
 			}
 		} else if (wet) {
@@ -159,5 +161,10 @@ public class BlockSponge extends BaseSubtypesBlock {
 	@Override
 	public Item getItemDropped(int meta, Random rand, int fortune) {
 		return Item.getItemFromBlock(ConfigWorld.tileReplacementMode == -1 || meta == 1 ? ModBlocks.SPONGE.get() : Blocks.sponge);
+	}
+
+	@Override
+	public @NonNull SoundType getSoundType(World world, int i, int i1, int i2, SoundMode soundMode) {
+		return world.getBlockMetadata(i, i1, i2) == 1 ? ModSounds.soundWetSponge : stepSound;
 	}
 }

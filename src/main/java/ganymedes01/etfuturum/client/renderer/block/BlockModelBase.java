@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.client.renderer.block;
 
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import ganymedes01.etfuturum.client.OpenGLHelper;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.EntityRenderer;
@@ -18,6 +19,10 @@ public abstract class BlockModelBase implements ISimpleBlockRenderingHandler {
 
 	protected BlockModelBase(int modelID) {
 		this.modelID = modelID;
+	}
+
+	protected BlockModelBase() {
+		this(RenderingRegistry.getNextAvailableRenderId());
 	}
 
 	@Override

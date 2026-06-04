@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.items;
 
-import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.Tags;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -86,8 +86,8 @@ public class ItemChorusFruit extends BaseFood {
 			entity.worldObj.spawnParticle("portal", d7, d8, d9, f, f1, f2);
 		}
 
-		entity.worldObj.playSoundEffect(d3, d4, d5, Reference.MCAssetVer + ":item.chorus_fruit.teleport", 1.0F, 1.0F);
-		entity.playSound(Reference.MCAssetVer + ":item.chorus_fruit.teleport", 1.0F, 1.0F);
+		entity.worldObj.playSoundEffect(d3, d4, d5, Tags.MC_ASSET_VER + ":item.chorus_fruit.teleport", 1.0F, 1.0F);
+		entity.playSound(Tags.MC_ASSET_VER + ":item.chorus_fruit.teleport", 1.0F, 1.0F);
 		return true;
 	}
 }

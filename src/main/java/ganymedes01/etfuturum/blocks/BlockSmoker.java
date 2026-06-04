@@ -4,10 +4,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.lib.GUIIDs;
-import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntitySmoker;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFurnace;
@@ -61,7 +61,7 @@ public class BlockSmoker extends BlockFurnace {
 			float f = (4 + (random.nextInt(8) + 1) + random.nextFloat()) / 16;
 			if (ConfigSounds.furnaceCrackling && random.nextDouble() < 0.1D) {
 				worldIn.playSound(x + .5D, y + .5D, z + .5D,
-						Reference.MCAssetVer + ":block.smoker.smoke", 1,
+						Tags.MC_ASSET_VER + ":block.smoker.smoke", 1,
 						(worldIn.rand.nextFloat() * 0.1F) + 0.9F, false);
 			}
 			worldIn.spawnParticle("smoke", x + f, y + 1, z + f, 0.0D, 0.0D, 0.0D);

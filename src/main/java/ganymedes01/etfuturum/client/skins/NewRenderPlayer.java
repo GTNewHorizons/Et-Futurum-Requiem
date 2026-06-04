@@ -1,8 +1,8 @@
 package ganymedes01.etfuturum.client.skins;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.model.ModelPlayer;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -15,7 +15,7 @@ public class NewRenderPlayer extends RenderPlayer {
 
 	private boolean cachedAlex;
 
-	public static final ResourceLocation STEVE_SKIN = new ResourceLocation(Reference.MOD_ID, "textures/steve.png");
+	public static final ResourceLocation STEVE_SKIN = new ResourceLocation(Tags.MOD_ID, "textures/steve.png");
 	private static final ModelPlayer STEVE = new ModelPlayer(0.0F, false), ALEX = new ModelPlayer(0.0F, true);
 
 	public NewRenderPlayer() {
@@ -52,7 +52,7 @@ public class NewRenderPlayer extends RenderPlayer {
 	protected ResourceLocation getEntityTexture(AbstractClientPlayer player) {
 		if (!ConfigFunctions.enablePlayerSkinOverlay || player.getLocationSkin() == null)
 			return super.getEntityTexture(player);
-		return new ResourceLocation(Reference.MOD_ID, player.getLocationSkin().getResourcePath());
+		return new ResourceLocation(Tags.MOD_ID, player.getLocationSkin().getResourcePath());
 	}
 
 	/**

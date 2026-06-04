@@ -32,6 +32,7 @@ public enum ModItems {
 	CHORUS_FRUIT(ConfigBlocksItems.enableChorusFruit, new ItemChorusFruit()),
 	CHORUS_FRUIT_POPPED(ConfigBlocksItems.enableChorusFruit, new BaseItem("popped_chorus_fruit")),
 	TIPPED_ARROW(ConfigBlocksItems.enableTippedArrows, new ItemArrowTipped()),
+	SPECTRAL_ARROW(ConfigBlocksItems.enableSpectralArrows, new ItemSpectralArrow()),
 	LINGERING_POTION(ConfigBlocksItems.enableLingeringPotions, new ItemLingeringPotion()),
 	DRAGON_BREATH(ConfigBlocksItems.enableLingeringPotions, new BaseItem("dragon_breath").setContainerItem(Items.glass_bottle).setPotionEffect("-14+13")),
 	ELYTRA(ConfigMixins.enableElytra, new ItemArmorElytra()),
@@ -59,11 +60,22 @@ public enum ModItems {
 	SHULKER_SHELL(ConfigBlocksItems.enableShulkerBoxes, new BaseItem("shulker_shell")),
 	PIGSTEP_RECORD(ConfigBlocksItems.enablePigstep, new ItemEtFuturumRecord("pigstep")),
 	OTHERSIDE_RECORD(ConfigBlocksItems.enableOtherside, new ItemEtFuturumRecord("otherside")),
+	PRECIPICE_RECORD(ConfigBlocksItems.enablePrecipice, new ItemEtFuturumRecord("precipice")),
+	CREATOR_MUSIC_BOX_RECORD(ConfigBlocksItems.enableCreatorMusicBox, new ItemEtFuturumRecord("creator_music_box")),
+	CREATOR_RECORD(ConfigBlocksItems.enableCreator, new ItemEtFuturumRecord("creator")),
+	TEARS_RECORD(ConfigBlocksItems.enableTears, new ItemEtFuturumRecord("tears")),
+	LAVA_CHICKEN_RECORD(ConfigBlocksItems.enableLavaChicken, new ItemEtFuturumRecord("lava_chicken")),
+	FIVE_RECORD(ConfigBlocksItems.enable5, new ItemEtFuturumRecord("5")),
+	DISC_FRAGMENT_5(ConfigBlocksItems.enable5, new BaseItem("disc_fragment_5", true)),
 	AMETHYST_SHARD(ConfigBlocksItems.enableAmethyst, new BaseItem("amethyst_shard")),
-	SHULKER_BOX_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.shulkerBoxesIronChest, new ItemShulkerBoxUpgrade()),
+	SHULKER_BOX_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableShulkerBoxes
+			&& ConfigModCompat.shulkerBoxesIronChest && ConfigModCompat.shulkerBoxesIronChestUpgradeItem, new ItemShulkerBoxUpgrade()),
+	BARREL_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigBlocksItems.enableBarrel
+			&& ConfigModCompat.barrelIronChest && ConfigModCompat.barrelIronChestUpgradeItem, new ItemBarrelUpgrade()),
 	HONEYCOMB(ConfigBlocksItems.enableHoney, new BaseItem("honeycomb")),
 	HONEY_BOTTLE(ConfigBlocksItems.enableHoney, new ItemHoneyBottle()),
 	BAMBOO(ConfigBlocksItems.enableBambooBlocks, new ItemBamboo()),
+	GOAT_HORN(ConfigEntities.enableGoats, new ItemGoatHorn()),
 
 	OAK_BOAT(ConfigBlocksItems.enableNewBoats && !ConfigBlocksItems.replaceOldBoats, new ItemNewBoat("minecraft", "oak", () -> Item.getItemFromBlock(Blocks.planks), 0, false, false)),
 	OAK_CHEST_BOAT(ConfigBlocksItems.enableNewBoats, new ItemNewBoat("minecraft", "oak", () -> Item.getItemFromBlock(Blocks.planks), 0, true, false)),
@@ -99,8 +111,8 @@ public enum ModItems {
 	//Debug Item
 	DEBUGGING_TOOL(Reference.DEV_ENVIRONMENT, new DebugTestItem());
 
-	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT};
-	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT};
+	public static final ModItems[] CHEST_BOATS = new ModItems[]{OAK_CHEST_BOAT, SPRUCE_CHEST_BOAT, BIRCH_CHEST_BOAT, JUNGLE_CHEST_BOAT, ACACIA_CHEST_BOAT, DARK_OAK_CHEST_BOAT, CHERRY_CHEST_BOAT, BAMBOO_CHEST_RAFT};
+	public static final ModItems[] BOATS = new ModItems[]{OAK_BOAT, SPRUCE_BOAT, BIRCH_BOAT, JUNGLE_BOAT, ACACIA_BOAT, DARK_OAK_BOAT, CHERRY_BOAT, BAMBOO_RAFT};
 	public static final ModItems[] OLD_SIGN_ITEMS = new ModItems[]{ITEM_SIGN_SPRUCE, ITEM_SIGN_BIRCH, ITEM_SIGN_JUNGLE, ITEM_SIGN_ACACIA, ITEM_SIGN_DARK_OAK};
 
 	/*

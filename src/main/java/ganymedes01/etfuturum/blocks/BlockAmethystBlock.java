@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.blocks;
 
+import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.client.sound.ModSounds;
-import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
@@ -24,8 +24,8 @@ public class BlockAmethystBlock extends BaseBlock {
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity ent) {
 		if (!world.isRemote && ent instanceof IProjectile) {
-			ent.playSound(Reference.MCAssetVer + ":block.amethyst_block.hit", 1.0F, 0.5F + world.rand.nextFloat() * 1.2F);
-			ent.playSound(Reference.MCAssetVer + ":block.amethyst_block.chime", 1.0F, 0.5F + world.rand.nextFloat() * 1.2F);
+			ent.playSound(Tags.MC_ASSET_VER + ":block.amethyst_block.hit", 1.0F, 0.5F + world.rand.nextFloat() * 1.2F);
+			ent.playSound(Tags.MC_ASSET_VER + ":block.amethyst_block.chime", 1.0F, 0.5F + world.rand.nextFloat() * 1.2F);
 		}
 	}
 }

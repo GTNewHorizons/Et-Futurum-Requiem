@@ -19,7 +19,10 @@ public class ConfigEntities extends ConfigBase {
 	public static boolean enableNetherEndermen;
 	public static boolean enableShearableSnowGolems;
 	public static boolean enableBees;
+	public static boolean enablePolarBears;
+	public static boolean enableGoats;
 	public static boolean enableSquidInk;
+	public static boolean enableFoxes;
 
 	static final String catHostile = "hostile";
 	static final String catNeutral = "neutral";
@@ -47,9 +50,12 @@ public class ConfigEntities extends ConfigBase {
 		//passive
 		enableRabbit = getBoolean("enableRabbits", catPassive, true, "");
 		enableBrownMooshroom = getBoolean("enableBrownMooshroom", catPassive, true, "Brown mooshroom variant, the red mooshrooms turn into then when they are hit by lightning.");
+		enableFoxes = getBoolean("enableFoxes", catPassive, true, "");
+		enableGoats = getBoolean("enableGoats", catPassive, true, "Goats spawn in snowy mountain biomes, can be milked, and drop horns when ramming hard blocks.");
 
 		//neutral
 		enableBees = getBoolean("enableBees", catNeutral, true, "");
+		enablePolarBears = getBoolean("enablePolarBears", catNeutral, true, "Polar bears spawn in snowy biomes and defend nearby cubs.");
 
 		//hostile
 		enableEndermite = getBoolean("enableEndermite", catHostile, true, "Rarely spawns when the player lands from Ender Pearl throws");
