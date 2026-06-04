@@ -32,6 +32,9 @@ public class EtFuturumLateMixins implements ILateMixinLoader {
 			if (loadedMods.contains("TConstruct")) {
 				mixins.add("spectator.MixinArmorProxyClientTConstruct");
 			}
+			if (loadedMods.contains("Thaumcraft")) {
+				mixins.add("spectator.MixinItemHoverHarnessThaumcraft");
+			}
 		}
 
 		return mixins;
