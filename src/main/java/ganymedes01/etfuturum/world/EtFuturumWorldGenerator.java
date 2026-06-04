@@ -166,11 +166,12 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			}
 		}
 
-		if (ModBlocks.MUD.isEnabled()) {
-			mudGen = new WorldGenClay(4);
-			((WorldGenClay) mudGen).field_150546_a/*block*/ = ModBlocks.MUD.get();
-			for(BiomeGenBase biome : BiomeDictionary.getBiomesForType(Type.SWAMP)) {
-				BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/mud_blob");
+			if (ModBlocks.MUD.isEnabled()) {
+				mudGen = new WorldGenClay(4);
+				((WorldGenClay) mudGen).field_150546_a/*block*/ = ModBlocks.MUD.get();
+				for(BiomeGenBase biome : BiomeDictionary.getBiomesForType(Type.SWAMP)) {
+					BiomeTags.addTags(biome, Tags.MOD_ID + ":has_decorator/mud_blob");
+				}
 			}
 		}
 	}
