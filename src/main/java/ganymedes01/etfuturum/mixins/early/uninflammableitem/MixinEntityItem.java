@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -40,9 +39,6 @@ public abstract class MixinEntityItem extends Entity {
 					|| tags.contains("ingotNetherite") || tags.contains("blockNetherite")) {
 				this.isImmuneToFire = true;
 				this.fireResistance = Integer.MAX_VALUE;
-			} else if (isImmuneToFire) {
-				this.isImmuneToFire = false;
-				this.fireResistance = 1;
 			}
 		}
 	}
@@ -54,29 +50,9 @@ public abstract class MixinEntityItem extends Entity {
 		}
 	}
 
-	/**
-	 * TODO: This should be changed to a WrapOperation
-	 * I've tried rearranging all of the motion values in every way I could think of.
-	 * Yet no matter what I do changing this to WrapOperation either causes no float or the item to sling out of and bounce on lava.
-	 * So this stays as a redirect for now until I can find some in-between
-	 */
-	@Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;moveEntity(DDD)V"))
-	private void floatLava(EntityItem instance, double mx, double my, double mz) {
-		double buoyancy = 0;
-		if (isImmuneToFire && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava) {
-			motionY += 0.04D; //Necessary to do this too or the ingot floats slightly below the lava for some reason
-			//Yes I tried setting my to += 0.08D it DOES NOT FIX IT
-			my += 0.04D;
-			buoyancy = 0.3D;
-			mx *= 0.5D;
-			mz *= 0.5D;
-		}
-		moveEntity(mx, my + buoyancy, mz);
-	}
-
 	@WrapOperation(method = "onUpdate",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlock(III)Lnet/minecraft/block/Block;"))
-	private Block noFizzBounce(World instance, int x, int y, int z, Operation<Block> original) { //Returns AIR so the check for lava is false; we do this to remove the fizzing and bouncing
+	private Block noFizzBounce(World instance, int x, int y, int z, Operation<Block> original) { //Returns AIR so the check for lava is false; we do this to remove the fizzing and bouncing that happens when items get incinerated
 		return isImmuneToFire ? Blocks.air : original.call(instance, x, y, z);
 	}
 
