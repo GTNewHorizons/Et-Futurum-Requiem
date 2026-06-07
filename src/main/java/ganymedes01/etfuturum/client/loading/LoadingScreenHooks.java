@@ -7,16 +7,6 @@ import net.minecraft.client.Minecraft;
 public class LoadingScreenHooks {
 
     public static final int CHUNK_COLOR_EMPTY = LoadingScreenChunkStage.EMPTY.getColor();
-    public static final int CHUNK_COLOR_STRUCTURE_STARTS = LoadingScreenChunkStage.STRUCTURE_STARTS.getColor();
-    public static final int CHUNK_COLOR_STRUCTURE_REFERENCES = LoadingScreenChunkStage.STRUCTURE_REFERENCES.getColor();
-    public static final int CHUNK_COLOR_BIOMES = LoadingScreenChunkStage.BIOMES.getColor();
-    public static final int CHUNK_COLOR_NOISE = LoadingScreenChunkStage.NOISE.getColor();
-    public static final int CHUNK_COLOR_SURFACE = LoadingScreenChunkStage.SURFACE.getColor();
-    public static final int CHUNK_COLOR_CARVERS = LoadingScreenChunkStage.CARVERS.getColor();
-    public static final int CHUNK_COLOR_FEATURES = LoadingScreenChunkStage.FEATURES.getColor();
-    public static final int CHUNK_COLOR_INITIALIZE_LIGHT = LoadingScreenChunkStage.INITIALIZE_LIGHT.getColor();
-    public static final int CHUNK_COLOR_LIGHT = LoadingScreenChunkStage.LIGHT.getColor();
-    public static final int CHUNK_COLOR_SPAWN = LoadingScreenChunkStage.SPAWN.getColor();
     public static final int CHUNK_COLOR_FULL = LoadingScreenChunkStage.FULL.getColor();
 
     public static void beginOther() {
@@ -63,7 +53,7 @@ public class LoadingScreenHooks {
         int radius = mc.gameSettings.renderDistanceChunks;
         int playerChunkX = ChunkLoadingProgress.getPlayerChunkX();
         int playerChunkZ = ChunkLoadingProgress.getPlayerChunkZ();
-        LoadingScreenStateTracker.updateChunkRadius(radius, true);
+        LoadingScreenStateTracker.updateChunkRadius(radius);
 
         for (int relativeZ = -radius; relativeZ <= radius; relativeZ++) {
             for (int relativeX = -radius; relativeX <= radius; relativeX++) {
