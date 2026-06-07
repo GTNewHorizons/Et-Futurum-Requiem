@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.mixins.early.worldthumbnail;
 
-import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import ganymedes01.etfuturum.client.loading.LoadingScreenWorldGenTracker;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;

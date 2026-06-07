@@ -49,9 +49,9 @@ public class LoadingScreenStateTracker {
         }
     }
 
-    public static void updateChunkRadius(int radius, boolean approximate) {
+    public static void updateChunkRadius(int radius) {
         if (active) {
-            SESSION.setChunkRadius(radius, approximate);
+            SESSION.setChunkRadius(radius);
         }
     }
 

@@ -142,6 +142,10 @@ public class WorldIconManager {
     }
 
     public static void resetData() {
+        if (captureNextFrame) {
+            Minecraft.getMinecraft().gameSettings.hideGUI = savedHideGUI;
+            captureNextFrame = false;
+        }
         pendingCapture = false;
         lastCaptureTime = 0;
         worldLoadTime = 0;

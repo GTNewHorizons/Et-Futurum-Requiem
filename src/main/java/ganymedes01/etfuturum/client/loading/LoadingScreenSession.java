@@ -13,7 +13,6 @@ public class LoadingScreenSession {
     private volatile boolean done;
     private volatile boolean chunkMapVisible;
     private volatile int chunkRadius;
-    private volatile boolean approximate;
 
     public void reset() {
         title = "";
@@ -22,7 +21,6 @@ public class LoadingScreenSession {
         done = false;
         chunkMapVisible = false;
         chunkRadius = 0;
-        approximate = false;
         chunkColors.clear();
     }
 
@@ -45,16 +43,14 @@ public class LoadingScreenSession {
         }
     }
 
-    public void setChunkRadius(int newRadius, boolean isApproximate) {
+    public void setChunkRadius(int newRadius) {
         chunkMapVisible = true;
         chunkRadius = Math.max(0, newRadius);
-        approximate = isApproximate;
     }
 
     public void clearChunkMap() {
         chunkMapVisible = false;
         chunkRadius = 0;
-        approximate = false;
         chunkColors.clear();
     }
 
@@ -80,7 +76,7 @@ public class LoadingScreenSession {
                 }
             }
 
-            snapshot = new LoadingScreenChunkSnapshot(chunkRadius, diameter, colors, approximate);
+            snapshot = new LoadingScreenChunkSnapshot(chunkRadius, diameter, colors);
         }
 
         return new LoadingScreenSnapshot(title, subtitle, progress, done, snapshot);
