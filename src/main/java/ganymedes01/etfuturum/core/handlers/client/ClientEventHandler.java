@@ -17,6 +17,10 @@ import ganymedes01.etfuturum.api.mappings.MultiBlockSoundContainer;
 import ganymedes01.etfuturum.api.spectator.SpectatorUtils;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.client.OpenGLHelper;
+import ganymedes01.etfuturum.client.SpawnChunkProgress;
+import ganymedes01.etfuturum.client.WorldIconManager;
+import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
+import ganymedes01.etfuturum.client.loading.LoadingScreenStateTracker;
 import ganymedes01.etfuturum.client.gui.GuiConfigWarning;
 import ganymedes01.etfuturum.client.gui.GuiGamemodeSwitcher;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
@@ -74,6 +78,7 @@ import net.minecraftforge.client.event.RenderPlayerEvent.SetArmorModel;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -748,6 +753,22 @@ public class ClientEventHandler {
 
 	@SubscribeEvent
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
+		if (ConfigMixins.worldSaveThumbnails) {
+			if (event.phase == Phase.START) {
+				WorldIconManager.onRenderTickStart();
+			} else {
+				WorldIconManager.onRenderTickEnd();
+			}
+		}
+		if (ConfigMixins.modernLoadingScreen && event.phase == Phase.END
+				&& mc.theWorld != null && mc.currentScreen == null) {
+			if (LoadingScreenStateTracker.shouldDelayReset(mc.thePlayer != null ? mc.thePlayer.ticksExisted : 0)) {
+				return;
+			}
+			LoadingScreenStateTracker.clearCompletionPending();
+			SpawnChunkProgress.reset();
+			LoadingScreenHooks.reset();
+		}
 		if (!ConfigMixins.enableElytra)
 			return;
 		EntityPlayerSP player = mc.thePlayer;
@@ -762,6 +783,20 @@ public class ClientEventHandler {
 			} else {
 				player.yOffset = prevYOffset;
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onWorldSave(WorldEvent.Save event) {
+		if (ConfigMixins.worldSaveThumbnails && event.world.provider.dimensionId == 0) {
+			WorldIconManager.scheduleCaptureFromSave();
+		}
+	}
+
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		if (ConfigMixins.worldSaveThumbnails && event.world.isRemote) {
+			WorldIconManager.resetData();
 		}
 	}
 
