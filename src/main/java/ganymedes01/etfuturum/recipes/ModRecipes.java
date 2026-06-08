@@ -278,6 +278,34 @@ public class ModRecipes {
 			registerOre("logWood", ModBlocks.BARK.newItemStack(1, i));
 			registerOre("logWood", ModBlocks.BARK2.newItemStack(1, i));
 
+			if (ModsList.BIOMES_O_PLENTY.isLoaded()) {
+				registerOre("logWood", ModBlocks.BOP_WOOD.newItemStack(1, i));
+				registerOre("logWood", ModBlocks.BOP_WOOD2.newItemStack(1, i));
+				registerOre("logWood", ModBlocks.BOP_WOOD3.newItemStack(1, i));
+				registerOre("logWood", ModBlocks.BOP_WOOD4.newItemStack(1, i));
+
+				if (ConfigBlocksItems.enableStrippedLogs) {
+					registerOre("logWood", ModBlocks.BOP_LOG_STRIPPED.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_LOG_STRIPPED2.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_LOG_STRIPPED3.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_LOG_STRIPPED4.newItemStack(1, i));
+
+					registerOre("logWood", ModBlocks.BOP_WOOD_STRIPPED.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_WOOD_STRIPPED2.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_WOOD_STRIPPED3.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.BOP_WOOD_STRIPPED4.newItemStack(1, i));
+				}
+			}
+
+			if (ModsList.WITCHERY.isLoaded()) {
+				registerOre("logWood", ModBlocks.WITCHERY_WOOD.newItemStack(1, i));
+
+				if (ConfigBlocksItems.enableStrippedLogs) {
+					registerOre("logWood", ModBlocks.WITCHERY_LOG_STRIPPED.newItemStack(1, i));
+					registerOre("logWood", ModBlocks.WITCHERY_WOOD_STRIPPED.newItemStack(1, i));
+				}
+			}
+
 			if (i == 0
 					|| (i == 1 && ConfigBlocksItems.enableStrippedLogs)
 					|| (i == 2 && ConfigBlocksItems.enableBarkLogs)
@@ -286,6 +314,13 @@ public class ModRecipes {
 				registerOre("logWood", ModBlocks.WARPED_STEM.newItemStack(1, i));
 				registerOre("logWood", ModBlocks.MANGROVE_LOG.newItemStack(1, i));
 				registerOre("logWood", ModBlocks.CHERRY_LOG.newItemStack(1, i));
+
+				if (i > 1) {
+					registerOre("logStripped", ModBlocks.CRIMSON_STEM.newItemStack(1, i));
+					registerOre("logStripped", ModBlocks.WARPED_STEM.newItemStack(1, i));
+					registerOre("logStripped", ModBlocks.MANGROVE_LOG.newItemStack(1, i));
+					registerOre("logStripped", ModBlocks.CHERRY_LOG.newItemStack(1, i));
+				}
 			}
 		}
 
