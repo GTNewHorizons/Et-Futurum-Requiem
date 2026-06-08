@@ -314,13 +314,6 @@ public class ModRecipes {
 				registerOre("logWood", ModBlocks.WARPED_STEM.newItemStack(1, i));
 				registerOre("logWood", ModBlocks.MANGROVE_LOG.newItemStack(1, i));
 				registerOre("logWood", ModBlocks.CHERRY_LOG.newItemStack(1, i));
-
-				if (i > 1) {
-					registerOre("logStripped", ModBlocks.CRIMSON_STEM.newItemStack(1, i));
-					registerOre("logStripped", ModBlocks.WARPED_STEM.newItemStack(1, i));
-					registerOre("logStripped", ModBlocks.MANGROVE_LOG.newItemStack(1, i));
-					registerOre("logStripped", ModBlocks.CHERRY_LOG.newItemStack(1, i));
-				}
 			}
 		}
 
