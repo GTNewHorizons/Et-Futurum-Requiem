@@ -297,7 +297,7 @@ public class ModRecipes {
 				}
 			}
 
-			if (ModsList.WITCHERY.isLoaded()) {
+			if (ModsList.WITCHERY.isLoaded() && i != 3) {
 				registerOre("logWood", ModBlocks.WITCHERY_WOOD.newItemStack(1, i));
 
 				if (ConfigBlocksItems.enableStrippedLogs) {
