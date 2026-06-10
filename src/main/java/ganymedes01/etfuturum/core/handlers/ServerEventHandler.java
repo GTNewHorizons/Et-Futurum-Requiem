@@ -435,16 +435,19 @@ public class ServerEventHandler {
 
 	@SubscribeEvent
 	public void chunkLoad(ChunkEvent.Load event) {
+		if (event.world.isRemote) return;
 		getLongSet(event.world.provider.dimensionId).add(toLongCoords(event.getChunk()));
 	}
 
 	@SubscribeEvent
 	public void chunkUnload(ChunkEvent.Unload event) {
+		if (event.world.isRemote) return;
 		getLongSet(event.world.provider.dimensionId).remove(toLongCoords(event.getChunk()));
 	}
 
 	@SubscribeEvent
 	public void worldUnload(WorldEvent.Unload event) {
+		if (event.world.isRemote) return;
 		loadedChunks.remove(event.world.provider.dimensionId);
 	}
 
