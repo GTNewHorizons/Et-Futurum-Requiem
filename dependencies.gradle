@@ -63,7 +63,7 @@ dependencies {
     compileOnly("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev") {
         transitive = false
     }
-    shadowImplementation('com.github.makamys:MCLib:0.3.7.7') {
+    shadowImplementation('com.github.makamys:MCLib:0.3.7.8') {
         exclude group: "codechicken"
     }
 }
