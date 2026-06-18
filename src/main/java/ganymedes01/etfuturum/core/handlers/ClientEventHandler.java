@@ -794,7 +794,7 @@ public class ClientEventHandler {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(receiveCanceled = true)
 	public void onPreRenderOverlay(RenderGameOverlayEvent.Pre event) {
 		if (ConfigMixins.worldSaveThumbnails && event.type == RenderGameOverlayEvent.ElementType.ALL) {
 			WorldIconManager.onPreRenderHUD();
