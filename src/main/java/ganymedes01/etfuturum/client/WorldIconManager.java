@@ -34,8 +34,8 @@ public class WorldIconManager {
     private static long lastCaptureTime = 0;
     private static long worldLoadTime = 0;
     private static boolean worldTimerStarted = false;
-    private static boolean captureNextFrame = false;
-    private static boolean savedHideGUI = false;
+    private static boolean pendingHudlessCapture = false;
+    private static File pendingCaptureFile = null;
 
     public static ResourceLocation getOrLoadIcon(String worldFolderName) {
         ResourceLocation cached = iconCache.get(worldFolderName);
@@ -85,9 +85,7 @@ public class WorldIconManager {
         iconCache.clear();
     }
 
-    public static void onRenderTickStart() {
-        if (captureNextFrame) return;
-
+    public static void onRenderTickEnd() {
         Minecraft mc = Minecraft.getMinecraft();
         if (!mc.isIntegratedServerRunning()) return;
         if (mc.theWorld == null) {
@@ -116,25 +114,20 @@ public class WorldIconManager {
 
         if (!shouldCapture) return;
 
-        savedHideGUI = mc.gameSettings.hideGUI;
-        mc.gameSettings.hideGUI = true;
-        captureNextFrame = true;
-    }
-
-    public static void onRenderTickEnd() {
-        if (!captureNextFrame) return;
-        captureNextFrame = false;
-
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.gameSettings.hideGUI = savedHideGUI;
-
-        if (mc.getIntegratedServer() == null) return;
-
         String folderName = mc.getIntegratedServer().getFolderName();
         File savesDir = ((SaveFormatOld) mc.getSaveLoader()).savesDirectory;
-        File iconFile = new File(savesDir, folderName + "/icon.png");
+        pendingCaptureFile = new File(savesDir, folderName + "/icon.png");
+        pendingHudlessCapture = true;
+    }
 
-        takeAutoScreenshot(iconFile);
+    // world is in the framebuffer but the HUD has not been drawn yet
+    public static void onPreRenderHUD() {
+        if (!pendingHudlessCapture) return;
+        pendingHudlessCapture = false;
+        if (pendingCaptureFile != null) {
+            takeAutoScreenshot(pendingCaptureFile);
+            pendingCaptureFile = null;
+        }
     }
 
     public static void scheduleCaptureFromSave() {
@@ -142,11 +135,9 @@ public class WorldIconManager {
     }
 
     public static void resetData() {
-        if (captureNextFrame) {
-            Minecraft.getMinecraft().gameSettings.hideGUI = savedHideGUI;
-            captureNextFrame = false;
-        }
         pendingCapture = false;
+        pendingHudlessCapture = false;
+        pendingCaptureFile = null;
         lastCaptureTime = 0;
         worldLoadTime = 0;
         worldTimerStarted = false;
