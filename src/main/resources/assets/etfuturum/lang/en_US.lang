@@ -442,6 +442,7 @@ item.etfuturum.disc_fragment_5.desc=Music Disc - 5
 item.etfuturum.honeycomb.name=Honeycomb
 item.etfuturum.honey_bottle.name=Honey Bottle
 item.etfuturum.bamboo.name=Bamboo
+item.etfuturum.glow_berries.name=Glow Berries
 item.etfuturum.goat_horn.name=Goat Horn
 
 instrument.minecraft.ponder_goat_horn=Ponder Goat Horn
@@ -704,11 +705,15 @@ tile.etfuturum.sculk_catalyst.name=Sculk Catalyst
 tile.etfuturum.magma.name=Magma Block
 tile.etfuturum.bone.name=Bone Block
 
+tile.etfuturum.cave_vines.name=Cave Vines
+
 tile.etfuturum.tinted_glass.name=Tinted Glass
 tile.etfuturum.bee_nest.name=Bee Nest
 tile.etfuturum.beehive.name=Beehive
 tile.etfuturum.honey_block.name=Honey Block
 tile.etfuturum.honeycomb_block.name=Honeycomb Block
+
+tile.etfuturum.glow_lichen.name=Glow Lichen
 
 tile.etfuturum.barrel.name=Barrel
 tile.etfuturum.blast_furnace.name=Blast Furnace
@@ -2052,4 +2057,8 @@ item.etfuturum.raw_magnesium.name=Raw Magnesium
 item.etfuturum.raw_boron.name=Raw Boron
 
 item.etfuturum.simpleores.raw_adamantium.name=Raw Adamantium
+
+item.etfuturum.tipped_arrow.potion.confusion.name=Arrow of Nausea
+item.etfuturum.tipped_arrow.potion.wither.name=Arrow of Withering
+
 item.skull.dragon.name=Dragon Head

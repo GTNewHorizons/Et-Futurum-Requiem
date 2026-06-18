@@ -6,6 +6,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import ganymedes01.etfuturum.ModBlocks;
+import ganymedes01.etfuturum.api.event.GlowLichenHighlightEvent;
 import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.client.model.ModelShulker;
 import ganymedes01.etfuturum.client.renderer.GlowingEffectRenderer;
@@ -54,7 +55,8 @@ public class ClientProxy extends CommonProxy {
 			GuiSubtitles.INSTANCE = new GuiSubtitles(FMLClientHandler.instance().getClient());
 			MinecraftForge.EVENT_BUS.register(GuiSubtitles.INSTANCE);
 		}
-
+		
+		MinecraftForge.EVENT_BUS.register(new GlowLichenHighlightEvent());
 		MinecraftForge.EVENT_BUS.register(BiomeFogEventHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(new GlowingEffectRenderer());
 	}
@@ -135,6 +137,7 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerBlockHandler(new BlockPinkPetalsRenderer(RenderIDs.PINK_PETALS));
 		RenderingRegistry.registerBlockHandler(new BlockBambooRenderer(RenderIDs.BAMBOO));
 		RenderingRegistry.registerBlockHandler(new BlockBubbleColumnRenderer(RenderIDs.BUBBLE_COLUMN));
+		RenderingRegistry.registerBlockHandler(new BlockGlowLichenRenderer(RenderIDs.GLOW_LICHEN));
 		if(ModsList.APPLIED_ENERGISTICS_2.isLoaded()) {
 			RenderingRegistry.registerBlockHandler(new BlockDeepslateCertusQuartzRenderer());
 		}

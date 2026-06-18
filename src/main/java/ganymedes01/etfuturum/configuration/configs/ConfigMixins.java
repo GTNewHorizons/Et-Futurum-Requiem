@@ -47,6 +47,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean thinPanes;
 	public static boolean colorGrassBlockItemSides;
 	public static boolean enablePlayersSleepingPecentageGamerule;
+  public static boolean enableJumpClimbing;
 	public static boolean adjustedLiquidPhysics;
 	public static boolean liquidItemFloat;
 	public static boolean worldSaveThumbnails;
@@ -127,5 +128,6 @@ public class ConfigMixins extends ConfigBase {
 		collidedThrowableFix = getBoolean("collidedThrowableFix", catFixes, true, "Fixes EntityThrowable entities not calling onEntityCollidedWithBlock, causing them to not trigger target blocks or chime amethyst.\nModified classes: net.minecraft.entity.projectile.EntityThrowable");
 		hideSingleLevelEnchants = getBoolean("hideSingleLevelEnchants", catFixes, true, "Fixes enchantments with only one possible level displaying a level in their name. E.G. \"Silk Touch I\" becomes \"Silk Touch\".\nModified Classes: net.minecraft.enchantment.Enchantment");
 		enablePlayersSleepingPecentageGamerule = getBoolean("enablePlayersSleepingPecentageGamerule", catBackport, true, "You nappa, you get slappa");
+        enableJumpClimbing = getBoolean("enableClimbingPlants", catBackport, true, "Allows players to simply hold jump to climb up climable blocks instead of having to collide with something horizontally.");
 	}
 }
