@@ -169,14 +169,10 @@ public class SpectatorModeClient extends SpectatorMode {
 		if (player == null) {
 			return;
 		}
-		final float minSpeed = 0.1F; // default walkSpeed from PlayerCapabilities
 		float speed = player.capabilities.flySpeed + wheelDelta * 0.005F;
-		speed = Math.max(minSpeed, Math.min(0.2F, speed));
-		if (speed != player.capabilities.flySpeed) {
-			player.capabilities.flySpeed = speed;
-			player.sendPlayerAbilities();
-		}
-		int percent = Math.round((speed - minSpeed) / (0.2F - minSpeed) * 100.0F);
+		speed = Math.max(0.0F, Math.min(0.2F, speed));
+		player.capabilities.flySpeed = speed;
+		int percent = Math.round(speed / 0.2F * 100.0F);
 		Minecraft.getMinecraft().ingameGUI.func_110326_a/*setRecordPlaying*/(
 				net.minecraft.client.resources.I18n.format("etfuturum.spectator.flyspeed", percent), false);
 	}
