@@ -1978,6 +1978,7 @@ tile.etfuturum.steel_barrel.name=Steel Barrel
 tile.etfuturum.darksteel_barrel.name=Dark Steel Barrel
 
 etfuturum.barrel.tooltip.slots=%d Slots
+etfuturum.spectator.flyspeed=Flying speed: %s%%
 
 
 tile.etfuturum.iron_shulker_box.name=Iron Shulker Box

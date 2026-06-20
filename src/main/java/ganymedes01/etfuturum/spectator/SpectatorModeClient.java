@@ -158,4 +158,26 @@ public class SpectatorModeClient extends SpectatorMode {
 			}
 		}
 	}
+
+	/**
+	 * Vanilla spectator behavior: scrolling the mouse wheel changes fly speed
+	 * instead of the hotbar slot. wheelDelta is the signum (-1 / +1) value that
+	 * runTick would otherwise pass to InventoryPlayer.changeCurrentItem.
+	 */
+	public void handleScrollFlySpeed(int wheelDelta) {
+		EntityClientPlayerMP player = FMLClientHandler.instance().getClientPlayerEntity();
+		if (player == null) {
+			return;
+		}
+		final float minSpeed = 0.1F; // default walkSpeed from PlayerCapabilities
+		float speed = player.capabilities.flySpeed + wheelDelta * 0.005F;
+		speed = Math.max(minSpeed, Math.min(0.2F, speed));
+		if (speed != player.capabilities.flySpeed) {
+			player.capabilities.flySpeed = speed;
+			player.sendPlayerAbilities();
+		}
+		int percent = Math.round((speed - minSpeed) / (0.2F - minSpeed) * 100.0F);
+		Minecraft.getMinecraft().ingameGUI.func_110326_a/*setRecordPlaying*/(
+				net.minecraft.client.resources.I18n.format("etfuturum.spectator.flyspeed", percent), false);
+	}
 }
