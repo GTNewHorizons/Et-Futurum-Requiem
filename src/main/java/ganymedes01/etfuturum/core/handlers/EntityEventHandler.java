@@ -112,6 +112,8 @@ public final class EntityEventHandler {
 
         for (EntityPlayerMP player : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
             if (uuid.equals(player.getPersistentID())) {
+                // func_110142_aN = getCombatTracker
+                // func_151521_b  = generateDeathMessage
                 player.addChatMessage(event.entityLiving.func_110142_aN().func_151521_b());
                 break;
             }
