@@ -3,14 +3,16 @@ package ganymedes01.etfuturum.client.loading;
 import ganymedes01.etfuturum.client.ChunkLoadingProgress;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.chunk.Chunk;
 
 public class LoadingScreenHooks {
 
-    public static final int CHUNK_COLOR_EMPTY = LoadingScreenChunkStage.EMPTY.getColor();
-    public static final int CHUNK_COLOR_FULL = LoadingScreenChunkStage.FULL.getColor();
+    private static final int CHUNK_COLOR_EMPTY = 0xFF545454;
 
     public static void beginOther() {
-        LoadingScreenStateTracker.beginIfNeeded();
+        // Hard reset on every world launch so a new/loaded world never inherits the previous
+        // world's chunk map or progress (the in-world reset is skipped if you quit via the menu).
+        LoadingScreenStateTracker.begin();
     }
 
     public static void beginDownloadTerrain(boolean integratedServer) {
@@ -24,8 +26,11 @@ public class LoadingScreenHooks {
         LoadingScreenStateTracker.reset();
     }
 
-    public static void updateServerChunkStage(int chunkX, int chunkZ, LoadingScreenChunkStage stage) {
-        updateServerChunkColor(chunkX, chunkZ, stage.getColor());
+    public static void resetForNewLaunch() {
+        // Clear the previous world's chunk map and progress before a new world loads; the
+        // in-world reset is skipped when you quit via the menu.
+        LoadingScreenStateTracker.reset();
+        SpawnChunkProgress.reset();
     }
 
     public static void updateServerChunkColor(int chunkX, int chunkZ, int color) {
@@ -57,8 +62,15 @@ public class LoadingScreenHooks {
 
         for (int relativeZ = -radius; relativeZ <= radius; relativeZ++) {
             for (int relativeX = -radius; relativeX <= radius; relativeX++) {
-                boolean loaded = ChunkLoadingProgress.isChunkLoaded(playerChunkX + relativeX, playerChunkZ + relativeZ);
-                int color = loaded ? CHUNK_COLOR_FULL : CHUNK_COLOR_EMPTY;
+                int chunkX = playerChunkX + relativeX;
+                int chunkZ = playerChunkZ + relativeZ;
+                int color;
+                if (ChunkLoadingProgress.isChunkLoaded(chunkX, chunkZ)) {
+                    Chunk chunk = mc.theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
+                    color = LoadingScreenChunkColorSampler.sample(chunk);
+                } else {
+                    color = CHUNK_COLOR_EMPTY;
+                }
                 LoadingScreenStateTracker.updateChunkColor(relativeX, relativeZ, color);
             }
         }
