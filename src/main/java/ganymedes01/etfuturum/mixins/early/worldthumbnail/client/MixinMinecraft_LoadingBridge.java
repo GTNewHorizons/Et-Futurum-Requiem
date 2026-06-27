@@ -28,7 +28,7 @@ public class MixinMinecraft_LoadingBridge {
                     target = "Lnet/minecraft/client/Minecraft;displayGuiScreen(Lnet/minecraft/client/gui/GuiScreen;)V",
                     ordinal = 1))
     private void etfu$bridgeLoadingScreen(Minecraft mc, GuiScreen screen) {
-        LoadingScreenHooks.beginOther();
+        LoadingScreenHooks.beginIntegratedLaunch();
         Framebuffer fb = mc.getFramebuffer();
         if (fb != null) {
             fb.setFramebufferColor(0, 0, 0, 1);
