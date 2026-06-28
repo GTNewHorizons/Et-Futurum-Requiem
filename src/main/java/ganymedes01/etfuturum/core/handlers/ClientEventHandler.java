@@ -88,6 +88,7 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent.SetArmorModel;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -764,12 +765,8 @@ public class ClientEventHandler {
 
 	@SubscribeEvent
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
-		if (ConfigMixins.worldSaveThumbnails) {
-			if (event.phase == Phase.START) {
-				WorldIconManager.onRenderTickStart();
-			} else {
-				WorldIconManager.onRenderTickEnd();
-			}
+		if (ConfigMixins.worldSaveThumbnails && event.phase == Phase.END) {
+			WorldIconManager.onRenderTickEnd();
 		}
 		if (ConfigMixins.modernLoadingScreen && event.phase == Phase.END
 				&& mc.theWorld != null && mc.currentScreen == null) {
@@ -881,17 +878,17 @@ public class ClientEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public void onWorldSave(WorldEvent.Save event) {
-		if (ConfigMixins.worldSaveThumbnails && event.world.provider.dimensionId == 0) {
-			WorldIconManager.scheduleCaptureFromSave();
+	@SubscribeEvent(receiveCanceled = true)
+	public void onPreRenderOverlay(RenderGameOverlayEvent.Pre event) {
+		if (ConfigMixins.worldSaveThumbnails && event.type == RenderGameOverlayEvent.ElementType.ALL) {
+			WorldIconManager.onPreRenderOverlay();
 		}
 	}
 
 	@SubscribeEvent
 	public void onWorldUnload(WorldEvent.Unload event) {
 		if (ConfigMixins.worldSaveThumbnails && event.world.isRemote) {
-			WorldIconManager.resetData();
+			WorldIconManager.onWorldUnload();
 		}
 	}
 
