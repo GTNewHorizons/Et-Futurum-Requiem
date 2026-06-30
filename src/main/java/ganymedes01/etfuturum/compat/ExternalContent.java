@@ -56,6 +56,7 @@ public class ExternalContent {
 		THAUMCRAFT_TABLE("Thaumcraft", "blockTable"),
 
 		BOP_GEM_ORE("BiomesOPlenty", "gemOre"),
+		BOP_LILYPAD("BiomesOPlenty", "lilyBop"),
 
 		DRACONIUM_ORE("DraconicEvolution", "draconiumOre"),
 
