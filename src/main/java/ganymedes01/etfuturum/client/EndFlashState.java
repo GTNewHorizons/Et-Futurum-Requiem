@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.client;
 
-import lombok.Getter;
 import net.minecraft.util.MathHelper;
 
 import java.util.Random;
@@ -21,10 +20,8 @@ public class EndFlashState {
 	private int duration;
 	private float intensity;
 	private float oldIntensity;
-	@Getter
-    private float xAngle;
-	@Getter
-    private float yAngle;
+	private float xAngle;
+	private float yAngle;
 
 	public void tick(long gameTime) {
 		calculateFlashParameters(gameTime);
@@ -72,5 +69,13 @@ public class EndFlashState {
 
 	public boolean flashStartedThisTick() {
 		return intensity > 0.0F && oldIntensity <= 0.0F;
+	}
+
+	public float getXAngle() {
+		return xAngle;
+	}
+
+	public float getYAngle() {
+		return yAngle;
 	}
 }

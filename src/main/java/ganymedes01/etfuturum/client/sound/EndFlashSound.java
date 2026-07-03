@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.client.sound;
 
 import cpw.mods.fml.client.FMLClientHandler;
-import ganymedes01.etfuturum.Tags;
+import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MovingSound;
 import net.minecraft.entity.Entity;
@@ -20,7 +20,7 @@ public class EndFlashSound extends MovingSound {
 	private final float yAngle;
 
 	public EndFlashSound(float xAngle, float yAngle) {
-		super(new ResourceLocation(Tags.MC_ASSET_VER + ":weather.end_flash"));
+		super(new ResourceLocation(Reference.MCAssetVer + ":weather.end_flash"));
 		this.xAngle = xAngle;
 		this.yAngle = yAngle;
 		this.repeat = false;

@@ -1,6 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.endflashes.client;
 
-import ganymedes01.etfuturum.core.handlers.client.ClientEventHandler;
+import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
