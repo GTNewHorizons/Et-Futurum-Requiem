@@ -10,6 +10,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -137,6 +138,18 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.enableRandomTickSpeed) {
 			mixins.add("randomtickspeed.MixinWorldServer");
 			mixins.add("randomtickspeed.MixinGameRules");
+		}
+
+		if ((ConfigWorld.endFlashes || ConfigWorld.modernEndAmbientColor) && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("endflashes.client.MixinEntityRenderer");
+		}
+
+		if (ConfigWorld.endFlashes && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("endflashes.client.MixinRenderGlobal");
+		}
+
+		if (ConfigWorld.modernLightmapGamma && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("modernlightmap.client.MixinEntityRenderer");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {
