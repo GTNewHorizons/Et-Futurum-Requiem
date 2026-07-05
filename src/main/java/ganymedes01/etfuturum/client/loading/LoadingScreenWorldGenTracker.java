@@ -4,10 +4,6 @@ import ganymedes01.etfuturum.client.SpawnChunkProgress;
 
 public class LoadingScreenWorldGenTracker {
 
-    public static void beginVanillaSpawn(int spawnChunkX, int spawnChunkZ, int radius) {
-
-    }
-
     public static void markGenerated(int chunkX, int chunkZ) {
         SpawnChunkProgress.markGenerated(chunkX, chunkZ);
         LoadingScreenHooks.updateServerChunkStage(chunkX, chunkZ, LoadingScreenChunkStage.BIOMES);
@@ -22,9 +18,5 @@ public class LoadingScreenWorldGenTracker {
         SpawnChunkProgress.markPopulated(chunkX, chunkZ);
         LoadingScreenHooks.updateServerChunkStage(chunkX, chunkZ, LoadingScreenChunkStage.FULL);
         LoadingScreenHooks.updateServerChunkProgress();
-    }
-
-    public static void finishVanillaSpawn() {
-
     }
 }

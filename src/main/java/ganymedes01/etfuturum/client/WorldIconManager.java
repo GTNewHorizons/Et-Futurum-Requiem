@@ -3,8 +3,11 @@ package ganymedes01.etfuturum.client;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.SaveFormatOld;
 import org.lwjgl.BufferUtils;
@@ -19,39 +22,35 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @SideOnly(Side.CLIENT)
 public class WorldIconManager {
 
     public static final int ICON_DISPLAY_SIZE = 32;
     public static final int ICON_OFFSET = 35;
     private static final int ICON_FILE_SIZE = 64;
-    private static final long CAPTURE_COOLDOWN_MS = 30_000;
-    private static final long INITIAL_DELAY_MS = 8_000;
+    private static final long INITIAL_DELAY_MS = 5_000;
     private static final ResourceLocation MISSING_ICON = new ResourceLocation("minecraft", "textures/misc/unknown_pack.png");
 
     private static final Map<String, ResourceLocation> iconCache = new HashMap<>();
-    private static volatile boolean pendingCapture = false;
-    private static long lastCaptureTime = 0;
-    private static long worldLoadTime = 0;
-    private static boolean worldTimerStarted = false;
-    private static boolean captureNextFrame = false;
-    private static boolean savedHideGUI = false;
+
+    private static BufferedImage heldGrab;
+    private static String heldGrabFolder;
+    private static boolean startPlaceholderDone;
+    private static long worldLoadTime;
 
     public static ResourceLocation getOrLoadIcon(String worldFolderName) {
         ResourceLocation cached = iconCache.get(worldFolderName);
         if (cached != null) return cached;
 
-        Minecraft mc = Minecraft.getMinecraft();
-        File savesDir = ((SaveFormatOld) mc.getSaveLoader()).savesDirectory;
-        File iconFile = new File(savesDir, worldFolderName + "/icon.png");
-
-        if (!iconFile.exists()) return MISSING_ICON;
+        File iconFile = iconFileFor(worldFolderName);
+        if (iconFile == null || !iconFile.exists()) return MISSING_ICON;
 
         try {
             BufferedImage img = ImageIO.read(iconFile);
             if (img == null) return MISSING_ICON;
             DynamicTexture tex = new DynamicTexture(img);
-            ResourceLocation loc = mc.getTextureManager()
+            ResourceLocation loc = Minecraft.getMinecraft().getTextureManager()
                     .getDynamicTextureLocation("etfu_world_icon_" + worldFolderName, tex);
             iconCache.put(worldFolderName, loc);
             return loc;
@@ -85,123 +84,148 @@ public class WorldIconManager {
         iconCache.clear();
     }
 
-    public static void onRenderTickStart() {
-        if (captureNextFrame) return;
+    public static void onPreRenderOverlay() {
+        // Pre(ALL): world drawn, HUD not yet, so the frame is already clean
+        if (heldGrab != null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        if (!mc.isIntegratedServerRunning()) return;
-        if (mc.theWorld == null) {
-            worldTimerStarted = false;
-            return;
+        if (!(mc.currentScreen instanceof GuiIngameMenu)) return;
+        if (!mc.isIntegratedServerRunning() || mc.getIntegratedServer() == null
+                || mc.getIntegratedServer().isServerStopped()) return;
+
+        BufferedImage icon = grabIcon();
+        if (icon != null) {
+            heldGrab = icon;
+            heldGrabFolder = mc.getIntegratedServer().getFolderName();
         }
-        if (mc.getIntegratedServer() == null || mc.getIntegratedServer().isServerStopped()) return;
-        if (mc.currentScreen != null) return;
-
-        long now = System.currentTimeMillis();
-
-        if (!worldTimerStarted) {
-            worldTimerStarted = true;
-            worldLoadTime = now;
-            return;
-        }
-
-        boolean shouldCapture = false;
-
-        if (now - worldLoadTime >= INITIAL_DELAY_MS && lastCaptureTime == 0) {
-            shouldCapture = true;
-        } else if (pendingCapture && now - lastCaptureTime >= CAPTURE_COOLDOWN_MS) {
-            shouldCapture = true;
-            pendingCapture = false;
-        }
-
-        if (!shouldCapture) return;
-
-        savedHideGUI = mc.gameSettings.hideGUI;
-        mc.gameSettings.hideGUI = true;
-        captureNextFrame = true;
     }
 
     public static void onRenderTickEnd() {
-        if (!captureNextFrame) return;
-        captureNextFrame = false;
-
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.gameSettings.hideGUI = savedHideGUI;
-
-        if (mc.getIntegratedServer() == null) return;
-
-        String folderName = mc.getIntegratedServer().getFolderName();
-        File savesDir = ((SaveFormatOld) mc.getSaveLoader()).savesDirectory;
-        File iconFile = new File(savesDir, folderName + "/icon.png");
-
-        takeAutoScreenshot(iconFile);
-    }
-
-    public static void scheduleCaptureFromSave() {
-        pendingCapture = true;
-    }
-
-    public static void resetData() {
-        pendingCapture = false;
-        lastCaptureTime = 0;
-        worldLoadTime = 0;
-        worldTimerStarted = false;
-    }
-
-    private static void takeAutoScreenshot(File targetFile) {
         Minecraft mc = Minecraft.getMinecraft();
 
-        int w = mc.displayWidth;
-        int h = mc.displayHeight;
-        if (w <= 0 || h <= 0) return;
+        if (!mc.isIntegratedServerRunning() || mc.getIntegratedServer() == null
+                || mc.getIntegratedServer().isServerStopped()) {
+            // back on the title screen, reset the session state
+            worldLoadTime = 0;
+            startPlaceholderDone = false;
+            return;
+        }
+        if (mc.theWorld == null) {
+            // between dimensions, keep the session state but don't tick the placeholder timer
+            return;
+        }
 
-        ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 4);
-        GL11.glReadPixels(0, 0, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+        // closed the menu without quitting, drop the grab so the next pause re-screenshots
+        if (heldGrab != null && mc.currentScreen == null) {
+            heldGrab = null;
+            heldGrabFolder = null;
+        }
 
+        if (startPlaceholderDone) return;
+        if (mc.currentScreen != null || mc.thePlayer == null) return;
+
+        long now = System.currentTimeMillis();
+        if (worldLoadTime == 0) {
+            worldLoadTime = now;
+            return;
+        }
+        if (now - worldLoadTime < INITIAL_DELAY_MS) return;
+
+        // only try the placeholder once per session, success or fail
+        startPlaceholderDone = true;
+        File iconFile = iconFileFor(mc.getIntegratedServer().getFolderName());
+        if (iconFile == null || iconFile.exists()) return;
+
+        BufferedImage icon = grabIcon();
+        if (icon != null) {
+            writeIconAsync(icon, iconFile);
+        }
+    }
+
+    public static void onWorldUnload() {
+        // only quit-via-pause-menu leaves a held grab, so dimension changes and kicks write nothing
+        if (heldGrab != null && heldGrabFolder != null) {
+            File iconFile = iconFileFor(heldGrabFolder);
+            if (iconFile != null) writeIconAsync(heldGrab, iconFile);
+        }
+        heldGrab = null;
+        heldGrabFolder = null;
+    }
+
+    private static BufferedImage grabIcon() {
+        Minecraft mc = Minecraft.getMinecraft();
+        Framebuffer fb = mc.getFramebuffer();
+
+        int w;
+        int h;
+        ByteBuffer buf;
+        if (fb != null && fb.framebufferTexture >= 0 && OpenGlHelper.isFramebufferEnabled()) {
+            w = fb.framebufferTextureWidth;
+            h = fb.framebufferTextureHeight;
+            if (w <= 0 || h <= 0) return null;
+            buf = BufferUtils.createByteBuffer(w * h * 4);
+            // sample mc's framebuffer texture directly by id rather than glReadPixels; glReadPixels
+            // reads whatever FBO is bound, which under Angelica HUD caching is the cleared HUD buffer
+            int prevTex = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, fb.framebufferTexture);
+            GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTex);
+        } else {
+            // no FBO, just read the bound buffer
+            w = mc.displayWidth;
+            h = mc.displayHeight;
+            if (w <= 0 || h <= 0) return null;
+            buf = BufferUtils.createByteBuffer(w * h * 4);
+            GL11.glReadPixels(0, 0, w, h, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+        }
+
+        // GL is bottom-left, flip Y on unpack
         int[] pixels = new int[w * h];
         for (int y = 0; y < h; y++) {
+            int row = y * w;
+            int flippedRow = (h - 1 - y) * w;
             for (int x = 0; x < w; x++) {
-                int srcIdx = (y * w + x) * 4;
-                int r = buf.get(srcIdx) & 0xFF;
-                int g = buf.get(srcIdx + 1) & 0xFF;
-                int b = buf.get(srcIdx + 2) & 0xFF;
-                int flippedY = h - 1 - y;
-                pixels[flippedY * w + x] = 0xFF000000 | (r << 16) | (g << 8) | b;
+                int i = (row + x) * 4;
+                int r = buf.get(i) & 0xFF;
+                int g = buf.get(i + 1) & 0xFF;
+                int b = buf.get(i + 2) & 0xFF;
+                pixels[flippedRow + x] = 0xFF000000 | (r << 16) | (g << 8) | b;
             }
         }
 
-        BufferedImage screenshot = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        screenshot.setRGB(0, 0, w, h, pixels, 0, w);
+        BufferedImage full = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        full.setRGB(0, 0, w, h, pixels, 0, w);
 
-        lastCaptureTime = System.currentTimeMillis();
+        int square = Math.min(w, h);
+        BufferedImage cropped = full.getSubimage((w - square) / 2, (h - square) / 2, square, square);
 
+        BufferedImage icon = new BufferedImage(ICON_FILE_SIZE, ICON_FILE_SIZE, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = icon.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(cropped, 0, 0, ICON_FILE_SIZE, ICON_FILE_SIZE, null);
+        g2d.dispose();
+        return icon;
+    }
+
+    private static void writeIconAsync(BufferedImage icon, File targetFile) {
         Thread saveThread = new Thread(() -> {
             try {
-                int cropX = 0;
-                int cropY = 0;
-                int cropW = w;
-                int cropH = h;
-                if (w > h) {
-                    cropX = (w - h) / 2;
-                    cropW = h;
-                } else {
-                    cropY = (h - w) / 2;
-                    cropH = w;
-                }
-
-                BufferedImage cropped = screenshot.getSubimage(cropX, cropY, cropW, cropH);
-                BufferedImage scaled = new BufferedImage(ICON_FILE_SIZE, ICON_FILE_SIZE, BufferedImage.TYPE_INT_RGB);
-                Graphics2D g2d = scaled.createGraphics();
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                g2d.drawImage(cropped, 0, 0, ICON_FILE_SIZE, ICON_FILE_SIZE, null);
-                g2d.dispose();
-
-                ImageIO.write(scaled, "png", targetFile);
+                File parent = targetFile.getParentFile();
+                if (parent != null) parent.mkdirs();
+                ImageIO.write(icon, "png", targetFile);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, "EFR-WorldIcon-Save");
         saveThread.setDaemon(true);
         saveThread.start();
+    }
+
+    private static File iconFileFor(String folderName) {
+        if (folderName == null) return null;
+        Minecraft mc = Minecraft.getMinecraft();
+        if (!(mc.getSaveLoader() instanceof SaveFormatOld)) return null;
+        File savesDir = ((SaveFormatOld) mc.getSaveLoader()).savesDirectory;
+        return new File(savesDir, folderName + "/icon.png");
     }
 }
