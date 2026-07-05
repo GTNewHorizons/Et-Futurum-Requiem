@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.entities;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.items.ItemNewBoat;
@@ -415,7 +416,7 @@ public class EntityNewBoat extends Entity {
 					if (block == Blocks.snow_layer) {
 						this.worldObj.setBlockToAir(x, y, z);
 						this.isCollidedHorizontally = false;
-					} else if (block == Blocks.waterlily) {
+					} else if (block == Blocks.waterlily || block == ExternalContent.Blocks.BOP_LILYPAD.get()) {
 						this.worldObj.func_147480_a(x, y, z, true); // breakBlock
 						this.isCollidedHorizontally = false;
 					}
