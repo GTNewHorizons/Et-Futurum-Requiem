@@ -180,6 +180,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigMixins.heldLanternPose && ConfigBlocksItems.enableLantern && side == MixinEnvironment.Side.CLIENT) {
 			mixins.add("lanternpose.client.MixinModelBiped");
+			mixins.add("lanternpose.client.MixinItemRenderer");
 		}
 
 		if (ConfigMixins.newEnderEyeSounds) {

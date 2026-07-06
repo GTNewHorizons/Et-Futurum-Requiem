@@ -27,6 +27,11 @@ public class MixinModelBiped {
 
 	@Inject(method = "setRotationAngles", at = @At("RETURN"))
 	private void etfu$holdLanternOut(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn, CallbackInfo ci) {
+		// Skip while the first person arm is being drawn: renderFirstPersonArm reuses this same
+		// setRotationAngles, and the horizontal lantern pose would corrupt the first person hand.
+		if (ItemLanternRenderer.renderingFirstPersonArm) {
+			return;
+		}
 		if (!(entityIn instanceof EntityLivingBase)) {
 			return;
 		}
