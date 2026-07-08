@@ -22,6 +22,7 @@ import ganymedes01.etfuturum.items.ItemBarrelUpgrade;
 import ganymedes01.etfuturum.items.ItemBeetrootSeeds;
 import ganymedes01.etfuturum.items.ItemBeetrootSoup;
 import ganymedes01.etfuturum.items.ItemChorusFruit;
+import ganymedes01.etfuturum.items.ItemCushion;
 import ganymedes01.etfuturum.items.ItemEndCrystal;
 import ganymedes01.etfuturum.items.ItemEtFuturumRecord;
 import ganymedes01.etfuturum.items.ItemGlowBerries;
@@ -106,6 +107,7 @@ public enum ModItems {
 	HONEYCOMB(ConfigBlocksItems.enableHoney, new BaseItem("honeycomb")),
 	HONEY_BOTTLE(ConfigBlocksItems.enableHoney, new ItemHoneyBottle()),
 	BAMBOO(ConfigBlocksItems.enableBambooBlocks, new ItemBamboo()),
+	CUShION(ConfigBlocksItems.enableCushion, new ItemCushion()),
 
 	OAK_BOAT(ConfigBlocksItems.enableNewBoats && !ConfigBlocksItems.replaceOldBoats, new ItemNewBoat("minecraft", "oak", () -> Item.getItemFromBlock(Blocks.planks), 0, false, false)),
 	OAK_CHEST_BOAT(ConfigBlocksItems.enableNewBoats, new ItemNewBoat("minecraft", "oak", () -> Item.getItemFromBlock(Blocks.planks), 0, true, false)),
