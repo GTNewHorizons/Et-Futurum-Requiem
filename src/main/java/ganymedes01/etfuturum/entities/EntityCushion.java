@@ -2,6 +2,7 @@ package ganymedes01.etfuturum.entities;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ganymedes01.etfuturum.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -46,7 +47,7 @@ public class EntityCushion extends Entity {
 
 		if (!worldObj.isRemote && worldObj.getTotalWorldTime() % 20 == 0) {
 			if (!onValidSurface()) {
-				setDead();
+				breakCushion(null);
 			}
 		}
 	}
@@ -73,12 +74,12 @@ public class EntityCushion extends Entity {
 
 	@Override
 	public boolean interactFirst(EntityPlayer player) {
-		if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer && this.riddenByEntity != player) {
+		if (riddenByEntity != null && riddenByEntity instanceof EntityPlayer && riddenByEntity != player) {
 			return true;
-		} else if (this.riddenByEntity != null && this.riddenByEntity != player) {
+		} else if (riddenByEntity != null && riddenByEntity != player) {
 			return false;
 		} else {
-			if (!this.worldObj.isRemote) {
+			if (!worldObj.isRemote) {
 				player.mountEntity(this);
 			}
 
@@ -88,35 +89,44 @@ public class EntityCushion extends Entity {
 
 	@Override
 	public boolean hitByEntity(Entity entity) {
-		return entity instanceof EntityPlayer ? this.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) entity), 0.0F) : false;
+		return entity instanceof EntityPlayer ? attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) entity), 0.0F) : false;
 	}
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (this.isEntityInvulnerable()) {
+		if (isEntityInvulnerable()) {
 			return false;
 		} else {
-			if (!this.isDead && !this.worldObj.isRemote) {
-				this.setDead();
-				this.setBeenAttacked();
-				// this.onBroken(source.getEntity());
+			if (!isDead && !worldObj.isRemote) {
+				setBeenAttacked();
+				breakCushion(source.getEntity());
 			}
 
 			return true;
 		}
 	}
 
-	// Disable bounding checks on client!
+	// Disable bounding checks on client, stops it teleporting up out of blocks it _should_ be inside
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int rotationIncrements) {
-		this.setPosition(x, y, z);
-		this.setRotation(yaw, pitch);
+		setPosition(x, y, z);
+		setRotation(yaw, pitch);
 	}
 
 	@Override
 	protected boolean shouldSetPosAfterLoading() {
 		return false;
+	}
+
+	public void breakCushion(Entity entity) {
+		setDead();
+
+		if (entity instanceof EntityPlayer player) {
+			if (player.capabilities.isCreativeMode) return;
+		}
+
+		entityDropItem(ModItems.CUSHION.newItemStack(1, getDyeColor()), 0.0F);
 	}
 
 	public boolean onValidSurface() {
