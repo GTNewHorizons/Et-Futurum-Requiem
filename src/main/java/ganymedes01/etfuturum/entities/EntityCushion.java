@@ -7,7 +7,6 @@ import net.minecraft.block.BlockStairs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
@@ -52,6 +51,21 @@ public class EntityCushion extends Entity {
 
 	public boolean canBeCollidedWith() {
 		return true;
+	}
+
+	@Override
+	public boolean interactFirst(EntityPlayer player) {
+		if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer && this.riddenByEntity != player) {
+			return true;
+		} else if (this.riddenByEntity != null && this.riddenByEntity != player) {
+			return false;
+		} else {
+			if (!this.worldObj.isRemote) {
+				player.mountEntity(this);
+			}
+
+			return true;
+		}
 	}
 
 	@Override
