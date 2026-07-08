@@ -17,9 +17,7 @@ public class ItemCushion extends BaseItem {
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float subX, float subY, float subZ) {
 		Block block = world.getBlock(x, y, z);
 
-		if (block == Blocks.snow_layer && (world.getBlockMetadata(x, y, z) & 7) < 1) {
-			side = 1;
-		} else if (block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush && !block.isReplaceable(world, x, y, z)) {
+		if (block == Blocks.snow_layer || block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush && !block.isReplaceable(world, x, y, z)) {
 			if (side == 0) --y;
 			if (side == 1) ++y;
 			if (side == 2) --z;
