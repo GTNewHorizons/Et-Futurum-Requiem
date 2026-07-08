@@ -5,17 +5,20 @@ import ganymedes01.etfuturum.client.renderer.item.ItemLanternRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * First person: when holding a lantern, render the player's empty-hand arm instead of the
- * floating item, so the lantern can later be hung from the wrist. Achieved by temporarily
+ * floating item, then draw the 3D lantern gripped in that hand. Achieved by temporarily
  * nulling the held item so vanilla renders the arm exactly as for an empty hand, then
  * restoring it. Only active when the held-lantern pose is enabled.
  */
@@ -49,26 +52,32 @@ public abstract class MixinItemRenderer {
 	}
 
 	/**
-	 * After vanilla renders the first-person arm (empty-hand branch), the matrix is still in the
-	 * arm frame, so hang the lantern from the wrist here. ordinal = 1 targets the empty-hand
-	 * renderFirstPersonArm call (ordinal 0 is the map branch, which never runs with a null item).
+	 * Replaces the empty-hand arm draw (ordinal 1; ordinal 0 is the map branch, which never runs
+	 * with a null item). When holding a lantern: raise and extend the arm, draw it, then hang the
+	 * 3D lantern in the same frame so both move together. One redirect keeps the ordering explicit
+	 * instead of stacking a BEFORE and an AFTER inject on the same call, where the BEFORE one did
+	 * not take effect. With no lantern held it just draws the arm as vanilla would.
 	 */
-	@Inject(
+	@Redirect(
 			method = "renderItemInFirstPerson",
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/renderer/entity/RenderPlayer;renderFirstPersonArm(Lnet/minecraft/entity/player/EntityPlayer;)V",
-					ordinal = 1,
-					shift = At.Shift.AFTER))
-	private void etfu$hangLanternOnWrist(float partialTicks, CallbackInfo ci) {
+					ordinal = 1))
+	private void etfu$armAndLantern(RenderPlayer renderPlayer, EntityPlayer player) {
 		if (this.etfu$heldLantern == null) {
+			renderPlayer.renderFirstPersonArm(player);
 			return;
 		}
+		// Raise/extend the arm; this offset moves the lantern too so they stay together.
+		ItemLanternRenderer.applyFirstPersonArmOffset();
+		// The arm tilt itself is applied to the model pose in MixinModelBiped, so it changes the arm
+		// without touching the lantern.
+		renderPlayer.renderFirstPersonArm(player);
 		Block block = Block.getBlockFromItem(this.etfu$heldLantern.getItem());
-		if (block == null) {
-			return;
+		if (block != null) {
+			ItemLanternRenderer.drawFirstPersonHangingLantern(this.etfu$renderBlocks, block);
 		}
-		ItemLanternRenderer.drawFirstPersonHangingLantern(this.etfu$renderBlocks, block);
 	}
 
 	@Inject(method = "renderItemInFirstPerson", at = @At("RETURN"))

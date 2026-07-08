@@ -15,9 +15,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Extends the right arm to nearly horizontal when the entity is holding a lantern,
- * so it reads as carrying the lantern out in front, hanging from the hand by its chain.
- * Third person only; the first person hand is rendered through a separate path.
+ * Poses the right arm when the entity is holding a lantern. In third person the arm extends to
+ * nearly horizontal so it reads as carrying the lantern out in front. When the first person arm is
+ * being drawn (flagged by ItemLanternRenderer.renderingFirstPersonArm) it instead applies a small
+ * tilt to the arm pose, so the first person hand tilts without affecting the lantern.
  */
 @Mixin(ModelBiped.class)
 public class MixinModelBiped {
@@ -27,9 +28,12 @@ public class MixinModelBiped {
 
 	@Inject(method = "setRotationAngles", at = @At("RETURN"))
 	private void etfu$holdLanternOut(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn, CallbackInfo ci) {
-		// Skip while the first person arm is being drawn: renderFirstPersonArm reuses this same
-		// setRotationAngles, and the horizontal lantern pose would corrupt the first person hand.
+		// First person arm: renderFirstPersonArm reuses this same setRotationAngles, so the third
+		// person horizontal pose must not run here. Instead apply the first person tilt to the arm
+		// pose at the shoulder joint - a real pose change, unlike a GL rotation of the whole frame,
+		// and it does not move the lantern.
 		if (ItemLanternRenderer.renderingFirstPersonArm) {
+			this.bipedRightArm.rotateAngleZ += ItemLanternRenderer.firstPersonArmTilt;
 			return;
 		}
 		if (!(entityIn instanceof EntityLivingBase)) {

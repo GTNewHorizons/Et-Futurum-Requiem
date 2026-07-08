@@ -42,6 +42,13 @@ public class ItemLanternRenderer implements IItemRenderer {
 	 */
 	public static boolean renderingFirstPersonArm = false;
 
+	/**
+	 * First person arm tilt in radians, added to bipedRightArm.rotateAngleZ at the shoulder joint by
+	 * MixinModelBiped. Changing the model pose (rather than wrapping the draw in a GL rotation) makes
+	 * the arm actually tilt without swinging the lantern. Tune this value.
+	 */
+	public static float firstPersonArmTilt = -0.2F;
+
 	private final RenderBlocks renderBlocks = new RenderBlocks();
 
 	@Override
@@ -141,6 +148,15 @@ public class ItemLanternRenderer implements IItemRenderer {
 	}
 
 	/**
+	 * Raises and extends the first person arm. Applied to both the arm and the lantern so they move
+	 * together. In this arm frame local +Y maps mostly to screen up-and-forward, so one positive
+	 * offset both lifts the arm and pushes it forward. Values hot-reload while tuning.
+	 */
+	public static void applyFirstPersonArmOffset() {
+		GL11.glTranslatef(0.0F, 0.3F, 0.0F);
+	}
+
+	/**
 	 * Draws the hanging lantern model at the current origin (full-bright, cull-free). Used by
 	 * the first-person arm mixin to hang the lantern from the wrist. The caller's matrix is the
 	 * first-person arm frame; the offsets below are the visual tuning knobs for that frame.
@@ -175,8 +191,8 @@ public class ItemLanternRenderer implements IItemRenderer {
 		// Position, scale and center the lantern (visual tuning knobs; verify in-game).
 		// Negative Z pushes the lantern away from the camera, back to the hand's depth so the arm
 		// is no longer behind it. Positive X moves it right toward the fist, positive Y raises it.
-		GL11.glTranslatef(0.1F, 0.3F, -0.5F);
-		GL11.glScalef(0.6F, 0.6F, 0.6F);
+		GL11.glTranslatef(0.0F, 0.3F, -0.5F);
+		GL11.glScalef(1F, 1F, 1F);
 		GL11.glTranslatef(-0.19F, -0.5F, -0.19F);
 
 		boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
