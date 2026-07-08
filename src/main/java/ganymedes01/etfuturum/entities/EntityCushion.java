@@ -1,10 +1,13 @@
 package ganymedes01.etfuturum.entities;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
@@ -69,6 +72,14 @@ public class EntityCushion extends Entity {
 
 			return true;
 		}
+	}
+
+	// Disable bounding checks on client!
+	@SideOnly(Side.CLIENT)
+	@Override
+	public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int rotationIncrements) {
+		this.setPosition(x, y, z);
+		this.setRotation(yaw, pitch);
 	}
 
 	@Override
