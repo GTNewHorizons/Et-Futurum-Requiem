@@ -49,6 +49,15 @@ public class ItemLanternRenderer implements IItemRenderer {
 	 */
 	public static float firstPersonArmTilt = -0.2F;
 
+	/**
+	 * Third person idle sway for the carried lantern arm, so it does not look frozen. armSwayAmount
+	 * is the angle amplitude in radians; armSwaySpeed scales the oscillation with ageInTicks;
+	 * armWalkSwayAmount scales an extra bob driven by the walk cycle. Tune these.
+	 */
+	public static float armSwayAmount = 0.06F;
+	public static float armSwaySpeed = 0.08F;
+	public static float armWalkSwayAmount = 0.15F;
+
 	private final RenderBlocks renderBlocks = new RenderBlocks();
 
 	@Override

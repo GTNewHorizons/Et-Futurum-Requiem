@@ -8,6 +8,7 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,9 +46,14 @@ public class MixinModelBiped {
 		}
 		Block block = Block.getBlockFromItem(held.getItem());
 		if (block == ModBlocks.LANTERN.get() || block == ModBlocks.SOUL_LANTERN.get()) {
-			// Arm nearly horizontal, pointing forward; drop the idle sideways sway.
-			this.bipedRightArm.rotateAngleX = ItemLanternRenderer.LANTERN_ARM_PITCH;
-			this.bipedRightArm.rotateAngleZ = 0.0F;
+			// Arm nearly horizontal, pointing forward. A gentle time-based sway keeps it from looking
+			// frozen, and a walk-cycle bob adds movement while moving. The lantern follows the hand, so
+			// it sways slightly too, which reads naturally for something hanging.
+			float sway = ItemLanternRenderer.armSwaySpeed * ageInTicks;
+			this.bipedRightArm.rotateAngleX = ItemLanternRenderer.LANTERN_ARM_PITCH
+					+ MathHelper.sin(sway) * ItemLanternRenderer.armSwayAmount
+					+ MathHelper.cos(limbSwing * 0.6662F) * limbSwingAmount * ItemLanternRenderer.armWalkSwayAmount;
+			this.bipedRightArm.rotateAngleZ = MathHelper.cos(sway) * ItemLanternRenderer.armSwayAmount;
 		}
 	}
 }
