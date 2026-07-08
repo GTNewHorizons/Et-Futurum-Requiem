@@ -13,14 +13,15 @@ import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Renders the lantern as a 3D model while held in hand, hanging from the fist by its
- * chain. Inventory icons and dropped items keep the default flat sprite, since this
- * renderer only handles the equipped render types.
+ * Renders the lantern as a 3D model while held in hand, gripped by its top. Inventory icons
+ * and dropped items keep the default flat sprite, since this renderer only handles the
+ * equipped render types.
  */
 public class ItemLanternRenderer implements IItemRenderer {
 
-	// Chain style that extends the links upwards, so the chain reads as running into the fist.
-	private static final int HANGING_META = 1;
+	// Top style with only the short bail on top (no chain links extending upwards), so the lantern
+	// reads as held by its top rather than dangling from a chain.
+	private static final int HELD_META = 0;
 
 	// Draws RGB axis gizmos (X red, Y green, Z blue) to visualise the transform frames. Debug only.
 	private static final boolean DEBUG_AXES = false;
@@ -101,11 +102,11 @@ public class ItemLanternRenderer implements IItemRenderer {
 						drawDebugAxes(2.0F);
 					}
 
-					// Enlarge, flip so the chain points up (model +Y maps to world-down here),
-					// then hang the body below the hand.
+					// Enlarge, flip so the top points up (model +Y maps to world-down here),
+					// then drop the body below the hand.
 					GL11.glScalef(2.0F, 2.0F, 2.0F);
 					GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
-					GL11.glTranslatef(-0.5F, -1.6F, 0F);
+					GL11.glTranslatef(-0.5F, -1.3F, 0F);
 				} else {
 					GL11.glTranslatef(0.4F, 0.1F, 0.4F);
 					GL11.glScalef(0.8F, 0.8F, 0.8F);
@@ -126,7 +127,7 @@ public class ItemLanternRenderer implements IItemRenderer {
 		t.startDrawingQuads();
 		t.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 		t.setBrightness(0x00f000f0);
-		BlockLanternRenderer.drawLanternModel(renderBlocks, block, HANGING_META);
+		BlockLanternRenderer.drawLanternModel(renderBlocks, block, HELD_META);
 		t.draw();
 
 		if (cull) {
@@ -187,7 +188,7 @@ public class ItemLanternRenderer implements IItemRenderer {
 		t.startDrawingQuads();
 		t.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 		t.setBrightness(0x00f000f0);
-		BlockLanternRenderer.drawLanternModel(renderBlocks, block, HANGING_META);
+		BlockLanternRenderer.drawLanternModel(renderBlocks, block, HELD_META);
 		t.draw();
 
 		if (cull) {
