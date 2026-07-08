@@ -2,8 +2,6 @@ package ganymedes01.etfuturum.entities;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockStairs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,14 +21,14 @@ public class EntityCushion extends Entity {
 		this.noClip = true;
 	}
 
-	public EntityCushion(World world, int x, int y, int z) {
+	public EntityCushion(World world, int x, int y, int z, double subY) {
 		this(world);
 		this.x = x;
 		this.y = y;
 		this.z = z;
 
 		this.posX = x + 0.5;
-		this.posY = getSurfaceHeight();
+		this.posY = y + subY;
 		this.posZ = z + 0.5;
 	}
 
@@ -40,13 +38,28 @@ public class EntityCushion extends Entity {
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbt) {
+	public void onEntityUpdate() {
+		super.onEntityUpdate();
 
+		if (!worldObj.isRemote && worldObj.getTotalWorldTime() % 20 == 0) {
+			if (!onValidSurface()) {
+				setDead();
+			}
+		}
+	}
+
+	@Override
+	protected void readEntityFromNBT(NBTTagCompound nbt) {
+		this.x = nbt.getInteger("TileX");
+		this.y = nbt.getInteger("TileY");
+		this.z = nbt.getInteger("TileZ");
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbt) {
-
+		nbt.setInteger("TileX", this.x);
+		nbt.setInteger("TileY", this.y);
+		nbt.setInteger("TileZ", this.z);
 	}
 
 	public boolean canBeCollidedWith() {
@@ -102,16 +115,7 @@ public class EntityCushion extends Entity {
 	}
 
 	public boolean onValidSurface() {
-		return true;
-	}
-
-	public double getSurfaceHeight() {
-		Block block = worldObj.getBlock(x, y - 1, z);
-		block.setBlockBoundsBasedOnState(worldObj, x, y - 1, z);
-		double maxY = block.getBlockBoundsMaxY();
-		if (block instanceof BlockStairs)
-			maxY = 0.5D;
-		return y - 1 + maxY;
+		return !worldObj.isAirBlock(x, y, z);
 	}
 
 }
