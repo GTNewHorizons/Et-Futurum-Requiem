@@ -10,6 +10,8 @@ import net.minecraft.world.World;
 
 public class EntityCushion extends Entity {
 
+	private static final int DYE_WATCHABLE = 14;
+
 	public int x;
 	public int y;
 	public int z;
@@ -23,6 +25,7 @@ public class EntityCushion extends Entity {
 
 	public EntityCushion(World world, int x, int y, int z, double subY) {
 		this(world);
+
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -34,7 +37,7 @@ public class EntityCushion extends Entity {
 
 	@Override
 	protected void entityInit() {
-
+		dataWatcher.addObject(DYE_WATCHABLE, (byte) 0);
 	}
 
 	@Override
@@ -50,6 +53,7 @@ public class EntityCushion extends Entity {
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbt) {
+		setDyeColor(nbt.getInteger("Color"));
 		this.x = nbt.getInteger("TileX");
 		this.y = nbt.getInteger("TileY");
 		this.z = nbt.getInteger("TileZ");
@@ -57,6 +61,7 @@ public class EntityCushion extends Entity {
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbt) {
+		nbt.setInteger("Color", this.getDyeColor());
 		nbt.setInteger("TileX", this.x);
 		nbt.setInteger("TileY", this.y);
 		nbt.setInteger("TileZ", this.z);
@@ -116,6 +121,14 @@ public class EntityCushion extends Entity {
 
 	public boolean onValidSurface() {
 		return !worldObj.isAirBlock(x, y, z);
+	}
+
+	public byte getDyeColor() {
+		return dataWatcher.getWatchableObjectByte(DYE_WATCHABLE);
+	}
+
+	public void setDyeColor(int color) {
+		dataWatcher.updateObject(DYE_WATCHABLE, (byte) color);
 	}
 
 }

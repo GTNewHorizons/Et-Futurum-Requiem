@@ -10,8 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
 public class CushionRenderer extends Render {
-	
-	// private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/cushion/black_cushion.png");
+
 	private static final ResourceLocation[] TEXTURES;
 	private static final ModelCushion MODEL = new ModelCushion();
 
@@ -40,7 +39,7 @@ public class CushionRenderer extends Render {
 	}
 
 	private void renderCushion(EntityCushion cushion) {
-		bindTexture(TEXTURES[0]);
+		bindTexture(TEXTURES[cushion.getDyeColor() % ModRecipes.dye_names.length]);
 		MODEL.render();
 	}
 	
