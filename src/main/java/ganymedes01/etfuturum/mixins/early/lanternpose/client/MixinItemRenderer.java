@@ -36,6 +36,13 @@ public abstract class MixinItemRenderer {
 
 	@Inject(method = "renderItemInFirstPerson", at = @At("HEAD"))
 	private void etfu$armInsteadOfLantern(float partialTicks, CallbackInfo ci) {
+		// Backhand's offhand first-person render reuses this method. Do not hijack it: let the
+		// offhand lantern flow through the normal item branch (EQUIPPED_FIRST_PERSON), which draws
+		// it in Backhand's left-hand frame. Hijacking would draw the right empty-hand arm in a
+		// mirrored frame and push everything off screen.
+		if (ItemLanternRenderer.renderingOffhand) {
+			return;
+		}
 		ItemStack held = this.itemToRender;
 		if (held == null) {
 			return;
