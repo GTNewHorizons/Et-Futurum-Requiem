@@ -3,10 +3,15 @@ package ganymedes01.etfuturum.entities;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModItems;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
 public class EntityCushion extends Entity {
@@ -46,6 +51,11 @@ public class EntityCushion extends Entity {
 		super.onEntityUpdate();
 
 		if (!worldObj.isRemote && worldObj.getTotalWorldTime() % 20 == 0) {
+			// reset the block we're on just in case we get teleposed or whatever
+			x = MathHelper.floor_double(posX);
+			y = MathHelper.floor_double(posY - 0.05);
+			z = MathHelper.floor_double(posZ);
+
 			if (!onValidSurface()) {
 				breakCushion(null);
 			}
@@ -106,6 +116,11 @@ public class EntityCushion extends Entity {
 		}
 	}
 
+	@Override
+	public ItemStack getPickedResult(MovingObjectPosition target) {
+		return ModItems.CUSHION.newItemStack(1, getDyeColor());
+	}
+
 	// Disable bounding checks on client, stops it teleporting up out of blocks it _should_ be inside
 	@SideOnly(Side.CLIENT)
 	@Override
@@ -121,6 +136,10 @@ public class EntityCushion extends Entity {
 
 	public void breakCushion(Entity entity) {
 		setDead();
+
+		if (!worldObj.isRemote) {
+			worldObj.playAuxSFX(2001, x, y, z, Block.getIdFromBlock(Blocks.wool) + (getDyeColor() << 12));
+		}
 
 		if (entity instanceof EntityPlayer player) {
 			if (player.capabilities.isCreativeMode) return;
