@@ -20,6 +20,7 @@ import ganymedes01.etfuturum.client.gui.inventory.GuiSmithingTable;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmoker;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
+import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
@@ -292,7 +293,7 @@ public class CommonProxy implements IGuiHandler {
 			EntityRegistry.addSpawn(EntityFox.class, 8, 2, 4, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.CONIFEROUS));
 		}
 
-		if (ConfigBlocksItems.enableCushion) {
+		if (ConfigExperiments.enableCushions) {
 			ModEntityList.registerEntity(EntityCushion.class, "cushion", 23, EtFuturum.instance, 64, 20, false);
 		}
 

@@ -138,9 +138,6 @@ public class ConfigBlocksItems extends ConfigBase {
 	public static boolean enableCherryBlocks;
 	public static boolean enableBambooBlocks;
 
-	// 26.3
-	public static boolean enableCushion;
-
 	public static boolean enableShulkerBoxes;
 	public static boolean enableDyedShulkerBoxes = true;
 	public static boolean enablePotionCauldron;
@@ -239,8 +236,6 @@ public class ConfigBlocksItems extends ConfigBase {
 //		enableMangroveBlocks = getBoolean("enableMangroveBlocks", catBlockNatural, true, "Enables mangrove wood and all of its wood subtypes, and the roots (+ muddy versions).");
 		enableCherryBlocks = getBoolean("enableCherryBlocks", catBlockNatural, true, "Enables cherry wood and all of its wood subtypes.");
 		enableBambooBlocks = getBoolean("enableBambooBlocks", catBlockNatural, true, "Enables bamboo wood and all of its wood subtypes, including the bamboo stalks themselves.");
-
-		enableCushion = getBoolean("enableCushion", catBlockFunc, true, "Enables cushion blocks and all of its color subtypes.");
 
 		// Check if we enable wood variants at all. Used by blocks where all the wood is 1 ID
 		woodVariants = ConfigExperiments.enableCrimsonBlocks || ConfigExperiments.enableWarpedBlocks || ConfigExperiments.enableMangroveBlocks || enableCherryBlocks || enableBambooBlocks;
