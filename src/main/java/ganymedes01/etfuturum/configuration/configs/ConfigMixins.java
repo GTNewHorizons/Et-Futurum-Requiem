@@ -126,7 +126,7 @@ public class ConfigMixins extends ConfigBase {
 		riddenHorsesInWater = getBoolean("riddenHorsesInWater", catBackport, true, "Allows ridden horses to float in water like in modern Minecraft versions.");
 
 		enableModernSwimming = getBoolean("enableModernSwimming", catBackport, true, "Backports modern sprint-swimming, swimming poses, and directional water movement.");
-		enableModernSneaking = getBoolean("enableModernSneaking", catBackport, true, "Uses the modern crouching height and lower camera position while sneaking. Disable this to retain vanilla 1.7.10 sneaking while keeping modern swimming and crawling.");
+		enableModernSneaking = getBoolean("enableModernSneaking", catBackport, false, "Uses the modern crouching height and lower camera position while sneaking. Disable this to retain vanilla 1.7.10 sneaking while keeping modern swimming and crawling.");
 		enableCrawling = getBoolean("enableCrawling", catBackport, true, "Allows players who cannot fit in a standing or crouching pose to crawl through one-block-high spaces. Requires enableModernSwimming as the logic and animation is pretty much shared.");
 		stepHeightFix = getBoolean("stepHeightFix", catFixes, true, "Makes the player able to step up even if a block would be above their head at the destination.\nModified classes: net.minecraft.entity.Entity");
 		arrowFallingFix = getBoolean("arrowFallingFix", catFixes, true, "Prevents arrows from falling off of blocks too easily\nModified classes: net.minecraft.entity.EntityArrow");
