@@ -94,7 +94,8 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 			desiredPose = PlayerPose.FALL_FLYING;
 		} else if (this.etfu$isSwimming()) {
 			desiredPose = PlayerPose.SWIMMING;
-		} else if (this.etfu$isActuallySneaking() && !this.capabilities.isFlying && !this.isOnLadder()) {
+		} else if (ConfigMixins.enableModernSneaking && this.etfu$isActuallySneaking()
+				&& !this.capabilities.isFlying && !this.isOnLadder()) {
 			desiredPose = PlayerPose.CROUCHING;
 		} else {
 			desiredPose = PlayerPose.STANDING;
@@ -241,7 +242,17 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 	@Override
 	public boolean isSneaking() {
-		return SwimmingHooks.isEnabled() ? this.etfu$pose == PlayerPose.CROUCHING : super.isSneaking();
+		if (!SwimmingHooks.isEnabled()) {
+			return super.isSneaking();
+		}
+		if (this.etfu$pose.isLowProfile()) {
+			return false;
+		}
+		if (ConfigMixins.enableModernSneaking || this.etfu$pose == PlayerPose.CROUCHING
+				&& !this.etfu$isActuallySneaking()) {
+			return this.etfu$pose == PlayerPose.CROUCHING;
+		}
+		return super.isSneaking();
 	}
 
 	@Override
