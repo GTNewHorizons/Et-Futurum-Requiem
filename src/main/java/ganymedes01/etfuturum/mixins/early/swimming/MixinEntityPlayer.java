@@ -85,6 +85,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 		PlayerPose desiredPose;
 
 		if (this.getHealth() <= 0.0F || this.isPlayerSleeping()) {
+			this.etfu$applyPoseSize(PlayerPose.STANDING);
 			this.etfu$pose = PlayerPose.STANDING;
 			return;
 		}
