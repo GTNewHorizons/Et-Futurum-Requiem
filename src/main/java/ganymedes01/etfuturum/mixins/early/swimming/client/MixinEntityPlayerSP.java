@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.mixins.early.swimming.client;
 
 import com.mojang.authlib.GameProfile;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.swimming.IPlayerSwimming;
 import ganymedes01.etfuturum.swimming.PlayerPose;
 import ganymedes01.etfuturum.swimming.SwimmingHooks;
@@ -78,7 +79,13 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 	@Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
 	private void etfu$useVisualCrouchingState(CallbackInfoReturnable<Boolean> cir) {
 		if (SwimmingHooks.isEnabled()) {
-			cir.setReturnValue(((IPlayerSwimming) this).etfu$getPose() == PlayerPose.CROUCHING);
+			PlayerPose pose = ((IPlayerSwimming) this).etfu$getPose();
+			if (pose.isLowProfile()) {
+				cir.setReturnValue(false);
+			} else if (ConfigMixins.enableModernSneaking || pose == PlayerPose.CROUCHING
+					&& !this.etfu$isActuallySneaking()) {
+				cir.setReturnValue(pose == PlayerPose.CROUCHING);
+			}
 		}
 	}
 
