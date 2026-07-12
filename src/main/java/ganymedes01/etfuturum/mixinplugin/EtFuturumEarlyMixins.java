@@ -226,7 +226,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("laddertrapdoors.MixinBlockTrapdoor");
 		}
 
-		if (ConfigMixins.editableSigns) {
+		if (ConfigMixins.signs) {
 			mixins.add("signs.MixinBlockSign");
 		}
 
