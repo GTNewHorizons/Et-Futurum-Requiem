@@ -7,6 +7,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import ganymedes01.etfuturum.compat.ExternalContent;
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.core.utils.helpers.SafeEnumHelperClient;
 import ganymedes01.etfuturum.entities.EntityNewBoatWithChest;
@@ -90,14 +91,17 @@ public class SpectatorMode {
 	 * {@link #isSpectator(EntityPlayer)} can only tell whether the *local* player is spectating:
 	 * the per-player GameType is not synced to other clients in 1.7.10, so it always returns false
 	 * for any other player's entity on the client. For rendering decisions about other players we
-	 * fall back to {@link EntityPlayer#isInvisible()}, which the server does set for spectators
-	 * (see {@link #onPlayerTick}) and which vanilla syncs to every client via the DataWatcher.
+	 * instead read a dedicated DataWatcher flag ({@link ConfigFunctions#spectatorDataWatcherFlag}),
+	 * set server-side whenever a player's GameType changes (see MixinEntityPlayer#dropCarriedItem)
+	 * and synced to every client by vanilla. Deliberately not reusing isInvisible(), since that flag
+	 * is also set by invisibility potions and would wrongly hide equipment on invisible non-spectators.
 	 */
 	public static boolean isSpectatorForRender(EntityPlayer player) {
-		if (isSpectator(player)) {
-			return true;
+		if (player == null) {
+			return false;
 		}
-		return player != null && player.worldObj != null && player.worldObj.isRemote && player.isInvisible();
+		byte flags = player.getDataWatcher().getWatchableObjectByte(0);
+		return (flags & (1 << ConfigFunctions.spectatorDataWatcherFlag)) != 0;
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
