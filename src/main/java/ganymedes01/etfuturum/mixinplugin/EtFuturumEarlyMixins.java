@@ -272,14 +272,15 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("swimming.MixinEntityLivingBase");
 			mixins.add("swimming.MixinEntityPlayer");
 			if (side == MixinEnvironment.Side.CLIENT) {
-				mixins.add("swimming.client.MixinActiveRenderInfo");
+				mixins.add("swimming.client.C04PacketPlayerPositionMixin");
+				mixins.add("swimming.client.C06PacketPlayerPosLookMixin");
 				mixins.add("swimming.client.MixinEntityClientPlayerMP");
 				mixins.add("swimming.client.MixinEntityPlayerSP");
 				mixins.add("swimming.client.MixinEntityRenderer");
-				mixins.add("swimming.client.MixinItemRenderer");
 				mixins.add("swimming.client.MixinModelBiped");
 				mixins.add("swimming.client.MixinPlayerControllerMP");
 				mixins.add("swimming.client.MixinRenderPlayer");
+				mixins.add("swimming.client.NetHandlerPlayClientMixin");
 			}
 		} else if (ConfigMixins.enableModernSwimming) {
 			Logger.warn("Modern swimming mixins are disabled because swimmingDataWatcherFlag is reserved or conflicts with elytraDataWatcherFlag.");

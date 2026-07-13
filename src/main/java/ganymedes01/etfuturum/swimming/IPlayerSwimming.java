@@ -9,7 +9,5 @@ public interface IPlayerSwimming {
 
 	boolean etfu$isEyeInWater();
 
-	PlayerPose etfu$getPose();
-
 	float etfu$getSwimAnimation(float partialTicks);
 }

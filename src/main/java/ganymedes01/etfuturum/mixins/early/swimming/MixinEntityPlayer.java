@@ -1,11 +1,16 @@
 package ganymedes01.etfuturum.mixins.early.swimming;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import ganymedes01.etfuturum.api.elytra.IElytraPlayer;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.elytra.IElytraPlayer;
+import ganymedes01.etfuturum.pose.IPlayerPose;
+import ganymedes01.etfuturum.pose.IPoseablePlayer;
+import ganymedes01.etfuturum.pose.PlayerPose;
+import ganymedes01.etfuturum.pose.PlayerPoseManager;
+import ganymedes01.etfuturum.pose.PlayerScaleEvent;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.swimming.IPlayerSwimming;
-import ganymedes01.etfuturum.swimming.PlayerPose;
 import ganymedes01.etfuturum.swimming.SwimmingHooks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -13,9 +18,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.IFluidBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,10 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends EntityLivingBase implements IPlayerSwimming {
-	@Unique
-	private static final float etfu$PLAYER_WIDTH = 0.6F;
-
+public abstract class MixinEntityPlayer extends EntityLivingBase implements IPoseablePlayer, IPlayerSwimming {
 	@Shadow
 	public PlayerCapabilities capabilities;
 	@Shadow
@@ -38,8 +40,9 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 	@Shadow
 	public abstract boolean isPlayerSleeping();
+
 	@Unique
-	private PlayerPose etfu$pose = PlayerPose.STANDING;
+	private IPlayerPose etfu$pose = PlayerPose.STANDING;
 
 	@Unique
 	private boolean etfu$eyeInWater;
@@ -49,6 +52,9 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 	@Unique
 	private float etfu$previousSwimAnimation;
+
+	@Unique
+	protected float etfu$scale = 1.0f;
 
 	protected MixinEntityPlayer(World world) {
 		super(world);
@@ -62,6 +68,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 		this.etfu$eyeInWater = this.isInsideOfMaterial(Material.water);
 		this.etfu$updateSwimmingFlag();
+		this.etfu$updateScale();
 		this.etfu$updatePose();
 		this.etfu$updateSwimAnimation();
 		if (this.etfu$isSwimming()) {
@@ -81,72 +88,36 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 	}
 
 	@Unique
+	private void etfu$updateScale() {
+		PlayerScaleEvent event = new PlayerScaleEvent((EntityPlayer) (Object) this, 1.0f);
+		MinecraftForge.EVENT_BUS.post(event);
+		etfu$scale = event.scale;
+	}
+
+	@Override
+	public float etfu$getScale() {
+		return etfu$scale;
+	}
+
+	@Unique
 	private void etfu$updatePose() {
-		PlayerPose desiredPose;
-
-		if (this.getHealth() <= 0.0F || this.isPlayerSleeping()) {
-			this.etfu$applyPoseSize(PlayerPose.STANDING);
-			this.etfu$pose = PlayerPose.STANDING;
-			return;
-		}
-
-		if (this.etfu$isFallFlying()) {
-			desiredPose = PlayerPose.FALL_FLYING;
-		} else if (this.etfu$isSwimming()) {
-			desiredPose = PlayerPose.SWIMMING;
-		} else if (ConfigMixins.enableModernSneaking && this.etfu$isActuallySneaking()
-				&& !this.capabilities.isFlying && !this.isOnLadder()) {
-			desiredPose = PlayerPose.CROUCHING;
-		} else {
-			desiredPose = PlayerPose.STANDING;
-		}
-		if (!this.noClip && !this.isRiding() && this.etfu$canResize() && !this.etfu$isPoseClear(desiredPose)) {
-			if (this.etfu$isPoseClear(PlayerPose.CROUCHING)) {
-				desiredPose = PlayerPose.CROUCHING;
-			} else if (ConfigMixins.enableCrawling && this.etfu$isPoseClear(PlayerPose.CRAWLING)) {
-				desiredPose = PlayerPose.CRAWLING;
-			} else if (this.etfu$pose.isLowProfile() && this.etfu$isPoseClear(this.etfu$pose)) {
-				desiredPose = this.etfu$pose;
-			} else {
-				return;
-			}
-		}
-
-		this.etfu$pose = desiredPose;
+		IPlayerPose desiredPose = PlayerPoseManager.getPose((EntityPlayer) (Object) this);
+		this.etfu$setPose(desiredPose);
 		this.etfu$applyPoseSize(desiredPose);
 	}
 
 	@Unique
-	private boolean etfu$canResize() {
-		final float tolerance = 0.025F;
-		double boxWidth = this.boundingBox.maxX - this.boundingBox.minX;
-		double boxHeight = this.boundingBox.maxY - this.boundingBox.minY;
-		boolean normalWidth = Math.abs(this.width - etfu$PLAYER_WIDTH) < tolerance
-				&& Math.abs(boxWidth - etfu$PLAYER_WIDTH) < tolerance;
-		boolean knownHeight = Math.abs(this.height - PlayerPose.SWIMMING.height) < tolerance
-				|| Math.abs(this.height - PlayerPose.CROUCHING.height) < tolerance
-				|| Math.abs(this.height - PlayerPose.STANDING.height) < tolerance;
-		boolean knownBoxHeight = Math.abs(boxHeight - PlayerPose.SWIMMING.height) < tolerance
-				|| Math.abs(boxHeight - PlayerPose.CROUCHING.height) < tolerance
-				|| Math.abs(boxHeight - PlayerPose.STANDING.height) < tolerance;
-		return normalWidth && knownHeight && knownBoxHeight;
-	}
-
-	@Unique
-	private void etfu$applyPoseSize(PlayerPose pose) {
-		if (!this.etfu$canResize()) {
-			return;
-		}
-
-		if (Math.abs(this.width - etfu$PLAYER_WIDTH) > 0.001F || Math.abs(this.height - pose.height) > 0.001F) {
-			this.setSize(etfu$PLAYER_WIDTH, pose.height);
+	private void etfu$applyPoseSize(IPlayerPose pose) {
+		float width = pose.getWidth() * etfu$getScale();
+		float height = pose.getHeight() * etfu$getScale();
+		if (Math.abs(this.width - width) > 0.001F || Math.abs(this.height - height) > 0.001F) {
+			this.setSize(width, height);
 		}
 	}
 
 	@Unique
 	private boolean etfu$isFallFlying() {
-		return ConfigMixins.enableElytra && this instanceof IElytraPlayer
-				&& ((IElytraPlayer) this).etfu$isElytraFlying();
+		return ConfigMixins.enableElytra && this instanceof IElytraPlayer && ((IElytraPlayer) this).etfu$isElytraFlying();
 	}
 
 	@Unique
@@ -159,28 +130,20 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 		}
 	}
 
-	@Inject(method = "getEyeHeight", at = @At("HEAD"), cancellable = true)
-	private void etfu$getPoseEyeHeight(CallbackInfoReturnable<Float> cir) {
-		if (!SwimmingHooks.isEnabled()) {
-			return;
+	@ModifyReturnValue(method = "getEyeHeight", at = @At("RETURN"))
+	private float etfu$getPoseEyeHeight(float origin) {
+		if (this.worldObj.isRemote) {
+			return origin * etfu$getScale();
 		}
-
-		if (this.etfu$pose.usesModernEyeHeight()) {
-			cir.setReturnValue(this.etfu$getLegacyEyeHeight(this.etfu$pose));
-		}
+		return this.etfu$pose.getEyeHeight() * etfu$getScale();
 	}
 
-	@Unique
-	private float etfu$getLegacyEyeHeight(PlayerPose pose) {
-		/* EntityPlayerSP keeps posY at the standing camera anchor by retaining the
-		 * legacy 1.62 yOffset. Convert the modern feet-relative eye height into
-		 * that coordinate system. Server and remote players use feet-based
-		 * positions and keep the modern value unchanged.
-		 */
-		if (this.worldObj.isRemote && this.yOffset > 1.0F) {
-			return pose.eyeHeight - this.yOffset;
+	@ModifyReturnValue(method = "getDefaultEyeHeight", at = @At("RETURN"), remap = false)
+	private float etfu$getDefaultEyeHeight(float origin) {
+		if (this.worldObj.isRemote) {
+			return origin * etfu$getScale();
 		}
-		return pose.eyeHeight;
+		return this.etfu$pose.getEyeHeight() * etfu$getScale();
 	}
 
 	@Inject(method = "canTriggerWalking", at = @At("HEAD"), cancellable = true)
@@ -237,22 +200,25 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 	@Unique
 	private boolean etfu$usesCrawlingMovement() {
-		return this.etfu$pose == PlayerPose.CRAWLING;
+		return etfu$getPose() == PlayerPose.CRAWLING;
 	}
 
 	@Override
 	public boolean isSneaking() {
-		if (!SwimmingHooks.isEnabled()) {
-			return super.isSneaking();
-		}
-		if (this.etfu$pose.isLowProfile()) {
-			return false;
-		}
-		if (ConfigMixins.enableModernSneaking || this.etfu$pose == PlayerPose.CROUCHING
-				&& !this.etfu$isActuallySneaking()) {
-			return this.etfu$pose == PlayerPose.CROUCHING;
-		}
-		return super.isSneaking();
+		return super.isSneaking() || etfu$getPose() == PlayerPose.CROUCHING;
+	}
+
+	@Unique
+	float etfu$CurrentYOffset = 0f;
+
+	@Override
+	public float etfu$getCurrentYOffset() {
+		return etfu$CurrentYOffset;
+	}
+
+	@Override
+	public void etfu$setCurrentYOffset(float offset) {
+		etfu$CurrentYOffset = offset;
 	}
 
 	@Override
@@ -264,7 +230,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 
 	@Override
 	public boolean etfu$isActuallySwimming() {
-		return this.etfu$pose == PlayerPose.SWIMMING || this.etfu$pose == PlayerPose.CRAWLING;
+		return etfu$getPose() == PlayerPose.SWIMMING || etfu$getPose() == PlayerPose.CRAWLING;
 	}
 
 	@Override
@@ -278,21 +244,13 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 	}
 
 	@Override
-	public PlayerPose etfu$getPose() {
+	public IPlayerPose etfu$getPose() {
 		return this.etfu$pose;
 	}
 
-	@Unique
-	private boolean etfu$isPoseClear(PlayerPose pose) {
-		float halfWidth = etfu$PLAYER_WIDTH / 2.0F;
-		AxisAlignedBB poseBox = AxisAlignedBB.getBoundingBox(
-				this.posX - halfWidth,
-				this.boundingBox.minY,
-				this.posZ - halfWidth,
-				this.posX + halfWidth,
-				this.boundingBox.minY + pose.height,
-				this.posZ + halfWidth).contract(1.0E-7D, 1.0E-7D, 1.0E-7D);
-		return this.worldObj.getCollidingBoundingBoxes((EntityPlayer) (Object) this, poseBox).isEmpty();
+	@Override
+	public void etfu$setPose(IPlayerPose pose) {
+		this.etfu$pose = pose;
 	}
 
 	@Override
