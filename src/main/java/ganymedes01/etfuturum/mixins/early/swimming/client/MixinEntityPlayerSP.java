@@ -2,15 +2,16 @@ package ganymedes01.etfuturum.mixins.early.swimming.client;
 
 import com.mojang.authlib.GameProfile;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.pose.IPlayerPose;
+import ganymedes01.etfuturum.pose.IPoseablePlayer;
+import ganymedes01.etfuturum.pose.PlayerPose;
 import ganymedes01.etfuturum.swimming.IPlayerSwimming;
-import ganymedes01.etfuturum.swimming.PlayerPose;
 import ganymedes01.etfuturum.swimming.SwimmingHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.MovementInput;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,7 +65,6 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 				&& (!this.movementInput.sneak && !movingForward || !this.isInWater())) {
 			this.setSprinting(false);
 		}
-
 	}
 
 	@Inject(method = "onLivingUpdate", at = @At("HEAD"))
@@ -73,17 +73,14 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 			return;
 		}
 		this.etfu$startingYSize = this.ySize;
-		this.etfu$wasSwimmingPose = ((IPlayerSwimming) this).etfu$getPose() == PlayerPose.SWIMMING;
+		this.etfu$wasSwimmingPose = ((IPoseablePlayer) this).etfu$getPose() == PlayerPose.SWIMMING;
 	}
 
 	@Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
 	private void etfu$useVisualCrouchingState(CallbackInfoReturnable<Boolean> cir) {
 		if (SwimmingHooks.isEnabled()) {
-			PlayerPose pose = ((IPlayerSwimming) this).etfu$getPose();
-			if (pose.isLowProfile()) {
-				cir.setReturnValue(false);
-			} else if (ConfigMixins.enableModernSneaking || pose == PlayerPose.CROUCHING
-					&& !this.etfu$isActuallySneaking()) {
+			IPlayerPose pose = ((IPoseablePlayer) this).etfu$getPose();
+			if (ConfigMixins.enableModernSneaking || pose == PlayerPose.CROUCHING && !this.etfu$isActuallySneaking()) {
 				cir.setReturnValue(pose == PlayerPose.CROUCHING);
 			}
 		}
@@ -93,24 +90,10 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 		return this.movementInput != null && this.movementInput.sneak;
 	}
 
-	@Override
-	public Vec3 getPosition(float partialTicks) {
-		if (SwimmingHooks.isEnabled()) {
-			PlayerPose pose = ((IPlayerSwimming) this).etfu$getPose();
-			if (pose.usesModernEyeHeight()) {
-				double x = this.prevPosX + (this.posX - this.prevPosX) * partialTicks;
-				double y = this.prevPosY + (this.posY - this.prevPosY) * partialTicks - pose.getCameraOffset();
-				double z = this.prevPosZ + (this.posZ - this.prevPosZ) * partialTicks;
-				return Vec3.createVectorHelper(x, y, z);
-			}
-		}
-		return super.getPosition(partialTicks);
-	}
-
 	@Unique
 	private void etfu$undoLegacySneakNudgeWhileLowProfile() {
-		PlayerPose pose = ((IPlayerSwimming) this).etfu$getPose();
-		if (!pose.usesModernEyeHeight() || this.movementInput == null
+		IPlayerPose pose = ((IPoseablePlayer) this).etfu$getPose();
+		if (!(pose.getEyeHeight() != PlayerPose.STANDING.getEyeHeight()) || this.movementInput == null
 				|| !this.movementInput.sneak) {
 			return;
 		}
