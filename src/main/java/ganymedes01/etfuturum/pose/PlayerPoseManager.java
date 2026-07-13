@@ -33,7 +33,7 @@ public class PlayerPoseManager {
         }
         for (int i = poses.size() - 1; i >= 0; i--) {
             IPlayerPose pose = poses.get(i);
-            if (isPoseClear(player, pose) && pose.canFallback(player)) {
+            if (pose.canFallback(player)) {
                 return pose;
             }
         }
