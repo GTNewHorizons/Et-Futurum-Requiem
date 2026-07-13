@@ -36,7 +36,7 @@ public interface IPlayerPose {
 
     static boolean isPoseClear(EntityPlayer player, IPlayerPose pose) {
         float scale = ((IPoseablePlayer) player).etfu$getScale();
-        float halfWidth = 0.6F / 2.0F * scale;
+        float halfWidth = pose.getWidth() / 2.0F * scale;
         AxisAlignedBB poseBox = AxisAlignedBB.getBoundingBox(
                 player.posX - halfWidth,
                 player.boundingBox.minY,
