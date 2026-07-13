@@ -284,6 +284,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			}
 		} else if (ConfigMixins.enableModernSwimming) {
 			Logger.warn("Modern swimming mixins are disabled because swimmingDataWatcherFlag is reserved or conflicts with elytraDataWatcherFlag.");
+    }
+    
+		if (ConfigMixins.riddenHorsesInWater) {
+			mixins.add("horsewater.MixinEntityHorse");
 		}
 
 		if (false) { //Does not work for some reason, investigate in 2.6.1
