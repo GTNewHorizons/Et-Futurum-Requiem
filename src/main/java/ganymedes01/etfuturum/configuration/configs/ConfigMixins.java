@@ -14,6 +14,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean stepHeightFix;
 	public static boolean bouncyBeds;
 	public static boolean floorCeilingButtons;
+	public static boolean heldLanternPose;
 	public static boolean boundedBlockBreakingParticles;
 	public static boolean newHurtSounds;
 	public static boolean newMobSounds;
@@ -96,6 +97,7 @@ public class ConfigMixins extends ConfigBase {
 		creativeFlightSpeedModifier = getFloat("creativeFlightSpeedModifier", catBackport, 2, 1, 5, "When greater than 1, boosts creative flight speed when sprinting, like in newer versions");
 		bouncyBeds = getBoolean("bouncyBeds", catBackport, true, "Makes beds bouncy. Should work with most modded beds. For continuity disabling this also disables EFR beds being bouncy.\nModified Classes: net.minecraft.block.BlockBed");
 		floorCeilingButtons = getBoolean("floorCeilingButtons", catBackport, true, "Allows ability to place buttons on the floor and ceiling. Note: Due to metadata limits, they won't rotate to face the player like how they were made to in more modern versions.\nModified Classes: net.minecraft.block.BlockButton");
+		heldLanternPose = getBoolean("heldLanternPose", catBackport, true, "Makes entities hold their arm out nearly horizontal when carrying a lantern, so it hangs from the hand by its chain. Third person only. Requires lanterns to be enabled.\nModified Classes: net.minecraft.client.model.ModelBiped");
 		newHurtSounds = getBoolean("newHurtSounds", catBackport, true, "Damage sounds for walking into a berry bush, drowning or burning\nModified Classes: net.minecraft.entity.player.EntityPlayer net.minecraft.client.entity.EntityClientPlayerMP");
 		newEnderEyeSounds = getBoolean("newEnderEyeSounds", catBackport, true, "New sounds for throwing an eye of ender, and for them breaking or dropping.\nModified Classes: net.minecraft.entity.item.EntityEnderEye net.minecraft.item.ItemEnderEye");
 		newMobSounds = getBoolean("newMobSounds", catBackport, true, "New sounds for the witch, snow golem, squid and wither skeleton.");
