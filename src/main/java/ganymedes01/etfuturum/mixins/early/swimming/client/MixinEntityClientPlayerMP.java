@@ -26,10 +26,6 @@ public abstract class MixinEntityClientPlayerMP {
 		IPoseablePlayer p = (IPoseablePlayer) this;
 		float targetYOffset = PlayerPose.STANDING.getEyeHeight() - p.etfu$getPose().getEyeHeight() * p.etfu$getScale();
 		targetYOffset = Math.min(targetYOffset, 1.62f);
-		if (targetYOffset == 0) {
-			p.etfu$setCurrentYOffset(targetYOffset);
-			((EntityClientPlayerMP) (Object) this).yOffset = 1.62f;
-		}
 		float currentYOffset = p.etfu$getCurrentYOffset();
 		if (currentYOffset == targetYOffset) {
 			return;
