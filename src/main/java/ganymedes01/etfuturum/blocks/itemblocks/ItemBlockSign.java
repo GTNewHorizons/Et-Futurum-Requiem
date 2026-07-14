@@ -77,9 +77,8 @@ public class ItemBlockSign extends ItemBlock {
 				if (tileentitysign != null) {
 					if (player instanceof EntityPlayerMP) {
 						tileentitysign.func_145912_a(player);
-						//This is needed because the game crashes whenever we open the sign normally for some reason, so we have to use a packet.
-						//I'd like to get rid of this packet eventually because it feels wrong
-						EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block)), (EntityPlayerMP) player);
+						// Always send the standing variant ID so the GUI renders straight-on
+						EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(field_150939_a)), (EntityPlayerMP) player);
 					}
 				}
 				return true;

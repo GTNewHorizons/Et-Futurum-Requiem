@@ -121,37 +121,18 @@ public class GuiEditWoodSign extends GuiScreen {
 		float f1 = 93.75F;
 		GL11.glScalef(-f1, -f1, -f1);
 		GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
-		BlockWoodSign block = (BlockWoodSign) this.tileSign.getBlockType();
-
-		if (block.standing) {
-			float f2 = this.tileSign.getBlockMetadata() * 360 / 16.0F;
-			GL11.glRotatef(f2, 0.0F, 1.0F, 0.0F);
-			GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
-		} else {
-			int k = this.tileSign.getBlockMetadata();
-			float f3 = 0.0F;
-
-			if (k == 2) {
-				f3 = 180.0F;
-			}
-
-			if (k == 4) {
-				f3 = 90.0F;
-			}
-
-			if (k == 5) {
-				f3 = -90.0F;
-			}
-
-			GL11.glRotatef(f3, 0.0F, 1.0F, 0.0F);
-			GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
-		}
+		GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
 
 		if (this.updateCounter / 6 % 2 == 0) {
 			this.tileSign.lineBeingEdited = this.editLine;
 		}
 
+		// Temporarily force metadata to 0 so the TESR renders the sign straight-on regardless of in-world orientation
+		int realMeta = this.tileSign.blockMetadata;
+		this.tileSign.blockMetadata = 0;
 		TileEntityRendererDispatcher.instance.renderTileEntityAt(this.tileSign, -0.5D, -0.75D, -0.5D, 0.0F);
+		this.tileSign.blockMetadata = realMeta;
+
 		this.tileSign.lineBeingEdited = -1;
 		GL11.glPopMatrix();
 		super.drawScreen(mouseX, mouseY, partialTicks);

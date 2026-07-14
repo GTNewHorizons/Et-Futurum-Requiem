@@ -18,22 +18,22 @@ public class WoodSignOpenHandler implements IMessageHandler<WoodSignOpenMessage,
 	@Override
 	public IMessage onMessage(WoodSignOpenMessage message, MessageContext ctx) {
 		WorldClient world = FMLClientHandler.instance().getClient().theWorld;
-		if (world.blockExists(message.tileX, message.tileY, message.tileZ)) {
-			TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(message.tileX, message.tileY, message.tileZ);
+		TileEntity tileEntity = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 
-			if (!(tileEntity instanceof TileEntityWoodSign)) {
-				tileEntity = new TileEntityWoodSign();
-				tileEntity.blockType = Block.getBlockById(message.id);
-				tileEntity.setWorldObj(FMLClientHandler.instance().getClient().theWorld);
-				tileEntity.xCoord = message.tileX;
-				tileEntity.yCoord = message.tileY;
-				tileEntity.zCoord = message.tileZ;
-			}
-
-			tileEntity.markDirty();
-
-			FMLClientHandler.instance().getClient().displayGuiScreen(new GuiEditWoodSign((TileEntityWoodSign) tileEntity));
+		// If the TE hasn't synced yet (first-time placement race), create a fallback.
+		// Otherwise use the real world TE so typing updates appear in-world instantly.
+		if (!(tileEntity instanceof TileEntityWoodSign)) {
+			tileEntity = new TileEntityWoodSign();
+			tileEntity.blockType = Block.getBlockById(message.id);
+			tileEntity.setWorldObj(world);
+			tileEntity.xCoord = message.tileX;
+			tileEntity.yCoord = message.tileY;
+			tileEntity.zCoord = message.tileZ;
 		}
+
+		tileEntity.markDirty();
+
+		FMLClientHandler.instance().getClient().displayGuiScreen(new GuiEditWoodSign((TileEntityWoodSign) tileEntity));
 		return null;
 	}
 

@@ -1,5 +1,8 @@
 package ganymedes01.etfuturum.mixins.early.signs;
 
+import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.network.WoodSignOpenMessage;
+import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,13 +31,18 @@ public class MixinBlockSign extends Block {
 			return true;
 		}
 
-        // TODO: 146100_a calls 145912_a which is used in ItemBlockSign
-        // This seems to now instantly updates the sign text on SP on character typed
-        // (this behavior is different from when placing a new sign)
-        // not sure about MP? need testing 
 		TileEntity tileEntity = worldIn.getTileEntity(x, y, z);
 		if (tileEntity instanceof TileEntitySign && player instanceof EntityPlayerMP) {
-			((EntityPlayerMP) player).func_146100_a(tileEntity);
+			// Use custom packet for modded wood signs, otherwise use vanilla path
+			if (tileEntity instanceof TileEntityWoodSign) {
+				TileEntityWoodSign woodSign = (TileEntityWoodSign) tileEntity;
+
+				woodSign.func_145912_a(player);
+				int blockId = Block.getIdFromBlock(woodSign.getBlockType());
+				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(woodSign, blockId), (EntityPlayerMP) player);
+			} else {
+				((EntityPlayerMP) player).func_146100_a(tileEntity);
+			}
 			return true;
 		}
 

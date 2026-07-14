@@ -14,11 +14,11 @@ public class WoodSignOpenMessage implements IMessage {
 	public WoodSignOpenMessage() {
 	}
 
-	public WoodSignOpenMessage(TileEntityWoodSign tileentitysign, int i) {
+	public WoodSignOpenMessage(TileEntityWoodSign tileentitysign, int blockId) {
 		tileX = tileentitysign.xCoord;
 		tileY = tileentitysign.yCoord;
 		tileZ = tileentitysign.zCoord;
-		id = i;
+		id = blockId;
 	}
 
 	@Override
