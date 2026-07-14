@@ -557,8 +557,6 @@ public class BlockPointedDripstone extends Block {
 			color = fluid.getColor(world, x, y + topOffset + 2, z);
 		}
 
-		setBlockBoundsBasedOnState(world, x, y, z);
-
 		double px = x + minX + (maxX - minX) * 0.5;
 		double pz = z + minZ + (maxZ - minZ) * 0.5;
 
