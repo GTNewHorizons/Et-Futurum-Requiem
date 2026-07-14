@@ -21,12 +21,24 @@ public interface IWaxableSign {
 
 	default void spawnWaxOnEffects(World world, int x, int y, int z) {
 		if (world.isRemote) {
-            playWaxOnSound(world, x, y, z);
+			playWaxOnSound(world, x, y, z);
 			Random random = world.rand;
+			int meta = world.getBlockMetadata(x, y, z);
 			for (int i = 0; i < 10; ++i) {
 				double px = x + random.nextFloat();
 				double py = y + random.nextFloat();
 				double pz = z + random.nextFloat();
+
+                // Wall sign, move particles to the side of the sign
+				if (meta >= 2 && meta <= 5) {
+					double randWallDistance = random.nextFloat() * 0.125D;
+					switch (meta) {
+						case 2: pz = z + 1.0D - randWallDistance; break;  // south
+						case 3: pz = z + randWallDistance; break;         // north
+						case 4: px = x + 1.0D - randWallDistance; break;  // east
+						case 5: px = x + randWallDistance; break;         // west
+					}
+				}
 				CustomParticles.spawnCopperWaxOnParticle(world, px, py, pz);
 			}
 		}
