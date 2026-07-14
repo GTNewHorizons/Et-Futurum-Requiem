@@ -10,8 +10,10 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.swimming.SwimmingHooks;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
@@ -264,6 +266,26 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("liquidphysics.MixinEntityItem");
 		}
 
+		boolean swimmingFlagAvailable = SwimmingHooks.isDataWatcherFlagAvailable();
+		if (ConfigMixins.enableModernSwimming && swimmingFlagAvailable) {
+			mixins.add("swimming.MixinEntity");
+			mixins.add("swimming.MixinEntityLivingBase");
+			mixins.add("swimming.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("swimming.client.C04PacketPlayerPositionMixin");
+				mixins.add("swimming.client.C06PacketPlayerPosLookMixin");
+				mixins.add("swimming.client.MixinEntityClientPlayerMP");
+				mixins.add("swimming.client.MixinEntityPlayerSP");
+				mixins.add("swimming.client.MixinEntityRenderer");
+				mixins.add("swimming.client.MixinModelBiped");
+				mixins.add("swimming.client.MixinPlayerControllerMP");
+				mixins.add("swimming.client.MixinRenderPlayer");
+				mixins.add("swimming.client.NetHandlerPlayClientMixin");
+			}
+		} else if (ConfigMixins.enableModernSwimming) {
+			Logger.warn("Modern swimming mixins are disabled because swimmingDataWatcherFlag is reserved or conflicts with elytraDataWatcherFlag.");
+    }
+    
 		if (ConfigMixins.riddenHorsesInWater) {
 			mixins.add("horsewater.MixinEntityHorse");
 		}

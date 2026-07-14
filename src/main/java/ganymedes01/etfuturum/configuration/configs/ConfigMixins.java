@@ -50,6 +50,9 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean modernLoadingScreen;
 	public static boolean adjustedLiquidPhysics;
 	public static boolean liquidItemFloat;
+	public static boolean enableModernSwimming;
+	public static boolean enableModernSneaking;
+	public static boolean enableCrawling;
 	public static boolean riddenHorsesInWater;
 
 
@@ -120,6 +123,9 @@ public class ConfigMixins extends ConfigBase {
 				"\nModified Client Classes: net.minecraft.client.renderer.RenderBlocks");
 		adjustedLiquidPhysics = getBoolean("adjustedLiquidPhysics", catBackport, true, "Moves entities in lava, speeds up items in all liquids, floats items in liquids, changes some other liquid to entity interactions.\nModified Classes: net.minecraft.world.World net.minecraft.entity.Entity net.minecraft.block.BlockLiquid");
 		liquidItemFloat = getBoolean("liquidItemFloat", catBackport, true, "Floats items upwards in liquids.\nModified Classes: net.minecraft.entity.item.EntityItem");
+		enableModernSwimming = getBoolean("enableModernSwimming", catBackport, true, "Backports modern sprint-swimming, swimming poses, and directional water movement.");
+		enableModernSneaking = getBoolean("enableModernSneaking", catBackport, false, "Uses the modern crouching height and lower camera position while sneaking. Disable this to retain vanilla 1.7.10 sneaking while keeping modern swimming and crawling.");
+		enableCrawling = getBoolean("enableCrawling", catBackport, true, "Allows players who cannot fit in a standing or crouching pose to crawl through one-block-high spaces. Requires enableModernSwimming as the logic and animation is pretty much shared.");
 		riddenHorsesInWater = getBoolean("riddenHorsesInWater", catBackport, true, "Allows ridden horses to float in water like in modern Minecraft versions.");
 
 		stepHeightFix = getBoolean("stepHeightFix", catFixes, true, "Makes the player able to step up even if a block would be above their head at the destination.\nModified classes: net.minecraft.entity.Entity");
