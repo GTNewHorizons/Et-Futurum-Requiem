@@ -41,7 +41,7 @@ public class MixinBlockSign extends Block {
 				int blockId = Block.getIdFromBlock(woodSign.getBlockType());
 				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(woodSign, blockId), (EntityPlayerMP) player);
 			} else {
-				((EntityPlayerMP) player).func_146100_a(tileEntity);
+				player.func_146100_a(tileEntity);
 			}
 			return true;
 		}

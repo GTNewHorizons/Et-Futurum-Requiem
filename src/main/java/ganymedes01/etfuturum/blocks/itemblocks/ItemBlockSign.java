@@ -75,11 +75,8 @@ public class ItemBlockSign extends ItemBlock {
 				TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
 				if (tileentitysign != null) {
-					if (player instanceof EntityPlayerMP) {
-						tileentitysign.func_145912_a(player);
-						// Always send the standing variant ID so the GUI renders straight-on
-						EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(field_150939_a)), (EntityPlayerMP) player);
-					}
+					tileentitysign.func_145912_a(player);
+					EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block)), (EntityPlayerMP) player);
 				}
 				return true;
 			}

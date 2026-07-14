@@ -20,8 +20,7 @@ public class WoodSignOpenHandler implements IMessageHandler<WoodSignOpenMessage,
 		WorldClient world = FMLClientHandler.instance().getClient().theWorld;
 		TileEntity tileEntity = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 
-		// If the TE hasn't synced yet (first-time placement race), create a fallback.
-		// Otherwise use the real world TE so typing updates appear in-world instantly.
+		// If the TE hasn't synced yet, create a fallback
 		if (!(tileEntity instanceof TileEntityWoodSign)) {
 			tileEntity = new TileEntityWoodSign();
 			tileEntity.blockType = Block.getBlockById(message.id);
