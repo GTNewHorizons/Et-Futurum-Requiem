@@ -28,7 +28,9 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IIcon;
@@ -110,6 +112,7 @@ public class BlockPointedDripstone extends Block {
 	}
 
 	public static final DamageSource STALACTITE_DAMAGE = new DamageSource("stalactite");
+	public static final DamageSource STALAGMITE_DAMAGE = new DamageSource("stalagmite");
 
 	public BlockPointedDripstone() {
 		super(Material.rock);
@@ -292,6 +295,27 @@ public class BlockPointedDripstone extends Block {
 	) {
 		this.setBlockBoundsBasedOnState(worldIn, x, y, z);
 		super.addCollisionBoxesToList(worldIn, x, y, z, mask, list, collider);
+	}
+
+	@Override
+	public void onFallenUpon(World world, int x, int y, int z, Entity entity, float fallDistance) {
+		if (!up.getBooleanValue(world, x, y, z)) {
+			super.onFallenUpon(world, x, y, z, entity, fallDistance);
+			return;
+		}
+		DripstoneState s = state.getValue(world, x, y, z);
+		if (s != DripstoneState.Tip && s != DripstoneState.TipMerge) {
+			super.onFallenUpon(world, x, y, z, entity, fallDistance);
+			return;
+		}
+		// Stalagmite tip: replaces normal fall damage — do not call super
+		entity.fallDistance = 0.0F;
+		if (entity.isEntityInvulnerable()) return;
+		if (entity instanceof EntityPlayer && ((EntityPlayer) entity).capabilities.allowFlying) return;
+		int damage = MathHelper.ceiling_float_int(fallDistance * 2.0F - 2.0F);
+		if (damage > 0) {
+			entity.attackEntityFrom(STALAGMITE_DAMAGE, damage);
+		}
 	}
 
 	@Override
