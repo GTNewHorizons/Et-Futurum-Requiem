@@ -10,6 +10,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Enable sign waxing and back text update logic
+ *
+ * @author mosesyu1028
+ */
 @Mixin(TileEntitySign.class)
 public abstract class MixinTileEntitySign implements IWaxableSign {
 

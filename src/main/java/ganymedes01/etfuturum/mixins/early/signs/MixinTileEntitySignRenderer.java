@@ -11,6 +11,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.lwjgl.opengl.GL11;
 
+/**
+ * Render back text on signs
+ * 
+ * @author mosesyu1028
+ */
 @Mixin(TileEntitySignRenderer.class)
 public class MixinTileEntitySignRenderer {
 
