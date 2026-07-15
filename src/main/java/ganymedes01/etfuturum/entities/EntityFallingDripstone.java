@@ -6,6 +6,7 @@ import ganymedes01.etfuturum.blocks.BlockPointedDripstone;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,6 +29,7 @@ public class EntityFallingDripstone extends EntityFallingBlock implements IEntit
 	public EntityFallingDripstone(World world, double x, double y, double z, int meta, int count) {
 		super(world, x, y, z, ModBlocks.POINTED_DRIPSTONE.get(), meta);
 		this.count = count;
+		this.fallHurtAmount = Math.max(count, 6); // 1 HP per piece (min 6) per block fallen
 		// The entity is anchored to the topmost block and spans `count` blocks downward,
 		// so yOffset and size must be updated before setPosition recomputes the bounding box.
 		this.yOffset = count - 0.5F;
@@ -78,14 +80,21 @@ public class EntityFallingDripstone extends EntityFallingBlock implements IEntit
 	@Override
 	protected void fall(float distance) {
 		if (!this.hurtEntities) return;
-		int damage = MathHelper.ceiling_float_int(distance - 1.0F);
-		if (damage <= 0) return;
+		int blocks = MathHelper.ceiling_float_int(distance - 1.0F);
+		if (blocks <= 0) return;
 
-		float dmgAmount = Math.min(damage * this.fallHurtAmount, this.fallHurtMax);
-		@SuppressWarnings("unchecked")
+		float baseDmg = Math.min(blocks * this.fallHurtAmount, this.fallHurtMax);
 		List<Entity> entities = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox);
 		for (Entity entity : entities) {
-			entity.attackEntityFrom(BlockPointedDripstone.STALACTITE_DAMAGE, dmgAmount);
+			float dmg = baseDmg;
+			if (entity instanceof EntityLivingBase) {
+				ItemStack helmet = ((EntityLivingBase) entity).getEquipmentInSlot(4);
+				if (helmet != null) {
+					dmg *= 0.75F; // helmet reduces damage by 1/4
+					helmet.damageItem(2, (EntityLivingBase) entity); // 2× durability cost
+				}
+			}
+			entity.attackEntityFrom(BlockPointedDripstone.STALACTITE_DAMAGE, dmg);
 		}
 	}
 
@@ -114,9 +123,9 @@ public class EntityFallingDripstone extends EntityFallingBlock implements IEntit
 	protected void readEntityFromNBT(NBTTagCompound tag) {
 		super.readEntityFromNBT(tag);
 		this.hurtEntities = tag.getBoolean("HurtEntities");
-		this.fallHurtAmount = tag.getFloat("FallHurtAmount");
 		this.fallHurtMax = tag.getInteger("FallHurtMax");
 		this.count = tag.getInteger("Count");
+		this.fallHurtAmount = Math.max(this.count, 6); // always derived from count
 		this.yOffset = count - 0.5F;
 		this.setSize(0.98F, this.count);
 	}
