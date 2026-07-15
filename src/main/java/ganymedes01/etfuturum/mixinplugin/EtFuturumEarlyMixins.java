@@ -264,6 +264,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("liquidphysics.MixinEntityItem");
 		}
 
+		if (ConfigMixins.riddenHorsesInWater) {
+			mixins.add("horsewater.MixinEntityHorse");
+		}
+
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
 		}
