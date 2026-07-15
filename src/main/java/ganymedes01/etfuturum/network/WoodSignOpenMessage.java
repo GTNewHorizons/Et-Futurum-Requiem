@@ -40,5 +40,4 @@ public class WoodSignOpenMessage implements IMessage {
 		buf.writeInt(this.id);
 		buf.writeBoolean(this.front);
 	}
-
 }
