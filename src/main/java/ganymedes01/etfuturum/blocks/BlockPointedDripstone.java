@@ -169,33 +169,33 @@ public class BlockPointedDripstone extends Block {
 		return count;
 	}
 
-	@Override
-	public int onBlockPlaced(World world, int x, int y, int z, int side, float subX, float subY, float subZ, int meta) {
-		ForgeDirection dir = ForgeDirection.getOrientation(side);
-
-		boolean pointingUp = dir == ForgeDirection.UP;
-
-		int count = countDripstone(world, x, y, z, pointingUp, pointingUp, true);
-
-		DripstoneState state = switch (count) {
+	/// Computes the dripstone state for a block at (x,y,z). `skipFirst` should be true when placing.
+	private DripstoneState computeState(World world, int x, int y, int z, boolean pointingUp, boolean skipFirst) {
+		int count = countDripstone(world, x, y, z, pointingUp, pointingUp, skipFirst);
+		DripstoneState result = switch (count) {
 			case 1 -> DripstoneState.Tip;
 			case 2 -> DripstoneState.Frustum;
 			default -> DripstoneState.Middle;
 		};
 
-		if (state == DripstoneState.Middle && countDripstone(world, x, y, z, pointingUp, !pointingUp, true) == 1) {
-			state = DripstoneState.Base;
+		if (result == DripstoneState.Middle && countDripstone(world, x, y, z, pointingUp, !pointingUp, skipFirst) == 1) {
+			result = DripstoneState.Base;
 		}
 
-		int dy = pointingUp ? 1 : -1;
-
-		if (state == DripstoneState.Tip && countDripstone(world, x, y + dy, z, !pointingUp, pointingUp, false) > 0) {
-			state = DripstoneState.TipMerge;
+		int stepY = pointingUp ? 1 : -1;
+		if (result == DripstoneState.Tip && countDripstone(world, x, y + stepY, z, !pointingUp, pointingUp, false) > 0) {
+			result = DripstoneState.TipMerge;
 		}
 
+		return result;
+	}
+
+	@Override
+	public int onBlockPlaced(World world, int x, int y, int z, int side, float subX, float subY, float subZ, int meta) {
+		boolean pointingUp = ForgeDirection.getOrientation(side) == ForgeDirection.UP;
+		DripstoneState state = computeState(world, x, y, z, pointingUp, true);
 		meta = this.up.getMetaPrimitive(pointingUp, 0);
 		meta = this.state.getMeta(state, meta);
-
 		return meta;
 	}
 
@@ -233,24 +233,22 @@ public class BlockPointedDripstone extends Block {
 		}
 	}
 
-	/**
-	 * Clears the whole contiguous run of down-pointing dripstone hanging below (x,y,z) in one
-	 * synchronous pass and spawns a single falling entity for it, rather than one entity per block.
-	 * Doing this atomically (instead of relying on onNeighborBlockChange to cascade block-by-block
-	 * across ticks) avoids a race where a redundant notification for a still-standing block spawns a
-	 * competing entity before the first one gets a chance to remove it.
-	 */
+	/// Clears the whole contiguous run of down-pointing dripstone hanging below (x,y,z) in one
+	/// synchronous pass and spawns a single falling entity for it, rather than one entity per block.
+	/// Doing this atomically (instead of relying on onNeighborBlockChange to cascade block-by-block
+	/// across ticks) avoids a race where a redundant notification for a still-standing block spawns a
+	/// competing entity before the first one gets a chance to remove it.
 	private void collapseHangingColumn(World world, int x, int y, int z) {
 		int meta = world.getBlockMetadata(x, y, z);
 
 		int count = 0;
-		int y2 = y;
+		int scanY = y;
 
 		this.collapsing = true;
 
-		while (!up.getBooleanValue(world, x, y2, z) && world.getBlock(x, y2, z) == this) {
-			world.setBlock(x, y2, z, Blocks.air, 0, 2);
-			y2--;
+		while (!up.getBooleanValue(world, x, scanY, z) && world.getBlock(x, scanY, z) == this) {
+			world.setBlock(x, scanY, z, Blocks.air, 0, 2);
+			scanY--;
 			count++;
 		}
 
@@ -263,28 +261,9 @@ public class BlockPointedDripstone extends Block {
 
 	private void updateState(World world, int x, int y, int z) {
 		boolean pointingUp = up.getBooleanValue(world, x, y, z);
-
-		int count = countDripstone(world, x, y, z, pointingUp, pointingUp, false);
-
-		DripstoneState state = switch (count) {
-			case 1 -> DripstoneState.Tip;
-			case 2 -> DripstoneState.Frustum;
-			default -> DripstoneState.Middle;
-		};
-
-		if (state == DripstoneState.Middle && countDripstone(world, x, y, z, pointingUp, !pointingUp, false) == 1) {
-			state = DripstoneState.Base;
-		}
-
-		int dy = pointingUp ? 1 : -1;
-
-		if (state == DripstoneState.Tip && countDripstone(world, x, y + dy, z, !pointingUp, pointingUp, false) > 0) {
-			state = DripstoneState.TipMerge;
-		}
-
+		DripstoneState state = computeState(world, x, y, z, pointingUp, false);
 		int meta = this.up.getMetaPrimitive(pointingUp, 0);
 		meta = this.state.getMeta(state, meta);
-
 		world.setBlockMetadataWithNotify(x, y, z, meta, 3);
 	}
 
@@ -303,8 +282,8 @@ public class BlockPointedDripstone extends Block {
 			super.onFallenUpon(world, x, y, z, entity, fallDistance);
 			return;
 		}
-		DripstoneState s = state.getValue(world, x, y, z);
-		if (s != DripstoneState.Tip && s != DripstoneState.TipMerge) {
+		DripstoneState state = this.state.getValue(world, x, y, z);
+		if (state != DripstoneState.Tip && state != DripstoneState.TipMerge) {
 			super.onFallenUpon(world, x, y, z, entity, fallDistance);
 			return;
 		}
@@ -318,10 +297,8 @@ public class BlockPointedDripstone extends Block {
 		}
 	}
 
-	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		DripstoneState state = this.state.getValue(world, x, y, z);
-
+	/// Returns the XZ inset (in block fractions) for a given dripstone state.
+	private static float boundsOffset(DripstoneState state) {
 		int shrinkage = switch (state) {
 			case Base -> 0;
 			case Middle -> 1;
@@ -329,40 +306,31 @@ public class BlockPointedDripstone extends Block {
 			case Tip, TipMerge -> 3;
 		};
 
-		float pixel = 0.0625f;
-		float offset = (float) (shrinkage + 2) * pixel;
+		return (shrinkage + 2) * 0.0625f;
+	}
 
+	@Override
+	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+		DripstoneState state = this.state.getValue(world, x, y, z);
+		float offset = boundsOffset(state);
 		if (state == DripstoneState.Tip) {
 			boolean pointingUp = this.up.getBooleanValue(world, x, y, z);
-
-			return AxisAlignedBB.getBoundingBox(
-				x + offset, y + (pointingUp ? 0F : pixel * 5), z + offset,
-				x + (1 - offset), y + (pointingUp ? pixel * 11 : 1.0F), z + (1 - offset)
-			);
-		} else {
-			return AxisAlignedBB.getBoundingBox(x + offset, y, z + offset, x + (1 - offset), y + 1.0F, z + (1 - offset));
+			float minY = pointingUp ? 0F : 5 * 0.0625f;
+			float maxY = pointingUp ? 11 * 0.0625f : 1.0F;
+			return AxisAlignedBB.getBoundingBox(x + offset, y + minY, z + offset, x + (1 - offset), y + maxY, z + (1 - offset));
 		}
+		return AxisAlignedBB.getBoundingBox(x + offset, y, z + offset, x + (1 - offset), y + 1.0F, z + (1 - offset));
 	}
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess access, int x, int y, int z) {
 		DripstoneState state = this.state.getValue(access, x, y, z);
-
-		int shrinkage = switch (state) {
-			case Base -> 0;
-			case Middle -> 1;
-			case Frustum -> 2;
-			case Tip, TipMerge -> 3;
-		};
-
-		float pixel = 0.0625f;
-
-		float offset = (float) (shrinkage + 2) * pixel;
-
+		float offset = boundsOffset(state);
 		if (state == DripstoneState.Tip) {
 			boolean pointingUp = this.up.getBooleanValue(access, x, y, z);
-
-			this.setBlockBounds(offset, pointingUp ? 0F : pixel * 5, offset, 1 - offset, pointingUp ? pixel * 11 : 1.0F, 1 - offset);
+			float minY = pointingUp ? 0F : 5 * 0.0625f;
+			float maxY = pointingUp ? 11 * 0.0625f : 1.0F;
+			this.setBlockBounds(offset, minY, offset, 1 - offset, maxY, 1 - offset);
 		} else {
 			this.setBlockBounds(offset, 0, offset, 1 - offset, 1.0F, 1 - offset);
 		}
@@ -372,9 +340,9 @@ public class BlockPointedDripstone extends Block {
 	public boolean canBlockStay(World world, int x, int y, int z) {
 		boolean pointingUp = up.getBooleanValue(world, x, y, z);
 
-		int baseY = y - (pointingUp ? 1 : -1);
+		int supportY = y - (pointingUp ? 1 : -1);
 
-		if (world.isSideSolid(x, baseY, z, pointingUp ? ForgeDirection.UP : ForgeDirection.DOWN)) return true;
+		if (world.isSideSolid(x, supportY, z, pointingUp ? ForgeDirection.UP : ForgeDirection.DOWN)) return true;
 
 		return countDripstone(world, x, y, z, pointingUp, !pointingUp, false) > 1;
 	}
@@ -407,28 +375,8 @@ public class BlockPointedDripstone extends Block {
 		return "pointed_dripstone";
 	}
 
-	/**
-	 * Returns the number of contiguous down-pointing dripstone blocks starting from
-	 * the base and scanning downward. Returns at most 12 to bound the search.
-	 */
-	private int stalactiteLength(World world, int x, int baseY, int z) {
-		int count = 0;
-		int scanY = baseY;
-
-		while (count <= 11) {
-			if (world.getBlock(x, scanY, z) != this) break;
-			if (up.getBooleanValue(world, x, scanY, z)) break;
-			count++;
-			scanY--;
-		}
-
-		return count;
-	}
-
-	/**
-	 * Scans downward from the base to find the Y coordinate of the tip.
-	 * Returns -1 if no tip is found within 11 blocks or if a non-stalactite block is encountered.
-	 */
+	/// Scans downward from the base to find the Y coordinate of the tip.
+	/// Returns -1 if no tip is found within 11 blocks or if a non-stalactite block is encountered.
 	private int findStalactiteTipY(World world, int x, int baseY, int z) {
 		int scanY = baseY;
 
@@ -436,8 +384,8 @@ public class BlockPointedDripstone extends Block {
 			if (world.getBlock(x, scanY, z) != this) return -1;
 			if (up.getBooleanValue(world, x, scanY, z)) return -1;
 
-			DripstoneState s = state.getValue(world, x, scanY, z);
-			if (s == DripstoneState.Tip || s == DripstoneState.TipMerge) return scanY;
+			DripstoneState state = this.state.getValue(world, x, scanY, z);
+			if (state == DripstoneState.Tip || state == DripstoneState.TipMerge) return scanY;
 
 			scanY--;
 		}
@@ -445,29 +393,21 @@ public class BlockPointedDripstone extends Block {
 		return -1;
 	}
 
-	/**
-	 * Scans upward from the tip to find the Y coordinate of the base.
-	 * Returns -1 if no base is found within 11 blocks or if a non-stalactite block is encountered.
-	 */
+	/// Returns the Y offset from the stalactite tip to the base (0 = single block, n = n+1 blocks tall).
+	/// Caps at 11. `baseY = tipY + offset`.
 	private int findStalactiteTopOffset(World world, int x, int tipY, int z) {
-		int scanY = tipY;
-
-		int i;
-
-		for (i = 0; i <= 11; i++) {
+		int offset = 0;
+		while (offset <= 11) {
+			int scanY = tipY + offset;
 			if (world.getBlock(x, scanY, z) != this) break;
 			if (up.getBooleanValue(world, x, scanY, z)) break;
-
-			scanY++;
+			offset++;
 		}
-
-		return i - 1;
+		return offset - 1;
 	}
 
-	/**
-	 * Returns the Forge {@link Fluid} at the given position if it is a fluid source block
-	 * (meta == 0), or {@code null} if the block is not a fluid or is a flowing fluid.
-	 */
+	/// Returns the Forge [Fluid] at the given position if it is a fluid source block
+	/// (meta == 0), or `null` if the block is not a fluid or is a flowing fluid.
 	@Nullable
 	private Fluid fluidSourceAt(World world, int x, int y, int z) {
 		Block block = world.getBlock(x, y, z);
@@ -479,10 +419,7 @@ public class BlockPointedDripstone extends Block {
 
 	private final BlockStatePool pool = new BlockStatePool(4);
 
-	/**
-	 * Returns true if a block allows drip to pass through it.
-	 * Covers air, ladders, open trapdoors, signs, torches, and any block with no collision box.
-	 */
+	/// Returns true if a block allows drip to pass through it.
 	private boolean isPassable(World world, int x, int y, int z, Block block) {
 		if (block instanceof BlockTrapDoor) {
 			try (BlockState state = BlockPropertyRegistry.getBlockState(pool, world, x, y, z)) {
@@ -493,39 +430,35 @@ public class BlockPointedDripstone extends Block {
 		return block.getCollisionBoundingBoxFromPool(world, x, y, z) == null;
 	}
 
-	/**
-	 * Scans downward from just below the tip to find a cauldron within 10 blocks.
-	 * Stops early if a non-passable, non-target block is encountered.
-	 * Returns the Y coordinate of the cauldron, or -1 if none is reachable.
-	 */
+	/// Scans downward from just below the tip to find a cauldron within 10 blocks.
+	/// Stops early if a non-passable, non-target block is encountered.
+	/// Returns the Y coordinate of the cauldron, or -1 if none is reachable.
 	private int findCauldronY(World world, int x, int tipY, int z) {
 		for (int y = tipY - 1; y >= tipY - 10; y--) {
-			Block b = world.getBlock(x, y, z);
+			Block block = world.getBlock(x, y, z);
 
-			if (b instanceof BlockCauldron || b instanceof BlockCauldronTileEntity) return y;
+			if (block instanceof BlockCauldron || block instanceof BlockCauldronTileEntity) return y;
 
-			if (!isPassable(world, x, y, z, b)) return -1;
+			if (!isPassable(world, x, y, z, block)) return -1;
 		}
 
 		return -1;
 	}
 
-	/**
-	 * Scans downward from just below the stalactite tip to find a stalagmite (up=true) Tip,
-	 * or a solid surface where a new stalagmite tip can start.
-	 * Returns the Y coordinate of the existing stalagmite tip or the empty slot above a solid surface,
-	 * or -1 if the path is blocked or nothing suitable is found.
-	 */
+	/// Scans downward from just below the stalactite tip to find a stalagmite (up=true) Tip,
+	/// or a solid surface where a new stalagmite tip can start.
+	/// Returns the Y coordinate of the existing stalagmite tip or the empty slot above a solid surface,
+	/// or -1 if the path is blocked or nothing suitable is found.
 	private int findStalagmiteTipY(World world, int x, int tipY, int z) {
 		for (int y = tipY - 1; y >= tipY - 10; y--) {
-			Block b = world.getBlock(x, y, z);
+			Block block = world.getBlock(x, y, z);
 
-			if (b == this && up.getBooleanValue(world, x, y, z)) {
-				DripstoneState s = state.getValue(world, x, y, z);
-				return s == DripstoneState.Tip || s == DripstoneState.TipMerge ? y : -1;
+			if (block == this && up.getBooleanValue(world, x, y, z)) {
+				DripstoneState dripState = state.getValue(world, x, y, z);
+				return dripState == DripstoneState.Tip || dripState == DripstoneState.TipMerge ? y : -1;
 			}
 
-			if (!isPassable(world, x, y, z, b)) {
+			if (!isPassable(world, x, y, z, block)) {
 				// Solid block: y+1 is the slot for a new stalagmite tip
 				if (world.isSideSolid(x, y, z, ForgeDirection.UP) && world.isAirBlock(x, y + 1, z)) {
 					return y + 1;
@@ -537,10 +470,8 @@ public class BlockPointedDripstone extends Block {
 		return -1;
 	}
 
-	/**
-	 * Places a new Tip block one step in the growth direction and updates the surrounding states.
-	 * Assumption: the target block at growY must be air before calling this.
-	 */
+	/// Places a new Tip block one step in the growth direction and updates the surrounding states.
+	/// Assumption: the target block at growY must be air before calling this.
 	private void growTip(World world, int x, int tipY, int z, boolean pointingUp) {
 		int growY = tipY + (pointingUp ? 1 : -1);
 
@@ -550,11 +481,9 @@ public class BlockPointedDripstone extends Block {
 		updateState(world, x, tipY, z);
 	}
 
-	/**
-	 * Attempts to grow the stalactite tip downward or a stalagmite tip upward.
-	 * Fires from the TIP block's random tick. Requires a dripstone_block above the base,
-	 * a water source 2 above the base, max length 8, and a 64/5625 chance (~1.138%).
-	 */
+	/// Attempts to grow the stalactite tip downward or a stalagmite tip upward.
+	/// Fires from the TIP block's random tick. Requires a dripstone\_block above the base,
+	/// a water source 2 above the base, max length 8, and a 64/5625 chance (\~1.138%).
 	private void tryGrow(World world, int x, int tipY, int z, Random rand) {
 		int topOffset = findStalactiteTopOffset(world, x, tipY, z);
 		int baseY = tipY + topOffset;
@@ -626,7 +555,7 @@ public class BlockPointedDripstone extends Block {
 		int tipY = findStalactiteTipY(world, x, y, z);
 		if (tipY < 0) return;
 
-		if (stalactiteLength(world, x, y, z) > 10) return;
+		if (y - tipY + 1 > 10) return;
 
 		int cauldronY = findCauldronY(world, x, tipY, z);
 		if (cauldronY < 0) return;
@@ -641,17 +570,16 @@ public class BlockPointedDripstone extends Block {
 
 		if (up.getBooleanValue(world, x, y, z)) return;
 
-		DripstoneState currentState = state.getValue(world, x, y, z);
-		if (currentState != DripstoneState.Tip && currentState != DripstoneState.TipMerge) return;
-
 		// TipMerge is the analog of a waterlogged tip — no drip particles
-		if (currentState == DripstoneState.TipMerge) return;
+		if (state.getValue(world, x, y, z) != DripstoneState.Tip) return;
 
 		int topOffset = findStalactiteTopOffset(world, x, y, z);
 		if (topOffset < 0 || topOffset >= 11) return;
 
+		int fluidSourceY = y + topOffset + 2;
+
 		// The fluid source must be 2 blocks above the base (1 block above the solid support).
-		Fluid fluid = fluidSourceAt(world, x, y + topOffset + 2, z);
+		Fluid fluid = fluidSourceAt(world, x, fluidSourceY, z);
 		if (fluid == null) {
 			// Fluid-less = 3x slower drips
 			if (rand.nextInt(3) != 0) return;
@@ -662,7 +590,7 @@ public class BlockPointedDripstone extends Block {
 		int color;
 
 		if (fluid == FluidRegistry.WATER) {
-			RGBColor mult = RGBColor.fromRGB(Blocks.water.colorMultiplier(world, x, y + topOffset + 2, z));
+			RGBColor mult = RGBColor.fromRGB(Blocks.water.colorMultiplier(world, x, fluidSourceY, z));
 			RGBColor base = RGBColor.fromRGB(MapColor.waterColor.colorValue);
 
 			base.red = base.red * mult.red / 255;
@@ -673,14 +601,14 @@ public class BlockPointedDripstone extends Block {
 		} else if (fluid == FluidRegistry.LAVA) {
 			color = 0xff7813;
 		} else {
-			color = fluid.getColor(world, x, y + topOffset + 2, z);
+			color = fluid.getColor(world, x, fluidSourceY, z);
 		}
 
 		setBlockBoundsBasedOnState(world, x, y, z);
 
-		double px = x + minX + (maxX - minX) * 0.5;
-		double pz = z + minZ + (maxZ - minZ) * 0.5;
+		double particleX = x + minX + (maxX - minX) * 0.5;
+		double particleZ = z + minZ + (maxZ - minZ) * 0.5;
 
-		CustomParticles.spawnDrippingParticle(world, px, y + minY - 0.05f, pz, color | 0xFF000000);
+		CustomParticles.spawnDrippingParticle(world, particleX, y + minY - 0.05f, particleZ, color | 0xFF000000);
 	}
 }
