@@ -486,28 +486,123 @@ public class BlockPointedDripstone extends Block {
 		return -1;
 	}
 
+	/**
+	 * Scans downward from just below the stalactite tip to find a stalagmite (up=true) Tip,
+	 * or a solid surface where a new stalagmite tip can start.
+	 * Returns the Y coordinate of the existing stalagmite tip or the empty slot above a solid surface,
+	 * or -1 if the path is blocked or nothing suitable is found.
+	 */
+	private int findStalagmiteTipY(World world, int x, int tipY, int z) {
+		for (int y = tipY - 1; y >= tipY - 10; y--) {
+			Block b = world.getBlock(x, y, z);
+
+			if (b == this && up.getBooleanValue(world, x, y, z)) {
+				DripstoneState s = state.getValue(world, x, y, z);
+				return s == DripstoneState.Tip || s == DripstoneState.TipMerge ? y : -1;
+			}
+
+			if (!isPassable(world, x, y, z, b)) {
+				// Solid block: y+1 is the slot for a new stalagmite tip
+				if (world.isSideSolid(x, y, z, ForgeDirection.UP) && world.isAirBlock(x, y + 1, z)) {
+					return y + 1;
+				}
+				return -1;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Places a new Tip block one step in the growth direction and updates the surrounding states.
+	 * Assumption: the target block at growY must be air before calling this.
+	 */
+	private void growTip(World world, int x, int tipY, int z, boolean pointingUp) {
+		int growY = tipY + (pointingUp ? 1 : -1);
+
+		world.setBlock(x, growY, z, this, up.getMetaPrimitive(pointingUp, 0), 2);
+
+		updateState(world, x, growY, z);
+		updateState(world, x, tipY, z);
+	}
+
+	/**
+	 * Attempts to grow the stalactite tip downward or a stalagmite tip upward.
+	 * Fires from the TIP block's random tick. Requires a dripstone_block above the base,
+	 * a water source 2 above the base, max length 8, and a 64/5625 chance (~1.138%).
+	 */
+	private void tryGrow(World world, int x, int tipY, int z, Random rand) {
+		int topOffset = findStalactiteTopOffset(world, x, tipY, z);
+		int baseY = tipY + topOffset;
+		int length = topOffset + 1;
+
+		// Must hang from dripstone_block
+		if (world.getBlock(x, baseY + 1, z) != ModBlocks.DRIPSTONE_BLOCK.get()) return;
+
+		// Water only — lava does not grow dripstone
+		Fluid fluid = fluidSourceAt(world, x, baseY + 2, z);
+		if (fluid != FluidRegistry.WATER) return;
+
+		// Max stalactite length 8 (wiki: "does not occur if 8 or more blocks long")
+		if (length >= 8) return;
+
+		// 64/5625 ≈ 1.138% chance (vanilla growth rate)
+		if (rand.nextInt(5625) >= 64) return;
+
+		// Stalactite growth: extend tip downward if air below
+		if (world.isAirBlock(x, tipY - 1, z)) {
+			growTip(world, x, tipY, z, false);
+			return;
+		}
+
+		// Stalactite tip is blocked; try growing the stalagmite instead
+		int targetY = findStalagmiteTipY(world, x, tipY, z);
+		if (targetY < 0) return;
+
+		Block targetBlock = world.getBlock(x, targetY, z);
+		if (targetBlock == this) {
+			// Existing stalagmite tip: grow upward if space above
+			if (world.isAirBlock(x, targetY + 1, z)) {
+				growTip(world, x, targetY, z, true);
+			}
+		} else {
+			// targetY is a solid-surface slot — place new stalagmite tip there
+			world.setBlock(x, targetY, z, this, up.getMetaPrimitive(true, 0), 2);
+			updateState(world, x, targetY, z);
+		}
+	}
+
 	@Override
 	public void updateTick(World world, int x, int y, int z, Random rand) {
 		if (world.isRemote) return;
 		if (up.getBooleanValue(world, x, y, z)) return;
-		if (countDripstone(world, x, y, z, false, true, false) > 1) return;
 
-		// Mud→clay: the mud sits above the solid support block (y+1), so at y+2.
-		// Not affected by length restriction and runs independently of fluid presence.
+		DripstoneState currentState = state.getValue(world, x, y, z);
+		boolean isTopmost = countDripstone(world, x, y, z, false, true, false) <= 1;
+
+		// Growth: fires from TIP block only
+		if (currentState == DripstoneState.Tip) {
+			tryGrow(world, x, y, z, rand);
+		}
+
+		// Mud→clay and cauldron fill: fires from BASE (topmost) block only
+		if (!isTopmost) return;
+
+		// Mud→clay: mud sits at y+2 (above the solid support at y+1).
 		if (!world.provider.isHellWorld && ModBlocks.MUD.isEnabled()) {
 			if (world.getBlock(x, y + 2, z) == ModBlocks.MUD.get() && rand.nextInt(256) < 45) {
 				world.setBlock(x, y + 2, z, Blocks.clay, 0, 3);
 			}
 		}
 
-		if (stalactiteLength(world, x, y, z) > 10) return;
-
-		// The fluid source must be 2 blocks above the base (1 block above the solid support).
+		// Fluid source must be 2 blocks above the base (1 above solid support).
 		Fluid fluid = fluidSourceAt(world, x, y + 2, z);
 		if (fluid == null) return;
 
 		int tipY = findStalactiteTipY(world, x, y, z);
 		if (tipY < 0) return;
+
+		if (stalactiteLength(world, x, y, z) > 10) return;
 
 		int cauldronY = findCauldronY(world, x, tipY, z);
 		if (cauldronY < 0) return;
@@ -556,6 +651,8 @@ public class BlockPointedDripstone extends Block {
 		} else {
 			color = fluid.getColor(world, x, y + topOffset + 2, z);
 		}
+
+		setBlockBoundsBasedOnState(world, x, y, z);
 
 		double px = x + minX + (maxX - minX) * 0.5;
 		double pz = z + minZ + (maxZ - minZ) * 0.5;
