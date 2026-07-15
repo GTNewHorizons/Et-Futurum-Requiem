@@ -20,7 +20,6 @@ import ganymedes01.etfuturum.client.gui.inventory.GuiSmithingTable;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmoker;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
-import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
@@ -270,7 +269,7 @@ public class CommonProxy implements IGuiHandler {
 			}
 		}
 
-		if (ConfigExperiments.enableDripstone) {
+		if (ConfigBlocksItems.enableDripstone) {
 			ModEntityList.registerEntity(EntityFallingDripstone.class, "falling_dripstone", 18, EtFuturum.instance, 64, 1, true);
 		}
 
