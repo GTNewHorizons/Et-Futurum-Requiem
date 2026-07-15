@@ -4,7 +4,6 @@ import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.blocks.IDegradable;
 import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import ganymedes01.etfuturum.ducks.IWaxableSign;
-import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.entity.player.EntityPlayer;
