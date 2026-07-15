@@ -3,7 +3,7 @@ package ganymedes01.etfuturum.api;
 import com.google.common.collect.Lists;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
-import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
+
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
@@ -41,7 +41,7 @@ public class DripOperationRegistry {
 
     /** Registers the built-in drip operations. Called from {@code EtFuturum.postInit}. */
     public static void init() {
-        if (!ConfigExperiments.enableDripstone) return;
+        if (!ConfigBlocksItems.enableDripstone) return;
 
         if (ConfigBlocksItems.enableLavaCauldrons) {
             register(new LavaCauldronFillOperation());

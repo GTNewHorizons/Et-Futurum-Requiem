@@ -217,7 +217,7 @@ public class CommonProxy implements IGuiHandler {
 			}
 		}
 
-		if (ConfigExperiments.enableDripstone) {
+		if (ConfigBlocksItems.enableDripstone) {
 			ModEntityList.registerEntity(EntityFallingDripstone.class, "falling_dripstone", 18, EtFuturum.instance, 64, 1, true);
 		}
 
