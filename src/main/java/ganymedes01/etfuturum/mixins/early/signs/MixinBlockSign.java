@@ -65,15 +65,35 @@ public class MixinBlockSign extends Block {
 			return true;
 		}
 
-		// Use custom packet if the sign is modded, otherwise use vanilla
-		if (tileEntity instanceof TileEntityWoodSign) {
-			TileEntityWoodSign woodSign = (TileEntityWoodSign) tileEntity;
-			woodSign.func_145912_a(player);
-			int blockId = Block.getIdFromBlock(woodSign.getBlockType());
-			EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(woodSign, blockId), (EntityPlayerMP) player);
-		} else {
-			player.func_146100_a(tileEntity);
-		}
+		// Route all signs through our custom GUI for double-sided editing
+		TileEntitySign signTile = (TileEntitySign) tileEntity;
+		signTile.func_145912_a(player);
+		boolean front = isPlayerOnFrontSide(world, x, y, z, player);
+		int blockId = Block.getIdFromBlock(signTile.getBlockType());
+		EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(signTile, blockId, front), (EntityPlayerMP) player);
 		return true;
+	}
+
+	private static boolean isPlayerOnFrontSide(World world, int x, int y, int z, EntityPlayer player) {
+		int meta = world.getBlockMetadata(x, y, z);
+		double dx = player.posX - (x + 0.5D);
+		double dz = player.posZ - (z + 0.5D);
+		IWaxableSign sign = (IWaxableSign) world.getTileEntity(x, y, z);
+
+		if (sign.isWallSign(world, x, y, z)) {
+			switch (meta) {
+				case 2: return dz < 0;  // south wall, front = north
+				case 3: return dz > 0;  // north wall, front = south
+				case 4: return dx < 0;  // east wall, front = west
+				case 5: return dx > 0;  // west wall, front = east
+				default: return true;
+			}
+		} else {
+			// Standing sign: front = direction of sign board
+			double angle = meta * Math.PI / 8.0;
+			double frontX = -Math.sin(angle);
+			double frontZ = Math.cos(angle);
+			return dx * frontX + dz * frontZ > 0;
+		}
 	}
 }

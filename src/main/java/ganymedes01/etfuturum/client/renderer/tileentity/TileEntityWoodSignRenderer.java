@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.client.renderer.tileentity;
 
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
+import ganymedes01.etfuturum.ducks.IWaxableSign;
 import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelSign;
@@ -64,6 +65,7 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 		GL11.glPopMatrix();
 		FontRenderer fontrenderer = this.func_147498_b();
 		f3 = 0.016666668F * f1;
+		GL11.glPushMatrix();
 		GL11.glTranslatef(0.0F, 0.5F * f1, 0.07F * f1);
 		GL11.glScalef(f3, -f3, f3);
 		GL11.glNormal3f(0.0F, 0.0F, -1.0F * f3);
@@ -87,6 +89,30 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 
 		GL11.glDepthMask(true);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GL11.glPopMatrix();
+
+		// Render back text
+		if (sign instanceof IWaxableSign) {
+			String[] backText = ((IWaxableSign) sign).getSignText(false);
+			GL11.glPushMatrix();
+			GL11.glTranslatef(0.0F, 0.5F * f1, -0.07F * f1);
+			GL11.glScalef(f3, -f3, f3);
+			GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
+			GL11.glNormal3f(0.0F, 0.0F, -1.0F * f3);
+			GL11.glDepthMask(false);
+			for (int i = 0; i < backText.length; ++i) {
+				String s = backText[i];
+				if (i == sign.lineBeingEdited) {
+					s = "> " + s + "§r <";
+				}
+				fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - backText.length * 5, b0);
+			}
+			GL11.glDepthMask(true);
+			GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			GL11.glPopMatrix();
+		}
+
 		GL11.glPopMatrix();
 	}
 }

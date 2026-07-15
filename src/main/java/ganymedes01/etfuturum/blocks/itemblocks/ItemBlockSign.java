@@ -76,7 +76,7 @@ public class ItemBlockSign extends ItemBlock {
 
 				if (tileentitysign != null) {
 					tileentitysign.func_145912_a(player);
-					EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block)), (EntityPlayerMP) player);
+					EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
 				}
 				return true;
 			}
