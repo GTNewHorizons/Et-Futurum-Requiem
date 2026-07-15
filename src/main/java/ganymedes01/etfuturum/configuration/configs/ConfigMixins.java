@@ -48,6 +48,7 @@ public class ConfigMixins extends ConfigBase {
   public static boolean enableJumpClimbing;
 	public static boolean worldSaveThumbnails;
 	public static boolean modernLoadingScreen;
+	public static boolean unicodeFontPages;
 	public static boolean adjustedLiquidPhysics;
 	public static boolean liquidItemFloat;
 
@@ -80,6 +81,7 @@ public class ConfigMixins extends ConfigBase {
 			flowerPotFixes = getBoolean("flowerPotFixes", catFixes, true, "Fixes flower pots having several restrictions limiting what they'll render inside of them. Required for crimson roots or azalea to render correctly in the flower pot, among other custom blocks.\nModified Client Classes: net.minecraft.client.renderer.RenderBlock");
 			worldSaveThumbnails = getBoolean("worldSaveThumbnails", catBackport, true, "Saves and displays icon.png thumbnails in the world selection screen, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiSelectWorld");
 			modernLoadingScreen = getBoolean("modernLoadingScreen", catBackport, true, "Modern loading screen with progress bar and chunk grid when entering a world, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiDownloadTerrain");
+			unicodeFontPages = getBoolean("unicodeFontPages", catBackport, true, "Update the vanilla character set with the modern versions, which also include updated unifont and extended hand-drawn bitmaps for non-latin characters.\nModified Client Classes: net.minecraft.client.gui.FontRenderer, net.minecraft.client.gui.GuiTextField");
 		}
 
 		endPortalFix = getBoolean("endPortalFix", catBackport, true, "Makes the End Portal block (the actual portal, not the frame) have an item icon, proper hitbox and will not instantly destroy itself in other dimensions.\nModified classes: net.minecraft.block.BlockEndPortal");
