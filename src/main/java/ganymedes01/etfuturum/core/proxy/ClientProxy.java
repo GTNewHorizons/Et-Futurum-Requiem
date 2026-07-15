@@ -81,8 +81,6 @@ import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityGatewayRendere
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityNewBeaconRenderer;
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityShulkerBoxRenderer;
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityWoodSignRenderer;
-import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
-import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import ganymedes01.etfuturum.entities.EntityArmourStand;
 import ganymedes01.etfuturum.entities.EntityBee;
 import ganymedes01.etfuturum.entities.EntityBrownMooshroom;

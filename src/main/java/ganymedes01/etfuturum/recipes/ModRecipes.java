@@ -792,11 +792,7 @@ public class ModRecipes {
 		GameRegistry.addRecipe(new RecipeAddPattern());
 
 		if (ConfigBlocksItems.enableDripstone) {
-			addShapedRecipe(new ItemStack(ModBlocks.DRIPSTONE_BLOCK.get()), "xx", "xx", 'x', new ItemStack(ModBlocks.POINTED_DRIPSTONE.get()));
-		}
-
-		if (ConfigBlocksItems.enableDripstone) {
-			addShapedRecipe(new ItemStack(ModBlocks.DRIPSTONE_BLOCK.get()), "xx", "xx", 'x', new ItemStack(ModBlocks.POINTED_DRIPSTONE.get()));
+			RecipeHelper.addShapedRecipe(new ItemStack(ModBlocks.DRIPSTONE_BLOCK.get()), "xx", "xx", 'x', new ItemStack(ModBlocks.POINTED_DRIPSTONE.get()));
 		}
 
 		ItemStack output145 = ModItems.WOODEN_ARMORSTAND.newItemStack();

@@ -836,40 +836,8 @@ public class ServerEventHandler {
 							}
 						}
 
-						//Lava cauldron filling and cauldron filling noises
-						if (heldStack != null && canUse(player, world, x, y, z) && oldBlock == Blocks.cauldron) {
-							Item item = heldStack.getItem();
-							if (ConfigBlocksItems.enableLavaCauldrons && item instanceof ItemBucket && ((ItemBucket) item).isFull == Blocks.flowing_lava && meta == 0) {
-								event.setResult(Result.DENY);
-								player.swingItem();
-								world.setBlock(x, y, z, ModBlocks.LAVA_CAULDRON.get());
-								if (ConfigSounds.fluidInteract) {
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.empty_lava", 1, 1);
-								}
-								if (!player.capabilities.isCreativeMode) {
-									if (heldStack.stackSize <= 1) {
-										player.inventory.setInventorySlotContents(player.inventory.currentItem, new ItemStack(item.getContainerItem()));
-									} else {
-										--heldStack.stackSize;
-									}
-								}
-								return;
-							} else if (ConfigSounds.fluidInteract) {
-								String container = "";
-								String fillOrEmpty = "";
-								if (item instanceof ItemBucket && ((ItemBucket) item).isFull == Blocks.flowing_water && meta < 3) {
-									container = "bucket";
-									fillOrEmpty = "empty";
-								} else if (item == Items.glass_bottle || (item == Items.potionitem && heldStack.getItemDamage() == 0 && !heldStack.hasTagCompound())) {
-									container = "bottle";
-									fillOrEmpty = /* meta < 3 && item == Items.potionitem ? "empty" : */ item == Items.glass_bottle && meta > 0 ? "fill" : "";
-								}//TODO add taking from cauldrons and evaporation, and filling a cauldron with regular potion bottles
-								if (!container.equals("") && !fillOrEmpty.equals("")) {
-									world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item." + container + "." + fillOrEmpty, 1, 1);
-									return;
-								}
-							}
-						}
+						//Lava cauldron filling/emptying and cauldron filling noises
+						if (cauldronInteract(event, heldStack, player, world, x, y, z, oldBlock, meta)) return;
 
 						// --- Bottle fill sounds --- //
 						if (ConfigSounds.fluidInteract && !world.isRemote && heldStack != null && heldStack.getItem() == Items.glass_bottle && event.action == Action.RIGHT_CLICK_AIR) {
@@ -1017,7 +985,7 @@ public class ServerEventHandler {
 				world.setBlock(x, y, z, Blocks.cauldron);
 
 				if (ConfigSounds.fluidInteract) {
-					world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.empty_lava", 1, 1);
+					world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bucket.empty_lava", 1, 1);
 				}
 
 				convertHeldItem(player, 1, new ItemStack(Items.lava_bucket));
@@ -1031,7 +999,7 @@ public class ServerEventHandler {
 				world.setBlock(x, y, z, ModBlocks.LAVA_CAULDRON.get());
 
 				if (ConfigSounds.fluidInteract) {
-					world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.fill_lava", 1, 1);
+					world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bucket.fill_lava", 1, 1);
 				}
 
 				convertHeldItem(player, 1, new ItemStack(Items.bucket));
@@ -1042,7 +1010,7 @@ public class ServerEventHandler {
 
 		if (item == Items.water_bucket && meta < 3) {
 			if (ConfigSounds.fluidInteract) {
-				world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.fill", 1, 1);
+				world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bucket.fill", 1, 1);
 			}
 
 			return true;
@@ -1051,7 +1019,7 @@ public class ServerEventHandler {
 			world.setBlockMetadataWithNotify(x, y, z, 0, 3);
 
 			if (ConfigSounds.fluidInteract) {
-				world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bucket.empty", 1, 1);
+				world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bucket.empty", 1, 1);
 			}
 
 			return true;
@@ -1059,7 +1027,7 @@ public class ServerEventHandler {
 			String fillOrEmpty = item == Items.glass_bottle && meta > 0 ? "fill" : "empty";
 
 			if (ConfigSounds.fluidInteract) {
-				world.playSoundEffect(x, y, z, Reference.MCAssetVer + ":item.bottle." + fillOrEmpty, 1, 1);
+				world.playSoundEffect(x, y, z, Tags.MC_ASSET_VER + ":item.bottle." + fillOrEmpty, 1, 1);
 			}
 
 			return true;
