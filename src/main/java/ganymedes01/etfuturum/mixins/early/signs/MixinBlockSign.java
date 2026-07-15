@@ -74,22 +74,24 @@ public class MixinBlockSign extends Block {
 		return true;
 	}
 
+	// Check which side of the sign the player should edit when the sign is clicked
 	private static boolean isPlayerOnFrontSide(World world, int x, int y, int z, EntityPlayer player) {
 		int meta = world.getBlockMetadata(x, y, z);
-		double dx = player.posX - (x + 0.5D);
-		double dz = player.posZ - (z + 0.5D);
 		IWaxableSign sign = (IWaxableSign) world.getTileEntity(x, y, z);
 
 		if (sign.isWallSign(world, x, y, z)) {
+			double signWallOffset = 0.0625F;
 			switch (meta) {
-				case 2: return dz < 0;  // south wall, front = north
-				case 3: return dz > 0;  // north wall, front = south
-				case 4: return dx < 0;  // east wall, front = west
-				case 5: return dx > 0;  // west wall, front = east
+				case 2: return player.posZ < z + 1.0 - signWallOffset;
+				case 3: return player.posZ > z + signWallOffset;
+				case 4: return player.posX < x + 1.0 - signWallOffset;
+				case 5: return player.posX > x + signWallOffset;
 				default: return true;
 			}
-		} else {
-			// Standing sign: front = direction of sign board
+		}
+		else {
+			double dx = player.posX - (x + 0.5D);
+			double dz = player.posZ - (z + 0.5D);
 			double angle = meta * Math.PI / 8.0;
 			double frontX = -Math.sin(angle);
 			double frontZ = Math.cos(angle);
