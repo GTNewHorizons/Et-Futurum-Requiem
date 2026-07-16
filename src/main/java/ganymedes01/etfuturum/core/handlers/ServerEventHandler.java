@@ -936,8 +936,6 @@ public class ServerEventHandler {
 
 							if (item == Items.redstone) {
 								block = Blocks.redstone_wire;
-							} else if (item == Items.sign) {
-								block = side < 2 ? Blocks.standing_sign : Blocks.wall_sign;
 							} else if (item == Items.wooden_door && side == 1) {
 								block = Blocks.wooden_door;
 							} else if (item == Items.iron_door && side == 1) {

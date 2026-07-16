@@ -23,63 +23,65 @@ public class ItemBlockSign extends ItemBlock {
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack itemStack, EntityPlayer player, World world, int x, int y, int z, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_) {
+	public boolean onItemUse(ItemStack itemStack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
 
-		if (p_77648_7_ == 0) {
+		if (side == 0) {
 			return false;
-		} else if (!world.getBlock(x, y, z).getMaterial().isSolid()) {
+		}
+
+		Block clickedBlock = world.getBlock(x, y, z);
+
+		if (clickedBlock != Blocks.vine && clickedBlock != Blocks.tallgrass && clickedBlock != Blocks.deadbush && !clickedBlock.isReplaceable(world, x, y, z)) {
+			if (!clickedBlock.getMaterial().isSolid()) {
+				return false;
+			}
+
+			switch (side) {
+				case 1: ++y; break;
+				case 2: --z; break;
+				case 3: ++z; break;
+				case 4: --x; break;
+				case 5: ++x; break;
+			}
+		}
+		else {
+			// Standing sign when overwriting a replaceable block
+			side = 1;
+		}
+
+		if (side == 1 && !World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
 			return false;
+		}
+
+		if (!player.canPlayerEdit(x, y, z, side, itemStack)) {
+			return false;
+		} else if (!Blocks.standing_sign.canPlaceBlockAt(world, x, y, z)) {
+			return false;
+		} else if (world.isRemote) {
+			return true;
 		} else {
-			if (p_77648_7_ == 1) {
-				++y;
-			}
-
-			if (p_77648_7_ == 2) {
-				--z;
-			}
-
-			if (p_77648_7_ == 3) {
-				++z;
-			}
-
-			if (p_77648_7_ == 4) {
-				--x;
-			}
-
-			if (p_77648_7_ == 5) {
-				++x;
-			}
-
-			if (!player.canPlayerEdit(x, y, z, p_77648_7_, itemStack)) {
-				return false;
-			} else if (!Blocks.standing_sign.canPlaceBlockAt(world, x, y, z)) {
-				return false;
-			} else if (world.isRemote) {
-				return true;
+			Block block;
+			if (side == 1) {
+				int i1 = MathHelper.floor_double((player.rotationYaw + 180.0F) * 16.0F / 360.0F + 0.5D) & 15;
+				block = field_150939_a; // blockInstance
+				world.setBlock(x, y, z, block, i1, 3);
 			} else {
-				Block block;
-				if (p_77648_7_ == 1) {
-					int i1 = MathHelper.floor_double((player.rotationYaw + 180.0F) * 16.0F / 360.0F + 0.5D) & 15;
-					block = field_150939_a; // blockInstance
-					world.setBlock(x, y, z, block, i1, 3);
-				} else {
-					block = ((BlockWoodSign) field_150939_a/*blockInstance*/).getWallSign();
-					world.setBlock(x, y, z, block, p_77648_7_, 3);
-				}
-
-				//Disable the sound for continuity, so it doesn't play when the event-based player would not
-				if (ConfigSounds.fixSilentPlacing)
-					world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, block.stepSound.func_150496_b()/*getPlaceSound*/, (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-
-				--itemStack.stackSize;
-				TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
-
-				if (tileentitysign != null) {
-					tileentitysign.func_145912_a(player);
-					EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
-				}
-				return true;
+				block = ((BlockWoodSign) field_150939_a/*blockInstance*/).getWallSign();
+				world.setBlock(x, y, z, block, side, 3);
 			}
+
+			//Disable the sound for continuity, so it doesn't play when the event-based player would not
+			if (ConfigSounds.fixSilentPlacing)
+				world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, block.stepSound.func_150496_b()/*getPlaceSound*/, (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+
+			--itemStack.stackSize;
+			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
+
+			if (tileentitysign != null) {
+				tileentitysign.func_145912_a(player);
+				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
+			}
+			return true;
 		}
 	}
 }
