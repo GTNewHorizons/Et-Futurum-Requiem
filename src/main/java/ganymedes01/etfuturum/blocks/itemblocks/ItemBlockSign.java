@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
@@ -17,6 +18,7 @@ import net.minecraft.world.World;
 public class ItemBlockSign extends ItemBlock {
 	public ItemBlockSign(Block sign) {
 		super(sign);
+		this.maxStackSize = Items.sign.getItemStackLimit(new ItemStack(Items.sign));
 		if (!(sign instanceof BlockWoodSign)) {
 			throw new IllegalArgumentException("ItemBlockSign block must be instance of BlockWoodSign!");
 		}

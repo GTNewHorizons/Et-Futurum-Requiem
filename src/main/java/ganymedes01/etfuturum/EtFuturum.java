@@ -60,7 +60,6 @@ import ganymedes01.etfuturum.core.proxy.CommonProxy;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.entities.ModEntityList;
-import ganymedes01.etfuturum.items.ItemWoodSign;
 import ganymedes01.etfuturum.lib.Reference;
 
 import ganymedes01.etfuturum.network.ArmourStandInteractHandler;
@@ -194,28 +193,6 @@ public class EtFuturum {
 		public void displayAllReleventItems(List<ItemStack> list) {
 			list.add(new ItemStack(Blocks.mob_spawner));
 			super.displayAllReleventItems(list);
-
-			//Remove the sign items from the list; we'll add them back in a moment
-			Iterator<ItemStack> iterator = list.iterator();
-			while (iterator.hasNext()) {
-				ItemStack stack = iterator.next();
-				for (ModItems sign : ModItems.OLD_SIGN_ITEMS) {
-					if (stack.getItem() == sign.get()) {
-						iterator.remove();
-					}
-				}
-			}
-
-			//Add the sign items back but in a way so they are sorted by their block ID instead of their item ID.
-			//This allows them to be in the correct place instead of always at the bottom of the block ID list, since item IDs are always above block IDs
-			for (ModItems sign : ModItems.OLD_SIGN_ITEMS) {
-				for (ItemStack stack : list) {
-					if (Item.getIdFromItem(stack.getItem()) > Block.getIdFromBlock(((ItemWoodSign) sign.get()).getSignBlock())) {
-						list.add(list.indexOf(stack), sign.newItemStack());
-						break;
-					}
-				}
-			}
 		}
 	};
 
