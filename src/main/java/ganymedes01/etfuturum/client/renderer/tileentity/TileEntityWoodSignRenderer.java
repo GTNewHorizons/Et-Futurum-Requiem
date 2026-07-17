@@ -1,5 +1,7 @@
 package ganymedes01.etfuturum.client.renderer.tileentity;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import ganymedes01.etfuturum.ducks.IWaxableSign;
 import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
@@ -10,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+@SideOnly(Side.CLIENT)
 public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 
 	/**

@@ -75,6 +75,7 @@ import ganymedes01.etfuturum.network.ChestBoatOpenInventoryHandler;
 import ganymedes01.etfuturum.network.ChestBoatOpenInventoryMessage;
 import ganymedes01.etfuturum.network.StartElytraFlyingHandler;
 import ganymedes01.etfuturum.network.StartElytraFlyingMessage;
+import ganymedes01.etfuturum.network.SignTextUpdateClientHandler;
 import ganymedes01.etfuturum.network.SignTextUpdateHandler;
 import ganymedes01.etfuturum.network.SignTextUpdateMessage;
 import ganymedes01.etfuturum.network.WoodSignOpenHandler;
@@ -295,7 +296,7 @@ public class EtFuturum {
 		networkWrapper.registerMessage(BlackHeartParticlesHandler.class, BlackHeartParticlesMessage.class, 1, Side.CLIENT);
 		networkWrapper.registerMessage(WoodSignOpenHandler.class, WoodSignOpenMessage.class, 3, Side.CLIENT);
 		networkWrapper.registerMessage(SignTextUpdateHandler.class, SignTextUpdateMessage.class, 8, Side.SERVER);
-		networkWrapper.registerMessage(SignTextUpdateHandler.class, SignTextUpdateMessage.class, 9, Side.CLIENT);
+		networkWrapper.registerMessage(SignTextUpdateClientHandler.class, SignTextUpdateMessage.class, 9, Side.CLIENT);
 		networkWrapper.registerMessage(BoatMoveHandler.class, BoatMoveMessage.class, 4, Side.SERVER);
 		networkWrapper.registerMessage(ChestBoatOpenInventoryHandler.class, ChestBoatOpenInventoryMessage.class, 5, Side.SERVER);
 		networkWrapper.registerMessage(StartElytraFlyingHandler.class, StartElytraFlyingMessage.class, 6, Side.SERVER);

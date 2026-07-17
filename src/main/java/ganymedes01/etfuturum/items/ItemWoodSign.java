@@ -17,6 +17,7 @@ public class ItemWoodSign extends Item {
 		setTextureName(sign.type + "_sign");
 		setCreativeTab(EtFuturum.creativeTabBlocks);
 		this.maxStackSize = Items.sign.getItemStackLimit(new ItemStack(Items.sign));
+		System.out.println("maxStackSize: " + this.maxStackSize);
 	}
 
 	@Override
