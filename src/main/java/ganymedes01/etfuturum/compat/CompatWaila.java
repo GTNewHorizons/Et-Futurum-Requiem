@@ -5,6 +5,8 @@ import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockBanner;
 import ganymedes01.etfuturum.blocks.BlockPotionCauldron;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
+import ganymedes01.etfuturum.blocks.BlockWoodSign;
+import ganymedes01.etfuturum.ducks.IWaxableSign;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronPotion;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
@@ -12,6 +14,7 @@ import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaRegistrar;
+import net.minecraft.block.BlockSign;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -32,6 +35,8 @@ public class CompatWaila {
 		registrar.registerBodyProvider(new BannerDataProvider(), BlockBanner.class);
 		registrar.registerStackProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
 		registrar.registerBodyProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
+		registrar.registerBodyProvider(new SignDataProvider(), BlockSign.class);
+		registrar.registerBodyProvider(new SignDataProvider(), BlockWoodSign.class);
 	}
 
 	public static void register() {
@@ -142,6 +147,39 @@ public class CompatWaila {
 		@Override
 		public NBTTagCompound getNBTData(EntityPlayerMP arg0, TileEntity arg1, NBTTagCompound arg2, World arg3, int arg4, int arg5, int arg6) {
 			return arg2;
+		}
+	}
+
+	public static class SignDataProvider implements IWailaDataProvider {
+		@Override
+		public ItemStack getWailaStack(IWailaDataAccessor accessor, IWailaConfigHandler config) {
+			return accessor.getStack();
+		}
+
+		@Override
+		public List<String> getWailaHead(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			return currenttip;
+		}
+
+		@Override
+		public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			if (accessor.getTileEntity() instanceof IWaxableSign sign && sign.isWaxed()) {
+				currenttip.add("Waxed");
+			}
+			return currenttip;
+		}
+
+		@Override
+		public List<String> getWailaTail(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			return currenttip;
+		}
+
+		@Override
+		public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity te, NBTTagCompound tag, World world, int x, int y, int z) {
+			return tag;
 		}
 	}
 }

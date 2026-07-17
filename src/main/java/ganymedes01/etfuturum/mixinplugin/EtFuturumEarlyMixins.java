@@ -2,7 +2,6 @@ package ganymedes01.etfuturum.mixinplugin;
 
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
@@ -224,6 +223,15 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.ladderTrapdoors) {
 			mixins.add("laddertrapdoors.MixinBlockLadder");
 			mixins.add("laddertrapdoors.MixinBlockTrapdoor");
+		}
+
+		if (ConfigMixins.signs) {
+			mixins.add("signs.MixinBlockSign");
+			mixins.add("signs.MixinItemSign");
+			mixins.add("signs.MixinTileEntitySign");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("signs.MixinTileEntitySignRenderer");
+			}
 		}
 
 		if (ConfigMixins.betterPistons) {

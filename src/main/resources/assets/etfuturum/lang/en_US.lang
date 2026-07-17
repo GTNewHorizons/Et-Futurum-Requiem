@@ -42,6 +42,7 @@ container.etfuturum.smoker=Smoker
 container.etfuturum.barrel=Barrel
 container.etfuturum.shulker_box=Shulker Box
 container.etfuturum.chest_boat=Boat with Chest
+sign.edit.back=Edit sign message (back)
 
 item.record.pigstep.desc=Lena Raine - Pigstep
 item.record.otherside.desc=Lena Raine - otherside

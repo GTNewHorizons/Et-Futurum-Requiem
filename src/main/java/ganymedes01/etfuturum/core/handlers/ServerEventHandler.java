@@ -38,6 +38,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
 import ganymedes01.etfuturum.core.utils.ItemStackSet;
 import ganymedes01.etfuturum.core.utils.Utils;
+import ganymedes01.etfuturum.ducks.IWaxableSign;
 import ganymedes01.etfuturum.elytra.IElytraEntityTrackerEntry;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
 
@@ -62,6 +63,7 @@ import ganymedes01.etfuturum.items.ItemArrowTipped;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
+import ganymedes01.etfuturum.network.SignTextUpdateMessage;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.storage.EtFuturumPlayer;
@@ -141,6 +143,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionHelper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntitySign;
 
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentText;
@@ -779,6 +782,30 @@ public class ServerEventHandler {
 		}
 	}
 
+	// This is required to sync the back-text of signs to players on chunk load,
+	// because the vanilla client doesn't know about them
+	@SubscribeEvent
+	public void onChunkWatch(net.minecraftforge.event.world.ChunkWatchEvent.Watch event) {
+		EntityPlayerMP mp = event.player;
+		net.minecraft.world.chunk.Chunk chunk = mp.getServerForPlayer()
+				.getChunkFromChunkCoords(event.chunk.chunkXPos, event.chunk.chunkZPos);
+		if (chunk == null) return;
+
+		for (Object obj : chunk.chunkTileEntityMap.values()) {
+			if (obj instanceof IWaxableSign) {
+				TileEntity te = (TileEntity) obj;
+				String[] back = ((IWaxableSign) obj).getSignText(false);
+
+				// Only send the packet if the back text is not empty
+				for (String s : back) if (!s.isEmpty()) {
+					EtFuturum.networkWrapper.sendTo(
+						new SignTextUpdateMessage(te.xCoord, te.yCoord, te.zCoord, false, back), mp);
+					break;
+				}
+			}
+		}
+	}
+
 	@SubscribeEvent
 	public void onPlayerInteractNonVanilla(PlayerInteractEvent event) {
 		if (event.action == Action.RIGHT_CLICK_AIR) {
@@ -909,8 +936,6 @@ public class ServerEventHandler {
 
 							if (item == Items.redstone) {
 								block = Blocks.redstone_wire;
-							} else if (item == Items.sign) {
-								block = side < 2 ? Blocks.standing_sign : Blocks.wall_sign;
 							} else if (item == Items.wooden_door && side == 1) {
 								block = Blocks.wooden_door;
 							} else if (item == Items.iron_door && side == 1) {
