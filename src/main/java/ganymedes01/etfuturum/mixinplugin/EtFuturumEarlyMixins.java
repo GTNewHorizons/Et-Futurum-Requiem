@@ -2,7 +2,6 @@ package ganymedes01.etfuturum.mixinplugin;
 
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
@@ -150,6 +149,12 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigWorld.modernLightmapGamma && side == MixinEnvironment.Side.CLIENT) {
 			mixins.add("modernlightmap.client.MixinEntityRenderer");
+		}
+
+		if (ConfigMixins.unicodeFontPages && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("unicodepages.client.MixinFontRenderer");
+			mixins.add("unicodepages.client.MixinGuiTextField");
+			mixins.add("unicodepages.client.MixinGuiScreenBook");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {
