@@ -5,7 +5,6 @@ import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
