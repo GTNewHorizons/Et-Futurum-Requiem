@@ -10,6 +10,7 @@ import ganymedes01.etfuturum.enchantment.FrostWalker;
 import ganymedes01.etfuturum.enchantment.Mending;
 import ganymedes01.etfuturum.enchantment.SoulSpeed;
 import ganymedes01.etfuturum.enchantment.SwiftSneak;
+import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSoulSand;
 import net.minecraft.block.material.Material;
@@ -56,20 +57,27 @@ public class ModEnchantments {
 	public static void onLivingUpdate(EntityLivingBase entity) {
 		if (!ConfigEnchantsPotions.enableFrostWalker && !ConfigEnchantsPotions.enableSoulSpeed)
 			return;
+		if (entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getModifier(SOUL_SPEED_UUID) != null) {
+			if(Math.abs(entity.motionX) + Math.abs(entity.motionZ) > 0.01) {
+				CustomParticles.spawnSoulSpeedOrb(entity.worldObj, entity.posX, entity.posY, entity.posZ);
+				float volume = entity.worldObj.rand.nextFloat() > 0.3F ? 0.0F : 0.15F;
+				entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, Reference.MCAssetVer + ":particle.soul_escape", volume, entity.worldObj.rand.nextFloat() * 0.4F + 0.6F, true);
+			}
+		}
 		if (entity.worldObj.isRemote)
 			return;
 
 		ItemStack boots = entity.getEquipmentInSlot(1);
 		int frostWalkerLevel = EnchantmentHelper.getEnchantmentLevel(frostWalker.effectId, boots);
 		int soulSpeedLevel = EnchantmentHelper.getEnchantmentLevel(soulSpeed.effectId, boots);
-		if ((frostWalkerLevel > 0 || soulSpeedLevel > 0) && entity.onGround) {
+		if (frostWalkerLevel > 0 || soulSpeedLevel > 0) {
 			double[] prevCoords = prevMoveCache.get(entity);
 			if (prevCoords == null || (Math.abs(prevCoords[0] - entity.posX) > 0.003D && Math.abs(prevCoords[1] - entity.posZ) > 0.003D)) {
 				int x = (int) entity.posX;
 				int y = (int) entity.posY;
 				int z = (int) entity.posZ;
 
-				if (frostWalkerLevel > 0) {
+				if (frostWalkerLevel > 0 && entity.onGround) {
 					int radius = Math.min(16, 2 + frostWalkerLevel);
 					for (int i = -radius; i <= radius; i++) {
 						for (int j = -radius; j <= radius; j++) {
@@ -89,21 +97,21 @@ public class ModEnchantments {
 					Block inBlock = entity.worldObj.getBlock(x, y, z);
 					Block underBlock = entity.worldObj.getBlock(x, y - 1, z);
 					IAttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-					if(inBlock instanceof BlockSoulSand || underBlock instanceof BlockSoulSoil || inBlock instanceof BlockSoulSoil || underBlock instanceof BlockSoulSand) {
-							if (attribute.getModifier(SOUL_SPEED_UUID) == null) {
-								attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105 * soulSpeedLevel, 2).setSaved(false));
-							}
-							if (prevCoords != null) {
-								double dx = (prevCoords[0] - x);
-								double dz = (prevCoords[1] - z);
-								double dist = Math.sqrt(dx * dx + dz * dz);
-								if (dist > 0.01 && entity.worldObj.rand.nextFloat() < 0.04F * dist) {
-									boots.damageItem(1, entity);
-									if (boots.stackSize <= 0) {
-										entity.setCurrentItemOrArmor(1, null);
-									}
+					if(inBlock == Blocks.soul_sand || inBlock == ModBlocks.SOUL_SOIL.get() || underBlock == Blocks.soul_sand || underBlock == ModBlocks.SOUL_SOIL.get()) {
+						if (attribute.getModifier(SOUL_SPEED_UUID) == null) {
+							attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105 * soulSpeedLevel, 2).setSaved(false));
+						}
+						if (prevCoords != null) {
+							double dx = (prevCoords[0] - x);
+							double dz = (prevCoords[1] - z);
+							double dist = Math.sqrt(dx * dx + dz * dz);
+							if (entity.worldObj.rand.nextFloat() < 0.04F * dist) {
+								boots.damageItem(1, entity);
+								if (boots.stackSize <= 0) {
+									entity.setCurrentItemOrArmor(1, null);
 								}
 							}
+						}
 					} else {
 						if(attribute.getModifier(SOUL_SPEED_UUID) != null) {
 							attribute.removeModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105*soulSpeedLevel, 2).setSaved(false));
