@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import ganymedes01.etfuturum.ModEnchantments;
 import ganymedes01.etfuturum.blocks.BlockSoulSoil;
+import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
 import ganymedes01.etfuturum.entities.attributes.EtFuturumEntityAttributes;
 import net.minecraft.block.Block;
