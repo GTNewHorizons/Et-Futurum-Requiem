@@ -2,6 +2,7 @@ package ganymedes01.etfuturum;
 
 import baubles.common.lib.PlayerHandler;
 import ganymedes01.etfuturum.blocks.BlockSoulSoil;
+import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
@@ -53,9 +54,9 @@ public class ModEnchantments {
 
 	// Frost Walker logic
 	public static void onLivingUpdate(EntityLivingBase entity) {
-		if (entity.worldObj.isRemote)
-			return;
 		if (!ConfigEnchantsPotions.enableFrostWalker && !ConfigEnchantsPotions.enableSoulSpeed)
+			return;
+		if (entity.worldObj.isRemote)
 			return;
 
 		ItemStack boots = entity.getEquipmentInSlot(1);
@@ -89,20 +90,20 @@ public class ModEnchantments {
 					Block underBlock = entity.worldObj.getBlock(x, y - 1, z);
 					IAttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 					if(inBlock instanceof BlockSoulSand || underBlock instanceof BlockSoulSoil || inBlock instanceof BlockSoulSoil || underBlock instanceof BlockSoulSand) {
-						if(attribute.getModifier(SOUL_SPEED_UUID) == null) {
-							attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105*soulSpeedLevel, 2).setSaved(false));
-						}
-						if (prevCoords != null) {
-							double dx = (prevCoords[0] - x);
-							double dz = (prevCoords[1] - z);
-							double dist = Math.sqrt(dx * dx + dz * dz);
-							if (dist > 0.01 && entity.worldObj.rand.nextFloat() < 0.04F * dist) {
-								boots.damageItem(1, entity);
-								if (boots.stackSize <= 0) {
-									entity.setCurrentItemOrArmor(1, null);
+							if (attribute.getModifier(SOUL_SPEED_UUID) == null) {
+								attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105 * soulSpeedLevel, 2).setSaved(false));
+							}
+							if (prevCoords != null) {
+								double dx = (prevCoords[0] - x);
+								double dz = (prevCoords[1] - z);
+								double dist = Math.sqrt(dx * dx + dz * dz);
+								if (dist > 0.01 && entity.worldObj.rand.nextFloat() < 0.04F * dist) {
+									boots.damageItem(1, entity);
+									if (boots.stackSize <= 0) {
+										entity.setCurrentItemOrArmor(1, null);
+									}
 								}
 							}
-						}
 					} else {
 						if(attribute.getModifier(SOUL_SPEED_UUID) != null) {
 							attribute.removeModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105*soulSpeedLevel, 2).setSaved(false));
