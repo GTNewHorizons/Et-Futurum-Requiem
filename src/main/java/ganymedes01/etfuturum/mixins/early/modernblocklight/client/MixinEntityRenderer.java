@@ -10,6 +10,8 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.potion.Potion;
 import net.minecraft.world.WorldProvider;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -51,6 +53,9 @@ public class MixinEntityRenderer {
 
 	@Unique
 	private float etfu$ambientTerm;
+
+	@Unique
+	private float etfu$nightVisionBrightness;
 
 	@Unique
 	private float etfu$legacyGreen;
@@ -100,6 +105,7 @@ public class MixinEntityRenderer {
 		this.etfu$floorRed = etfu$ambientFloor(counterpart, 0, nightVision, sunlit + this.etfu$ambientTerm);
 		this.etfu$floorGreen = etfu$ambientFloor(counterpart, 1, nightVision, sunlit);
 		this.etfu$floorBlue = etfu$ambientFloor(counterpart, 2, nightVision, sky);
+		this.etfu$nightVisionBrightness = nightVision;
 	}
 
 	@ModifyConstant(method = "updateLightmap", constant = @Constant(floatValue = 0.1F))
@@ -216,6 +222,35 @@ public class MixinEntityRenderer {
 	@Unique
 	private float etfu$dropTrailingOffset(float original) {
 		return this.etfu$modernBlockLight ? 0.0F : original;
+	}
+
+	@Final
+    @Shadow
+	private int[] lightmapColors;
+
+	@Inject(method = "updateLightmap", at = @At(value = "FIELD",
+			opcode = Opcodes.GETFIELD,
+			target = "Lnet/minecraft/client/renderer/EntityRenderer;lightmapTexture:Lnet/minecraft/client/renderer/texture/DynamicTexture;"))
+	private void etfu$applyNightVisionBoostLast(float p_78472_1_, CallbackInfo ci) {
+		if (!this.etfu$modernNightVision || this.etfu$nightVisionBrightness <= 0.0F) {
+			return;
+		}
+		float nvRed = ModernLightmap.NIGHT_VISION[0] * this.etfu$nightVisionBrightness;
+		float nvGreen = ModernLightmap.NIGHT_VISION[1] * this.etfu$nightVisionBrightness;
+		float nvBlue = ModernLightmap.NIGHT_VISION[2] * this.etfu$nightVisionBrightness;
+
+		for (int i = 0; i < this.lightmapColors.length; i++) {
+			int color = this.lightmapColors[i];
+			int r = (color >> 16) & 0xFF;
+			int g = (color >> 8) & 0xFF;
+			int b = color & 0xFF;
+
+			r = Math.min(0xFF, (int) Math.max(r, nvRed * 255.0F));
+			g = Math.min(0xFF, (int) Math.max(g, nvGreen * 255.0F));
+			b = Math.min(0xFF, (int) Math.max(b, nvBlue * 255.0F));
+
+			this.lightmapColors[i] = (color & 0xFF000000) | (r << 16) | (g << 8) | b;
+		}
 	}
 
 	@Unique
