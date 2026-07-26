@@ -1,7 +1,6 @@
 package ganymedes01.etfuturum;
 
 import baubles.common.lib.PlayerHandler;
-import ganymedes01.etfuturum.blocks.BlockSoulSoil;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
@@ -12,14 +11,12 @@ import ganymedes01.etfuturum.enchantment.SoulSpeed;
 import ganymedes01.etfuturum.enchantment.SwiftSneak;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockSoulSand;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
