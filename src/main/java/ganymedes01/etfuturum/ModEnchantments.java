@@ -6,6 +6,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.enchantment.FrostWalker;
 import ganymedes01.etfuturum.enchantment.Mending;
+import ganymedes01.etfuturum.enchantment.SoulSpeed;
 import ganymedes01.etfuturum.enchantment.SwiftSneak;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -30,6 +31,7 @@ public class ModEnchantments {
 	public static Enchantment frostWalker;
 	public static Enchantment mending;
 	public static Enchantment swiftSneak;
+	public static Enchantment soulSpeed;
 
 	private static final Map<EntityLivingBase, double[]> prevMoveCache = new WeakHashMap<>();
 
@@ -40,6 +42,8 @@ public class ModEnchantments {
 			mending = new Mending();
 		if (ConfigEnchantsPotions.enableSwiftSneak)
 			swiftSneak = new SwiftSneak();
+		if (ConfigEnchantsPotions.enableSoulSpeed)
+			soulSpeed = new SoulSpeed();
 	}
 
 	// Frost Walker logic
