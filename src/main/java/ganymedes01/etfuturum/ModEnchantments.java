@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum;
 
 import baubles.common.lib.PlayerHandler;
+import ganymedes01.etfuturum.blocks.BlockSoulSoil;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
@@ -9,10 +10,15 @@ import ganymedes01.etfuturum.enchantment.Mending;
 import ganymedes01.etfuturum.enchantment.SoulSpeed;
 import ganymedes01.etfuturum.enchantment.SwiftSneak;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSoulSand;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -21,10 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class ModEnchantments {
 
@@ -32,6 +35,8 @@ public class ModEnchantments {
 	public static Enchantment mending;
 	public static Enchantment swiftSneak;
 	public static Enchantment soulSpeed;
+
+	public static final UUID SOUL_SPEED_UUID = UUID.fromString("7f382a10-21a4-4a87-8df0-aa542031bcbb");
 
 	private static final Map<EntityLivingBase, double[]> prevMoveCache = new WeakHashMap<>();
 
@@ -50,30 +55,57 @@ public class ModEnchantments {
 	public static void onLivingUpdate(EntityLivingBase entity) {
 		if (entity.worldObj.isRemote)
 			return;
-		if (!ConfigEnchantsPotions.enableFrostWalker)
+		if (!ConfigEnchantsPotions.enableFrostWalker && !ConfigEnchantsPotions.enableSoulSpeed)
 			return;
 
 		ItemStack boots = entity.getEquipmentInSlot(1);
-		int level = 0;
-		if ((level = EnchantmentHelper.getEnchantmentLevel(frostWalker.effectId, boots)) > 0 && entity.onGround) {
+		int frostWalkerLevel = EnchantmentHelper.getEnchantmentLevel(frostWalker.effectId, boots);
+		int soulSpeedLevel = EnchantmentHelper.getEnchantmentLevel(soulSpeed.effectId, boots);
+		if ((frostWalkerLevel > 0 || soulSpeedLevel > 0) && entity.onGround) {
 			double[] prevCoords = prevMoveCache.get(entity);
 			if (prevCoords == null || (Math.abs(prevCoords[0] - entity.posX) > 0.003D && Math.abs(prevCoords[1] - entity.posZ) > 0.003D)) {
 				int x = (int) entity.posX;
 				int y = (int) entity.posY;
 				int z = (int) entity.posZ;
 
-				int radius = Math.min(16, 2 + level);
-
-				for (int i = -radius; i <= radius; i++) {
-					for (int j = -radius; j <= radius; j++) {
-						if (i * i + j * j <= radius * radius) {
-							Block block = entity.worldObj.getBlock(x + i, y - 1, z + j);
-							Block blockUp = entity.worldObj.getBlock(x + i, y, z + j);
-							if (!blockUp.isNormalCube() && blockUp.getMaterial() != Material.water && (block == Blocks.water || block == Blocks.flowing_water)) {
-								if (entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, AxisAlignedBB.getBoundingBox(x + i, y - 1, z + j, x + i + 1, y, z + j + 1)).isEmpty()) {
-									entity.worldObj.setBlock(x + i, y - 1, z + j, ModBlocks.FROSTED_ICE.get());
+				if (frostWalkerLevel > 0) {
+					int radius = Math.min(16, 2 + frostWalkerLevel);
+					for (int i = -radius; i <= radius; i++) {
+						for (int j = -radius; j <= radius; j++) {
+							if (i * i + j * j <= radius * radius) {
+								Block block = entity.worldObj.getBlock(x + i, y - 1, z + j);
+								Block blockUp = entity.worldObj.getBlock(x + i, y, z + j);
+								if (!blockUp.isNormalCube() && blockUp.getMaterial() != Material.water && (block == Blocks.water || block == Blocks.flowing_water)) {
+									if (entity.worldObj.getEntitiesWithinAABBExcludingEntity(entity, AxisAlignedBB.getBoundingBox(x + i, y - 1, z + j, x + i + 1, y, z + j + 1)).isEmpty()) {
+										entity.worldObj.setBlock(x + i, y - 1, z + j, ModBlocks.FROSTED_ICE.get());
+									}
 								}
 							}
+						}
+					}
+				}
+				if (soulSpeedLevel > 0) {
+					Block inBlock = entity.worldObj.getBlock(x, y, z);
+					Block underBlock = entity.worldObj.getBlock(x, y - 1, z);
+					IAttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+					if(inBlock instanceof BlockSoulSand || underBlock instanceof BlockSoulSoil || inBlock instanceof BlockSoulSoil || underBlock instanceof BlockSoulSand) {
+						if(attribute.getModifier(SOUL_SPEED_UUID) == null) {
+							attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105*soulSpeedLevel, 2).setSaved(false));
+						}
+						if (prevCoords != null) {
+							double dx = (prevCoords[0] - x);
+							double dz = (prevCoords[1] - z);
+							double dist = Math.sqrt(dx * dx + dz * dz);
+							if (dist > 0.01 && entity.worldObj.rand.nextFloat() < 0.04F * dist) {
+								boots.damageItem(1, entity);
+								if (boots.stackSize <= 0) {
+									entity.setCurrentItemOrArmor(1, null);
+								}
+							}
+						}
+					} else {
+						if(attribute.getModifier(SOUL_SPEED_UUID) != null) {
+							attribute.removeModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105*soulSpeedLevel, 2).setSaved(false));
 						}
 					}
 				}
