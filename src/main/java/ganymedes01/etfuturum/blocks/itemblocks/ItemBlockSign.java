@@ -81,6 +81,9 @@ public class ItemBlockSign extends ItemBlock {
 
 			if (tileentitysign != null) {
 				tileentitysign.func_145912_a(player);
+				System.out.println("[SERVER] ItemBlockSign sending WoodSignOpenMessage (on place): front=true"
+					+ " pos=" + x + "," + y + "," + z + " blockId=" + Block.getIdFromBlock(block)
+					+ " player=" + player.getCommandSenderName());
 				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
 			}
 			return true;

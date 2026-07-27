@@ -38,7 +38,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
 import ganymedes01.etfuturum.core.utils.ItemStackSet;
 import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.ducks.IWaxableSign;
+import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.elytra.IElytraEntityTrackerEntry;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
 
@@ -63,7 +63,7 @@ import ganymedes01.etfuturum.items.ItemArrowTipped;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
-import ganymedes01.etfuturum.network.SignTextUpdateMessage;
+import ganymedes01.etfuturum.network.SignUpdateMessage;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.storage.EtFuturumPlayer;
@@ -782,8 +782,7 @@ public class ServerEventHandler {
 		}
 	}
 
-	// This is required to sync the back-text of signs to players on chunk load,
-	// because the vanilla client doesn't know about them
+	// Sync sign state to players on chunk load
 	@SubscribeEvent
 	public void onChunkWatch(net.minecraftforge.event.world.ChunkWatchEvent.Watch event) {
 		EntityPlayerMP mp = event.player;
@@ -792,16 +791,15 @@ public class ServerEventHandler {
 		if (chunk == null) return;
 
 		for (Object obj : chunk.chunkTileEntityMap.values()) {
-			if (obj instanceof IWaxableSign) {
+			if (obj instanceof ISign) {
 				TileEntity te = (TileEntity) obj;
-				String[] back = ((IWaxableSign) obj).getSignText(false);
+				ISign iSign = (ISign) obj;
+				TileEntitySign signTe = (TileEntitySign) te;
 
-				// Only send the packet if the back text is not empty
-				for (String s : back) if (!s.isEmpty()) {
-					EtFuturum.networkWrapper.sendTo(
-						new SignTextUpdateMessage(te.xCoord, te.yCoord, te.zCoord, false, back), mp);
-					break;
-				}
+				EtFuturum.networkWrapper.sendTo(
+					new SignUpdateMessage(te.xCoord, te.yCoord, te.zCoord,
+							signTe.signText, iSign.getSignText(false),
+							iSign.isWaxed(), iSign.getDyeId()), mp);
 			}
 		}
 	}

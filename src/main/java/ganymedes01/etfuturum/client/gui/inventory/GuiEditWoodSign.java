@@ -2,8 +2,8 @@ package ganymedes01.etfuturum.client.gui.inventory;
 
 import com.gtnewhorizon.gtnhlib.util.font.FontRendering;
 import ganymedes01.etfuturum.EtFuturum;
-import ganymedes01.etfuturum.ducks.IWaxableSign;
-import ganymedes01.etfuturum.network.SignTextUpdateMessage;
+import ganymedes01.etfuturum.ducks.ISign;
+import ganymedes01.etfuturum.network.SignUpdateMessage;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -44,7 +44,7 @@ public class GuiEditWoodSign extends GuiScreen {
 	public GuiEditWoodSign(TileEntitySign tileSign, boolean front) {
 		this.tileSign = tileSign;
 		this.front = front;
-		this.editingText = ((IWaxableSign) tileSign).getSignText(front);
+		this.editingText = ((ISign) tileSign).getSignText(front);
 	}
 
 	@Override
@@ -64,13 +64,18 @@ public class GuiEditWoodSign extends GuiScreen {
 		NetHandlerPlayClient nethandlerplayclient = this.mc.getNetHandler();
 
 		if (nethandlerplayclient != null) {
+			ISign iSign = (ISign) this.tileSign;
+			System.out.println("[CLIENT] GuiEditWoodSign.onGuiClosed: front=" + this.front
+				+ " pos=" + this.tileSign.xCoord + "," + this.tileSign.yCoord + "," + this.tileSign.zCoord
+				+ " text0=\"" + this.editingText[0] + "\"");
+
 			// Update client TE immediately (don't wait for server relay)
-			System.arraycopy(this.editingText, 0, ((IWaxableSign) this.tileSign).getSignText(this.front), 0, 4);
+			System.arraycopy(this.editingText, 0, iSign.getSignText(this.front), 0, 4);
 			this.tileSign.getWorldObj().func_147479_m(this.tileSign.xCoord, this.tileSign.yCoord, this.tileSign.zCoord);
-			// Sync to server for persistence + other players
-			EtFuturum.networkWrapper.sendToServer(new SignTextUpdateMessage(
-					this.tileSign.xCoord, this.tileSign.yCoord, this.tileSign.zCoord,
-					this.front, this.editingText));
+
+			// Sync to server
+			EtFuturum.networkWrapper.sendToServer(new SignUpdateMessage(
+					this.tileSign.xCoord, this.tileSign.yCoord, this.tileSign.zCoord, iSign.getSignText(true), iSign.getSignText(false)));
 		}
 
 		this.tileSign.setEditable(true);

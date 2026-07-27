@@ -9,11 +9,43 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public interface IWaxableSign {
+public interface ISign {
 	boolean isWaxed();
 	void setWaxed(boolean waxed);
 
+	/** Get the dye color ID (0-15), or -1 if not dyed */
+	int getDyeId();
+	void setDyeId(int dyeId);
+
 	String[] getSignText(boolean front);
+
+	/** Map dye metadata (0-15) to the closest § color code */
+	String[] DYE_COLOR_CODES = {
+		"\u00A7f", // 0: white
+		"\u00A76", // 1: orange -> gold
+		"\u00A7d", // 2: magenta -> light purple
+		"\u00A7b", // 3: light_blue -> aqua
+		"\u00A7e", // 4: yellow
+		"\u00A7a", // 5: lime -> green
+		"\u00A7d", // 6: pink -> light purple
+		"\u00A78", // 7: gray -> dark gray
+		"\u00A77", // 8: light_gray -> gray
+		"\u00A73", // 9: cyan -> dark aqua
+		"\u00A75", // 10: purple -> dark purple
+		"\u00A79", // 11: blue
+		"\u00A76", // 12: brown -> gold
+		"\u00A72", // 13: green -> dark green
+		"\u00A7c", // 14: red
+		"\u00A70", // 15: black
+	};
+
+	// Adds dye color as formatting code to text, as well as handling §r (reset)
+	default String applyDyeBaseColor(String text) {
+		int dyeId = getDyeId();
+		if (dyeId < 0 || dyeId > 15) return text;
+		String code = DYE_COLOR_CODES[dyeId];
+		return code + text.replace("\u00A7r", "\u00A7r" + code);
+	}
 
 	default boolean isWallSign(World world, int x, int y, int z) {
 		Block block = world.getBlock(x, y, z);

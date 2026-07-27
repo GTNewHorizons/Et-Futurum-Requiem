@@ -1,31 +1,65 @@
 package ganymedes01.etfuturum.mixins.early.signs;
 
-import ganymedes01.etfuturum.ducks.IWaxableSign;
+import ganymedes01.etfuturum.ducks.ISign;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySignRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Render back text on signs
+ * Render back text and apply dye color on signs
  * 
  * @author mosesyu1028
  */
 @Mixin(TileEntitySignRenderer.class)
 public class MixinTileEntitySignRenderer {
 
-	@Inject(method = "renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V", at = @At("TAIL"))
-	private void renderBackText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
-        if (!(te instanceof IWaxableSign))
+	@Unique
+	private String[] etfuturum$originalSignText;
+
+	/**
+	 * Before vanilla renders front text, apply dye base color to signText
+	 */
+	@Inject(method = "renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V", at = @At("HEAD"))
+	private void applyDyeToFrontText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
+		if (!(te instanceof TileEntitySign) || !(te instanceof ISign))
 			return;
 		TileEntitySign sign = (TileEntitySign) te;
-		String[] backText = ((IWaxableSign) sign).getSignText(false);
-		boolean standing = !((IWaxableSign) sign).isWallSign(te.getWorldObj(), te.xCoord, te.yCoord, te.zCoord);
+		ISign iSign = (ISign) sign;
+		int dyeId = iSign.getDyeId();
+		if (dyeId < 0 || dyeId > 15)
+			return;
+		// Save original and apply dye base color
+		etfuturum$originalSignText = new String[4];
+		for (int i = 0; i < 4; i++) {
+			etfuturum$originalSignText[i] = sign.signText[i];
+			sign.signText[i] = iSign.applyDyeBaseColor(sign.signText[i]);
+		}
+	}
+
+	@Inject(method = "renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V", at = @At("TAIL"))
+	private void renderBackText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
+        if (!(te instanceof ISign))
+			return;
+		TileEntitySign sign = (TileEntitySign) te;
+		ISign iSign = (ISign) sign;
+
+		// Restore original front text that was modified in the HEAD inject
+		if (etfuturum$originalSignText != null) {
+			for (int i = 0; i < 4; i++) {
+				sign.signText[i] = etfuturum$originalSignText[i];
+			}
+			etfuturum$originalSignText = null;
+		}
+
+		String[] backText = iSign.getSignText(false);
+		boolean standing = !iSign.isWallSign(te.getWorldObj(), te.xCoord, te.yCoord, te.zCoord);
 
 		GL11.glPushMatrix();
 		float f1 = 0.6666667F;
@@ -56,7 +90,7 @@ public class MixinTileEntitySignRenderer {
 		FontRenderer fontrenderer = ((TileEntitySignRenderer) (Object) this).func_147498_b();
 		byte b0 = 0;
 		for (int i = 0; i < backText.length; ++i) {
-			String s = backText[i];
+			String s = iSign.applyDyeBaseColor(backText[i]);
 			if (i == sign.lineBeingEdited) {
 				s = "> " + s + "§r <";
 			}

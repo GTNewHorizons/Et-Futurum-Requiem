@@ -6,7 +6,8 @@ import ganymedes01.etfuturum.blocks.BlockBanner;
 import ganymedes01.etfuturum.blocks.BlockPotionCauldron;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
-import ganymedes01.etfuturum.ducks.IWaxableSign;
+import ganymedes01.etfuturum.ducks.ISign;
+import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronPotion;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
@@ -165,8 +166,17 @@ public class CompatWaila {
 		@Override
 		public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
 										 IWailaConfigHandler config) {
-			if (accessor.getTileEntity() instanceof IWaxableSign sign && sign.isWaxed()) {
-				currenttip.add("Waxed");
+			if (accessor.getTileEntity() instanceof ISign sign) {
+				if (sign.isWaxed()) {
+					currenttip.add("Waxed");
+				}
+				int dyeId = sign.getDyeId();
+				if (dyeId >= 0 && dyeId < ModRecipes.dye_names.length) {
+					String dyeName = ModRecipes.dye_names[dyeId];
+					// Capitalize first letter
+					String displayName = dyeName.substring(0, 1).toUpperCase() + dyeName.substring(1).replace("_", " ");
+					currenttip.add("Dyed: " + displayName);
+				}
 			}
 			return currenttip;
 		}
