@@ -94,9 +94,9 @@ public class MixinEntityRenderer {
 		float nightVision = ConfigWorld.modernNightVision
 				? ModernLightmap.nightVisionBrightness(this.mc.thePlayer, p_78472_1_)
 				: 0.0F;
-		this.etfu$floorRed = ModernLightmap.floor(ModernLightmap.END_AMBIENT[0], 0, nightVision);
-		this.etfu$floorGreen = ModernLightmap.floor(ModernLightmap.END_AMBIENT[1], 1, nightVision);
-		this.etfu$floorBlue = ModernLightmap.floor(ModernLightmap.END_AMBIENT[2], 2, nightVision);
+		this.etfu$floorRed = ModernLightmap.floor(ModernLightmap.endAmbient(0), 0, nightVision);
+		this.etfu$floorGreen = ModernLightmap.floor(ModernLightmap.endAmbient(1), 1, nightVision);
+		this.etfu$floorBlue = ModernLightmap.floor(ModernLightmap.endAmbient(2), 2, nightVision);
 	}
 
 	@ModifyConstant(method = "updateLightmap", constant = @Constant(floatValue = 0.22F))

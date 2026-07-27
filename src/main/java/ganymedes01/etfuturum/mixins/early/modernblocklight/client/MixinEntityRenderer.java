@@ -46,7 +46,16 @@ public class MixinEntityRenderer {
 	private boolean etfu$modernNightVision;
 
 	@Unique
-	private float[] etfu$ambientColor;
+	private boolean etfu$hasAmbientColor;
+
+	@Unique
+	private float etfu$ambientRed;
+
+	@Unique
+	private float etfu$ambientGreen;
+
+	@Unique
+	private float etfu$ambientBlue;
 
 	@Unique
 	private float etfu$flickerFactor;
@@ -84,7 +93,10 @@ public class MixinEntityRenderer {
 		WorldProvider provider = world.provider;
 		boolean counterpart = ModernLightmap.hasModernCounterpart(provider);
 		this.etfu$counterpart = counterpart;
-		this.etfu$ambientColor = ModernLightmap.ambientColor(provider);
+		this.etfu$hasAmbientColor = ModernLightmap.hasAmbientColor(provider);
+		this.etfu$ambientRed = ModernLightmap.ambientColor(provider, 0);
+		this.etfu$ambientGreen = ModernLightmap.ambientColor(provider, 1);
+		this.etfu$ambientBlue = ModernLightmap.ambientColor(provider, 2);
 		this.etfu$modernBlockLight = ConfigWorld.modernBlockLightTint && counterpart;
 		this.etfu$modernNightVision = ConfigWorld.modernNightVision && counterpart
 				&& (provider.dimensionId != 1 || ConfigWorld.modernEndAmbientColor);
@@ -112,9 +124,9 @@ public class MixinEntityRenderer {
 			return;
 		}
 		float nightVision = this.etfu$nightVisionBrightness;
-		this.etfu$floorRed = etfu$ambientFloor(0, nightVision, f5 + this.etfu$ambientTerm);
-		this.etfu$floorGreen = etfu$ambientFloor(1, nightVision, f5);
-		this.etfu$floorBlue = etfu$ambientFloor(2, nightVision, f2);
+		this.etfu$floorRed = etfu$ambientFloor(this.etfu$ambientRed, 0, nightVision, f5 + this.etfu$ambientTerm);
+		this.etfu$floorGreen = etfu$ambientFloor(this.etfu$ambientGreen, 1, nightVision, f5);
+		this.etfu$floorBlue = etfu$ambientFloor(this.etfu$ambientBlue, 2, nightVision, f2);
 	}
 
 	@ModifyConstant(method = "updateLightmap", constant = @Constant(floatValue = 0.1F))
@@ -212,7 +224,7 @@ public class MixinEntityRenderer {
 		float g = levelTerm * ModernLightmap.BLOCK_TINT_CURVE[1][level];
 		float b = levelTerm * ModernLightmap.BLOCK_TINT_CURVE[2][level];
 
-		if (this.etfu$ambientColor == null) {
+		if (!this.etfu$hasAmbientColor) {
 			g += this.etfu$legacyGreen;
 			b += this.etfu$legacyBlue;
 		}
@@ -263,7 +275,7 @@ public class MixinEntityRenderer {
 	}
 
 	@Unique
-	private float etfu$ambientFloor(int channel, float nightVisionBrightness, float leak) {
+	private float etfu$ambientFloor(float ambient, int channel, float nightVisionBrightness, float leak) {
 		if (!this.etfu$counterpart) {
 			return 0.03F;
 		}
@@ -271,9 +283,9 @@ public class MixinEntityRenderer {
 				? ModernLightmap.NIGHT_VISION[channel] * nightVisionBrightness
 				: 0.0F;
 		if (ConfigWorld.modernBlockLightTint) {
-			return this.etfu$ambientColor == null
-					? 0.03F
-					: Math.max(this.etfu$ambientColor[channel], nightVision) - leak;
+			return this.etfu$hasAmbientColor
+					? Math.max(ambient, nightVision) - leak
+					: 0.03F;
 		}
 		return Math.max(0.03F, (nightVision - 0.03F) / ModernLightmap.BIAS);
 	}

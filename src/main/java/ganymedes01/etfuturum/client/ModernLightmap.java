@@ -18,11 +18,11 @@ public final class ModernLightmap {
 
 	public static final float BIAS = 0.96F;
 
-	public static final float[] OVERWORLD_AMBIENT = {10.0F / 255.0F, 10.0F / 255.0F, 10.0F / 255.0F};
+	private static final float[] OVERWORLD_AMBIENT = {10.0F / 255.0F, 10.0F / 255.0F, 10.0F / 255.0F};
 
-	public static final float[] NETHER_AMBIENT = {48.0F / 255.0F, 40.0F / 255.0F, 33.0F / 255.0F};
+	private static final float[] NETHER_AMBIENT = {48.0F / 255.0F, 40.0F / 255.0F, 33.0F / 255.0F};
 
-	public static final float[] END_AMBIENT = {63.0F / 255.0F, 71.0F / 255.0F, 63.0F / 255.0F};
+	private static final float[] END_AMBIENT = {63.0F / 255.0F, 71.0F / 255.0F, 63.0F / 255.0F};
 
 	public static final float[] NIGHT_VISION = {153.0F / 255.0F, 153.0F / 255.0F, 153.0F / 255.0F};
 
@@ -36,7 +36,11 @@ public final class ModernLightmap {
 
 	private static final float[] NETHER_TABLE = generateTable(0.1F);
 
+	private static final float NO_AMBIENT_LIGHT = -1.0F;
+
 	private static WeakReference<WorldProvider> cachedProvider = new WeakReference<>(null);
+
+	private static float cachedAmbientLight = NO_AMBIENT_LIGHT;
 
 	private static float[] cachedAmbient;
 
@@ -58,6 +62,10 @@ public final class ModernLightmap {
 		return Math.max(ambient, NIGHT_VISION[channel] * nightVisionBrightness);
 	}
 
+	public static float endAmbient(int channel) {
+		return END_AMBIENT[channel];
+	}
+
 	/**
 	 * False for a modded dimension whose brightness table matches nothing we know how to rebuild;
 	 * every modern lightmap change stays off there so the dimension keeps the look its mod tuned.
@@ -67,18 +75,30 @@ public final class ModernLightmap {
 		return cachedModernCounterpart;
 	}
 
-	public static float[] ambientColor(WorldProvider provider) {
+	public static boolean hasAmbientColor(WorldProvider provider) {
 		resolve(provider);
-		return cachedAmbient;
+		return cachedAmbient != null;
+	}
+
+	public static float ambientColor(WorldProvider provider, int channel) {
+		resolve(provider);
+		return cachedAmbient == null ? 0.0F : cachedAmbient[channel];
 	}
 
 	private static void resolve(WorldProvider provider) {
-		if (cachedProvider.get() == provider) {
+		float ambientLight = ambientLight(provider);
+		if (cachedProvider.get() == provider && cachedAmbientLight == ambientLight) {
 			return;
 		}
 		cachedProvider = new WeakReference<>(provider);
+		cachedAmbientLight = ambientLight;
 		cachedAmbient = computeAmbientColor(provider);
 		cachedModernCounterpart = provider.dimensionId == 1 || cachedAmbient != null;
+	}
+
+	private static float ambientLight(WorldProvider provider) {
+		float[] table = provider.lightBrightnessTable;
+		return table == null || table.length == 0 ? NO_AMBIENT_LIGHT : table[0];
 	}
 
 	private static float[] computeAmbientColor(WorldProvider provider) {
