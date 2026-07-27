@@ -58,7 +58,7 @@ public class MixinEntityRenderer {
 		float max = Math.max(r, Math.max(g, b));
 		if (max > 0.0F) {
 			float inverted = 1.0F - max;
-			float scaled = (float) (1.0F - Math.pow(inverted, 4));
+			float scaled = (float) (1.0F - (inverted*inverted*inverted*inverted));
 			float mix = 1.0F + gamma * (scaled / max - 1.0F);
 			r *= mix;
 			g *= mix;
