@@ -37,6 +37,9 @@ public class MixinEntityRenderer {
 	private Minecraft mc;
 
 	@Unique
+	private boolean etfu$counterpart;
+
+	@Unique
 	private boolean etfu$modernBlockLight;
 
 	@Unique
@@ -80,6 +83,7 @@ public class MixinEntityRenderer {
 		}
 		WorldProvider provider = world.provider;
 		boolean counterpart = ModernLightmap.hasModernCounterpart(provider);
+		this.etfu$counterpart = counterpart;
 		this.etfu$ambientColor = ModernLightmap.ambientColor(provider);
 		this.etfu$modernBlockLight = ConfigWorld.modernBlockLightTint && counterpart;
 		this.etfu$modernNightVision = ConfigWorld.modernNightVision && counterpart
@@ -94,18 +98,23 @@ public class MixinEntityRenderer {
 		this.etfu$legacyGreen = etfu$vanillaGreen(this.etfu$ambientTerm);
 		this.etfu$legacyBlue = etfu$vanillaBlue(this.etfu$ambientTerm);
 
-		float nightVision = ConfigWorld.modernNightVision
+		this.etfu$nightVisionBrightness = ConfigWorld.modernNightVision
 				? ModernLightmap.nightVisionBrightness(this.mc.thePlayer, p_78472_1_)
 				: 0.0F;
+	}
 
-		// What the dimension's ambient light leaks into the sky and block terms, per channel.
-		float sun = world.getSunBrightness(1.0F);
-		float sky = offset * (world.lastLightningBolt > 0 ? 1.0F : sun * 0.95F + 0.05F);
-		float sunlit = sky * (sun * 0.65F + 0.35F);
-		this.etfu$floorRed = etfu$ambientFloor(counterpart, 0, nightVision, sunlit + this.etfu$ambientTerm);
-		this.etfu$floorGreen = etfu$ambientFloor(counterpart, 1, nightVision, sunlit);
-		this.etfu$floorBlue = etfu$ambientFloor(counterpart, 2, nightVision, sky);
-		this.etfu$nightVisionBrightness = nightVision;
+	@Inject(method = "updateLightmap", at = @At(value = "CONSTANT", args = "floatValue=0.96F", ordinal = 0))
+	private void etfu$resolveAmbientFloors(float p_78472_1_, CallbackInfo ci,
+										   @Local(name = "i") int i,
+										   @Local(name = "f2") float f2,
+										   @Local(name = "f5") float f5) {
+		if (i != 0) {
+			return;
+		}
+		float nightVision = this.etfu$nightVisionBrightness;
+		this.etfu$floorRed = etfu$ambientFloor(0, nightVision, f5 + this.etfu$ambientTerm);
+		this.etfu$floorGreen = etfu$ambientFloor(1, nightVision, f5);
+		this.etfu$floorBlue = etfu$ambientFloor(2, nightVision, f2);
 	}
 
 	@ModifyConstant(method = "updateLightmap", constant = @Constant(floatValue = 0.1F))
@@ -254,8 +263,8 @@ public class MixinEntityRenderer {
 	}
 
 	@Unique
-	private float etfu$ambientFloor(boolean counterpart, int channel, float nightVisionBrightness, float leak) {
-		if (!counterpart) {
+	private float etfu$ambientFloor(int channel, float nightVisionBrightness, float leak) {
+		if (!this.etfu$counterpart) {
 			return 0.03F;
 		}
 		float nightVision = this.etfu$modernNightVision

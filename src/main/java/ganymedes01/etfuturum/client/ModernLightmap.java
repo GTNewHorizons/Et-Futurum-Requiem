@@ -86,14 +86,14 @@ public final class ModernLightmap {
 			case 0:
 				return OVERWORLD_AMBIENT;
 			case -1:
-				return NETHER_AMBIENT;
+				return netherAmbient(provider);
 			case 1:
 				return null; // The End writes its own floor in the dimensionId == 1 branch.
 			default:
 				break;
 		}
 		if (provider instanceof WorldProviderHell) {
-			return NETHER_AMBIENT;
+			return netherAmbient(provider);
 		}
 		if (provider instanceof WorldProviderEnd) {
 			return END_AMBIENT;
@@ -102,6 +102,11 @@ public final class ModernLightmap {
 			return OVERWORLD_AMBIENT;
 		}
 		return matchesTable(provider, NETHER_TABLE) ? NETHER_AMBIENT : null;
+	}
+
+	private static float[] netherAmbient(WorldProvider provider) {
+		float[] table = provider.lightBrightnessTable;
+		return table == null || table.length == 0 || table[0] <= 0.0F ? null : NETHER_AMBIENT;
 	}
 
 	private static boolean matchesTable(WorldProvider provider, float[] reference) {
