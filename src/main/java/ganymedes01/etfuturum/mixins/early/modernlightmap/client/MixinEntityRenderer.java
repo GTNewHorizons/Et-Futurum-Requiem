@@ -1,19 +1,18 @@
 package ganymedes01.etfuturum.mixins.early.modernlightmap.client;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import ganymedes01.etfuturum.client.ModernLightmap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.settings.GameSettings;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -39,14 +38,13 @@ public class MixinEntityRenderer {
 		this.etfu$hasModernCounterpart = world != null && ModernLightmap.hasModernCounterpart(world.provider);
 	}
 
-	@Redirect(method = "updateLightmap", at = @At(value = "FIELD",
+	@ModifyExpressionValue(method = "updateLightmap", at = @At(value = "FIELD",
 			target = "Lnet/minecraft/client/settings/GameSettings;gammaSetting:F",
 			opcode = Opcodes.GETFIELD))
-	private float etfu$modernGamma(GameSettings settings,
+	private float etfu$modernGamma(float gamma,
 								   @Local(name = "f8") LocalFloatRef red,
 								   @Local(name = "f9") LocalFloatRef green,
 								   @Local(name = "f10") LocalFloatRef blue) {
-		float gamma = settings.gammaSetting;
 		if (!this.etfu$hasModernCounterpart) {
 			return gamma;
 		}
