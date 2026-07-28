@@ -946,6 +946,18 @@ public enum ModBlocks {
 				}
 			}
 		}
+
+		// NewHorizonsCoreMod uses item_sign_* so we still need to have that aliased in the registry
+		// because the signs are now ItemBlocks which have registry names sign_*
+		ModBlocks[] legacySigns = {SIGN_SPRUCE, SIGN_BIRCH, SIGN_JUNGLE, SIGN_ACACIA, SIGN_DARK_OAK};
+		for (ModBlocks signBlock : legacySigns) {
+			if (signBlock.isEnabled()) {
+				Item item = Item.getItemFromBlock(signBlock.get());
+				if (item != null) {
+					Item.itemRegistry.putObject("etfuturum:item_" + signBlock.name().toLowerCase(), item);
+				}
+			}
+		}
 	}
 
 	private final boolean isEnabled;
