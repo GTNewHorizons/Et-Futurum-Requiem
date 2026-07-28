@@ -20,14 +20,8 @@ public class SignUpdateServerHandler implements IMessageHandler<SignUpdateMessag
 	public IMessage onMessage(SignUpdateMessage message, MessageContext ctx) {
 		WorldServer world = ctx.getServerHandler().playerEntity.getServerForPlayer();
 		if (world == null) {
-			System.out.println("[SERVER] SignTextUpdate ERROR: world is null!");
 			return null;
 		}
-
-		System.out.println("[SERVER] SignTextUpdate RECEIVED: pos=" + message.tileX + "," + message.tileY + "," + message.tileZ
-			+ " player=" + ctx.getServerHandler().playerEntity.getCommandSenderName()
-			+ " waxed=" + message.waxed + " dyeId=" + message.dyeId
-			+ " front0=\"" + message.frontLines[0] + "\" back0=\"" + message.backLines[0] + "\"");
 
 		TileEntity te = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 		if (te instanceof ISign) {
@@ -40,11 +34,6 @@ public class SignUpdateServerHandler implements IMessageHandler<SignUpdateMessag
 			message.waxed = sign.isWaxed();
 			message.dyeId = sign.getDyeId();
 
-			System.out.println("[SERVER] SignTextUpdate APPLIED: waxed=" + message.waxed
-				+ " dyeId=" + message.dyeId
-				+ " front0=\"" + sign.getSignText(true)[0] + "\""
-				+ " back0=\"" + sign.getSignText(false)[0] + "\"");
-
 			te.markDirty();
 			world.markBlockForUpdate(message.tileX, message.tileY, message.tileZ);
 			Chunk chunk = world.getChunkFromChunkCoords(message.tileX >> 4, message.tileZ >> 4);
@@ -54,8 +43,6 @@ public class SignUpdateServerHandler implements IMessageHandler<SignUpdateMessag
 			EtFuturum.networkWrapper.sendToAllAround(message,
 					new NetworkRegistry.TargetPoint(world.provider.dimensionId,
 							message.tileX + 0.5, message.tileY + 0.5, message.tileZ + 0.5, 64));
-		} else {
-			System.out.println("[SERVER] SignTextUpdate ERROR: TE is not ISign! te=" + te);
 		}
 		return null;
 	}

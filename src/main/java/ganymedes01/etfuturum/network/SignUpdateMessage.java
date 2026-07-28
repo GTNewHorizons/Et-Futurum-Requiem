@@ -67,9 +67,6 @@ public class SignUpdateMessage implements IMessage {
 		this.dyeId = buf.readInt();
 		this.frontLines = readLines(buf);
 		this.backLines = readLines(buf);
-		System.out.println("[NET] SignUpdateMessage.fromBytes: pos=" + this.tileX + "," + this.tileY + "," + this.tileZ
-			+ " waxed=" + this.waxed + " dyeId=" + this.dyeId
-			+ " front0=\"" + this.frontLines[0] + "\" back0=\"" + this.backLines[0] + "\"");
 	}
 
 	@Override
@@ -81,9 +78,5 @@ public class SignUpdateMessage implements IMessage {
 		buf.writeInt(this.dyeId);
 		writeLines(buf, this.frontLines != null ? this.frontLines : new String[]{"", "", "", ""});
 		writeLines(buf, this.backLines != null ? this.backLines : new String[]{"", "", "", ""});
-		System.out.println("[NET] SignUpdateMessage.toBytes: pos=" + this.tileX + "," + this.tileY + "," + this.tileZ
-			+ " waxed=" + this.waxed + " dyeId=" + this.dyeId
-			+ " front0=\"" + (this.frontLines != null ? this.frontLines[0] : "null") + "\""
-			+ " back0=\"" + (this.backLines != null ? this.backLines[0] : "null") + "\"");
 	}
 }

@@ -26,11 +26,6 @@ public class WoodSignOpenHandler implements IMessageHandler<WoodSignOpenMessage,
 		World world = FMLClientHandler.instance().getClient().theWorld;
 		TileEntity tileEntity = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 
-		System.out.println("[CLIENT] WoodSignOpenHandler RECEIVED: front=" + message.front
-			+ " pos=" + message.tileX + "," + message.tileY + "," + message.tileZ
-			+ " blockId=" + message.id
-			+ " existingTE=" + (tileEntity instanceof TileEntitySign ? "TileEntitySign" : (tileEntity != null ? tileEntity.getClass().getSimpleName() : "null")));
-
 		if (!(tileEntity instanceof TileEntitySign)) {
 			Block block = Block.getBlockById(message.id);
 			tileEntity = block instanceof ganymedes01.etfuturum.blocks.BlockWoodSign
@@ -40,7 +35,6 @@ public class WoodSignOpenHandler implements IMessageHandler<WoodSignOpenMessage,
 			tileEntity.xCoord = message.tileX;
 			tileEntity.yCoord = message.tileY;
 			tileEntity.zCoord = message.tileZ;
-			System.out.println("[CLIENT] WoodSignOpenHandler: created new TE " + tileEntity.getClass().getSimpleName());
 		}
 
 		tileEntity.markDirty();

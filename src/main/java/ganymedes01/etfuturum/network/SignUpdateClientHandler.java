@@ -26,13 +26,8 @@ public class SignUpdateClientHandler implements IMessageHandler<SignUpdateMessag
 	private void handleMessage(SignUpdateMessage message) {
 		World world = Minecraft.getMinecraft().theWorld;
 		if (world == null) {
-			System.out.println("[CLIENT] SignTextUpdateClient ERROR: world is null!");
 			return;
 		}
-
-		System.out.println("[CLIENT] SignTextUpdateClient RECEIVED: pos=" + message.tileX + "," + message.tileY + "," + message.tileZ
-			+ " waxed=" + message.waxed + " dyeId=" + message.dyeId
-			+ " front0=\"" + message.frontLines[0] + "\" back0=\"" + message.backLines[0] + "\"");
 
 		TileEntity te = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 		if (te instanceof ISign) {
@@ -41,11 +36,7 @@ public class SignUpdateClientHandler implements IMessageHandler<SignUpdateMessag
 			System.arraycopy(message.backLines, 0, sign.getSignText(false), 0, 4);
 			sign.setDyeId(message.dyeId);
 			sign.setWaxed(message.waxed);
-			System.out.println("[CLIENT] SignTextUpdateClient AFTER: waxed=" + sign.isWaxed()
-				+ " dyeId=" + sign.getDyeId());
 			world.func_147479_m(message.tileX, message.tileY, message.tileZ);
-		} else {
-			System.out.println("[CLIENT] SignTextUpdateClient ERROR: TE is not ISign! te=" + te);
 		}
 	}
 }

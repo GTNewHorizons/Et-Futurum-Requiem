@@ -27,25 +27,21 @@ public abstract class MixinTileEntitySign implements ISign {
 
 	@Override
 	public boolean isWaxed() {
-		System.out.println("isWaxed: " + waxed);
 		return waxed;
 	}
 
 	@Override
 	public void setWaxed(boolean waxed) {
-		System.out.println("setWaxed");
 		this.waxed = waxed;
 	}
 
 	@Override
 	public int getDyeId() {
-		// System.out.println("getDyeId: " + dyeId);
 		return dyeId;
 	}
 
 	@Override
 	public void setDyeId(int dyeId) {
-		System.out.println("setDyeId: " + dyeId);
 		this.dyeId = dyeId;
 	}
 
@@ -70,11 +66,6 @@ public abstract class MixinTileEntitySign implements ISign {
 				nbt.setString("BackText" + (i + 1), signBackText[i] != null ? signBackText[i] : "");
 			}
 		}
-		TileEntitySign self = (TileEntitySign) (Object) this;
-		System.out.println("[SERVER] writeToNBT: waxed=" + waxed + " dyeId=" + dyeId
-			+ " frontText0=\"" + self.signText[0] + "\" frontText1=\"" + self.signText[1]
-			+ "\" frontText2=\"" + self.signText[2] + "\" frontText3=\"" + self.signText[3] + "\""
-			+ " backText0=\"" + (signBackText != null ? signBackText[0] : "null") + "\"");
 	}
 
 	@Inject(method = "readFromNBT", at = @At("TAIL"))
@@ -91,11 +82,6 @@ public abstract class MixinTileEntitySign implements ISign {
 			String key = "BackText" + (i + 1);
 			signBackText[i] = nbt.hasKey(key) ? nbt.getString(key) : "";
 		}
-		System.out.println("[CLIENT] readFromNBT: waxed=" + waxed + " dyeId=" + dyeId
-			+ " frontText0=\"" + self.signText[0] + "\" frontText1=\"" + self.signText[1]
-			+ "\" frontText2=\"" + self.signText[2] + "\" frontText3=\"" + self.signText[3] + "\""
-			+ " backText0=\"" + signBackText[0] + "\" backText1=\"" + signBackText[1]
-			+ "\" backText2=\"" + signBackText[2] + "\" backText3=\"" + signBackText[3] + "\"");
 
 		// Trigger re-render on client so waxed/dyed signs show correctly after chunk load
 		if (self.getWorldObj() != null && self.getWorldObj().isRemote) {

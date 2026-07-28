@@ -65,9 +65,6 @@ public class GuiEditWoodSign extends GuiScreen {
 
 		if (nethandlerplayclient != null) {
 			ISign iSign = (ISign) this.tileSign;
-			System.out.println("[CLIENT] GuiEditWoodSign.onGuiClosed: front=" + this.front
-				+ " pos=" + this.tileSign.xCoord + "," + this.tileSign.yCoord + "," + this.tileSign.zCoord
-				+ " text0=\"" + this.editingText[0] + "\"");
 
 			// Update client TE immediately (don't wait for server relay)
 			System.arraycopy(this.editingText, 0, iSign.getSignText(this.front), 0, 4);

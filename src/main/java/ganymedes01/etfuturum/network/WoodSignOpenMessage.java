@@ -30,9 +30,6 @@ public class WoodSignOpenMessage implements IMessage {
 		this.tileZ = buf.readInt();
 		this.id = buf.readInt();
 		this.front = buf.readBoolean();
-		System.out.println("[NET] WoodSignOpenMessage.fromBytes: front=" + this.front
-			+ " pos=" + this.tileX + "," + this.tileY + "," + this.tileZ
-			+ " blockId=" + this.id);
 	}
 
 	@Override
@@ -42,8 +39,5 @@ public class WoodSignOpenMessage implements IMessage {
 		buf.writeInt(this.tileZ);
 		buf.writeInt(this.id);
 		buf.writeBoolean(this.front);
-		System.out.println("[NET] WoodSignOpenMessage.toBytes: front=" + this.front
-			+ " pos=" + this.tileX + "," + this.tileY + "," + this.tileZ
-			+ " blockId=" + this.id);
 	}
 }

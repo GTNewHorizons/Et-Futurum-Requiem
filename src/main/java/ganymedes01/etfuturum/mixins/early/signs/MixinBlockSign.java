@@ -51,7 +51,6 @@ public class MixinBlockSign extends Block {
 			// Wax the sign
 			if (!world.isRemote) {
 				iSign.setWaxed(true);
-				System.out.println("[SERVER] Waxing sign at " + x + "," + y + "," + z);
 				tileEntity.markDirty();
 				world.markBlockForUpdate(x, y, z);
 				syncSignState(world, x, y, z, (TileEntitySign) tileEntity, iSign);
@@ -70,7 +69,6 @@ public class MixinBlockSign extends Block {
 			if (dyeId >= 0 && iSign.getDyeId() != dyeId) {
 				if (!world.isRemote) {
 					iSign.setDyeId(dyeId);
-					System.out.println("[SERVER] Dyeing sign at " + x + "," + y + "," + z + " dyeId=" + dyeId);
 					tileEntity.markDirty();
 					world.markBlockForUpdate(x, y, z);
 					syncSignState(world, x, y, z, (TileEntitySign) tileEntity, iSign);
@@ -97,10 +95,6 @@ public class MixinBlockSign extends Block {
 		signTile.func_145912_a(player);
 		boolean front = isPlayerOnFrontSide(world, x, y, z, player);
 		int blockId = Block.getIdFromBlock(signTile.getBlockType());
-		System.out.println("[SERVER] MixinBlockSign sending WoodSignOpenMessage: front=" + front
-			+ " pos=" + x + "," + y + "," + z + " blockId=" + blockId
-			+ " player=" + player.getCommandSenderName()
-			+ " existingText0=\"" + signTile.signText[0] + "\"");
 		EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(signTile, blockId, front), (EntityPlayerMP) player);
 		return true;
 	}
