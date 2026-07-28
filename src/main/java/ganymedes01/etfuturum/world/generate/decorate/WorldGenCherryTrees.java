@@ -44,7 +44,11 @@ public class WorldGenCherryTrees extends WorldGenAbstractTree {
 		if (checkSpace(world, rand, x, y, z)) {
 			int height = 7;
 
-			world.setBlock(x, y - 1, z, Blocks.dirt);
+			Block blockUnder = world.getBlock(x, y - 1, z);
+
+			if (blockUnder == Blocks.grass || blockUnder == Blocks.mycelium) {
+				world.setBlock(x, y - 1, z, Blocks.dirt);
+			}
 
 			int firstBranchOffsetFromTop = Math.max(0, height - 1 + MathHelper.getRandomIntegerInRange(rand, branchStartOffsetFromTopMin, branchStartOffsetFromTopMax)); //second branch
 			int secondBranchOffsetFromTop = Math.max(0, height - 1 + MathHelper.getRandomIntegerInRange(rand, branchStartOffsetFromTopMin, branchStartOffsetFromTopMax));
