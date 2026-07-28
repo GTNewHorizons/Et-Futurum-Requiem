@@ -604,7 +604,37 @@ public class EtFuturum {
 					mapping.ignore();
 					ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
 				}
+
+				// Remap old ItemWoodSign registry names to new ItemBlockSign items
+				// We want to rename the old item_sign_* to the new sign_* because the signs are now
+				// ItemBlocks registered in ModBlocks instead of ItemWoodSigns registered in ModItems
+				// New wood signs are already using ItemBlocks, and oak retains the origianl vanilla registration
+				if (mapping.type == GameRegistry.Type.ITEM && mapping.name.startsWith("etfuturum:item_sign_")) {
+					String woodType = mapping.name.replace("etfuturum:item_sign_", "");
+					Item remapItem = null;
+					switch (woodType) {
+						case "spruce":
+							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_SPRUCE.get());
+							break;
+						case "birch":
+							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_BIRCH.get());
+							break;
+						case "jungle":
+							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_JUNGLE.get());
+							break;
+						case "acacia":
+							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_ACACIA.get());
+							break;
+						case "dark_oak":
+							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_DARK_OAK.get());
+							break;
+					}
+					if (remapItem != null) {
+						mapping.remap(remapItem);
+					}
+				}
 			}
+
 			if (mapping.name.equals("etfuturum:glow_berries")) {
 				mapping.ignore();
 			}
