@@ -14,6 +14,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -24,6 +25,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
 
 import java.util.*;
@@ -50,6 +53,12 @@ public class ModEnchantments {
 			soulSpeed = new SoulSpeed();
 	}
 
+	private static Block findNearestBlock(World w, double posX, double posY, double posZ) {
+		int x = MathHelper.floor_double(posX);
+		int y = MathHelper.floor_double(posY);
+		int z = MathHelper.floor_double(posZ);
+		return w.getBlock(x, y, z);
+	}
 	// Frost Walker logic
 	public static void onLivingUpdate(EntityLivingBase entity) {
 		if (!ConfigEnchantsPotions.enableFrostWalker && !ConfigEnchantsPotions.enableSoulSpeed)
@@ -91,10 +100,9 @@ public class ModEnchantments {
 					}
 				}
 				if (soulSpeedLevel > 0) {
-					Block inBlock = entity.worldObj.getBlock(x, y, z);
-					Block underBlock = entity.worldObj.getBlock(x, y - 1, z);
+					Block b = findNearestBlock(entity.worldObj, entity.posX, entity.posY - 0.05D, entity.posZ);
 					IAttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-					if(inBlock == Blocks.soul_sand || inBlock == ModBlocks.SOUL_SOIL.get() || underBlock == Blocks.soul_sand || underBlock == ModBlocks.SOUL_SOIL.get()) {
+					if(b == Blocks.soul_sand || b == ModBlocks.SOUL_SOIL.get()) {
 						if (attribute.getModifier(SOUL_SPEED_UUID) == null) {
 							attribute.applyModifier(new AttributeModifier(SOUL_SPEED_UUID, "Soul Speed Boost", 1.3D + 0.105 * soulSpeedLevel, 2).setSaved(false));
 						}
