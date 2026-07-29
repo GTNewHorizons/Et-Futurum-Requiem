@@ -5,7 +5,6 @@ import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockBanner;
 import ganymedes01.etfuturum.blocks.BlockPotionCauldron;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
-import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
@@ -37,7 +36,6 @@ public class CompatWaila {
 		registrar.registerStackProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
 		registrar.registerBodyProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
 		registrar.registerBodyProvider(new SignDataProvider(), BlockSign.class);
-		registrar.registerBodyProvider(new SignDataProvider(), BlockWoodSign.class);
 	}
 
 	public static void register() {
