@@ -39,6 +39,7 @@ public class EntityPanda extends EntityAnimal {
 	private static final int EATING_FLAG = 1;
 	private static final int EATING_DURATION = 80;
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
+	private static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 
 	private static Item bopBamboo;
 	private static boolean bopBambooResolved;
@@ -46,8 +47,6 @@ public class EntityPanda extends EntityAnimal {
 	private int eatingTicks;
 	private float sittingAnimationProgress;
 	private float previousSittingAnimationProgress;
-	private float eatingAnimationProgress;
-	private float previousEatingAnimationProgress;
 
 	public EntityPanda(World world) {
 		super(world);
@@ -93,11 +92,14 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	@Override
+	public float getEyeHeight() {
+		return isChild() ? 0.40625F : super.getEyeHeight();
+	}
+
+	@Override
 	public void onLivingUpdate() {
 		previousSittingAnimationProgress = sittingAnimationProgress;
-		previousEatingAnimationProgress = eatingAnimationProgress;
 		sittingAnimationProgress = updateAnimationProgress(sittingAnimationProgress, isSitting(), 0.15F, 0.19F);
-		eatingAnimationProgress = updateAnimationProgress(eatingAnimationProgress, isEating(), 0.2F, 0.2F);
 
 		if (worldObj.isRemote) {
 			if (isEating()) {
@@ -137,8 +139,10 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	private static Item getBopBamboo() {
-		if (!bopBambooResolved && Loader.isModLoaded("BiomesOPlenty")) {
-			bopBamboo = GameRegistry.findItem("BiomesOPlenty", "bamboo");
+		if (!bopBambooResolved) {
+			if (Loader.isModLoaded("BiomesOPlenty")) {
+				bopBamboo = GameRegistry.findItem("BiomesOPlenty", "bamboo");
+			}
 			bopBambooResolved = bopBamboo != null
 					|| Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION);
 		}
@@ -176,11 +180,6 @@ public class EntityPanda extends EntityAnimal {
 				+ (sittingAnimationProgress - previousSittingAnimationProgress) * partialTick;
 	}
 
-	public float getEatingAnimationProgress(float partialTick) {
-		return previousEatingAnimationProgress
-				+ (eatingAnimationProgress - previousEatingAnimationProgress) * partialTick;
-	}
-
 	public int getEatingTicks() {
 		return eatingTicks;
 	}
@@ -208,9 +207,11 @@ public class EntityPanda extends EntityAnimal {
 
 	@Override
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData livingData) {
+		IEntityLivingData spawnData = super.onSpawnWithEgg(livingData);
 		setMainGene(getRandomGene());
 		setHiddenGene(getRandomGene());
-		return super.onSpawnWithEgg(livingData);
+		applyGeneAttributes();
+		return spawnData;
 	}
 
 	@Override
@@ -229,7 +230,9 @@ public class EntityPanda extends EntityAnimal {
 		setMainGene(Gene.byName(nbt.getString("MainGene")));
 		setHiddenGene(Gene.byName(nbt.getString("HiddenGene")));
 
-		eatingTicks = Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")));
+		eatingTicks = isBamboo(getHeldItem())
+				? Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")))
+				: 0;
 		setSitting(false);
 		setPandaEating(false);
 	}
@@ -238,7 +241,16 @@ public class EntityPanda extends EntityAnimal {
 	public EntityPanda createChild(EntityAgeable mate) {
 		EntityPanda child = new EntityPanda(worldObj);
 		child.inheritGenes(this, mate instanceof EntityPanda ? (EntityPanda) mate : null);
+		child.applyGeneAttributes();
 		return child;
+	}
+
+	private void applyGeneAttributes() {
+		getEntityAttribute(SharedMonsterAttributes.maxHealth)
+				.setBaseValue(getVariant() == Gene.WEAK ? 10.0D : 20.0D);
+		getEntityAttribute(SharedMonsterAttributes.movementSpeed)
+				.setBaseValue(getVariant() == Gene.LAZY ? 0.07D : 0.15D);
+		setHealth(Math.min(getHealth(), getMaxHealth()));
 	}
 
 	private void inheritGenes(EntityPanda mother, EntityPanda father) {
@@ -323,6 +335,7 @@ public class EntityPanda extends EntityAnimal {
 
 	private void pickUpBamboo(EntityItem entityItem) {
 		if (worldObj.isRemote
+				|| isChild()
 				|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
 				|| entityItem == null
 				|| entityItem.isDead
@@ -335,15 +348,18 @@ public class EntityPanda extends EntityAnimal {
 			return;
 		}
 
-		ItemStack heldStack = droppedStack.splitStack(1);
+		ItemStack heldStack = droppedStack.copy();
+		heldStack.stackSize = 1;
 		setCurrentItemOrArmor(0, heldStack);
 		equipmentDropChances[0] = 2.0F;
-		onItemPickup(entityItem, 1);
 
-		if (droppedStack.stackSize <= 0) {
+		if (droppedStack.stackSize == 1) {
+			onItemPickup(entityItem, 1);
 			entityItem.setDead();
 		} else {
-			entityItem.setEntityItemStack(droppedStack);
+			ItemStack remainder = droppedStack.copy();
+			remainder.stackSize = droppedStack.stackSize - 1;
+			entityItem.setEntityItemStack(remainder);
 		}
 	}
 
@@ -352,6 +368,9 @@ public class EntityPanda extends EntityAnimal {
 		if (isBamboo(heldStack)) {
 			--heldStack.stackSize;
 			setCurrentItemOrArmor(0, heldStack.stackSize > 0 ? heldStack : null);
+		}
+		if (getHeldItem() == null) {
+			equipmentDropChances[0] = DEFAULT_EQUIPMENT_DROP_CHANCE;
 		}
 
 		eatingTicks = 0;
@@ -367,12 +386,12 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			return isBamboo(getHeldItem()) && onGround && !isInWater();
+			return !isChild() && isBamboo(getHeldItem()) && onGround && !isInWater();
 		}
 
 		@Override
 		public boolean continueExecuting() {
-			return isEating() && isBamboo(getHeldItem()) && onGround && !isInWater()
+			return !isChild() && isEating() && isBamboo(getHeldItem()) && onGround && !isInWater()
 					&& eatingTicks < EATING_DURATION;
 		}
 
@@ -423,7 +442,7 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			if (getHeldItem() != null || isSitting() || rand.nextInt(10) != 0
+			if (isChild() || getHeldItem() != null || isSitting() || rand.nextInt(10) != 0
 					|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
 				return false;
 			}
@@ -434,7 +453,8 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean continueExecuting() {
-			return worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
+			return !isChild()
+					&& worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
 					&& getHeldItem() == null
 					&& targetItem != null
 					&& targetItem.isEntityAlive()

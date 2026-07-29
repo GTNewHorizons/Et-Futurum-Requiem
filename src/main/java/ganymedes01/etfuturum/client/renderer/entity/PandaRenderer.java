@@ -64,25 +64,20 @@ public class PandaRenderer extends RenderLiving {
 		super.renderEquippedItems(panda, partialTicks);
 
 		ItemStack stack = panda.getHeldItem();
-		float sitting = MathHelper.clamp_float(panda.getSittingAnimationProgress(partialTicks), 0.0F, 1.0F);
-		if (stack == null || !panda.isSitting() || sitting <= 0.0F) {
+		if (stack == null || !panda.isSitting()) {
 			return;
 		}
 
-		float eating = panda.isEating()
-				? MathHelper.clamp_float(panda.getEatingAnimationProgress(partialTicks), 0.0F, 1.0F)
-				: 0.0F;
-		float chew = MathHelper.sin((panda.ticksExisted + partialTicks) * 0.6F) * eating;
-
-		GL11.glPushMatrix();
-		if (mainModel.isChild) {
-			GL11.glScalef(0.5F, 0.5F, 0.5F);
-			GL11.glTranslatef(0.0F, 1.5F, 0.0F);
+		float y = 1.4F;
+		float z = -0.6F;
+		if (panda.isEating()) {
+			float chew = MathHelper.sin((panda.ticksExisted + partialTicks) * 0.6F);
+			z -= 0.2F * chew + 0.2F;
+			y -= 0.09F * chew;
 		}
 
-		float eatingOffset = eating > 0.0F ? eating * (0.2F + 0.2F * chew) : 0.0F;
-		GL11.glTranslatef(0.1F, 1.4F - 0.09F * chew, -0.6F - eatingOffset);
-		GL11.glRotatef(4.0F * chew, 0.0F, 0.0F, 1.0F);
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0.1F, y, z);
 		transformHeldItem(stack);
 		renderHeldItem(panda, stack);
 		GL11.glPopMatrix();

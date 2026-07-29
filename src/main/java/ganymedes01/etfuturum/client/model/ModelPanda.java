@@ -17,7 +17,7 @@ public class ModelPanda extends ModelBase {
 	public final ModelRenderer rightFrontLeg;
 	public final ModelRenderer leftFrontLeg;
 	private float sittingAnimationProgress;
-	private float eatingAnimationProgress;
+	private boolean eating;
 
 	public ModelPanda() {
 		textureWidth = 64;
@@ -27,8 +27,8 @@ public class ModelPanda extends ModelBase {
 		head.addBox(-6.5F, -5.0F, -4.0F, 13, 10, 9);
 		head.setRotationPoint(0.0F, 11.5F, -17.0F);
 		head.setTextureOffset(45, 16).addBox(-3.5F, 0.0F, -6.0F, 7, 5, 2);
-		head.setTextureOffset(52, 25).addBox(-8.5F, -4.0F, -0.5F, 5, 5, 1);
-		head.setTextureOffset(52, 25).addBox(3.5F, -4.0F, -0.5F, 5, 5, 1);
+		head.setTextureOffset(52, 25).addBox(-8.5F, -8.0F, -1.0F, 5, 4, 1);
+		head.setTextureOffset(52, 25).addBox(3.5F, -8.0F, -1.0F, 5, 4, 1);
 
 		body = new ModelRenderer(this, 0, 25);
 		body.addBox(-9.5F, -13.0F, -6.5F, 19, 26, 13);
@@ -56,10 +56,10 @@ public class ModelPanda extends ModelBase {
 		if (entity instanceof EntityPanda) {
 			EntityPanda panda = (EntityPanda) entity;
 			sittingAnimationProgress = clampAnimationProgress(panda.getSittingAnimationProgress(partialTicks));
-			eatingAnimationProgress = clampAnimationProgress(panda.getEatingAnimationProgress(partialTicks));
+			eating = panda.isEating();
 		} else {
 			sittingAnimationProgress = 0.0F;
-			eatingAnimationProgress = 0.0F;
+			eating = false;
 		}
 	}
 
@@ -70,14 +70,14 @@ public class ModelPanda extends ModelBase {
 
 		if (isChild) {
 			GL11.glPushMatrix();
-			GL11.glScalef(0.75F, 0.75F, 0.75F);
-			GL11.glTranslatef(0.0F, 8.0F * scale, 4.0F * scale);
+			GL11.glScalef(0.5555556F, 0.5555556F, 0.5555556F);
+			GL11.glTranslatef(0.0F, 23.0F * scale, 4.8F * scale);
 			head.render(scale);
 			GL11.glPopMatrix();
 
 			GL11.glPushMatrix();
-			GL11.glScalef(0.5F, 0.5F, 0.5F);
-			GL11.glTranslatef(0.0F, 24.0F * scale, 0.0F);
+			GL11.glScalef(1.0F / 3.0F, 1.0F / 3.0F, 1.0F / 3.0F);
+			GL11.glTranslatef(0.0F, 49.0F * scale, 0.0F);
 			renderBody(scale);
 			GL11.glPopMatrix();
 		} else {
@@ -126,20 +126,18 @@ public class ModelPanda extends ModelBase {
 		if (sitting > 0.0F) {
 			body.rotateAngleX = lerp(sitting, body.rotateAngleX, 1.7407963F);
 			head.rotateAngleX = lerp(sitting, head.rotateAngleX, (float) Math.PI / 2.0F);
-			head.rotateAngleY *= 1.0F - sitting;
 
-			rightFrontLeg.rotateAngleZ = -0.27079642F * sitting;
-			leftFrontLeg.rotateAngleZ = 0.27079642F * sitting;
-			rightHindLeg.rotateAngleZ = 0.5707964F * sitting;
-			leftHindLeg.rotateAngleZ = -0.5707964F * sitting;
-		}
+			rightFrontLeg.rotateAngleZ = -0.27079642F;
+			leftFrontLeg.rotateAngleZ = 0.27079642F;
+			rightHindLeg.rotateAngleZ = 0.5707964F;
+			leftHindLeg.rotateAngleZ = -0.5707964F;
 
-		float eating = eatingAnimationProgress * sitting;
-		if (eating > 0.0F) {
-			float chew = MathHelper.sin(ageInTicks * 0.6F);
-			head.rotateAngleX = lerp(eating, head.rotateAngleX, (float) Math.PI / 2.0F + 0.2F * chew);
-			rightFrontLeg.rotateAngleX = lerp(eating, rightFrontLeg.rotateAngleX, -0.4F - 0.2F * chew);
-			leftFrontLeg.rotateAngleX = lerp(eating, leftFrontLeg.rotateAngleX, -0.4F - 0.2F * chew);
+			if (eating) {
+				float chew = MathHelper.sin(ageInTicks * 0.6F);
+				head.rotateAngleX = (float) Math.PI / 2.0F + 0.2F * chew;
+				rightFrontLeg.rotateAngleX = -0.4F - 0.2F * chew;
+				leftFrontLeg.rotateAngleX = -0.4F - 0.2F * chew;
+			}
 		}
 	}
 
