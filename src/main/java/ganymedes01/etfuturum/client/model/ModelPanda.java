@@ -19,6 +19,8 @@ public class ModelPanda extends ModelBase {
 	private float sittingAnimationProgress;
 	private boolean eating;
 	private boolean unhappy;
+	private boolean sneezing;
+	private int sneezeTicks;
 
 	public ModelPanda() {
 		textureWidth = 64;
@@ -59,10 +61,14 @@ public class ModelPanda extends ModelBase {
 			sittingAnimationProgress = clampAnimationProgress(panda.getSittingAnimationProgress(partialTicks));
 			eating = panda.isEating();
 			unhappy = panda.getUnhappyTicks() > 0;
+			sneezing = panda.isSneezing();
+			sneezeTicks = panda.getSneezeTicks();
 		} else {
 			sittingAnimationProgress = 0.0F;
 			eating = false;
 			unhappy = false;
+			sneezing = false;
+			sneezeTicks = 0;
 		}
 	}
 
@@ -132,6 +138,15 @@ public class ModelPanda extends ModelBase {
 			head.rotateAngleZ = headShake;
 			rightFrontLeg.rotateAngleX = -pawShake;
 			leftFrontLeg.rotateAngleX = pawShake;
+		}
+
+		if (sneezing) {
+			if (sneezeTicks < 15) {
+				head.rotateAngleX = -(float) Math.PI / 4.0F * sneezeTicks / 14.0F;
+			} else if (sneezeTicks < 20) {
+				float recovery = (sneezeTicks - 15) / 5.0F;
+				head.rotateAngleX = -(float) Math.PI / 4.0F + (float) Math.PI / 4.0F * recovery;
+			}
 		}
 
 		float sitting = sittingAnimationProgress;

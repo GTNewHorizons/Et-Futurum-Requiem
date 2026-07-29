@@ -43,10 +43,13 @@ public class EntityPanda extends EntityAnimal {
 	private static final int HIDDEN_GENE = 19;
 	private static final int PANDA_FLAGS = 20;
 	private static final int UNHAPPY_COUNTER = 21;
+	private static final int SNEEZE_COUNTER = 22;
 
-	private static final int SITTING_FLAG = 8;
 	private static final int EATING_FLAG = 1;
+	private static final int SNEEZING_FLAG = 2;
+	private static final int SITTING_FLAG = 8;
 	private static final int EATING_DURATION = 80;
+	private static final int SNEEZE_DURATION = 20;
 	private static final int ATTACK_COOLDOWN = 20;
 	private static final int UNHAPPY_DURATION = 32;
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
@@ -97,6 +100,7 @@ public class EntityPanda extends EntityAnimal {
 		dataWatcher.addObject(HIDDEN_GENE, (byte) Gene.NORMAL.getId());
 		dataWatcher.addObject(PANDA_FLAGS, (byte) 0);
 		dataWatcher.addObject(UNHAPPY_COUNTER, 0);
+		dataWatcher.addObject(SNEEZE_COUNTER, 0);
 	}
 
 	@Override
@@ -199,6 +203,7 @@ public class EntityPanda extends EntityAnimal {
 
 		super.onLivingUpdate();
 		updateUnhappyState();
+		updateSneezeState();
 
 		if (!worldObj.isRemote && getAttackTarget() == null) {
 			stopAttackingAfterHit = false;
@@ -206,6 +211,56 @@ public class EntityPanda extends EntityAnimal {
 		}
 		if (attackCooldown > 0) {
 			--attackCooldown;
+		}
+	}
+
+	private void updateSneezeState() {
+		if (worldObj.isRemote) {
+			return;
+		}
+
+		if (!isSneezing() && canStartSneezing()) {
+			setSneezing(true);
+		}
+		if (!isSneezing()) {
+			return;
+		}
+
+		int sneezeTicks = getSneezeTicks() + 1;
+		setSneezeTicks(sneezeTicks);
+		if (sneezeTicks > SNEEZE_DURATION) {
+			setSneezing(false);
+			finishSneezing();
+		} else if (sneezeTicks == 1) {
+			playSound(Reference.MCAssetVer + ":entity.panda.pre_sneeze", 1.0F, 1.0F);
+		}
+	}
+
+	private boolean canStartSneezing() {
+		if (!isChild() || !canPerformPandaAction()) {
+			return false;
+		}
+		if (getVariant() == Gene.WEAK && rand.nextInt(500) == 1) {
+			return true;
+		}
+		return rand.nextInt(6000) == 1;
+	}
+
+	private void finishSneezing() {
+		worldObj.setEntityState(this, (byte) 47);
+		playSound(Reference.MCAssetVer + ":entity.panda.sneeze", 1.0F, 1.0F);
+
+		List<EntityPanda> nearbyPandas = worldObj.getEntitiesWithinAABB(
+				EntityPanda.class,
+				boundingBox.expand(10.0D, 10.0D, 10.0D));
+		for (EntityPanda panda : nearbyPandas) {
+			if (!panda.isChild() && panda.onGround && !panda.isInWater() && panda.canPerformPandaAction()) {
+				panda.jump();
+			}
+		}
+
+		if (rand.nextInt(700) == 0 && worldObj.getGameRules().getGameRuleBooleanValue("doMobLoot")) {
+			dropItem(Items.slime_ball, 1);
 		}
 	}
 
@@ -364,6 +419,25 @@ public class EntityPanda extends EntityAnimal {
 		setPandaFlag(EATING_FLAG, eating);
 	}
 
+	public boolean isSneezing() {
+		return getPandaFlag(SNEEZING_FLAG);
+	}
+
+	private void setSneezing(boolean sneezing) {
+		setPandaFlag(SNEEZING_FLAG, sneezing);
+		if (!sneezing) {
+			setSneezeTicks(0);
+		}
+	}
+
+	public int getSneezeTicks() {
+		return dataWatcher.getWatchableObjectInt(SNEEZE_COUNTER);
+	}
+
+	private void setSneezeTicks(int ticks) {
+		dataWatcher.updateObject(SNEEZE_COUNTER, Math.max(0, ticks));
+	}
+
 	private boolean getPandaFlag(int flag) {
 		return (dataWatcher.getWatchableObjectByte(PANDA_FLAGS) & flag) != 0;
 	}
@@ -439,6 +513,7 @@ public class EntityPanda extends EntityAnimal {
 		eatingTicks = isPandaFood(getHeldItem())
 				? Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")))
 				: 0;
+		setSneezing(false);
 		setSitting(false);
 		setPandaEating(false);
 	}
@@ -551,6 +626,19 @@ public class EntityPanda extends EntityAnimal {
 			}
 			return;
 		}
+		if (status == 47) {
+			float yawRadians = renderYawOffset * (float) Math.PI / 180.0F;
+			double distance = (width + 1.0F) * 0.5D;
+			worldObj.spawnParticle(
+					"slime",
+					posX - distance * MathHelper.sin(yawRadians),
+					posY + getEyeHeight() - 0.1D,
+					posZ + distance * MathHelper.cos(yawRadians),
+					motionX,
+					0.0D,
+					motionZ);
+			return;
+		}
 
 		super.handleHealthUpdate(status);
 	}
@@ -627,7 +715,11 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	private boolean canPerformAttack() {
-		return !isBurning() && !isSitting() && !isEating();
+		return !isBurning() && canPerformPandaAction();
+	}
+
+	private boolean canPerformPandaAction() {
+		return !isSitting() && !isEating();
 	}
 
 	private class AIPandaPanic extends EntityAIPanic {
