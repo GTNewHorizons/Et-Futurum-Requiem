@@ -11,11 +11,14 @@ import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIFollowParent;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAIPanic;
@@ -29,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -42,6 +46,7 @@ public class EntityPanda extends EntityAnimal {
 	private static final int SITTING_FLAG = 8;
 	private static final int EATING_FLAG = 1;
 	private static final int EATING_DURATION = 80;
+	private static final int ATTACK_COOLDOWN = 20;
 	private static final int UNHAPPY_DURATION = 32;
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
 	private static final int BAMBOO_SEARCH_RADIUS = 7;
@@ -55,6 +60,8 @@ public class EntityPanda extends EntityAnimal {
 	private int eatingTicks;
 	private float sittingAnimationProgress;
 	private float previousSittingAnimationProgress;
+	private boolean stopAttackingAfterHit;
+	private int attackCooldown;
 
 	public EntityPanda(World world) {
 		super(world);
@@ -62,8 +69,9 @@ public class EntityPanda extends EntityAnimal {
 		getNavigator().setAvoidsWater(true);
 
 		tasks.addTask(0, new EntityAISwimming(this));
-		tasks.addTask(1, new EntityAIPanic(this, 2.0D));
+		tasks.addTask(1, new AIPandaPanic());
 		tasks.addTask(2, new AIEatBamboo());
+		tasks.addTask(3, new AIPandaAttack());
 		tasks.addTask(3, new AIPandaMate());
 		tasks.addTask(4, new EntityAITempt(this, 1.0D, ModItems.BAMBOO.get(), false));
 
@@ -77,6 +85,7 @@ public class EntityPanda extends EntityAnimal {
 		tasks.addTask(7, new EntityAIWander(this, 1.0D));
 		tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
 		tasks.addTask(9, new EntityAILookIdle(this));
+		targetTasks.addTask(1, new AIPandaHurtByTarget());
 	}
 
 	@Override
@@ -93,11 +102,79 @@ public class EntityPanda extends EntityAnimal {
 		super.applyEntityAttributes();
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(20.0D);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.15D);
+		getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(6.0D);
 	}
 
 	@Override
 	protected boolean isAIEnabled() {
 		return true;
+	}
+
+	@Override
+	public boolean allowLeashing() {
+		return false;
+	}
+
+	@Override
+	public boolean attackEntityAsMob(Entity target) {
+		if (attackCooldown > 0) {
+			return false;
+		}
+		attackCooldown = ATTACK_COOLDOWN;
+		playSound(Reference.MCAssetVer + ":entity.panda.bite", 1.0F, 1.0F);
+		if (getVariant() != Gene.AGGRESSIVE) {
+			stopAttackingAfterHit = true;
+		}
+
+		super.attackEntityAsMob(target);
+		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+		return target.attackEntityFrom(DamageSource.causeMobDamage(this), damage);
+	}
+
+	@Override
+	public boolean attackEntityFrom(DamageSource source, float amount) {
+		setSitting(false);
+		return super.attackEntityFrom(source, amount);
+	}
+
+	@Override
+	protected String getLivingSound() {
+		if (getVariant() == Gene.AGGRESSIVE) {
+			return Reference.MCAssetVer + ":entity.panda.aggressive_ambient";
+		}
+		if (getVariant() == Gene.WORRIED) {
+			return Reference.MCAssetVer + ":entity.panda.worried_ambient";
+		}
+		return Reference.MCAssetVer + ":entity.panda.ambient";
+	}
+
+	@Override
+	protected String getHurtSound() {
+		return Reference.MCAssetVer + ":entity.panda.hurt";
+	}
+
+	@Override
+	protected String getDeathSound() {
+		return Reference.MCAssetVer + ":entity.panda.death";
+	}
+
+	/**
+	 * MCP name: {@code playStepSound}
+	 */
+	@Override
+	protected void func_145780_a(int x, int y, int z, Block block) {
+		playSound(Reference.MCAssetVer + ":entity.panda.step", 0.15F, 1.0F);
+	}
+
+	@Override
+	protected void dropFewItems(boolean hitRecently, int lootingLevel) {
+		Item bamboo = GameRegistry.findItem(Reference.MOD_ID, "bamboo");
+		if (bamboo == null) {
+			bamboo = getBopBamboo();
+		}
+		if (bamboo != null) {
+			dropItem(bamboo, 1);
+		}
 	}
 
 	@Override
@@ -120,6 +197,13 @@ public class EntityPanda extends EntityAnimal {
 
 		super.onLivingUpdate();
 		updateUnhappyState();
+
+		if (!worldObj.isRemote && getAttackTarget() == null) {
+			stopAttackingAfterHit = false;
+		}
+		if (attackCooldown > 0) {
+			--attackCooldown;
+		}
 	}
 
 	private void updateUnhappyState() {
@@ -457,6 +541,61 @@ public class EntityPanda extends EntityAnimal {
 		return false;
 	}
 
+	private boolean canPerformAttack() {
+		return !isBurning() && !isSitting() && !isEating();
+	}
+
+	private class AIPandaPanic extends EntityAIPanic {
+
+		private AIPandaPanic() {
+			super(EntityPanda.this, 2.0D);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return isBurning() && super.shouldExecute();
+		}
+	}
+
+	private class AIPandaAttack extends EntityAIAttackOnCollide {
+
+		private AIPandaAttack() {
+			super(EntityPanda.this, 1.2D, true);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformAttack() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformAttack() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaHurtByTarget extends EntityAIHurtByTarget {
+
+		private AIPandaHurtByTarget() {
+			super(EntityPanda.this, false);
+		}
+
+		@Override
+		public void startExecuting() {
+			stopAttackingAfterHit = false;
+			super.startExecuting();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			if (stopAttackingAfterHit) {
+				setAttackTarget(null);
+				return false;
+			}
+			return super.continueExecuting();
+		}
+	}
+
 	private class AIPandaMate extends EntityAIMate {
 
 		private int nextUnhappyTick;
@@ -494,7 +633,7 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean continueExecuting() {
-			return !isChild() && isEating() && isBamboo(getHeldItem()) && onGround && !isInWater()
+			return !isChild() && isEating() && isBamboo(getHeldItem()) && !isInWater()
 					&& eatingTicks < EATING_DURATION;
 		}
 
@@ -510,6 +649,13 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public void resetTask() {
+			if (!worldObj.isRemote && (isBurning() || isInWater()) && isBamboo(getHeldItem())) {
+				ItemStack heldStack = getHeldItem().copy();
+				entityDropItem(heldStack, 0.0F);
+				setCurrentItemOrArmor(0, null);
+				equipmentDropChances[0] = DEFAULT_EQUIPMENT_DROP_CHANCE;
+				eatingTicks = 0;
+			}
 			setPandaEating(false);
 			setSitting(false);
 		}
@@ -519,10 +665,13 @@ public class EntityPanda extends EntityAnimal {
 			getNavigator().clearPathEntity();
 			moveForward = 0.0F;
 			moveStrafing = 0.0F;
+			setSitting(true);
 			++eatingTicks;
 
 			if (eatingTicks >= 20 && eatingTicks % 12 == 0) {
-				playSound(Reference.MCAssetVer + ":entity.panda.eat", 0.5F, 0.9F + rand.nextFloat() * 0.2F);
+				float volume = 0.5F + 0.5F * rand.nextInt(2);
+				float pitch = 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.2F;
+				playSound(Reference.MCAssetVer + ":entity.panda.eat", volume, pitch);
 				worldObj.setEntityState(EntityPanda.this, (byte) 45);
 			}
 
