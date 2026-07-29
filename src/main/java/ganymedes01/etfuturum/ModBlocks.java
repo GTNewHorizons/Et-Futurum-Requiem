@@ -947,9 +947,8 @@ public enum ModBlocks {
 			}
 		}
 
-		// Backward compat: other mods (NHCoreMod, Extra Utilities, etc.) reference
-		// the old item_sign_* names from when signs were standalone ItemWoodSigns in
-		// ModItems. These aliases are cleared in serverStarting before world loading.
+		// Other mods reference item_sign_*, so we make aliases here.
+		// They are cleared in serverStarting before world loading.
 		ModBlocks[] legacySigns = {SIGN_SPRUCE, SIGN_BIRCH, SIGN_JUNGLE, SIGN_ACACIA, SIGN_DARK_OAK};
 		for (ModBlocks signBlock : legacySigns) {
 			if (signBlock.isEnabled()) {

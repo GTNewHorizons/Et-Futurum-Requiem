@@ -607,10 +607,8 @@ public class EtFuturum {
 					ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
 				}
 
-				// Old standalone ItemWoodSign items (item_sign_*) no longer exist;
-				// they were replaced by ItemBlockSign registered under sign_*.
-				// processIdRematches can't remap an existing ItemBlock to a different
-				// ID, so we silently ignore these. Placed sign blocks are unaffected.
+				// item_sign_* replaced by sign_*.
+				// processIdRematches can't remap existing ItemBlock to a different ID, so ignore
 				if (mapping.type == GameRegistry.Type.ITEM && mapping.name.startsWith("etfuturum:item_sign_")) {
 					mapping.ignore();
 				}
