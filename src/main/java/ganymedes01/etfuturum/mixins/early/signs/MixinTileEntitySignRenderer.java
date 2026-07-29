@@ -22,40 +22,48 @@ public class MixinTileEntitySignRenderer {
 
 	@Unique
 	private String[] etfuturum$originalSignText;
+	@Unique
+	private int etfuturum$originalLineBeingEdited = -1;
 
 	/**
-	 * Before vanilla renders front text, apply dye base color to signText
+	 * Before vanilla renders front text, apply dye to signText including
+	 * the >< cursor on the edited line, then hide lineBeingEdited
+	 * so vanilla doesn't add its own undyed cursor.
 	 */
 	@Inject(method = "renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V", at = @At("HEAD"))
-	private void applyDyeToFrontText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
-		if (!(te instanceof TileEntitySign) || !(te instanceof ISign))
+	private void etfuturum$applyDyeToFrontText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
+		if (!(te instanceof TileEntitySign sign) || !(te instanceof ISign iSign))
 			return;
-		TileEntitySign sign = (TileEntitySign) te;
-		ISign iSign = (ISign) sign;
-		int dyeId = iSign.getDyeId();
-		if (dyeId < 0 || dyeId > 15)
-			return;
-		// Save original and apply dye base color
+
 		etfuturum$originalSignText = new String[4];
+		int editLine = sign.lineBeingEdited;
 		for (int i = 0; i < 4; i++) {
 			etfuturum$originalSignText[i] = sign.signText[i];
+
+			if (i == editLine) {
+				sign.signText[i] = "> " + sign.signText[i] + "§r <";
+				etfuturum$originalLineBeingEdited = editLine;
+				sign.lineBeingEdited = -1;  // removes cursor from vanilla rendering
+			}
 			sign.signText[i] = iSign.applyDyeBaseColor(sign.signText[i]);
 		}
 	}
 
 	@Inject(method = "renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V", at = @At("TAIL"))
 	private void renderBackText(TileEntity te, double x, double y, double z, float partialTicks, CallbackInfo ci) {
-        if (!(te instanceof ISign))
+		if (!(te instanceof TileEntitySign sign) || !(te instanceof ISign iSign))
 			return;
-		TileEntitySign sign = (TileEntitySign) te;
-		ISign iSign = (ISign) sign;
 
-		// Restore original front text that was modified in the HEAD inject
+		// Restore original front text and lineBeingEdited
 		if (etfuturum$originalSignText != null) {
 			for (int i = 0; i < 4; i++) {
 				sign.signText[i] = etfuturum$originalSignText[i];
 			}
 			etfuturum$originalSignText = null;
+		}
+		if (etfuturum$originalLineBeingEdited >= 0) {
+			sign.lineBeingEdited = etfuturum$originalLineBeingEdited;
+			etfuturum$originalLineBeingEdited = -1;
 		}
 
 		String[] backText = iSign.getSignText(false);
@@ -90,10 +98,11 @@ public class MixinTileEntitySignRenderer {
 		FontRenderer fontrenderer = ((TileEntitySignRenderer) (Object) this).func_147498_b();
 		byte b0 = 0;
 		for (int i = 0; i < backText.length; ++i) {
-			String s = iSign.applyDyeBaseColor(backText[i]);
+			String s = backText[i];
 			if (i == sign.lineBeingEdited) {
 				s = "> " + s + "§r <";
 			}
+			s = iSign.applyDyeBaseColor(s);
 			fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - backText.length * 5, b0);
 		}
 
