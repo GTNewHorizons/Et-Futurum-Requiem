@@ -350,6 +350,7 @@ entity.etfuturum.elder_guardian.name=Elder Guardian
 entity.etfuturum.polar_bear.name=Polar Bear
 entity.etfuturum.bee.name=Bee
 entity.etfuturum.fox.name=Fox
+entity.etfuturum.panda.name=Panda
 
 # Items
 item.etfuturum.mutton.name=Raw Mutton

@@ -297,6 +297,7 @@ entity.etfuturum.guardian.name=Страж
 entity.etfuturum.elder_guardian.name=Древний страж
 entity.etfuturum.polar_bear.name=Белый медведь
 entity.etfuturum.bee.name=Пчела
+entity.etfuturum.panda.name=Панда
 
 # Предметы (Items)
 item.etfuturum.mutton.name=Сырая баранина

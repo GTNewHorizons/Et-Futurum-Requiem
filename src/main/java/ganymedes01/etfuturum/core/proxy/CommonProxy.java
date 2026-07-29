@@ -44,6 +44,7 @@ import ganymedes01.etfuturum.entities.EntityNewBoat;
 import ganymedes01.etfuturum.entities.EntityNewBoatSeat;
 import ganymedes01.etfuturum.entities.EntityNewBoatWithChest;
 import ganymedes01.etfuturum.entities.EntityNewSnowGolem;
+import ganymedes01.etfuturum.entities.EntityPanda;
 import ganymedes01.etfuturum.entities.EntityPlacedEndCrystal;
 import ganymedes01.etfuturum.entities.EntityRabbit;
 import ganymedes01.etfuturum.entities.EntityRespawnedDragon;
@@ -289,6 +290,10 @@ public class CommonProxy implements IGuiHandler {
 		if (ConfigEntities.enableFoxes) {
 			ModEntityList.registerEntity(EntityFox.class, "fox", 22, EtFuturum.instance, 64, 1, true, 0xD5B69F, 0xCC6920);
 			EntityRegistry.addSpawn(EntityFox.class, 8, 2, 4, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.CONIFEROUS));
+		}
+
+		if (ConfigEntities.enablePandas) {
+			ModEntityList.registerEntity(EntityPanda.class, "panda", 23, EtFuturum.instance, 80, 3, true, 0xE7E7E7, 0x1B1B22);
 		}
 
 		//make magmas slightly more common, hopefully.
