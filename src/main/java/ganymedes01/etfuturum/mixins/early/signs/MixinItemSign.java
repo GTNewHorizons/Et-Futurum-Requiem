@@ -1,85 +1,78 @@
 package ganymedes01.etfuturum.mixins.early.signs;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSign;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Allow replacing replaceable blocks matching modded signs.
+ * Janky implementation of ItemBlockSign logic
+ * 
+ * @author mosesyu1028
+ */
 @Mixin(ItemSign.class)
 public class MixinItemSign {
-	/**
-	 * @author mosesyu1028
-	 * @reason Allow replacing replaceable blocks matching modded signs.
-	 */
 
-	@Overwrite
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (side == 0) {
-			return false;
-		}
+	// Calculate result before applying offset based on side
+	private boolean etfuturum$blockIsReplaceable;
 
-		Block clickedBlock = world.getBlock(x, y, z);
-
-		if (!clickedBlock.isReplaceable(world, x, y, z)) {
-			if (!clickedBlock.getMaterial().isSolid()) {
-				return false;
-			}
-
-			switch (side) {
-				case 1: ++y; break;
-				case 2: --z; break;
-				case 3: ++z; break;
-				case 4: --x; break;
-				case 5: ++x; break;
-			}
-		}
-		else {
-			side = 1;  // Force standing sign when overwriting replaceable
-		}
-
-		if (side == 1 && !World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
-			return false;
-		}
-
-		if (!player.canPlayerEdit(x, y, z, side, stack)) {
-			return false;
-		}
-		else if (!Blocks.standing_sign.canPlaceBlockAt(world, x, y, z)) {
-			return false;
-		}
-		else if (world.isRemote) {
+	// Skip solid check if replaceable
+	@ModifyExpressionValue(method = "onItemUse", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/block/material/Material;isSolid()Z"))
+	private boolean treatReplaceableAsSolid(boolean original, ItemStack stack, EntityPlayer player,
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		if (original) {
+			etfuturum$blockIsReplaceable = false;
 			return true;
 		}
-		else {
-			Block block;
-			if (side == 1) {
-				int rotation = MathHelper.floor_double((player.rotationYaw + 180.0F) * 16.0F / 360.0F + 0.5D) & 15;
-				block = Blocks.standing_sign;
-				world.setBlock(x, y, z, block, rotation, 3);
-			}
-			else {
-				block = Blocks.wall_sign;
-				world.setBlock(x, y, z, block, side, 3);
-			}
+		etfuturum$blockIsReplaceable = world.getBlock(x, y, z).isReplaceable(world, x, y, z);
+		return etfuturum$blockIsReplaceable;
+	}
 
-			//Disable the sound for continuity, so it doesn't play when the event-based player would not
-			if (ConfigSounds.fixSilentPlacing)
-				world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, block.stepSound.func_150496_b(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+	// Skip offset if replaceable
+	@Definition(id = "side", local = @Local(type = int.class, ordinal = 3))
+	@Expression("side == ?")
+	@ModifyExpressionValue(method = "onItemUse", at = @At(value = "MIXINEXTRAS:EXPRESSION"),
+		slice = @Slice(
+			from = @At(value = "INVOKE", target = "Lnet/minecraft/block/material/Material;isSolid()Z"),
+			to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;canPlayerEdit(IIIILnet/minecraft/item/ItemStack;)Z")
+		))
+	private boolean skipOffsetReplaceable(boolean original, ItemStack stack, EntityPlayer player,
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		return original && !etfuturum$blockIsReplaceable;
+	}
 
-			--stack.stackSize;
-			TileEntitySign tileentitysign = (TileEntitySign) world.getTileEntity(x, y, z);
+	// If replaceable, force standing sign (side = 1)
+	@ModifyVariable(method = "onItemUse", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/entity/player/EntityPlayer;canPlayerEdit(IIIILnet/minecraft/item/ItemStack;)Z"),
+		ordinal = 3, argsOnly = true)
+	private int forceStandingReplaceable(int currentSide, ItemStack stack, EntityPlayer player,
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		return etfuturum$blockIsReplaceable ? 1 : currentSide;
+	}
 
-			if (tileentitysign != null) {
-				player.func_146100_a(tileentitysign);
-			}
-			return true;
+	@Inject(method = "onItemUse", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/World;setBlock(IIILnet/minecraft/block/Block;II)Z",
+		shift = At.Shift.AFTER))
+	private void fixSilentPlacing(ItemStack stack, EntityPlayer player, World world,
+		int x, int y, int z, int side, float hitX, float hitY, float hitZ, CallbackInfoReturnable<Boolean> cir) {
+		if (ConfigSounds.fixSilentPlacing) {
+			Block.SoundType blockSound = Blocks.standing_sign.stepSound;
+			world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, blockSound.func_150496_b(), (blockSound.getVolume() + 1.0F) / 2.0F, blockSound.getPitch() * 0.8F);
 		}
 	}
 }
