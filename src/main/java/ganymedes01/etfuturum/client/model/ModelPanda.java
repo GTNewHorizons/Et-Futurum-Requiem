@@ -65,7 +65,7 @@ public class ModelPanda extends ModelBase {
 			onBackAnimationProgress = clampAnimationProgress(panda.getOnBackAnimationProgress(partialTicks));
 			rollAnimationProgress = clampAnimationProgress(panda.getRollAnimationProgress(partialTicks));
 			eating = panda.isEating();
-			unhappy = panda.getUnhappyTicks() > 0;
+			unhappy = panda.isUnhappy();
 			scared = panda.isScaredByThunderstorm();
 			sneezing = panda.isSneezing();
 			sneezeTicks = panda.getSneezeTicks();

@@ -14,6 +14,7 @@ import ganymedes01.etfuturum.entities.ai.EntityAICustomAvoidEntity;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
@@ -26,11 +27,11 @@ import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityMoveHelper;
-import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -49,14 +50,17 @@ public class EntityPanda extends EntityAnimal {
 	private static final int MAIN_GENE = 18;
 	private static final int HIDDEN_GENE = 19;
 	private static final int PANDA_FLAGS = 20;
-	private static final int UNHAPPY_COUNTER = 21;
-	private static final int SNEEZE_COUNTER = 22;
+	private static final int SNEEZE_COUNTER = 21;
 
 	private static final int EATING_FLAG = 1;
 	private static final int SNEEZING_FLAG = 2;
 	private static final int ROLLING_FLAG = 4;
 	private static final int SITTING_FLAG = 8;
 	private static final int ON_BACK_FLAG = 16;
+	private static final int UNHAPPY_FLAG = 32;
+	private static final byte EATING_PARTICLES_STATUS = 45;
+	private static final byte BABY_GROWTH_PARTICLES_STATUS = 46;
+	private static final byte SNEEZE_PARTICLE_STATUS = 47;
 	private static final int EATING_DURATION = 80;
 	private static final int SNEEZE_DURATION = 20;
 	private static final int ROLL_DURATION = 32;
@@ -66,10 +70,14 @@ public class EntityPanda extends EntityAnimal {
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
 	private static final int BAMBOO_SEARCH_RADIUS = 7;
 	private static final int BAMBOO_SEARCH_HEIGHT = 3;
+	private static final int FIRE_ESCAPE_HORIZONTAL_RADIUS = 5;
+	private static final int FIRE_ESCAPE_VERTICAL_RADIUS = 4;
+	private static final int FIRE_ESCAPE_MAX_TICKS = 100;
 	private static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 	private static final double LAZY_LIE_START_CHANCE = 0.0075D;
 	private static final double BABY_ROLL_START_CHANCE = 0.006D;
 	private static final double PLAYFUL_ROLL_START_CHANCE = 0.0559D;
+	private static final double FIRE_ESCAPE_DIRECT_DISTANCE_SQ = 4.0D;
 	private static final double LAZY_MOVEMENT_LERP_MAX_DISTANCE_SQ = 0.01D;
 	private static final double LAZY_MOVEMENT_LERP_MAX_HEIGHT = 0.0625D;
 
@@ -77,9 +85,13 @@ public class EntityPanda extends EntityAnimal {
 	private static Block bopBambooBlock;
 	private static boolean bopBambooResolved;
 
-	private int eatingTicks;
-	private int rollTicks;
 	private Vec3 rollDelta;
+	// Both sides advance the visual phase from the synced rolling flag; only the server applies motion.
+	private int rollTicks;
+	// Server-side AI/NBT state; clients animate chewing from the synced eating flag.
+	private int eatingTicks;
+	// Server-side timer; clients only need the synced unhappy flag for the head-shaking pose.
+	private int unhappyTicks;
 	private float sittingAnimationProgress;
 	private float previousSittingAnimationProgress;
 	private float onBackAnimationProgress;
@@ -97,7 +109,7 @@ public class EntityPanda extends EntityAnimal {
 		moveHelper = new PandaMoveHelper();
 
 		tasks.addTask(0, new EntityAISwimming(this));
-		tasks.addTask(1, new AIPandaPanic());
+		tasks.addTask(1, new AIPandaEscapeFire());
 		tasks.addTask(2, new AIEatFood());
 		tasks.addTask(3, new AIPandaAttack());
 		tasks.addTask(3, new AIPandaMate());
@@ -126,7 +138,6 @@ public class EntityPanda extends EntityAnimal {
 		dataWatcher.addObject(MAIN_GENE, (byte) Gene.NORMAL.getId());
 		dataWatcher.addObject(HIDDEN_GENE, (byte) Gene.NORMAL.getId());
 		dataWatcher.addObject(PANDA_FLAGS, (byte) 0);
-		dataWatcher.addObject(UNHAPPY_COUNTER, 0);
 		dataWatcher.addObject(SNEEZE_COUNTER, 0);
 	}
 
@@ -246,14 +257,6 @@ public class EntityPanda extends EntityAnimal {
 		previousRollAnimationProgress = rollAnimationProgress;
 		rollAnimationProgress = updateAnimationProgress(rollAnimationProgress, isRolling(), 0.15F, 0.19F);
 
-		if (worldObj.isRemote) {
-			if (isEating()) {
-				++eatingTicks;
-			} else {
-				eatingTicks = 0;
-			}
-		}
-
 		super.onLivingUpdate();
 		updateWorriedState();
 		updateUnhappyState();
@@ -277,6 +280,10 @@ public class EntityPanda extends EntityAnimal {
 		if (worldObj.isRemote || getVariant() != Gene.WORRIED) {
 			return;
 		}
+		if (isBurning()) {
+			setSitting(false);
+			return;
+		}
 
 		if (worldObj.isThundering() && !isInWater()) {
 			if (!isSitting()) {
@@ -284,7 +291,7 @@ public class EntityPanda extends EntityAnimal {
 			}
 			setSitting(true);
 			setPandaEating(false);
-			eatingTicks = 0;
+			setEatingTicks(0);
 		} else if (!isEating()) {
 			setSitting(false);
 		}
@@ -292,25 +299,26 @@ public class EntityPanda extends EntityAnimal {
 
 	private void updateRollingState() {
 		if (!isRolling()) {
-			rollTicks = 0;
+			setRollTicks(0);
 			rollDelta = null;
 			return;
 		}
 
-		++rollTicks;
-		if (rollTicks > ROLL_DURATION) {
-			if (worldObj.isRemote) {
-				rollTicks = ROLL_DURATION;
-			} else {
+		if (getRollTicks() >= ROLL_DURATION) {
+			// A delayed metadata packet leaves the client on the final frame instead of rotating past 360°.
+			if (!worldObj.isRemote) {
 				setRolling(false);
 			}
 			return;
 		}
+
+		int ticks = getRollTicks() + 1;
+		setRollTicks(ticks);
 		if (worldObj.isRemote) {
 			return;
 		}
 
-		if (rollTicks == 1) {
+		if (ticks == 1) {
 			float yawRadians = rotationYaw * (float) Math.PI / 180.0F;
 			float rollSpeed = isChild() ? 0.1F : 0.2F;
 			rollDelta = Vec3.createVectorHelper(
@@ -321,7 +329,7 @@ public class EntityPanda extends EntityAnimal {
 			motionY = 0.27D;
 			motionZ = rollDelta.zCoord;
 			isAirBorne = true;
-		} else if (rollTicks == 7 || rollTicks == 15 || rollTicks == 23) {
+		} else if (ticks == 7 || ticks == 15 || ticks == 23) {
 			motionX = 0.0D;
 			motionZ = 0.0D;
 			if (onGround) {
@@ -367,7 +375,7 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	private void finishSneezing() {
-		worldObj.setEntityState(this, (byte) 47);
+		worldObj.setEntityState(this, SNEEZE_PARTICLE_STATUS);
 		playSound(Reference.MCAssetVer + ":entity.panda.sneeze", 1.0F, 1.0F);
 
 		List<EntityPanda> nearbyPandas = worldObj.getEntitiesWithinAABB(
@@ -444,7 +452,7 @@ public class EntityPanda extends EntityAnimal {
 			consumePlayerItem(player, offeredStack);
 			addGrowth((int) (((-getGrowingAge()) / 20) * 0.1F));
 			player.swingItem();
-			worldObj.setEntityState(this, (byte) 46);
+			worldObj.setEntityState(this, BABY_GROWTH_PARTICLES_STATUS);
 			return true;
 		}
 
@@ -466,7 +474,7 @@ public class EntityPanda extends EntityAnimal {
 		consumePlayerItem(player, offeredStack);
 		setCurrentItemOrArmor(0, heldStack);
 		equipmentDropChances[0] = 2.0F;
-		eatingTicks = 0;
+		setEatingTicks(0);
 		setSitting(true);
 		setPandaEating(true);
 		getNavigator().clearPathEntity();
@@ -554,9 +562,12 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	private void setRolling(boolean rolling) {
+		if (rolling && !isRolling()) {
+			setRollTicks(0);
+		}
 		setPandaFlag(ROLLING_FLAG, rolling);
 		if (!rolling) {
-			rollTicks = 0;
+			setRollTicks(0);
 			rollDelta = null;
 		}
 	}
@@ -616,20 +627,33 @@ public class EntityPanda extends EntityAnimal {
 		return rollTicks;
 	}
 
+	private void setRollTicks(int ticks) {
+		rollTicks = MathHelper.clamp_int(ticks, 0, ROLL_DURATION);
+	}
+
 	public boolean isScaredByThunderstorm() {
 		return getVariant() == Gene.WORRIED && worldObj.isThundering();
 	}
 
-	public int getEatingTicks() {
+	private int getEatingTicks() {
 		return eatingTicks;
 	}
 
-	public int getUnhappyTicks() {
-		return dataWatcher.getWatchableObjectInt(UNHAPPY_COUNTER);
+	private void setEatingTicks(int ticks) {
+		eatingTicks = MathHelper.clamp_int(ticks, 0, EATING_DURATION);
+	}
+
+	public boolean isUnhappy() {
+		return getPandaFlag(UNHAPPY_FLAG);
+	}
+
+	private int getUnhappyTicks() {
+		return unhappyTicks;
 	}
 
 	private void setUnhappyTicks(int ticks) {
-		dataWatcher.updateObject(UNHAPPY_COUNTER, Math.max(0, ticks));
+		unhappyTicks = Math.max(0, ticks);
+		setPandaFlag(UNHAPPY_FLAG, unhappyTicks > 0);
 	}
 
 	public Gene getMainGene() {
@@ -668,7 +692,7 @@ public class EntityPanda extends EntityAnimal {
 		nbt.setString("MainGene", getMainGene().getName());
 		nbt.setString("HiddenGene", getHiddenGene().getName());
 		if (isEating()) {
-			nbt.setInteger("PandaEatingTicks", eatingTicks);
+			nbt.setInteger("PandaEatingTicks", getEatingTicks());
 		}
 	}
 
@@ -679,9 +703,9 @@ public class EntityPanda extends EntityAnimal {
 		setHiddenGene(Gene.byName(nbt.getString("HiddenGene")));
 		applyGeneAttributes();
 
-		eatingTicks = isPandaFood(getHeldItem())
+		setEatingTicks(isPandaFood(getHeldItem())
 				? Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")))
-				: 0;
+				: 0);
 		setSneezing(false);
 		setRolling(false);
 		setOnBack(false);
@@ -757,7 +781,7 @@ public class EntityPanda extends EntityAnimal {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void handleHealthUpdate(byte status) {
-		if (status == 45) {
+		if (status == EATING_PARTICLES_STATUS) {
 			ItemStack heldItem = getHeldItem();
 			if (isPandaFood(heldItem)) {
 				String particle = "iconcrack_" + Item.getIdFromItem(heldItem.getItem());
@@ -781,7 +805,7 @@ public class EntityPanda extends EntityAnimal {
 			}
 			return;
 		}
-		if (status == 46) {
+		if (status == BABY_GROWTH_PARTICLES_STATUS) {
 			for (int i = 0; i < 3; ++i) {
 				double xSpeed = rand.nextGaussian() * 0.02D;
 				double ySpeed = rand.nextGaussian() * 0.02D;
@@ -797,7 +821,7 @@ public class EntityPanda extends EntityAnimal {
 			}
 			return;
 		}
-		if (status == 47) {
+		if (status == SNEEZE_PARTICLE_STATUS) {
 			float yawRadians = renderYawOffset * (float) Math.PI / 180.0F;
 			double distance = (width + 1.0F) * 0.5D;
 			worldObj.spawnParticle(
@@ -856,7 +880,7 @@ public class EntityPanda extends EntityAnimal {
 			equipmentDropChances[0] = DEFAULT_EQUIPMENT_DROP_CHANCE;
 		}
 
-		eatingTicks = 0;
+		setEatingTicks(0);
 		setPandaEating(false);
 		setSitting(false);
 	}
@@ -891,6 +915,28 @@ public class EntityPanda extends EntityAnimal {
 		return !isBurning() && canPerformPandaAction();
 	}
 
+	private void alertAggressivePandas(EntityLivingBase attacker) {
+		if (worldObj.isRemote || attacker == null || !attacker.isEntityAlive()) {
+			return;
+		}
+
+		double followRange = getEntityAttribute(SharedMonsterAttributes.followRange).getAttributeValue();
+		List<EntityPanda> nearbyPandas = worldObj.getEntitiesWithinAABB(
+				EntityPanda.class,
+				boundingBox.expand(followRange, 10.0D, followRange));
+		for (EntityPanda panda : nearbyPandas) {
+			if (panda == this
+					|| !panda.isEntityAlive()
+					|| panda.getVariant() != Gene.AGGRESSIVE
+					|| panda.getAttackTarget() != null
+					|| panda.getAITarget() != null
+					|| panda.isOnSameTeam(attacker)) {
+				continue;
+			}
+			panda.setAttackTarget(attacker);
+		}
+	}
+
 	private boolean canPerformPandaAction() {
 		return !isOnBack()
 				&& !isScaredByThunderstorm()
@@ -915,7 +961,7 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public void onUpdateMoveHelper() {
-			if (canPerformPandaAction()) {
+			if (isBurning() || canPerformPandaAction()) {
 				super.onUpdateMoveHelper();
 				return;
 			}
@@ -1045,7 +1091,7 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean continueExecuting() {
-			if (!isOnBack() || isInWater()) {
+			if (!isOnBack() || isInWater() || isBurning()) {
 				return false;
 			}
 			if (getVariant() != Gene.LAZY && rand.nextInt(600) == 1) {
@@ -1123,15 +1169,152 @@ public class EntityPanda extends EntityAnimal {
 		}
 	}
 
-	private class AIPandaPanic extends EntityAIPanic {
+	private class AIPandaEscapeFire extends EntityAIBase {
 
-		private AIPandaPanic() {
-			super(EntityPanda.this, 2.0D);
+		private static final double ESCAPE_SPEED = 2.0D;
+
+		private double targetX;
+		private double targetY;
+		private double targetZ;
+		private boolean targetingWater;
+		private boolean restoreWaterAvoidance;
+		private boolean previouslyAvoidedWater;
+		private int escapeTicks;
+
+		private AIPandaEscapeFire() {
+			setMutexBits(1);
 		}
 
 		@Override
 		public boolean shouldExecute() {
-			return isBurning() && super.shouldExecute();
+			if (!isBurning()) {
+				return false;
+			}
+
+			targetingWater = findNearestWater();
+			if (targetingWater) {
+				return true;
+			}
+
+			return findRandomEscapeTarget();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			if (targetingWater) {
+				return isBurning()
+						&& !isInWater()
+						&& escapeTicks < FIRE_ESCAPE_MAX_TICKS
+						&& (!getNavigator().noPath()
+								|| getDistanceSq(targetX, targetY, targetZ) <= FIRE_ESCAPE_DIRECT_DISTANCE_SQ);
+			}
+			return !getNavigator().noPath();
+		}
+
+		@Override
+		public void startExecuting() {
+			setSitting(false);
+			setOnBack(false);
+			setPandaEating(false);
+			setEatingTicks(0);
+			getNavigator().clearPathEntity();
+			escapeTicks = 0;
+
+			previouslyAvoidedWater = getNavigator().getAvoidsWater();
+			restoreWaterAvoidance = true;
+			if (targetingWater) {
+				getNavigator().setAvoidsWater(false);
+			}
+
+			boolean startedPath = getNavigator().tryMoveToXYZ(targetX, targetY, targetZ, ESCAPE_SPEED);
+			if (!startedPath
+					&& targetingWater
+					&& getDistanceSq(targetX, targetY, targetZ) > FIRE_ESCAPE_DIRECT_DISTANCE_SQ) {
+				getNavigator().setAvoidsWater(previouslyAvoidedWater);
+				targetingWater = false;
+				if (findRandomEscapeTarget()) {
+					getNavigator().tryMoveToXYZ(targetX, targetY, targetZ, ESCAPE_SPEED);
+				}
+			}
+		}
+
+		@Override
+		public void updateTask() {
+			++escapeTicks;
+			if (targetingWater
+					&& !isInWater()
+					&& getNavigator().noPath()
+					&& getDistanceSq(targetX, targetY, targetZ) <= FIRE_ESCAPE_DIRECT_DISTANCE_SQ) {
+				getNavigator().clearPathEntity();
+				getMoveHelper().setMoveTo(targetX, targetY, targetZ, ESCAPE_SPEED);
+			}
+		}
+
+		@Override
+		public void resetTask() {
+			if (restoreWaterAvoidance) {
+				getNavigator().setAvoidsWater(previouslyAvoidedWater);
+				restoreWaterAvoidance = false;
+			}
+			targetingWater = false;
+		}
+
+		private boolean findNearestWater() {
+			int originX = MathHelper.floor_double(posX);
+			int originY = MathHelper.floor_double(boundingBox.minY);
+			int originZ = MathHelper.floor_double(posZ);
+			int minY = Math.max(0, originY - FIRE_ESCAPE_VERTICAL_RADIUS);
+			int maxY = Math.min(worldObj.getActualHeight() - 1, originY + FIRE_ESCAPE_VERTICAL_RADIUS);
+			double nearestDistance = Double.MAX_VALUE;
+			boolean foundWater = false;
+
+			for (int x = originX - FIRE_ESCAPE_HORIZONTAL_RADIUS;
+					x <= originX + FIRE_ESCAPE_HORIZONTAL_RADIUS;
+					++x) {
+				for (int z = originZ - FIRE_ESCAPE_HORIZONTAL_RADIUS;
+						z <= originZ + FIRE_ESCAPE_HORIZONTAL_RADIUS;
+						++z) {
+					if (!worldObj.blockExists(x, originY, z)) {
+						continue;
+					}
+					for (int y = minY; y <= maxY; ++y) {
+						if (worldObj.getBlock(x, y, z).getMaterial() != Material.water) {
+							continue;
+						}
+
+						double xDistance = x + 0.5D - posX;
+						double yDistance = y + 0.5D - posY;
+						double zDistance = z + 0.5D - posZ;
+						double distance = xDistance * xDistance
+								+ yDistance * yDistance
+								+ zDistance * zDistance;
+						if (distance < nearestDistance) {
+							nearestDistance = distance;
+							targetX = x + 0.5D;
+							targetY = y;
+							targetZ = z + 0.5D;
+							foundWater = true;
+						}
+					}
+				}
+			}
+
+			return foundWater;
+		}
+
+		private boolean findRandomEscapeTarget() {
+			Vec3 target = RandomPositionGenerator.findRandomTarget(
+					EntityPanda.this,
+					FIRE_ESCAPE_HORIZONTAL_RADIUS,
+					FIRE_ESCAPE_VERTICAL_RADIUS);
+			if (target == null) {
+				return false;
+			}
+
+			targetX = target.xCoord;
+			targetY = target.yCoord;
+			targetZ = target.zCoord;
+			return true;
 		}
 	}
 
@@ -1160,9 +1343,11 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public void startExecuting() {
+			EntityLivingBase attacker = getAITarget();
 			stopAttackingAfterHit = false;
 			pacifiedByBamboo = false;
 			super.startExecuting();
+			alertAggressivePandas(attacker);
 		}
 
 		@Override
@@ -1217,6 +1402,7 @@ public class EntityPanda extends EntityAnimal {
 					&& !isOnBack()
 					&& !isRolling()
 					&& !isScaredByThunderstorm()
+					&& !isBurning()
 					&& isPandaFood(getHeldItem())
 					&& !isInWater();
 		}
@@ -1227,16 +1413,18 @@ public class EntityPanda extends EntityAnimal {
 					&& !isOnBack()
 					&& !isRolling()
 					&& !isScaredByThunderstorm()
+					&& !isBurning()
 					&& isEating()
 					&& isPandaFood(getHeldItem())
 					&& !isInWater()
-					&& eatingTicks < EATING_DURATION;
+					&& getEatingTicks() < EATING_DURATION;
 		}
 
 		@Override
 		public void startExecuting() {
-			if (eatingTicks <= 0 || eatingTicks >= EATING_DURATION) {
-				eatingTicks = 0;
+			int ticks = getEatingTicks();
+			if (ticks <= 0 || ticks >= EATING_DURATION) {
+				setEatingTicks(0);
 			}
 			setSitting(true);
 			setPandaEating(true);
@@ -1250,7 +1438,10 @@ public class EntityPanda extends EntityAnimal {
 				entityDropItem(heldStack, 0.0F);
 				setCurrentItemOrArmor(0, null);
 				equipmentDropChances[0] = DEFAULT_EQUIPMENT_DROP_CHANCE;
-				eatingTicks = 0;
+				setEatingTicks(0);
+			}
+			if (!isPandaFood(getHeldItem())) {
+				setEatingTicks(0);
 			}
 			setPandaEating(false);
 			setSitting(false);
@@ -1262,16 +1453,17 @@ public class EntityPanda extends EntityAnimal {
 			moveForward = 0.0F;
 			moveStrafing = 0.0F;
 			setSitting(true);
-			++eatingTicks;
+			int ticks = getEatingTicks() + 1;
+			setEatingTicks(ticks);
 
-			if (eatingTicks >= 20 && eatingTicks % 12 == 0) {
+			if (ticks >= 20 && ticks % 12 == 0) {
 				float volume = 0.5F + 0.5F * rand.nextInt(2);
 				float pitch = 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.2F;
 				playSound(Reference.MCAssetVer + ":entity.panda.eat", volume, pitch);
-				worldObj.setEntityState(EntityPanda.this, (byte) 45);
+				worldObj.setEntityState(EntityPanda.this, EATING_PARTICLES_STATUS);
 			}
 
-			if (eatingTicks >= EATING_DURATION) {
+			if (ticks >= EATING_DURATION) {
 				finishEating();
 			}
 		}
