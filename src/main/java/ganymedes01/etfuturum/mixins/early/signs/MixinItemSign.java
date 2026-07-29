@@ -16,8 +16,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class MixinItemSign {
 	/**
 	 * @author mosesyu1028
-	 * @reason Fixes vanilla sign placement to allow replacing replaceable blocks
-	 * (tall grass, vines, dead bushes, etc.) matching ItemBlock behavior.
+	 * @reason Allow replacing replaceable blocks matching modded signs.
 	 */
 
 	@Overwrite
@@ -28,7 +27,7 @@ public class MixinItemSign {
 
 		Block clickedBlock = world.getBlock(x, y, z);
 
-		if (clickedBlock != Blocks.vine && clickedBlock != Blocks.tallgrass && clickedBlock != Blocks.deadbush && !clickedBlock.isReplaceable(world, x, y, z)) {
+		if (!clickedBlock.isReplaceable(world, x, y, z)) {
 			if (!clickedBlock.getMaterial().isSolid()) {
 				return false;
 			}
@@ -42,11 +41,9 @@ public class MixinItemSign {
 			}
 		}
 		else {
-			// Standing sign when overwriting a replaceable block
-			side = 1;
+			side = 1;  // Force standing sign when overwriting replaceable
 		}
 
-		// When placing a standing sign, verify the block below has a solid top surface
 		if (side == 1 && !World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
 			return false;
 		}
@@ -74,7 +71,7 @@ public class MixinItemSign {
 
 			//Disable the sound for continuity, so it doesn't play when the event-based player would not
 			if (ConfigSounds.fixSilentPlacing)
-				world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, block.stepSound.func_150496_b()/*getPlaceSound*/, (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				world.playSoundEffect((float) x + 0.5F, (float) y + 0.5F, (float) z + 0.5F, block.stepSound.func_150496_b(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
 
 			--stack.stackSize;
 			TileEntitySign tileentitysign = (TileEntitySign) world.getTileEntity(x, y, z);

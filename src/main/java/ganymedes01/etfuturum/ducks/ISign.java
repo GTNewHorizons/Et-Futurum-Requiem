@@ -33,7 +33,7 @@ public interface ISign {
 		"\u00A73", // 9: cyan -> dark aqua
 		"\u00A75", // 10: purple -> dark purple
 		"\u00A79", // 11: blue
-		"\u00A76", // 12: brown -> gold
+		"\u00A74", // 12: brown -> dark red
 		"\u00A72", // 13: green -> dark green
 		"\u00A7c", // 14: red
 		"\u00A70", // 15: black
