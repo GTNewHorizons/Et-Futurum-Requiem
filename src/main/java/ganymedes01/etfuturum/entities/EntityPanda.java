@@ -10,6 +10,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.compat.CompatBiomesOPlenty;
 import ganymedes01.etfuturum.entities.ai.EntityAICustomAvoidEntity;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
@@ -36,6 +37,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -44,6 +46,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 
 public class EntityPanda extends EntityAnimal {
 
@@ -70,6 +73,7 @@ public class EntityPanda extends EntityAnimal {
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
 	private static final int BAMBOO_SEARCH_RADIUS = 7;
 	private static final int BAMBOO_SEARCH_HEIGHT = 3;
+	private static final int NATURAL_BABY_CHANCE = 5;
 	private static final int FIRE_ESCAPE_HORIZONTAL_RADIUS = 5;
 	private static final int FIRE_ESCAPE_VERTICAL_RADIUS = 4;
 	private static final int FIRE_ESCAPE_MAX_TICKS = 100;
@@ -152,6 +156,35 @@ public class EntityPanda extends EntityAnimal {
 	@Override
 	protected boolean isAIEnabled() {
 		return true;
+	}
+
+	@Override
+	public boolean getCanSpawnHere() {
+		int x = MathHelper.floor_double(posX);
+		int y = MathHelper.floor_double(boundingBox.minY);
+		int z = MathHelper.floor_double(posZ);
+		Block ground = worldObj.getBlock(x, y - 1, z);
+
+		if (ground == Blocks.grass) {
+			return super.getCanSpawnHere();
+		}
+
+		BiomeGenBase biome = worldObj.getBiomeGenForCoords(x, z);
+		if (ground != Blocks.dirt
+				|| worldObj.getBlockMetadata(x, y - 1, z) != 2
+				|| !CompatBiomesOPlenty.isBambooForestBiome(biome)
+				|| worldObj.getFullBlockLightValue(x, y, z) <= 8) {
+			return false;
+		}
+
+		return worldObj.checkNoEntityCollision(boundingBox)
+				&& worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()
+				&& !worldObj.isAnyLiquid(boundingBox);
+	}
+
+	@Override
+	public int getMaxSpawnedInChunk() {
+		return 2;
 	}
 
 	@Override
@@ -683,7 +716,17 @@ public class EntityPanda extends EntityAnimal {
 		setMainGene(getRandomGene());
 		setHiddenGene(getRandomGene());
 		applyGeneAttributes();
+		if (spawnData instanceof PandaGroupData) {
+			if (rand.nextInt(NATURAL_BABY_CHANCE) == 0) {
+				setGrowingAge(-24000);
+			}
+		} else {
+			spawnData = new PandaGroupData();
+		}
 		return spawnData;
+	}
+
+	private static class PandaGroupData implements IEntityLivingData {
 	}
 
 	@Override

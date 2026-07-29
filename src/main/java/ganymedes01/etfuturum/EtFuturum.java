@@ -41,6 +41,7 @@ import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
 
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
+import ganymedes01.etfuturum.compat.CompatBiomesOPlenty;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.compat.CompatRPLEEventHandler;
 import ganymedes01.etfuturum.compat.CompatTinkersConstruct;
@@ -324,6 +325,9 @@ public class EtFuturum {
 		if (ModsList.WAILA.isLoaded()) {
 			CompatWaila.register();
 		}
+
+		// Restore JUNGLE tags for BOP's vanilla biome replacements before biome-based registrations take snapshots.
+		CompatBiomesOPlenty.registerOverriddenJungleBiomeTypes();
 
 		proxy.registerEvents();
 		proxy.registerEntities();
