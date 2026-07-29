@@ -1,9 +1,18 @@
 package ganymedes01.etfuturum.entities;
 
+import java.util.List;
+
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.LoaderState;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIFollowParent;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMate;
@@ -12,8 +21,10 @@ import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -22,6 +33,21 @@ public class EntityPanda extends EntityAnimal {
 
 	private static final int MAIN_GENE = 18;
 	private static final int HIDDEN_GENE = 19;
+	private static final int PANDA_FLAGS = 20;
+
+	private static final int SITTING_FLAG = 8;
+	private static final int EATING_FLAG = 1;
+	private static final int EATING_DURATION = 80;
+	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
+
+	private static Item bopBamboo;
+	private static boolean bopBambooResolved;
+
+	private int eatingTicks;
+	private float sittingAnimationProgress;
+	private float previousSittingAnimationProgress;
+	private float eatingAnimationProgress;
+	private float previousEatingAnimationProgress;
 
 	public EntityPanda(World world) {
 		super(world);
@@ -30,12 +56,20 @@ public class EntityPanda extends EntityAnimal {
 
 		tasks.addTask(0, new EntityAISwimming(this));
 		tasks.addTask(1, new EntityAIPanic(this, 2.0D));
-		tasks.addTask(2, new EntityAIMate(this, 1.0D));
-		tasks.addTask(3, new EntityAITempt(this, 1.0D, ModItems.BAMBOO.get(), false));
-		tasks.addTask(4, new EntityAIFollowParent(this, 1.25D));
-		tasks.addTask(5, new EntityAIWander(this, 1.0D));
-		tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-		tasks.addTask(7, new EntityAILookIdle(this));
+		tasks.addTask(2, new AIEatBamboo());
+		tasks.addTask(3, new EntityAIMate(this, 1.0D));
+		tasks.addTask(4, new EntityAITempt(this, 1.0D, ModItems.BAMBOO.get(), false));
+
+		Item externalBamboo = getBopBamboo();
+		if (externalBamboo != null && externalBamboo != ModItems.BAMBOO.get()) {
+			tasks.addTask(4, new EntityAITempt(this, 1.0D, externalBamboo, false));
+		}
+
+		tasks.addTask(5, new AIPickupBamboo());
+		tasks.addTask(6, new EntityAIFollowParent(this, 1.25D));
+		tasks.addTask(7, new EntityAIWander(this, 1.0D));
+		tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+		tasks.addTask(9, new EntityAILookIdle(this));
 	}
 
 	@Override
@@ -43,6 +77,7 @@ public class EntityPanda extends EntityAnimal {
 		super.entityInit();
 		dataWatcher.addObject(MAIN_GENE, (byte) Gene.NORMAL.getId());
 		dataWatcher.addObject(HIDDEN_GENE, (byte) Gene.NORMAL.getId());
+		dataWatcher.addObject(PANDA_FLAGS, (byte) 0);
 	}
 
 	@Override
@@ -58,8 +93,96 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	@Override
+	public void onLivingUpdate() {
+		previousSittingAnimationProgress = sittingAnimationProgress;
+		previousEatingAnimationProgress = eatingAnimationProgress;
+		sittingAnimationProgress = updateAnimationProgress(sittingAnimationProgress, isSitting(), 0.15F, 0.19F);
+		eatingAnimationProgress = updateAnimationProgress(eatingAnimationProgress, isEating(), 0.2F, 0.2F);
+
+		if (worldObj.isRemote) {
+			if (isEating()) {
+				++eatingTicks;
+			} else {
+				eatingTicks = 0;
+			}
+		}
+
+		super.onLivingUpdate();
+	}
+
+	private static float updateAnimationProgress(float progress, boolean active, float riseSpeed, float fallSpeed) {
+		if (active) {
+			return Math.min(1.0F, progress + riseSpeed);
+		}
+		return Math.max(0.0F, progress - fallSpeed);
+	}
+
+	@Override
 	public boolean isBreedingItem(ItemStack stack) {
-		return stack != null && stack.getItem() == ModItems.BAMBOO.get();
+		return isBamboo(stack);
+	}
+
+	public static boolean isBamboo(ItemStack stack) {
+		if (stack == null || stack.getItem() == null) {
+			return false;
+		}
+
+		Item item = stack.getItem();
+		if (item == ModItems.BAMBOO.get()) {
+			return true;
+		}
+
+		Item externalBamboo = getBopBamboo();
+		return externalBamboo != null && item == externalBamboo;
+	}
+
+	private static Item getBopBamboo() {
+		if (!bopBambooResolved && Loader.isModLoaded("BiomesOPlenty")) {
+			bopBamboo = GameRegistry.findItem("BiomesOPlenty", "bamboo");
+			bopBambooResolved = bopBamboo != null
+					|| Loader.instance().hasReachedState(LoaderState.POSTINITIALIZATION);
+		}
+		return bopBamboo;
+	}
+
+	public boolean isSitting() {
+		return getPandaFlag(SITTING_FLAG);
+	}
+
+	private void setSitting(boolean sitting) {
+		setPandaFlag(SITTING_FLAG, sitting);
+	}
+
+	@Override
+	public boolean isEating() {
+		return getPandaFlag(EATING_FLAG);
+	}
+
+	private void setPandaEating(boolean eating) {
+		setPandaFlag(EATING_FLAG, eating);
+	}
+
+	private boolean getPandaFlag(int flag) {
+		return (dataWatcher.getWatchableObjectByte(PANDA_FLAGS) & flag) != 0;
+	}
+
+	private void setPandaFlag(int flag, boolean value) {
+		byte flags = dataWatcher.getWatchableObjectByte(PANDA_FLAGS);
+		dataWatcher.updateObject(PANDA_FLAGS, value ? (byte) (flags | flag) : (byte) (flags & ~flag));
+	}
+
+	public float getSittingAnimationProgress(float partialTick) {
+		return previousSittingAnimationProgress
+				+ (sittingAnimationProgress - previousSittingAnimationProgress) * partialTick;
+	}
+
+	public float getEatingAnimationProgress(float partialTick) {
+		return previousEatingAnimationProgress
+				+ (eatingAnimationProgress - previousEatingAnimationProgress) * partialTick;
+	}
+
+	public int getEatingTicks() {
+		return eatingTicks;
 	}
 
 	public Gene getMainGene() {
@@ -95,6 +218,9 @@ public class EntityPanda extends EntityAnimal {
 		super.writeEntityToNBT(nbt);
 		nbt.setString("MainGene", getMainGene().getName());
 		nbt.setString("HiddenGene", getHiddenGene().getName());
+		if (isEating()) {
+			nbt.setInteger("PandaEatingTicks", eatingTicks);
+		}
 	}
 
 	@Override
@@ -102,6 +228,10 @@ public class EntityPanda extends EntityAnimal {
 		super.readEntityFromNBT(nbt);
 		setMainGene(Gene.byName(nbt.getString("MainGene")));
 		setHiddenGene(Gene.byName(nbt.getString("HiddenGene")));
+
+		eatingTicks = Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")));
+		setSitting(false);
+		setPandaEating(false);
 	}
 
 	@Override
@@ -158,6 +288,225 @@ public class EntityPanda extends EntityAnimal {
 			return Gene.WEAK;
 		}
 		return value < 11 ? Gene.BROWN : Gene.NORMAL;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void handleHealthUpdate(byte status) {
+		if (status == 45) {
+			ItemStack heldItem = getHeldItem();
+			if (isBamboo(heldItem)) {
+				String particle = "iconcrack_" + Item.getIdFromItem(heldItem.getItem());
+				if (heldItem.getHasSubtypes()) {
+					particle += "_" + heldItem.getItemDamage();
+				}
+
+				for (int i = 0; i < 6; ++i) {
+					double xSpeed = (rand.nextDouble() - 0.5D) * 0.08D;
+					double ySpeed = rand.nextDouble() * 0.08D + 0.04D;
+					double zSpeed = (rand.nextDouble() - 0.5D) * 0.08D;
+					worldObj.spawnParticle(
+							particle,
+							posX + (rand.nextDouble() - 0.5D) * 0.35D,
+							posY + 0.75D + rand.nextDouble() * 0.15D,
+							posZ + (rand.nextDouble() - 0.5D) * 0.35D,
+							xSpeed,
+							ySpeed,
+							zSpeed);
+				}
+			}
+			return;
+		}
+
+		super.handleHealthUpdate(status);
+	}
+
+	private void pickUpBamboo(EntityItem entityItem) {
+		if (worldObj.isRemote
+				|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
+				|| entityItem == null
+				|| entityItem.isDead
+				|| getHeldItem() != null) {
+			return;
+		}
+
+		ItemStack droppedStack = entityItem.getEntityItem();
+		if (!isBamboo(droppedStack) || droppedStack.stackSize <= 0) {
+			return;
+		}
+
+		ItemStack heldStack = droppedStack.splitStack(1);
+		setCurrentItemOrArmor(0, heldStack);
+		equipmentDropChances[0] = 2.0F;
+		onItemPickup(entityItem, 1);
+
+		if (droppedStack.stackSize <= 0) {
+			entityItem.setDead();
+		} else {
+			entityItem.setEntityItemStack(droppedStack);
+		}
+	}
+
+	private void finishEating() {
+		ItemStack heldStack = getHeldItem();
+		if (isBamboo(heldStack)) {
+			--heldStack.stackSize;
+			setCurrentItemOrArmor(0, heldStack.stackSize > 0 ? heldStack : null);
+		}
+
+		eatingTicks = 0;
+		setPandaEating(false);
+		setSitting(false);
+	}
+
+	private class AIEatBamboo extends EntityAIBase {
+
+		private AIEatBamboo() {
+			setMutexBits(7);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return isBamboo(getHeldItem()) && onGround && !isInWater();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return isEating() && isBamboo(getHeldItem()) && onGround && !isInWater()
+					&& eatingTicks < EATING_DURATION;
+		}
+
+		@Override
+		public void startExecuting() {
+			if (eatingTicks <= 0 || eatingTicks >= EATING_DURATION) {
+				eatingTicks = 0;
+			}
+			setSitting(true);
+			setPandaEating(true);
+			getNavigator().clearPathEntity();
+		}
+
+		@Override
+		public void resetTask() {
+			setPandaEating(false);
+			setSitting(false);
+		}
+
+		@Override
+		public void updateTask() {
+			getNavigator().clearPathEntity();
+			moveForward = 0.0F;
+			moveStrafing = 0.0F;
+			++eatingTicks;
+
+			if (eatingTicks >= 20 && eatingTicks % 12 == 0) {
+				playSound(Reference.MCAssetVer + ":entity.panda.eat", 0.5F, 0.9F + rand.nextFloat() * 0.2F);
+				worldObj.setEntityState(EntityPanda.this, (byte) 45);
+			}
+
+			if (eatingTicks >= EATING_DURATION) {
+				finishEating();
+			}
+		}
+	}
+
+	private class AIPickupBamboo extends EntityAIBase {
+
+		private EntityItem targetItem;
+		private int pathUpdateTicks;
+		private int pursuitTicks;
+		private int pathFailures;
+
+		private AIPickupBamboo() {
+			setMutexBits(1);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			if (getHeldItem() != null || isSitting() || rand.nextInt(10) != 0
+					|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
+				return false;
+			}
+
+			targetItem = findNearestBamboo();
+			return targetItem != null;
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
+					&& getHeldItem() == null
+					&& targetItem != null
+					&& targetItem.isEntityAlive()
+					&& targetItem.delayBeforeCanPickup <= 0
+					&& isBamboo(targetItem.getEntityItem())
+					&& getDistanceSqToEntity(targetItem) <= 160.0D
+					&& pursuitTicks < MAX_PICKUP_PURSUIT_TICKS
+					&& pathFailures < 3;
+		}
+
+		@Override
+		public void startExecuting() {
+			pathUpdateTicks = 10;
+			pursuitTicks = 0;
+			pathFailures = 0;
+			moveToTarget();
+		}
+
+		@Override
+		public void resetTask() {
+			targetItem = null;
+			getNavigator().clearPathEntity();
+		}
+
+		@Override
+		public void updateTask() {
+			if (targetItem == null) {
+				return;
+			}
+
+			++pursuitTicks;
+			if (getDistanceSqToEntity(targetItem) < 2.25D) {
+				pickUpBamboo(targetItem);
+				return;
+			}
+
+			if (--pathUpdateTicks <= 0) {
+				pathUpdateTicks = 10;
+				moveToTarget();
+			}
+		}
+
+		private void moveToTarget() {
+			if (targetItem != null) {
+				if (getNavigator().tryMoveToEntityLiving(targetItem, 1.2D)) {
+					pathFailures = 0;
+				} else {
+					++pathFailures;
+				}
+			}
+		}
+
+		private EntityItem findNearestBamboo() {
+			List<EntityItem> items = worldObj.getEntitiesWithinAABB(
+					EntityItem.class,
+					boundingBox.expand(8.0D, 4.0D, 8.0D));
+			EntityItem nearest = null;
+			double nearestDistance = Double.MAX_VALUE;
+
+			for (EntityItem item : items) {
+				if (item.isDead || item.delayBeforeCanPickup > 0 || !isBamboo(item.getEntityItem())) {
+					continue;
+				}
+
+				double distance = getDistanceSqToEntity(item);
+				if (distance < nearestDistance) {
+					nearest = item;
+					nearestDistance = distance;
+				}
+			}
+			return nearest;
+		}
 	}
 
 	public enum Gene {

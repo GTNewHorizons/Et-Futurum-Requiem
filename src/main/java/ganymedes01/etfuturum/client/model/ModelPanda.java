@@ -1,8 +1,10 @@
 package ganymedes01.etfuturum.client.model;
 
+import ganymedes01.etfuturum.entities.EntityPanda;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -14,6 +16,8 @@ public class ModelPanda extends ModelBase {
 	public final ModelRenderer leftHindLeg;
 	public final ModelRenderer rightFrontLeg;
 	public final ModelRenderer leftFrontLeg;
+	private float sittingAnimationProgress;
+	private float eatingAnimationProgress;
 
 	public ModelPanda() {
 		textureWidth = 64;
@@ -42,6 +46,21 @@ public class ModelPanda extends ModelBase {
 		leg.addBox(-3.0F, 0.0F, -3.0F, 6, 9, 6);
 		leg.setRotationPoint(x, y, z);
 		return leg;
+	}
+
+	@Override
+	public void setLivingAnimations(EntityLivingBase entity, float limbSwing, float limbSwingAmount,
+			float partialTicks) {
+		super.setLivingAnimations(entity, limbSwing, limbSwingAmount, partialTicks);
+
+		if (entity instanceof EntityPanda) {
+			EntityPanda panda = (EntityPanda) entity;
+			sittingAnimationProgress = clampAnimationProgress(panda.getSittingAnimationProgress(partialTicks));
+			eatingAnimationProgress = clampAnimationProgress(panda.getEatingAnimationProgress(partialTicks));
+		} else {
+			sittingAnimationProgress = 0.0F;
+			eatingAnimationProgress = 0.0F;
+		}
 	}
 
 	@Override
@@ -86,6 +105,15 @@ public class ModelPanda extends ModelBase {
 		body.rotateAngleY = 0.0F;
 		body.rotateAngleZ = 0.0F;
 
+		rightHindLeg.rotateAngleY = 0.0F;
+		rightHindLeg.rotateAngleZ = 0.0F;
+		leftHindLeg.rotateAngleY = 0.0F;
+		leftHindLeg.rotateAngleZ = 0.0F;
+		rightFrontLeg.rotateAngleY = 0.0F;
+		rightFrontLeg.rotateAngleZ = 0.0F;
+		leftFrontLeg.rotateAngleY = 0.0F;
+		leftFrontLeg.rotateAngleZ = 0.0F;
+
 		float stride = MathHelper.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
 		float oppositeStride = MathHelper.cos(limbSwing * 0.6662F + (float) Math.PI) * 1.4F
 				* limbSwingAmount;
@@ -93,5 +121,33 @@ public class ModelPanda extends ModelBase {
 		leftHindLeg.rotateAngleX = oppositeStride;
 		rightFrontLeg.rotateAngleX = oppositeStride;
 		leftFrontLeg.rotateAngleX = stride;
+
+		float sitting = sittingAnimationProgress;
+		if (sitting > 0.0F) {
+			body.rotateAngleX = lerp(sitting, body.rotateAngleX, 1.7407963F);
+			head.rotateAngleX = lerp(sitting, head.rotateAngleX, (float) Math.PI / 2.0F);
+			head.rotateAngleY *= 1.0F - sitting;
+
+			rightFrontLeg.rotateAngleZ = -0.27079642F * sitting;
+			leftFrontLeg.rotateAngleZ = 0.27079642F * sitting;
+			rightHindLeg.rotateAngleZ = 0.5707964F * sitting;
+			leftHindLeg.rotateAngleZ = -0.5707964F * sitting;
+		}
+
+		float eating = eatingAnimationProgress * sitting;
+		if (eating > 0.0F) {
+			float chew = MathHelper.sin(ageInTicks * 0.6F);
+			head.rotateAngleX = lerp(eating, head.rotateAngleX, (float) Math.PI / 2.0F + 0.2F * chew);
+			rightFrontLeg.rotateAngleX = lerp(eating, rightFrontLeg.rotateAngleX, -0.4F - 0.2F * chew);
+			leftFrontLeg.rotateAngleX = lerp(eating, leftFrontLeg.rotateAngleX, -0.4F - 0.2F * chew);
+		}
+	}
+
+	private static float lerp(float amount, float start, float end) {
+		return start + amount * (end - start);
+	}
+
+	private static float clampAnimationProgress(float progress) {
+		return MathHelper.clamp_float(progress, 0.0F, 1.0F);
 	}
 }

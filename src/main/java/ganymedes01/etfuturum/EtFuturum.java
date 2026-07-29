@@ -935,6 +935,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.fox.death", "neutral");
 		config.addSoundEvent(ver, "entity.fox.bite", "neutral");
 		config.addSoundEvent(ver, "entity.fox.sniff", "neutral");
+		config.addSoundEvent(ver, "entity.panda.eat", "neutral");
 
 
 		config.addSoundEvent(ver, "entity.player.hurt_on_fire", "player");
