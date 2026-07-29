@@ -13,6 +13,7 @@ import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -126,6 +127,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -605,33 +607,12 @@ public class EtFuturum {
 					ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
 				}
 
-				// Remap old ItemWoodSign registry names to new ItemBlockSign items
-				// We want to rename the old item_sign_* to the new sign_* because the signs are now
-				// ItemBlocks registered in ModBlocks instead of ItemWoodSigns registered in ModItems
-				// New wood signs are already using ItemBlocks, and oak retains the origianl vanilla registration
+				// Old standalone ItemWoodSign items (item_sign_*) no longer exist;
+				// they were replaced by ItemBlockSign registered under sign_*.
+				// processIdRematches can't remap an existing ItemBlock to a different
+				// ID, so we silently ignore these. Placed sign blocks are unaffected.
 				if (mapping.type == GameRegistry.Type.ITEM && mapping.name.startsWith("etfuturum:item_sign_")) {
-					String woodType = mapping.name.replace("etfuturum:item_sign_", "");
-					Item remapItem = null;
-					switch (woodType) {
-						case "spruce":
-							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_SPRUCE.get());
-							break;
-						case "birch":
-							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_BIRCH.get());
-							break;
-						case "jungle":
-							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_JUNGLE.get());
-							break;
-						case "acacia":
-							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_ACACIA.get());
-							break;
-						case "dark_oak":
-							remapItem = Item.getItemFromBlock(ModBlocks.SIGN_DARK_OAK.get());
-							break;
-					}
-					if (remapItem != null) {
-						mapping.remap(remapItem);
-					}
+					mapping.ignore();
 				}
 			}
 
@@ -686,6 +667,21 @@ public class EtFuturum {
 		}
 
 		return null;
+	}
+
+	@EventHandler
+	public void serverAboutToStart(FMLServerAboutToStartEvent event) {
+		// Clear sign aliases (added in ModBlocks.init for backward compat)
+		// before world loading so injectWorldIDMap doesn't see them.
+		try {
+			Field aliasesField = ReflectionHelper.findField(Item.itemRegistry.getClass(), "aliases");
+			@SuppressWarnings("unchecked")
+			Map<String, String> aliases = (Map<String, String>) aliasesField.get(Item.itemRegistry);
+			if (aliases != null) {
+				aliases.keySet().removeIf(k -> k.startsWith("etfuturum:item_sign_"));
+			}
+		} catch (Exception ignored) {
+		}
 	}
 
 	@EventHandler
