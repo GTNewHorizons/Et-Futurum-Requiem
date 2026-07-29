@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Enable sign waxing, back text, and dye color update logic
+ * Also applies to modded signs since TileEntityWoodSign extends TileEntitySign
  *
  * @author mosesyu1028
  */
@@ -83,7 +84,7 @@ public abstract class MixinTileEntitySign implements ISign {
 			signBackText[i] = nbt.hasKey(key) ? nbt.getString(key) : "";
 		}
 
-		// Trigger re-render on client so waxed/dyed signs show correctly after chunk load
+		// Trigger client re-render so waxed/dyed signs show correctly after chunk load
 		if (self.getWorldObj() != null && self.getWorldObj().isRemote) {
 			self.getWorldObj().func_147479_m(self.xCoord, self.yCoord, self.zCoord);
 		}
