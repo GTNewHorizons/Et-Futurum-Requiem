@@ -18,6 +18,7 @@ public class ModelPanda extends ModelBase {
 	public final ModelRenderer leftFrontLeg;
 	private float sittingAnimationProgress;
 	private boolean eating;
+	private boolean unhappy;
 
 	public ModelPanda() {
 		textureWidth = 64;
@@ -57,9 +58,11 @@ public class ModelPanda extends ModelBase {
 			EntityPanda panda = (EntityPanda) entity;
 			sittingAnimationProgress = clampAnimationProgress(panda.getSittingAnimationProgress(partialTicks));
 			eating = panda.isEating();
+			unhappy = panda.getUnhappyTicks() > 0;
 		} else {
 			sittingAnimationProgress = 0.0F;
 			eating = false;
+			unhappy = false;
 		}
 	}
 
@@ -121,6 +124,15 @@ public class ModelPanda extends ModelBase {
 		leftHindLeg.rotateAngleX = oppositeStride;
 		rightFrontLeg.rotateAngleX = oppositeStride;
 		leftFrontLeg.rotateAngleX = stride;
+
+		if (unhappy) {
+			float headShake = 0.35F * MathHelper.sin(ageInTicks * 0.6F);
+			float pawShake = 0.75F * MathHelper.sin(ageInTicks * 0.3F);
+			head.rotateAngleY = headShake;
+			head.rotateAngleZ = headShake;
+			rightFrontLeg.rotateAngleX = -pawShake;
+			leftFrontLeg.rotateAngleX = pawShake;
+		}
 
 		float sitting = sittingAnimationProgress;
 		if (sitting > 0.0F) {

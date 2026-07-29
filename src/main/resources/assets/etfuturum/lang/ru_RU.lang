@@ -124,6 +124,7 @@ subtitle.entity.squid.ambient=Спрут плавает
 subtitle.entity.squid.hurt=Спрут получает урон
 subtitle.entity.squid.death=Спрут погибает
 subtitle.entity.panda.eat=Панда ест
+subtitle.entity.panda.cant_breed=Панда блеет
 
 subtitle.entity.boat.paddle_water=Звук весла по воде
 subtitle.entity.boat.paddle_land=Звук весла по земле
