@@ -17,8 +17,11 @@ public class ModelPanda extends ModelBase {
 	public final ModelRenderer rightFrontLeg;
 	public final ModelRenderer leftFrontLeg;
 	private float sittingAnimationProgress;
+	private float onBackAnimationProgress;
+	private float rollAnimationProgress;
 	private boolean eating;
 	private boolean unhappy;
+	private boolean scared;
 	private boolean sneezing;
 	private int sneezeTicks;
 
@@ -59,14 +62,20 @@ public class ModelPanda extends ModelBase {
 		if (entity instanceof EntityPanda) {
 			EntityPanda panda = (EntityPanda) entity;
 			sittingAnimationProgress = clampAnimationProgress(panda.getSittingAnimationProgress(partialTicks));
+			onBackAnimationProgress = clampAnimationProgress(panda.getOnBackAnimationProgress(partialTicks));
+			rollAnimationProgress = clampAnimationProgress(panda.getRollAnimationProgress(partialTicks));
 			eating = panda.isEating();
 			unhappy = panda.getUnhappyTicks() > 0;
+			scared = panda.isScaredByThunderstorm();
 			sneezing = panda.isSneezing();
 			sneezeTicks = panda.getSneezeTicks();
 		} else {
 			sittingAnimationProgress = 0.0F;
+			onBackAnimationProgress = 0.0F;
+			rollAnimationProgress = 0.0F;
 			eating = false;
 			unhappy = false;
+			scared = false;
 			sneezing = false;
 			sneezeTicks = 0;
 		}
@@ -165,6 +174,32 @@ public class ModelPanda extends ModelBase {
 				rightFrontLeg.rotateAngleX = -0.4F - 0.2F * chew;
 				leftFrontLeg.rotateAngleX = -0.4F - 0.2F * chew;
 			}
+			if (scared) {
+				head.rotateAngleX = 2.1707964F;
+				rightFrontLeg.rotateAngleX = -0.9F;
+				leftFrontLeg.rotateAngleX = -0.9F;
+			}
+		}
+
+		float onBack = onBackAnimationProgress;
+		if (onBack > 0.0F) {
+			float hindLegMovement = 0.6F * MathHelper.sin(ageInTicks * 0.15F);
+			float frontLegMovement = 0.3F * MathHelper.sin(ageInTicks * 0.25F);
+			rightHindLeg.rotateAngleX = -hindLegMovement;
+			leftHindLeg.rotateAngleX = hindLegMovement;
+			rightFrontLeg.rotateAngleX = frontLegMovement;
+			leftFrontLeg.rotateAngleX = -frontLegMovement;
+			head.rotateAngleX = lerp(onBack, head.rotateAngleX, (float) Math.PI / 2.0F);
+		}
+
+		float roll = rollAnimationProgress;
+		if (roll > 0.0F) {
+			float legMovement = 0.5F * MathHelper.sin(ageInTicks * 0.5F);
+			rightHindLeg.rotateAngleX = -legMovement;
+			leftHindLeg.rotateAngleX = legMovement;
+			rightFrontLeg.rotateAngleX = legMovement;
+			leftFrontLeg.rotateAngleX = -legMovement;
+			head.rotateAngleX = lerp(roll, head.rotateAngleX, 2.0561945F);
 		}
 	}
 

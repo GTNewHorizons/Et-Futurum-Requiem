@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.entities;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.LoaderState;
@@ -9,10 +10,13 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.ModItems;
+import ganymedes01.etfuturum.entities.ai.EntityAICustomAvoidEntity;
 import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
@@ -21,12 +25,14 @@ import net.minecraft.entity.ai.EntityAIFollowParent;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIMate;
+import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -35,6 +41,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class EntityPanda extends EntityAnimal {
@@ -47,23 +54,38 @@ public class EntityPanda extends EntityAnimal {
 
 	private static final int EATING_FLAG = 1;
 	private static final int SNEEZING_FLAG = 2;
+	private static final int ROLLING_FLAG = 4;
 	private static final int SITTING_FLAG = 8;
+	private static final int ON_BACK_FLAG = 16;
 	private static final int EATING_DURATION = 80;
 	private static final int SNEEZE_DURATION = 20;
+	private static final int ROLL_DURATION = 32;
+	private static final int LAZY_MOVEMENT_LERP_TICKS = 9;
 	private static final int ATTACK_COOLDOWN = 20;
 	private static final int UNHAPPY_DURATION = 32;
 	private static final int MAX_PICKUP_PURSUIT_TICKS = 200;
 	private static final int BAMBOO_SEARCH_RADIUS = 7;
 	private static final int BAMBOO_SEARCH_HEIGHT = 3;
 	private static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
+	private static final double LAZY_LIE_START_CHANCE = 0.0075D;
+	private static final double BABY_ROLL_START_CHANCE = 0.006D;
+	private static final double PLAYFUL_ROLL_START_CHANCE = 0.0559D;
+	private static final double LAZY_MOVEMENT_LERP_MAX_DISTANCE_SQ = 0.01D;
+	private static final double LAZY_MOVEMENT_LERP_MAX_HEIGHT = 0.0625D;
 
 	private static Item bopBamboo;
 	private static Block bopBambooBlock;
 	private static boolean bopBambooResolved;
 
 	private int eatingTicks;
+	private int rollTicks;
+	private Vec3 rollDelta;
 	private float sittingAnimationProgress;
 	private float previousSittingAnimationProgress;
+	private float onBackAnimationProgress;
+	private float previousOnBackAnimationProgress;
+	private float rollAnimationProgress;
+	private float previousRollAnimationProgress;
 	private boolean stopAttackingAfterHit;
 	private boolean pacifiedByBamboo;
 	private int attackCooldown;
@@ -72,24 +94,29 @@ public class EntityPanda extends EntityAnimal {
 		super(world);
 		setSize(1.3F, 1.25F);
 		getNavigator().setAvoidsWater(true);
+		moveHelper = new PandaMoveHelper();
 
 		tasks.addTask(0, new EntityAISwimming(this));
 		tasks.addTask(1, new AIPandaPanic());
 		tasks.addTask(2, new AIEatFood());
 		tasks.addTask(3, new AIPandaAttack());
 		tasks.addTask(3, new AIPandaMate());
-		tasks.addTask(4, new EntityAITempt(this, 1.0D, ModItems.BAMBOO.get(), false));
+		tasks.addTask(4, new AIPandaTempt(ModItems.BAMBOO.get()));
 
 		Item externalBamboo = getBopBamboo();
 		if (externalBamboo != null && externalBamboo != ModItems.BAMBOO.get()) {
-			tasks.addTask(4, new EntityAITempt(this, 1.0D, externalBamboo, false));
+			tasks.addTask(4, new AIPandaTempt(externalBamboo));
 		}
 
 		tasks.addTask(5, new AIPickupFood());
-		tasks.addTask(6, new EntityAIFollowParent(this, 1.25D));
-		tasks.addTask(7, new EntityAIWander(this, 1.0D));
-		tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-		tasks.addTask(9, new EntityAILookIdle(this));
+		tasks.addTask(6, new AIPandaAvoidEntity(EntityPlayer.class, 8.0F, EntityPanda::canWorriedPandaAvoid));
+		tasks.addTask(6, new AIPandaAvoidEntity(EntityMob.class, 4.0F, entity -> true));
+		tasks.addTask(8, new AIPandaLieOnBack());
+		tasks.addTask(9, new AIPandaWatchClosest());
+		tasks.addTask(10, new AIPandaLookIdle());
+		tasks.addTask(12, new AIPandaRoll());
+		tasks.addTask(13, new AIPandaFollowParent());
+		tasks.addTask(14, new AIPandaWander());
 		targetTasks.addTask(1, new AIPandaHurtByTarget());
 	}
 
@@ -189,9 +216,35 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public void setPositionAndRotation2(
+			double x,
+			double y,
+			double z,
+			float yaw,
+			float pitch,
+			int rotationIncrements) {
+		double xDistance = x - posX;
+		double zDistance = z - posZ;
+		double horizontalDistanceSq = xDistance * xDistance + zDistance * zDistance;
+		if (getVariant() == Gene.LAZY
+				&& !isRolling()
+				&& horizontalDistanceSq > 1.0E-7D
+				&& horizontalDistanceSq <= LAZY_MOVEMENT_LERP_MAX_DISTANCE_SQ
+				&& Math.abs(y - posY) <= LAZY_MOVEMENT_LERP_MAX_HEIGHT) {
+			rotationIncrements = Math.max(rotationIncrements, LAZY_MOVEMENT_LERP_TICKS);
+		}
+		super.setPositionAndRotation2(x, y, z, yaw, pitch, rotationIncrements);
+	}
+
+	@Override
 	public void onLivingUpdate() {
 		previousSittingAnimationProgress = sittingAnimationProgress;
 		sittingAnimationProgress = updateAnimationProgress(sittingAnimationProgress, isSitting(), 0.15F, 0.19F);
+		previousOnBackAnimationProgress = onBackAnimationProgress;
+		onBackAnimationProgress = updateAnimationProgress(onBackAnimationProgress, isOnBack(), 0.15F, 0.19F);
+		previousRollAnimationProgress = rollAnimationProgress;
+		rollAnimationProgress = updateAnimationProgress(rollAnimationProgress, isRolling(), 0.15F, 0.19F);
 
 		if (worldObj.isRemote) {
 			if (isEating()) {
@@ -202,8 +255,14 @@ public class EntityPanda extends EntityAnimal {
 		}
 
 		super.onLivingUpdate();
+		updateWorriedState();
 		updateUnhappyState();
 		updateSneezeState();
+		updateRollingState();
+
+		if (isSitting()) {
+			rotationPitch = 0.0F;
+		}
 
 		if (!worldObj.isRemote && getAttackTarget() == null) {
 			stopAttackingAfterHit = false;
@@ -211,6 +270,67 @@ public class EntityPanda extends EntityAnimal {
 		}
 		if (attackCooldown > 0) {
 			--attackCooldown;
+		}
+	}
+
+	private void updateWorriedState() {
+		if (worldObj.isRemote || getVariant() != Gene.WORRIED) {
+			return;
+		}
+
+		if (worldObj.isThundering() && !isInWater()) {
+			if (!isSitting()) {
+				getNavigator().clearPathEntity();
+			}
+			setSitting(true);
+			setPandaEating(false);
+			eatingTicks = 0;
+		} else if (!isEating()) {
+			setSitting(false);
+		}
+	}
+
+	private void updateRollingState() {
+		if (!isRolling()) {
+			rollTicks = 0;
+			rollDelta = null;
+			return;
+		}
+
+		++rollTicks;
+		if (rollTicks > ROLL_DURATION) {
+			if (worldObj.isRemote) {
+				rollTicks = ROLL_DURATION;
+			} else {
+				setRolling(false);
+			}
+			return;
+		}
+		if (worldObj.isRemote) {
+			return;
+		}
+
+		if (rollTicks == 1) {
+			float yawRadians = rotationYaw * (float) Math.PI / 180.0F;
+			float rollSpeed = isChild() ? 0.1F : 0.2F;
+			rollDelta = Vec3.createVectorHelper(
+					motionX - MathHelper.sin(yawRadians) * rollSpeed,
+					0.0D,
+					motionZ + MathHelper.cos(yawRadians) * rollSpeed);
+			motionX = rollDelta.xCoord;
+			motionY = 0.27D;
+			motionZ = rollDelta.zCoord;
+			isAirBorne = true;
+		} else if (rollTicks == 7 || rollTicks == 15 || rollTicks == 23) {
+			motionX = 0.0D;
+			motionZ = 0.0D;
+			if (onGround) {
+				motionY = 0.27D;
+				isAirBorne = true;
+			}
+		} else if (rollDelta != null) {
+			motionX = rollDelta.xCoord;
+			motionZ = rollDelta.zCoord;
 		}
 	}
 
@@ -299,6 +419,16 @@ public class EntityPanda extends EntityAnimal {
 
 	@Override
 	public boolean interact(EntityPlayer player) {
+		if (isOnBack()) {
+			if (!worldObj.isRemote) {
+				setOnBack(false);
+			}
+			return true;
+		}
+		if (isScaredByThunderstorm()) {
+			return false;
+		}
+
 		ItemStack offeredStack = player.inventory.getCurrentItem();
 		if (!isBamboo(offeredStack)) {
 			return super.interact(player);
@@ -419,6 +549,26 @@ public class EntityPanda extends EntityAnimal {
 		setPandaFlag(EATING_FLAG, eating);
 	}
 
+	public boolean isRolling() {
+		return getPandaFlag(ROLLING_FLAG);
+	}
+
+	private void setRolling(boolean rolling) {
+		setPandaFlag(ROLLING_FLAG, rolling);
+		if (!rolling) {
+			rollTicks = 0;
+			rollDelta = null;
+		}
+	}
+
+	public boolean isOnBack() {
+		return getPandaFlag(ON_BACK_FLAG);
+	}
+
+	private void setOnBack(boolean onBack) {
+		setPandaFlag(ON_BACK_FLAG, onBack);
+	}
+
 	public boolean isSneezing() {
 		return getPandaFlag(SNEEZING_FLAG);
 	}
@@ -450,6 +600,24 @@ public class EntityPanda extends EntityAnimal {
 	public float getSittingAnimationProgress(float partialTick) {
 		return previousSittingAnimationProgress
 				+ (sittingAnimationProgress - previousSittingAnimationProgress) * partialTick;
+	}
+
+	public float getOnBackAnimationProgress(float partialTick) {
+		return previousOnBackAnimationProgress
+				+ (onBackAnimationProgress - previousOnBackAnimationProgress) * partialTick;
+	}
+
+	public float getRollAnimationProgress(float partialTick) {
+		return previousRollAnimationProgress
+				+ (rollAnimationProgress - previousRollAnimationProgress) * partialTick;
+	}
+
+	public int getRollTicks() {
+		return rollTicks;
+	}
+
+	public boolean isScaredByThunderstorm() {
+		return getVariant() == Gene.WORRIED && worldObj.isThundering();
 	}
 
 	public int getEatingTicks() {
@@ -509,11 +677,14 @@ public class EntityPanda extends EntityAnimal {
 		super.readEntityFromNBT(nbt);
 		setMainGene(Gene.byName(nbt.getString("MainGene")));
 		setHiddenGene(Gene.byName(nbt.getString("HiddenGene")));
+		applyGeneAttributes();
 
 		eatingTicks = isPandaFood(getHeldItem())
 				? Math.max(0, Math.min(EATING_DURATION - 1, nbt.getInteger("PandaEatingTicks")))
 				: 0;
 		setSneezing(false);
+		setRolling(false);
+		setOnBack(false);
 		setSitting(false);
 		setPandaEating(false);
 	}
@@ -646,6 +817,8 @@ public class EntityPanda extends EntityAnimal {
 	private void pickUpFood(EntityItem entityItem) {
 		if (worldObj.isRemote
 				|| isChild()
+				|| getVariant() == Gene.WORRIED
+				|| !canPerformPandaAction()
 				|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
 				|| entityItem == null
 				|| entityItem.isDead
@@ -719,7 +892,235 @@ public class EntityPanda extends EntityAnimal {
 	}
 
 	private boolean canPerformPandaAction() {
-		return !isSitting() && !isEating();
+		return !isOnBack()
+				&& !isScaredByThunderstorm()
+				&& !isEating()
+				&& !isRolling()
+				&& !isSitting();
+	}
+
+	private static boolean canWorriedPandaAvoid(EntityLivingBase entity) {
+		if (!(entity instanceof EntityPlayer)) {
+			return true;
+		}
+		EntityPlayer player = (EntityPlayer) entity;
+		return !SpectatorMode.isSpectator(player);
+	}
+
+	private class PandaMoveHelper extends EntityMoveHelper {
+
+		private PandaMoveHelper() {
+			super(EntityPanda.this);
+		}
+
+		@Override
+		public void onUpdateMoveHelper() {
+			if (canPerformPandaAction()) {
+				super.onUpdateMoveHelper();
+				return;
+			}
+
+			setMoveTo(EntityPanda.this.posX, EntityPanda.this.posY, EntityPanda.this.posZ, 0.0D);
+			EntityPanda.this.setMoveForward(0.0F);
+			EntityPanda.this.moveStrafing = 0.0F;
+		}
+	}
+
+	private class AIPandaAvoidEntity extends EntityAICustomAvoidEntity {
+
+		private AIPandaAvoidEntity(
+				Class<? extends Entity> targetClass,
+				float distance,
+				Predicate<EntityLivingBase> selector) {
+			super(EntityPanda.this, targetClass, distance, 2.0D, 2.0D, selector);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return getVariant() == Gene.WORRIED && canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return getVariant() == Gene.WORRIED && canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaTempt extends EntityAITempt {
+
+		private AIPandaTempt(Item item) {
+			super(EntityPanda.this, 1.0D, item, false);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaFollowParent extends EntityAIFollowParent {
+
+		private AIPandaFollowParent() {
+			super(EntityPanda.this, 1.25D);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaWander extends EntityAIWander {
+
+		private AIPandaWander() {
+			super(EntityPanda.this, 1.0D);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaWatchClosest extends EntityAIWatchClosest {
+
+		private AIPandaWatchClosest() {
+			super(EntityPanda.this, EntityPlayer.class, 6.0F);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaLookIdle extends EntityAILookIdle {
+
+		private AIPandaLookIdle() {
+			super(EntityPanda.this);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			return canPerformPandaAction() && super.shouldExecute();
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
+	}
+
+	private class AIPandaLieOnBack extends EntityAIBase {
+
+		private int nextLieOnBackTick;
+
+		@Override
+		public boolean shouldExecute() {
+			return nextLieOnBackTick < ticksExisted
+					&& getVariant() == Gene.LAZY
+					&& canPerformPandaAction()
+					&& rand.nextDouble() < LAZY_LIE_START_CHANCE;
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			if (!isOnBack() || isInWater()) {
+				return false;
+			}
+			if (getVariant() != Gene.LAZY && rand.nextInt(600) == 1) {
+				return false;
+			}
+			return rand.nextInt(2000) != 1;
+		}
+
+		@Override
+		public void startExecuting() {
+			if (!canPerformPandaAction()) {
+				return;
+			}
+			setOnBack(true);
+			nextLieOnBackTick = 0;
+		}
+
+		@Override
+		public void resetTask() {
+			setOnBack(false);
+			nextLieOnBackTick = ticksExisted + 200;
+		}
+	}
+
+	private class AIPandaRoll extends EntityAIBase {
+
+		private AIPandaRoll() {
+			setMutexBits(7);
+		}
+
+		@Override
+		public boolean shouldExecute() {
+			if ((!isChild() && getVariant() != Gene.PLAYFUL) || !onGround || !canPerformPandaAction()) {
+				return false;
+			}
+			if (isAirAheadAndBelow()) {
+				return true;
+			}
+
+			double chance = getVariant() == Gene.PLAYFUL
+					? PLAYFUL_ROLL_START_CHANCE
+					: BABY_ROLL_START_CHANCE;
+			return rand.nextDouble() < chance;
+		}
+
+		@Override
+		public boolean continueExecuting() {
+			return false;
+		}
+
+		@Override
+		public void startExecuting() {
+			if (!canPerformPandaAction()) {
+				return;
+			}
+			getNavigator().clearPathEntity();
+			setRolling(true);
+		}
+
+		@Override
+		public boolean isInterruptible() {
+			return false;
+		}
+
+		private boolean isAirAheadAndBelow() {
+			float yawRadians = rotationYaw * (float) Math.PI / 180.0F;
+			float forwardX = -MathHelper.sin(yawRadians);
+			float forwardZ = MathHelper.cos(yawRadians);
+			int offsetX = Math.abs(forwardX) > 0.5F ? (int) (forwardX / Math.abs(forwardX)) : 0;
+			int offsetZ = Math.abs(forwardZ) > 0.5F ? (int) (forwardZ / Math.abs(forwardZ)) : 0;
+			return worldObj.isAirBlock(
+					MathHelper.floor_double(posX) + offsetX,
+					MathHelper.floor_double(posY) - 1,
+					MathHelper.floor_double(posZ) + offsetZ);
+		}
 	}
 
 	private class AIPandaPanic extends EntityAIPanic {
@@ -785,7 +1186,7 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			if (!super.shouldExecute() || getUnhappyTicks() > 0) {
+			if (!canPerformPandaAction() || !super.shouldExecute() || getUnhappyTicks() > 0) {
 				return false;
 			}
 			if (hasNearbyBamboo()) {
@@ -797,6 +1198,11 @@ public class EntityPanda extends EntityAnimal {
 			}
 			return false;
 		}
+
+		@Override
+		public boolean continueExecuting() {
+			return canPerformPandaAction() && super.continueExecuting();
+		}
 	}
 
 	private class AIEatFood extends EntityAIBase {
@@ -807,12 +1213,23 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			return !isChild() && isPandaFood(getHeldItem()) && !isInWater();
+			return !isChild()
+					&& !isOnBack()
+					&& !isRolling()
+					&& !isScaredByThunderstorm()
+					&& isPandaFood(getHeldItem())
+					&& !isInWater();
 		}
 
 		@Override
 		public boolean continueExecuting() {
-			return !isChild() && isEating() && isPandaFood(getHeldItem()) && !isInWater()
+			return !isChild()
+					&& !isOnBack()
+					&& !isRolling()
+					&& !isScaredByThunderstorm()
+					&& isEating()
+					&& isPandaFood(getHeldItem())
+					&& !isInWater()
 					&& eatingTicks < EATING_DURATION;
 		}
 
@@ -873,7 +1290,11 @@ public class EntityPanda extends EntityAnimal {
 
 		@Override
 		public boolean shouldExecute() {
-			if (isChild() || getHeldItem() != null || isSitting() || rand.nextInt(10) != 0
+			if (isChild()
+					|| getVariant() == Gene.WORRIED
+					|| getHeldItem() != null
+					|| !canPerformPandaAction()
+					|| rand.nextInt(10) != 0
 					|| !worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")) {
 				return false;
 			}
@@ -885,6 +1306,8 @@ public class EntityPanda extends EntityAnimal {
 		@Override
 		public boolean continueExecuting() {
 			return !isChild()
+					&& getVariant() != Gene.WORRIED
+					&& canPerformPandaAction()
 					&& worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing")
 					&& getHeldItem() == null
 					&& targetItem != null

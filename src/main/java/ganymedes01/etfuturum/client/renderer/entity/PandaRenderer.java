@@ -42,16 +42,75 @@ public class PandaRenderer extends RenderLiving {
 	protected void rotateCorpse(EntityPanda panda, float animationProgress, float bodyYaw, float partialTicks) {
 		super.rotateCorpse(panda, animationProgress, bodyYaw, partialTicks);
 
+		applyRollTransform(panda, partialTicks);
+
+		float pitch = panda.prevRotationPitch
+				+ partialTicks * (panda.rotationPitch - panda.prevRotationPitch);
 		float sitting = MathHelper.clamp_float(panda.getSittingAnimationProgress(partialTicks), 0.0F, 1.0F);
-		if (sitting <= 0.0F) {
+		if (sitting > 0.0F) {
+			GL11.glTranslatef(0.0F, 0.8F * sitting, 0.0F);
+			GL11.glRotatef(pitch + 90.0F * sitting, 1.0F, 0.0F, 0.0F);
+			GL11.glTranslatef(0.0F, -1.0F * sitting, 0.0F);
+
+			if (panda.isScaredByThunderstorm()) {
+				float shake = (float) (Math.cos(panda.ticksExisted * 1.25D)
+						* Math.PI
+						* 0.05000000074505806D);
+				GL11.glRotatef(shake, 0.0F, 1.0F, 0.0F);
+				if (panda.isChild()) {
+					GL11.glTranslatef(0.0F, 0.8F, 0.55F);
+				}
+			}
+		}
+
+		float onBack = MathHelper.clamp_float(panda.getOnBackAnimationProgress(partialTicks), 0.0F, 1.0F);
+		if (onBack > 0.0F) {
+			float height = panda.isChild() ? 0.5F : 1.3F;
+			GL11.glTranslatef(0.0F, height * onBack, 0.0F);
+			GL11.glRotatef(pitch + 180.0F * onBack, 1.0F, 0.0F, 0.0F);
+		}
+	}
+
+	private static void applyRollTransform(EntityPanda panda, float partialTicks) {
+		int rollTicks = panda.getRollTicks();
+		if (rollTicks <= 0) {
 			return;
 		}
 
-		GL11.glTranslatef(0.0F, 0.8F * sitting, 0.0F);
-		float pitch = panda.prevRotationPitch
-				+ partialTicks * (panda.rotationPitch - panda.prevRotationPitch);
-		GL11.glRotatef(pitch + 90.0F * sitting, 1.0F, 0.0F, 0.0F);
-		GL11.glTranslatef(0.0F, -1.0F * sitting, 0.0F);
+		float height = panda.isChild() ? 0.3F : 0.8F;
+		float currentAngle = getRollAngle(rollTicks);
+		float nextAngle = getRollAngle(rollTicks + 1);
+		float angle = currentAngle + partialTicks * (nextAngle - currentAngle);
+		float y;
+
+		if (rollTicks < 8) {
+			y = (height + 0.2F) * angle / 90.0F;
+		} else if (rollTicks < 16) {
+			y = height + 0.2F + (height - 0.2F) * (angle - 90.0F) / 90.0F;
+		} else if (rollTicks < 24) {
+			y = height + height * (270.0F - angle) / 90.0F;
+		} else {
+			y = height * (360.0F - angle) / 90.0F;
+		}
+
+		GL11.glTranslatef(0.0F, y, 0.0F);
+		GL11.glRotatef(-angle, 1.0F, 0.0F, 0.0F);
+	}
+
+	private static float getRollAngle(int rollTicks) {
+		if (rollTicks < 8) {
+			return 90.0F * rollTicks / 7.0F;
+		}
+		if (rollTicks < 16) {
+			return 90.0F + 90.0F * (rollTicks - 8) / 7.0F;
+		}
+		if (rollTicks < 24) {
+			return 180.0F + 90.0F * (rollTicks - 16) / 7.0F;
+		}
+		if (rollTicks < 32) {
+			return 270.0F + 90.0F * (rollTicks - 24) / 7.0F;
+		}
+		return 360.0F;
 	}
 
 	@Override
@@ -64,7 +123,7 @@ public class PandaRenderer extends RenderLiving {
 		super.renderEquippedItems(panda, partialTicks);
 
 		ItemStack stack = panda.getHeldItem();
-		if (stack == null || !panda.isSitting()) {
+		if (stack == null || !panda.isSitting() || panda.isScaredByThunderstorm()) {
 			return;
 		}
 
