@@ -50,7 +50,7 @@ public class ItemBlockSign extends ItemBlock {
 			side = 1;  // Force standing sign when overwriting replaceable
 		}
 
-		if (side == 1 && !World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
+		if (side == 1 && !world.getBlock(x, y - 1, z).getMaterial().isSolid()) {
 			return false;
 		}
 
