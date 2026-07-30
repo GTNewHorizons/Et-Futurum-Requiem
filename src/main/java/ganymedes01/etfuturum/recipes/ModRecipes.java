@@ -236,11 +236,11 @@ public class ModRecipes {
 		}
 
 		registerOre("signWood", Items.sign);
-		registerOre("signWood", ModBlocks.SIGN_SPRUCE.get());
-		registerOre("signWood", ModBlocks.SIGN_BIRCH.get());
-		registerOre("signWood", ModBlocks.SIGN_JUNGLE.get());
-		registerOre("signWood", ModBlocks.SIGN_ACACIA.get());
-		registerOre("signWood", ModBlocks.SIGN_DARK_OAK.get());
+		registerOre("signWood", ModItems.ITEM_SIGN_SPRUCE.get());
+		registerOre("signWood", ModItems.ITEM_SIGN_BIRCH.get());
+		registerOre("signWood", ModItems.ITEM_SIGN_JUNGLE.get());
+		registerOre("signWood", ModItems.ITEM_SIGN_ACACIA.get());
+		registerOre("signWood", ModItems.ITEM_SIGN_DARK_OAK.get());
 
 		registerOre("signWood", ModBlocks.CRIMSON_SIGN.get());
 		registerOre("signWood", ModBlocks.WARPED_SIGN.get());
