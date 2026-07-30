@@ -4,9 +4,11 @@ package ganymedes01.etfuturum.compat;
 
 import baubles.api.BaublesApi;
 import baubles.api.expanded.BaubleExpandedSlots;
+import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockLantern;
 import ganymedes01.etfuturum.items.equipment.ItemArmorElytra;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
 public class CompatBaublesExpanded {
@@ -27,6 +29,19 @@ public class CompatBaublesExpanded {
 				ItemStack wings = BaublesApi.getBaubles((EntityPlayer) entity).getStackInSlot(slotIndex);
 				if (wings != null && wings.getItem() instanceof ItemArmorElytra) {
 					return wings;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static ItemStack getWornLanternFromBaubles(EntityLivingBase entity) {
+		if (entity instanceof EntityPlayer) {
+			IInventory baubles = BaublesApi.getBaubles((EntityPlayer) entity);
+			for (int slotIndex = 0; slotIndex < baubles.getSizeInventory(); slotIndex++) {
+				ItemStack stack = baubles.getStackInSlot(slotIndex);
+				if (stack != null && stack.getItem() instanceof ItemBlockLantern) {
+					return stack;
 				}
 			}
 		}

@@ -24,6 +24,7 @@ import ganymedes01.etfuturum.client.gui.GuiGamemodeSwitcher;
 import ganymedes01.etfuturum.client.particle.CustomParticles;
 import ganymedes01.etfuturum.client.particle.DeferredBubbleFX;
 import ganymedes01.etfuturum.client.renderer.entity.elytra.LayerBetterElytra;
+import ganymedes01.etfuturum.client.renderer.entity.lantern.LayerLanternBauble;
 import ganymedes01.etfuturum.client.sound.AmbienceLoop;
 import ganymedes01.etfuturum.client.sound.BeeFlySound;
 import ganymedes01.etfuturum.client.sound.EndFlashSound;
@@ -444,6 +445,8 @@ public class ClientEventHandler {
 		if (event.entityPlayer instanceof IElytraPlayer) {
 			LayerBetterElytra.doRenderLayer(event.entityLiving, event.entityPlayer.limbSwing, event.entityPlayer.limbSwingAmount, Minecraft.getMinecraft().timer.renderPartialTicks, event.entityPlayer.getAge(), 0.0625F);
 		}
+
+		LayerLanternBauble.doRenderLayer(event.entityLiving, event.slot);
 
 		if (isSpectator(event.entityPlayer)) {
 			event.result = 0;
