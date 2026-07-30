@@ -20,6 +20,14 @@ public abstract class MixinEntityTrackerEntry {
 		return etfu$getMovementThreshold(original);
 	}
 
+	@ModifyConstant(method = "sendLocationToAllClients", constant = @Constant(intValue = 4, ordinal = 1))
+	private int etfu$adjustPandaMovementThresholdY(int original) {
+		// Panda movement and terrain transitions repeatedly cross the 1/32-block vertical grid. Keeping vanilla's
+		// 4-unit deadband can leave the last client target up to 3/32 inside the ground, where client-side gravity may
+		// pull the panda through the block.
+		return myEntity instanceof EntityPanda ? 1 : original;
+	}
+
 	@ModifyConstant(method = "sendLocationToAllClients", constant = @Constant(intValue = 4, ordinal = 2))
 	private int etfu$adjustPandaMovementThresholdZ(int original) {
 		return etfu$getMovementThreshold(original);
