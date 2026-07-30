@@ -1,10 +1,12 @@
 package ganymedes01.etfuturum.blocks;
 
 import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.core.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
@@ -57,7 +59,7 @@ public class BlockWoodSign extends BlockSign {
 		} else {
 			setStepSound(Block.soundTypeWood);
 		}
-		if (standing) {
+		if (block != Blocks.planks && standing) {
 			setCreativeTab(EtFuturum.creativeTabBlocks);
 		}
 	}
@@ -69,6 +71,9 @@ public class BlockWoodSign extends BlockSign {
 
 	@Override
 	public Item getItemDropped(int meta, Random random, int fortune) {
+		if (baseBlock == Blocks.planks) {
+			return ModItems.OLD_SIGN_ITEMS[this.meta - 1].get();
+		}
 		return Item.getItemFromBlock(standingSign);
 	}
 

@@ -774,15 +774,15 @@ public enum ModBlocks {
 	WITCHERY_HAWTHORN_TRAPDOOR(ConfigBlocksItems.enableVanillaTrapdoors && ModsList.WITCHERY.isLoaded(), new BaseTrapdoor("witchery_hawthorn")),
 
 	//legacy signs
-	SIGN_SPRUCE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "spruce", Blocks.planks, 1), ItemBlockSign.class),
+	SIGN_SPRUCE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "spruce", Blocks.planks, 1), null),
 	WALL_SIGN_SPRUCE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, false, "spruce", Blocks.planks, 1), null),
-	SIGN_BIRCH(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "birch", Blocks.planks, 2), ItemBlockSign.class),
+	SIGN_BIRCH(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "birch", Blocks.planks, 2), null),
 	WALL_SIGN_BIRCH(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, false, "birch", Blocks.planks, 2), null),
-	SIGN_JUNGLE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "jungle", Blocks.planks, 3), ItemBlockSign.class),
+	SIGN_JUNGLE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "jungle", Blocks.planks, 3), null),
 	WALL_SIGN_JUNGLE(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, false, "jungle", Blocks.planks, 3), null),
-	SIGN_ACACIA(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "acacia", Blocks.planks, 4), ItemBlockSign.class),
+	SIGN_ACACIA(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "acacia", Blocks.planks, 4), null),
 	WALL_SIGN_ACACIA(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, false, "acacia", Blocks.planks, 4), null),
-	SIGN_DARK_OAK(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "dark_oak", Blocks.planks, 5), ItemBlockSign.class),
+	SIGN_DARK_OAK(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, true, "dark_oak", Blocks.planks, 5), null),
 	WALL_SIGN_DARK_OAK(ConfigBlocksItems.enableVanillaSigns, new BlockWoodSign(TileEntityWoodSign.class, false, "dark_oak", Blocks.planks, 5), null),
 
 	//new wood signs (instead of a separate ItemBlock we use the standing sign as the ItemBlock
@@ -943,18 +943,6 @@ public enum ModBlocks {
 				} else {
 					GameRegistry.registerBlock(block.get(), block.name().toLowerCase());
 					//Used if getItemBlock() == null but getHasItemBlock() is true, registering it with a default inventory item.
-				}
-			}
-		}
-
-		// Other mods reference item_sign_*, so we make aliases here.
-		// They are cleared in serverStarting before world loading.
-		ModBlocks[] legacySigns = {SIGN_SPRUCE, SIGN_BIRCH, SIGN_JUNGLE, SIGN_ACACIA, SIGN_DARK_OAK};
-		for (ModBlocks signBlock : legacySigns) {
-			if (signBlock.isEnabled()) {
-				Item item = Item.getItemFromBlock(signBlock.get());
-				if (item != null) {
-					Item.itemRegistry.putObject("etfuturum:item_" + signBlock.name().toLowerCase(), item);
 				}
 			}
 		}

@@ -13,7 +13,6 @@ import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -127,7 +126,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -606,14 +604,7 @@ public class EtFuturum {
 					mapping.ignore();
 					ReflectionHelper.setPrivateValue(FMLMissingMappingsEvent.MissingMapping.class, mapping, FMLMissingMappingsEvent.Action.BLOCKONLY, "action");
 				}
-
-				// item_sign_* replaced by sign_*.
-				// processIdRematches can't remap existing ItemBlock to a different ID, so ignore
-				if (mapping.type == GameRegistry.Type.ITEM && mapping.name.startsWith("etfuturum:item_sign_")) {
-					mapping.ignore();
-				}
 			}
-
 			if (mapping.name.equals("etfuturum:glow_berries")) {
 				mapping.ignore();
 			}
@@ -665,21 +656,6 @@ public class EtFuturum {
 		}
 
 		return null;
-	}
-
-	@EventHandler
-	public void serverAboutToStart(FMLServerAboutToStartEvent event) {
-		// Clear sign aliases (added in ModBlocks.init for backward compat)
-		// before world loading so injectWorldIDMap doesn't see them.
-		try {
-			Field aliasesField = ReflectionHelper.findField(Item.itemRegistry.getClass(), "aliases");
-			@SuppressWarnings("unchecked")
-			Map<String, String> aliases = (Map<String, String>) aliasesField.get(Item.itemRegistry);
-			if (aliases != null) {
-				aliases.keySet().removeIf(k -> k.startsWith("etfuturum:item_sign_"));
-			}
-		} catch (Exception ignored) {
-		}
 	}
 
 	@EventHandler
