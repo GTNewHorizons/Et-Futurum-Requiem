@@ -2,8 +2,6 @@ package ganymedes01.etfuturum.client;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
@@ -49,13 +47,8 @@ public final class ModernLightmap {
 	private ModernLightmap() {
 	}
 
-	public static float nightVisionBrightness(EntityPlayer player, float partialTicks) {
-		PotionEffect effect = player == null ? null : player.getActivePotionEffect(Potion.nightVision);
-		if (effect == null) {
-			return 0.0F;
-		}
-		int duration = effect.getDuration();
-		return duration > 200 ? 1.0F : 0.7F + MathHelper.sin((duration - partialTicks) * (float) Math.PI * 0.2F) * 0.3F;
+	public static boolean hasNightVision(EntityPlayer player) {
+		return player != null && player.isPotionActive(Potion.nightVision);
 	}
 
 	public static float floor(float ambient, int channel, float nightVisionBrightness) {

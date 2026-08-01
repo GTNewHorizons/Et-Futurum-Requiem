@@ -6,6 +6,7 @@ import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -44,6 +45,11 @@ public class MixinEntityRenderer {
 
 	@Shadow
 	private float bossColorModifierPrev;
+
+	@Shadow
+	private float getNightVisionBrightness(EntityPlayer p_82830_1_, float p_82830_2_) {
+		return 0.0F;
+	}
 
 	@Unique
 	private float etfu$flashRed;
@@ -92,8 +98,9 @@ public class MixinEntityRenderer {
 		this.etfu$flashBlue = intensity * FLASH_B;
 
 		float nightVision = ConfigWorld.modernNightVision
-				? ModernLightmap.nightVisionBrightness(this.mc.thePlayer, p_78472_1_)
-				: 0.0F;
+				&& ModernLightmap.hasNightVision(this.mc.thePlayer)
+						? this.getNightVisionBrightness(this.mc.thePlayer, p_78472_1_)
+						: 0.0F;
 		this.etfu$floorRed = ModernLightmap.floor(ModernLightmap.endAmbient(0), 0, nightVision);
 		this.etfu$floorGreen = ModernLightmap.floor(ModernLightmap.endAmbient(1), 1, nightVision);
 		this.etfu$floorBlue = ModernLightmap.floor(ModernLightmap.endAmbient(2), 2, nightVision);

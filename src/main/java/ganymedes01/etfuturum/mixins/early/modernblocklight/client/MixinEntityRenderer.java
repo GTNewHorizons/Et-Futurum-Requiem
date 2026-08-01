@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
 import net.minecraft.world.WorldProvider;
 import org.objectweb.asm.Opcodes;
@@ -35,6 +36,11 @@ public class MixinEntityRenderer {
 
 	@Shadow
 	private Minecraft mc;
+
+	@Shadow
+	private float getNightVisionBrightness(EntityPlayer p_82830_1_, float p_82830_2_) {
+		return 0.0F;
+	}
 
 	@Unique
 	private boolean etfu$counterpart;
@@ -111,8 +117,9 @@ public class MixinEntityRenderer {
 		this.etfu$legacyBlue = etfu$vanillaBlue(this.etfu$ambientTerm);
 
 		this.etfu$nightVisionBrightness = ConfigWorld.modernNightVision
-				? ModernLightmap.nightVisionBrightness(this.mc.thePlayer, p_78472_1_)
-				: 0.0F;
+				&& ModernLightmap.hasNightVision(this.mc.thePlayer)
+						? this.getNightVisionBrightness(this.mc.thePlayer, p_78472_1_)
+						: 0.0F;
 	}
 
 	@Inject(method = "updateLightmap", at = @At(value = "CONSTANT", args = "floatValue=0.96F", ordinal = 0))
