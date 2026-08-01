@@ -3,11 +3,18 @@ package ganymedes01.etfuturum.blocks.itemblocks;
 import baubles.api.BaubleType;
 import baubles.api.IBauble;
 import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import org.lwjgl.opengl.GL11;
 import vazkii.botania.api.item.IBaubleRender;
@@ -56,30 +63,39 @@ public class ItemBlockLantern extends ItemBlock implements IBauble, IBaubleRende
 	}
 
 	/*
-	 * The ItemTravelBelt-style plain translate turned out not to hold up in-game (same mirrored/misoriented
-	 * look as the old SetArmorModel hook), so this reuses the offset/rotation/scale already tuned empirically
-	 * against the actual game render for that hook.
+	 * Draws the stitched item icon at the player's hip, following Botania's own
+	 * BaubleRenderHandler#renderManaTablet. The lightmap coordd is reset on the next entity render.
 	 */
-	private static final float OFFSET_X = 0.0F;
-	private static final float OFFSET_Y = 0.7F;
-	private static final float OFFSET_Z = -0.15F;
-	private static final float ROTATION_X = -26.7F;
-	private static final float ROTATION_Y = 44.0F;
-	private static final float ROTATION_Z = -144.1F;
-	private static final float SIZE = 0.3F;
+	private static final float SIZE = 0.45F;
 
 	@Optional.Method(modid = "Botania")
+	@SideOnly(Side.CLIENT)
 	@Override
 	public void onPlayerBaubleRender(ItemStack stack, RenderPlayerEvent event, RenderType type) {
 		if (type != RenderType.BODY) {
 			return;
 		}
-		GL11.glTranslatef(OFFSET_X, OFFSET_Y, OFFSET_Z);
-		GL11.glRotatef(ROTATION_X, 1F, 0F, 0F);
-		GL11.glRotatef(ROTATION_Y, 0F, 1F, 0F);
-		GL11.glRotatef(ROTATION_Z, 0F, 0F, 1F);
+		Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.locationItemsTexture);
+		Helper.rotateIfSneaking(event.entityPlayer);
+
+		// Undo the -1,-1,1 mirror the entity renderer left on the stack.
+		// No Y rotation: the sprite stays in the XY plane so it faces forward.
+		GL11.glRotatef(180F, 1F, 0F, 0F);
+		// Belt height, one hip over, just clear of the body (and of leg armour)
+		boolean armor = event.entityPlayer.getCurrentArmor(1) != null;
+		GL11.glTranslatef(0.14F, -0.78F, armor ? 0.19F : 0.15F);
 		GL11.glScalef(SIZE, SIZE, SIZE);
-		RenderManager.instance.itemRenderer.renderItem(event.entityPlayer, stack, 0);
+		// Icon draws from (0,0) to (1,1); recentre so the offsets above are its middle
+		GL11.glTranslatef(-0.5F, -0.5F, 0F);
+
+		// Lantern is a light source, so draw it fullbright
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240F, 240F);
+		GL11.glColor3f(1F, 1F, 1F);
+
+		IIcon icon = stack.getIconIndex();
+		ItemRenderer.renderItemIn2D(Tessellator.instance,
+				icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(),
+				icon.getIconWidth(), icon.getIconHeight(), 1F / 16F);
 	}
 
 }
