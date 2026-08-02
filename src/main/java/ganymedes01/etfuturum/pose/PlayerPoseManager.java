@@ -44,11 +44,8 @@ public class PlayerPoseManager {
         return PlayerPose.STANDING;
     }
 
-    static {
-        PlayerPoseManager.register(PlayerPose.STANDING);
-        PlayerPoseManager.register(PlayerPose.CROUCHING);
-        PlayerPoseManager.register(PlayerPose.CRAWLING);
-        PlayerPoseManager.register(PlayerPose.SWIMMING);
-        PlayerPoseManager.register(PlayerPose.FALL_FLYING);
+    static public boolean isEnabled()
+    {
+        return !poses.isEmpty();
     }
 }

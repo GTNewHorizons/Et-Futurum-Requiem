@@ -1,4 +1,4 @@
-package ganymedes01.etfuturum.mixins.early.swimming.client;
+package ganymedes01.etfuturum.mixins.early.pose.client;
 
 import ganymedes01.etfuturum.pose.IPoseablePlayer;
 import net.minecraft.client.Minecraft;

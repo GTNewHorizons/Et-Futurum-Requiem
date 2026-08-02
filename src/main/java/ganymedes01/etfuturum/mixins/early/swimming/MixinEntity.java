@@ -15,20 +15,4 @@ public class MixinEntity {
 		return entity instanceof IPlayerSwimming
 				? ((IPlayerSwimming) entity).etfu$isActuallySneaking() : entity.isSneaking();
 	}
-
-	@ModifyExpressionValue(method = "isEntityInsideOpaqueBlock", at = @At(value = "CONSTANT", args = "floatValue=0.1F"))
-	private float applyOffset(float origin) {
-		if ((Object) this instanceof EntityPlayer player) {
-			return origin * player.height / 1.8F;
-		}
-		return origin;
-	}
-
-	@ModifyExpressionValue(method = "handleWaterMovement", at = @At(value = "CONSTANT", args = "doubleValue=-0.4000000059604645D"))
-	private double etfu$keepSwimmingPlayersInWater(double origin) {
-		if ((Object) this instanceof EntityPlayer player) {
-			return origin * player.height / 1.8F;
-		}
-		return origin;
-	}
 }

@@ -20,18 +20,4 @@ public abstract class MixinEntityClientPlayerMP {
 		return player instanceof IPlayerSwimming
 				? ((IPlayerSwimming) player).etfu$isActuallySneaking() : player.isSneaking();
 	}
-
-	@Inject(method = "onUpdate", at = @At("HEAD"))
-	private void updateYOffset(CallbackInfo ci) {
-		IPoseablePlayer p = (IPoseablePlayer) this;
-		float targetYOffset = PlayerPose.STANDING.getEyeHeight() - p.etfu$getPose().getEyeHeight() * p.etfu$getScale();
-		targetYOffset = Math.min(targetYOffset, 1.62f);
-		float currentYOffset = p.etfu$getCurrentYOffset();
-		if (currentYOffset == targetYOffset) {
-			return;
-		}
-		currentYOffset += (targetYOffset - currentYOffset) * 0.5F;
-		p.etfu$setCurrentYOffset(currentYOffset);
-		((EntityClientPlayerMP) (Object) this).yOffset = 1.62f - currentYOffset;
-	}
 }

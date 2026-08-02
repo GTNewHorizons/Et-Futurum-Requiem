@@ -65,13 +65,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IEly
 		}
 	}
 
-	@Inject(method = "getEyeHeight", at = @At("HEAD"), cancellable = true)
-	private void getElytraEyeHeight(CallbackInfoReturnable<Float> cir) {
-		if (this.etfu$isElytraFlying() && !this.isPlayerSleeping()) {
-			cir.setReturnValue(0.4f);
-		}
-	}
-
 	private float etfu$ticksElytraFlying = 0;
 	private boolean etfu$lastElytraFlying = false;
 

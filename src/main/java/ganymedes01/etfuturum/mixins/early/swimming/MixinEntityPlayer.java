@@ -32,17 +32,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends EntityLivingBase implements IPoseablePlayer, IPlayerSwimming {
+public abstract class MixinEntityPlayer extends EntityLivingBase implements IPlayerSwimming {
 	@Shadow
 	public PlayerCapabilities capabilities;
+
 	@Shadow
 	public float cameraYaw;
 
 	@Shadow
 	public abstract boolean isPlayerSleeping();
-
-	@Unique
-	private IPlayerPose etfu$pose = PlayerPose.STANDING;
 
 	@Unique
 	private boolean etfu$eyeInWater;
@@ -52,9 +50,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 
 	@Unique
 	private float etfu$previousSwimAnimation;
-
-	@Unique
-	protected float etfu$scale = 1.0f;
 
 	protected MixinEntityPlayer(World world) {
 		super(world);
@@ -68,8 +63,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 
 		this.etfu$eyeInWater = this.isInsideOfMaterial(Material.water);
 		this.etfu$updateSwimmingFlag();
-		this.etfu$updateScale();
-		this.etfu$updatePose();
 		this.etfu$updateSwimAnimation();
 		if (this.etfu$isSwimming()) {
 			this.cameraYaw *= 0.6F;
@@ -88,34 +81,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 	}
 
 	@Unique
-	private void etfu$updateScale() {
-		PlayerScaleEvent event = new PlayerScaleEvent((EntityPlayer) (Object) this, 1.0f);
-		MinecraftForge.EVENT_BUS.post(event);
-		etfu$scale = event.scale;
-	}
-
-	@Override
-	public float etfu$getScale() {
-		return etfu$scale;
-	}
-
-	@Unique
-	private void etfu$updatePose() {
-		IPlayerPose desiredPose = PlayerPoseManager.getPose((EntityPlayer) (Object) this);
-		this.etfu$setPose(desiredPose);
-		this.etfu$applyPoseSize(desiredPose);
-	}
-
-	@Unique
-	private void etfu$applyPoseSize(IPlayerPose pose) {
-		float width = pose.getWidth() * etfu$getScale();
-		float height = pose.getHeight() * etfu$getScale();
-		if (Math.abs(this.width - width) > 0.001F || Math.abs(this.height - height) > 0.001F) {
-			this.setSize(width, height);
-		}
-	}
-
-	@Unique
 	private boolean etfu$isFallFlying() {
 		return ConfigMixins.enableElytra && this instanceof IElytraPlayer && ((IElytraPlayer) this).etfu$isElytraFlying();
 	}
@@ -128,22 +93,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 		} else {
 			this.etfu$swimAnimation = Math.max(0.0F, this.etfu$swimAnimation - 0.09F);
 		}
-	}
-
-	@ModifyReturnValue(method = "getEyeHeight", at = @At("RETURN"))
-	private float etfu$getPoseEyeHeight(float origin) {
-		if (this.worldObj.isRemote) {
-			return origin * etfu$getScale();
-		}
-		return this.etfu$pose.getEyeHeight() * etfu$getScale();
-	}
-
-	@ModifyReturnValue(method = "getDefaultEyeHeight", at = @At("RETURN"), remap = false)
-	private float etfu$getDefaultEyeHeight(float origin) {
-		if (this.worldObj.isRemote) {
-			return origin * etfu$getScale();
-		}
-		return this.etfu$pose.getEyeHeight() * etfu$getScale();
 	}
 
 	@Inject(method = "canTriggerWalking", at = @At("HEAD"), cancellable = true)
@@ -186,7 +135,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 
 	@Unique
 	private float etfu$adjustLowProfileMovement(float movement) {
-		if (this.etfu$pose == PlayerPose.SWIMMING && this.etfu$isActuallySneaking()) {
+		if (((IPoseablePlayer) this).etfu$getPose() == PlayerPose.SWIMMING && this.etfu$isActuallySneaking()) {
 			return Math.abs(movement) > 1.0E-5F && Math.abs(movement) <= 0.30001F
 					? movement / 0.3F : movement;
 		}
@@ -200,25 +149,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 
 	@Unique
 	private boolean etfu$usesCrawlingMovement() {
-		return etfu$getPose() == PlayerPose.CRAWLING;
-	}
-
-	@Override
-	public boolean isSneaking() {
-		return super.isSneaking() || etfu$getPose() == PlayerPose.CROUCHING;
-	}
-
-	@Unique
-	float etfu$CurrentYOffset = 0f;
-
-	@Override
-	public float etfu$getCurrentYOffset() {
-		return etfu$CurrentYOffset;
-	}
-
-	@Override
-	public void etfu$setCurrentYOffset(float offset) {
-		etfu$CurrentYOffset = offset;
+		return getPlayerPose() == PlayerPose.CRAWLING;
 	}
 
 	@Override
@@ -230,7 +161,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 
 	@Override
 	public boolean etfu$isActuallySwimming() {
-		return etfu$getPose() == PlayerPose.SWIMMING || etfu$getPose() == PlayerPose.CRAWLING;
+		return getPlayerPose() == PlayerPose.SWIMMING || getPlayerPose() == PlayerPose.CRAWLING;
 	}
 
 	@Override
@@ -244,18 +175,13 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPos
 	}
 
 	@Override
-	public IPlayerPose etfu$getPose() {
-		return this.etfu$pose;
-	}
-
-	@Override
-	public void etfu$setPose(IPlayerPose pose) {
-		this.etfu$pose = pose;
-	}
-
-	@Override
 	public float etfu$getSwimAnimation(float partialTicks) {
 		return this.etfu$previousSwimAnimation
 				+ (this.etfu$swimAnimation - this.etfu$previousSwimAnimation) * partialTicks;
+	}
+
+	@Unique
+	private IPlayerPose getPlayerPose() {
+		return ((IPoseablePlayer) this).etfu$getPose();
 	}
 }
