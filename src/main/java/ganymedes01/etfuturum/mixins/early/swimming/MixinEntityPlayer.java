@@ -39,9 +39,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IPla
 	@Shadow
 	public float cameraYaw;
 
-	@Shadow
-	public abstract boolean isPlayerSleeping();
-
 	@Unique
 	private boolean etfu$eyeInWater;
 

@@ -13,14 +13,18 @@ public abstract class MixinEntityClientPlayerMP {
     @Inject(method = "onUpdate", at = @At("HEAD"))
     private void updateYOffset(CallbackInfo ci) {
         IPoseablePlayer p = (IPoseablePlayer) this;
-        float targetYOffset = PlayerPose.STANDING.getEyeHeight() - p.etfu$getPose().getEyeHeight() * p.etfu$getScale();
-        targetYOffset = Math.min(targetYOffset, 1.62f);
+        EntityClientPlayerMP player = ((EntityClientPlayerMP) (Object) this);
+        float actualEyeHeight = p.etfu$getPose().getEyeHeight() * p.etfu$getScale();
+        if (Math.abs(player.yOffset - actualEyeHeight) <= 0.001F) return;
+        float standingEyeHeight = PlayerPose.STANDING.getEyeHeight();
+        float targetYOffset = standingEyeHeight - actualEyeHeight;
+        targetYOffset = Math.min(targetYOffset, standingEyeHeight);
         float currentYOffset = p.etfu$getCurrentYOffset();
-        if (currentYOffset == targetYOffset) {
+        if (Math.abs(targetYOffset - currentYOffset) <= 0.001F) {
             return;
         }
         currentYOffset += (targetYOffset - currentYOffset) * 0.5F;
         p.etfu$setCurrentYOffset(currentYOffset);
-        ((EntityClientPlayerMP) (Object) this).yOffset = 1.62f - currentYOffset;
+        player.yOffset = standingEyeHeight - currentYOffset;
     }
 }

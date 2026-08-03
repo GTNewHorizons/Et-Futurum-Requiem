@@ -17,9 +17,6 @@ public class PlayerPoseManager {
     }
 
     static public IPlayerPose getPose(EntityPlayer player) {
-        if (player.getHealth() <= 0.0F || player.isPlayerSleeping()) {
-            return PlayerPose.STANDING;
-        }
         IPlayerPose deserdPose = null;
         for (IPlayerPose pose : poses) {
             if (pose.canApply(player)) {

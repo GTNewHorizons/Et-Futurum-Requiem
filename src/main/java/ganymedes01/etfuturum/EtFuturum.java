@@ -322,6 +322,11 @@ public class EtFuturum {
 		{
 			PlayerPoseManager.register(PlayerPose.FALL_FLYING);
 		}
+		if (PlayerPoseManager.isEnabled())
+		{
+			PlayerPoseManager.register(PlayerPose.SLEEPING);
+			PlayerPoseManager.register(PlayerPose.DEATH);
+		}
 	}
 
 	@EventHandler
