@@ -13,11 +13,11 @@ public interface IPlayerPose {
     }
 
     default float getEyeHeight() {
-        return 1.65f;
+        return 1.62f;
     }
 
     default boolean isLowProfile() {
-        return getEyeHeight() < 1.65f;
+        return getEyeHeight() < 1.62f;
     }
 
     default boolean canApply(EntityPlayer player) {
