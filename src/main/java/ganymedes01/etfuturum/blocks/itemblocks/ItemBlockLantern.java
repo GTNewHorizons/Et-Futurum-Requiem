@@ -1,7 +1,8 @@
 package ganymedes01.etfuturum.blocks.itemblocks;
 
 import baubles.api.BaubleType;
-import baubles.api.IBauble;
+import baubles.api.expanded.BaubleItemHelper;
+import baubles.api.expanded.IBaubleExpanded;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -12,6 +13,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -19,11 +21,14 @@ import net.minecraftforge.client.event.RenderPlayerEvent;
 import org.lwjgl.opengl.GL11;
 import vazkii.botania.api.item.IBaubleRender;
 
+import java.util.List;
+
 @Optional.InterfaceList({
-		@Optional.Interface(modid = "Baubles|Expanded", iface = "baubles.api.IBauble"),
+		@Optional.Interface(modid = "Baubles|Expanded", iface = "baubles.api.expanded.IBaubleExpanded"),
 		@Optional.Interface(modid = "Botania", iface = "vazkii.botania.api.item.IBaubleRender")
 })
-public class ItemBlockLantern extends ItemBlock implements IBauble, IBaubleRender {
+public class ItemBlockLantern extends ItemBlock implements IBaubleExpanded, IBaubleRender {
+    private static final String[] BAUBLE_TYPES = {"belt"};
 
 	public ItemBlockLantern(Block block) {
 		super(block);
@@ -35,7 +40,21 @@ public class ItemBlockLantern extends ItemBlock implements IBauble, IBaubleRende
 		return BaubleType.BELT;
 	}
 
-	@Optional.Method(modid = "Baubles|Expanded")
+
+    @Optional.Method(modid = "Baubles|Expanded")
+    @Override
+    public String[] getBaubleTypes(ItemStack itemstack) {
+        return BAUBLE_TYPES;
+    }
+
+    @Optional.Method(modid = "Baubles|Expanded")
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advancedItemTooltips) {
+        super.addInformation(stack, player, tooltip, advancedItemTooltips);
+        BaubleItemHelper.addSlotInformation(tooltip, BAUBLE_TYPES);
+    }
+
+    @Optional.Method(modid = "Baubles|Expanded")
 	@Override
 	public void onWornTick(ItemStack itemstack, EntityLivingBase player) {
 	}
