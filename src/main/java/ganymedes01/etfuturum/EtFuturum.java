@@ -250,7 +250,7 @@ public class EtFuturum {
 			e.printStackTrace();
 		}
 
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).preInitAction();
 			}
@@ -310,7 +310,7 @@ public class EtFuturum {
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).initAction();
 			}
@@ -417,7 +417,7 @@ public class EtFuturum {
 			}
 		}
 
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).postInitAction();
 			}
@@ -451,7 +451,7 @@ public class EtFuturum {
 	@EventHandler
 	@SuppressWarnings("unchecked")
 	public void onLoadComplete(FMLLoadCompleteEvent e) {
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).onLoadAction();
 			}
