@@ -255,7 +255,7 @@ public class EtFuturum {
 				((IInitAction) block.get()).preInitAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).preInitAction();
 			}
@@ -315,7 +315,7 @@ public class EtFuturum {
 				((IInitAction) block.get()).initAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).initAction();
 			}
@@ -422,7 +422,7 @@ public class EtFuturum {
 				((IInitAction) block.get()).postInitAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).postInitAction();
 			}
@@ -456,7 +456,7 @@ public class EtFuturum {
 				((IInitAction) block.get()).onLoadAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).onLoadAction();
 			}
