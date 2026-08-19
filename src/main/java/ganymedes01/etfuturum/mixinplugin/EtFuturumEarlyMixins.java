@@ -300,6 +300,8 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		{
 			mixins.add("pose.MixinEntity");
 			mixins.add("pose.MixinEntityPlayer");
+			mixins.add("pose.MixinItemBoat");
+			mixins.add("pose.MixinBlockPistonBase");
 			if (side == MixinEnvironment.Side.CLIENT) {
 				mixins.add("pose.client.C04PacketPlayerPositionMixin");
 				mixins.add("pose.client.C06PacketPlayerPosLookMixin");
@@ -377,7 +379,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return null;
+		return new String[] {"ganymedes01.etfuturum.asm.pose.HardcodedPlayerHeightTransformer"};
 	}
 
 	@Override
