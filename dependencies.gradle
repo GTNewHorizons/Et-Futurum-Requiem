@@ -39,6 +39,7 @@ dependencies {
     compileOnly("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev") {transitive=false}
     compileOnly "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
     compileOnly('com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev')
+    compileOnly("com.github.GTNewHorizons:Botania:1.13.28-GTNH:api") {transitive = false}
     compileOnly("com.github.GTNewHorizons:CraftTweaker:3.4.7:dev")
     compileOnly "team.chisel:Chisel:2.9.5.12:deobf"
     compileOnly "team.chisel.ctmlib:CTMLib:MC1.7.10-1.4.1.5:deobf"
