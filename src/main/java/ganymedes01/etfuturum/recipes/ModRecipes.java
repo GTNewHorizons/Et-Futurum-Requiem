@@ -827,6 +827,10 @@ public class ModRecipes {
 			addShapedRecipe(ModBlocks.BLUE_ICE.newItemStack(), "xxx", "xxx", "xxx", 'x', Blocks.packed_ice);
 		}
 
+		if (!ModsList.GTNH.isLoaded() && ModItems.COOPERS_MALLET.isEnabled()) {
+			addShapedRecipe(ModItems.COOPERS_MALLET.newItemStack(), "cbr", " s ", " s ", 'c', Blocks.chest, 'b', "blockCopper", 'r', ModBlocks.BARREL.get(), 's', "stickWood");
+		}
+
 		addShapedRecipe(ModBlocks.SMOKER.newItemStack(), " l ", "lxl", " l ", 'x', Blocks.furnace, 'l', "logWood");
 
 		addShapedRecipe(ModBlocks.BLAST_FURNACE.newItemStack(), "iii", "ixi", "sss", 'x', Blocks.furnace, 'i', "ingotIron", 's', ConfigBlocksItems.enableSmoothStone ? ModBlocks.SMOOTH_STONE.get() : Blocks.stone);

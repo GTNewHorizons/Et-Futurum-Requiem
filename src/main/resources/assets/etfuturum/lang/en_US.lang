@@ -2219,6 +2219,8 @@ item.shulker_copper_iron_upgrade.name=Copper to Iron Shulker Box Upgrade
 item.shulker_copper_silver_upgrade.name=Copper to Silver Shulker Box Upgrade
 item.shulker_silver_gold_upgrade.name=Silver to Gold Shulker Box Upgrade
 
+item.etfuturum.coopers_mallet.name=Cooper's Mallet
+
 item.barrel_vanilla_iron_upgrade.name=Vanilla to Iron Barrel Upgrade
 item.barrel_vanilla_copper_upgrade.name=Vanilla to Copper Barrel Upgrade
 item.barrel_iron_gold_upgrade.name=Iron to Gold Barrel Upgrade
