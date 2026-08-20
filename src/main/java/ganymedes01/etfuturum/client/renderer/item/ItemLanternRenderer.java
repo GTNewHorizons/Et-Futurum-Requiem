@@ -1,7 +1,7 @@
 package ganymedes01.etfuturum.client.renderer.item;
 
 import ganymedes01.etfuturum.client.renderer.block.BlockLanternRenderer;
-import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -93,7 +93,7 @@ public class ItemLanternRenderer implements IItemRenderer {
 
 		// When the arm-pose mixin is active, the third person arm is rotated to near
 		// horizontal, so the attached lantern must be counter-rotated to hang vertically.
-		boolean armPosed = ConfigMixins.heldLanternPose;
+		boolean armPosed = ConfigTweaks.heldLanternPose;
 
 		GL11.glPushMatrix();
 

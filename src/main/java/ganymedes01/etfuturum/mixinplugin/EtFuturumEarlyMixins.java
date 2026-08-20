@@ -178,7 +178,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("floorceilbutton.MixinBlockButton");
 		}
 
-		if (ConfigMixins.heldLanternPose && ConfigBlocksItems.enableLantern && side == MixinEnvironment.Side.CLIENT) {
+		if (ConfigTweaks.heldLanternPose && ConfigBlocksItems.enableLantern && side == MixinEnvironment.Side.CLIENT) {
 			mixins.add("lanternpose.client.MixinModelBiped");
 			mixins.add("lanternpose.client.MixinItemRenderer");
 		}

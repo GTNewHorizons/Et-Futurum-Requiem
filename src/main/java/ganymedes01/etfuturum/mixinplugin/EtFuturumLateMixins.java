@@ -6,6 +6,7 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import ganymedes01.etfuturum.Tags;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
+import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class EtFuturumLateMixins implements ILateMixinLoader {
 		List<String> mixins = new ArrayList<>();
 
 		if (FMLLaunchHandler.side().isClient()
-				&& ConfigMixins.heldLanternPose
+				&& ConfigTweaks.heldLanternPose
 				&& ConfigBlocksItems.enableLantern
 				&& loadedMods.contains("backhand")) {
 			// Extend and sway the left arm in third person when a lantern is carried in the offhand.
