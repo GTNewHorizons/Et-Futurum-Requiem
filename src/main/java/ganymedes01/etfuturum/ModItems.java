@@ -26,13 +26,14 @@ import ganymedes01.etfuturum.items.ItemEndCrystal;
 import ganymedes01.etfuturum.items.ItemEtFuturumRecord;
 import ganymedes01.etfuturum.items.ItemGlowBerries;
 import ganymedes01.etfuturum.items.ItemHoneyBottle;
+import ganymedes01.etfuturum.items.ItemCoopersMallet;
 import ganymedes01.etfuturum.items.ItemLingeringPotion;
 import ganymedes01.etfuturum.items.ItemNetheriteIngot;
 import ganymedes01.etfuturum.items.ItemNewBoat;
 import ganymedes01.etfuturum.items.ItemRabbitStew;
 import ganymedes01.etfuturum.items.ItemShulkerBoxUpgrade;
-import ganymedes01.etfuturum.items.ItemMalletCooper;
 import ganymedes01.etfuturum.items.ItemSuspiciousStew;
+
 import ganymedes01.etfuturum.items.ItemSweetBerries;
 import ganymedes01.etfuturum.items.ItemWoodSign;
 import ganymedes01.etfuturum.items.equipment.ItemArmorElytra;
@@ -104,7 +105,7 @@ public enum ModItems {
 	AMETHYST_SHARD(ConfigBlocksItems.enableAmethyst, new BaseItem("amethyst_shard")),
 	SHULKER_BOX_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.shulkerBoxesIronChest, new ItemShulkerBoxUpgrade()),
 	BARREL_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.barrelIronChest, new ItemBarrelUpgrade()),
-	MALLET_COOPER(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.enableChestBarrelConversion, new ItemMalletCooper()),
+	COOPERS_MALLET(ConfigBlocksItems.enableBarrel && ConfigBlocksItems.enableCoopersMallet, new ItemCoopersMallet()),
 	HONEYCOMB(ConfigBlocksItems.enableHoney, new BaseItem("honeycomb")),
 	HONEY_BOTTLE(ConfigBlocksItems.enableHoney, new ItemHoneyBottle()),
 	BAMBOO(ConfigBlocksItems.enableBambooBlocks, new ItemBamboo()),

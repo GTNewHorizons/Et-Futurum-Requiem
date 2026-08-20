@@ -421,8 +421,13 @@ public class ModRecipes {
 	}
 
 	private static void registerRecipes() {
-		if (ModItems.MALLET_COOPER.isEnabled()) {
-			GameRegistry.addRecipe(new ShapedOreRecipe(ModItems.MALLET_COOPER.newItemStack(), "BCH", " S ", " S ", 'B', "ingotCopper", 'C', "blockCopper", 'S', "ingotIron", 'S', "stickWood"));
+		if (ModItems.COOPERS_MALLET.isEnabled() && !ModsList.GTNH.isLoaded()) {
+			Block ironChestBlock = ExternalContent.Blocks.IRON_CHEST.get();
+			if (ironChestBlock != null) { // The copper chest ingredient only exists if Iron Chests is installed
+				// Copper chest meta = IronChestType.COPPER.ordinal() == 3 in the GTNH Iron Chests fork (6.1.13)
+				GameRegistry.addRecipe(new ShapedOreRecipe(ModItems.COOPERS_MALLET.newItemStack(), "BCH", " S ", " S ",
+						'B', "ingotCopper", 'C', "blockCopper", 'H', new ItemStack(ironChestBlock, 1, 3), 'S', "stickWood"));
+			}
 		}
 
 		if (!ModsList.GTNH.isLoaded()) {
