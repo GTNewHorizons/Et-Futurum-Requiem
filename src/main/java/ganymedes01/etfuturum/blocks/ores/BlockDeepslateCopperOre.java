@@ -12,7 +12,7 @@ import net.minecraftforge.oredict.OreDictionary;
 public class BlockDeepslateCopperOre extends BlockDeepslateOre implements IInitAction {
 
 	public BlockDeepslateCopperOre() {
-		super(ModBlocks.COPPER_ORE.get());
+		super(ModBlocks.COPPER_ORE.get(), ModBlocks.COPPER_ORE.isEnabled());
 	}
 
 	@Override
