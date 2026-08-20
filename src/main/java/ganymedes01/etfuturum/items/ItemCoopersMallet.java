@@ -4,6 +4,7 @@ import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.compat.CompatIronChest;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
+import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.tileentities.TileEntityBarrel;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPistonBase;
@@ -21,9 +22,13 @@ import net.minecraft.world.World;
 public class ItemCoopersMallet extends BaseItem {
 
 	public ItemCoopersMallet() {
-		setUnlocalizedNameWithPrefix("coopers_mallet");
-		setTextureName("stick"); //TODO: placeholder art
+		setNames("coopers_mallet");
 		setMaxStackSize(1);
+	}
+
+	@Override
+	public String getTextureDomain() {
+		return Reference.MOD_ID;
 	}
 
 	/**
