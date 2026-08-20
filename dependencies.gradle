@@ -47,6 +47,7 @@ dependencies {
     compileOnly "codechicken:CodeChickenLib:1.7.10-1.1.3.140:dev"
     compileOnly "codechicken:CodeChickenCore:1.7.10-1.0.7.47:dev"
     compileOnly 'com.github.GTNewHorizons:ironchest:6.1.13'
+    runtimeOnlyNonPublishable 'com.github.GTNewHorizons:ironchest:6.1.13'
     compileOnly 'curse.maven:applied-energistics-2-223794:2296430'
     compileOnly 'com.github.GTNewHorizons:Battlegear2-for-Backhand:1.6.8-backhand'
     compileOnly('com.github.GTNewHorizons:ForbiddenMagic:0.9.16-GTNH:dev') {

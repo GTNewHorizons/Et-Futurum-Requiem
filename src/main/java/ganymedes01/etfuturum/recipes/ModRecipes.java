@@ -421,6 +421,10 @@ public class ModRecipes {
 	}
 
 	private static void registerRecipes() {
+		if (ModItems.STORAGEINATOR.isEnabled()) {
+			GameRegistry.addRecipe(new ShapedOreRecipe(ModItems.STORAGEINATOR.newItemStack(), "BCH", " S ", " S ", 'B', "ingotCopper", 'C', "blockCopper", 'S', "ingotIron", 'S', "stickWood"));
+		}
+
 		if (!ModsList.GTNH.isLoaded()) {
 			addShapedRecipe(ModBlocks.OLD_GRAVEL.newItemStack(4), "xy", "yx", 'x', ModBlocks.COARSE_DIRT.get(), 'y', Blocks.gravel);
 		}
