@@ -197,8 +197,7 @@ public class DeepslateOreRegistry {
 				Block oreNorm = entry.getKey().getObject();
 				Block oreDeep = entry.getValue().getObject();
 				if (!ModRecipes.validateItems(oreNorm, oreDeep)) {
-					Logger.error("INVALID FURNACE RECIPE DETECTED: " + entry);
-					Logger.error("This means that a mod added INVALID items to the furnace registry!");
+					Logger.error("INVALID DEEPSLATE ORE MAPPING DETECTED: source=" + entry.getKey() + ", replacement=" + entry.getValue() + ". A block is air or unregistered.");
 				}
 
 				boolean saltyModOre = oreDeep.getClass().getName().toLowerCase().contains("saltymod");
