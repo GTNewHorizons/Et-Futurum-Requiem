@@ -23,9 +23,6 @@ public class ItemLanternRenderer implements IItemRenderer {
 	// reads as held by its top rather than dangling from a chain.
 	private static final int HELD_META = 0;
 
-	// Draws RGB axis gizmos (X red, Y green, Z blue) to visualise the transform frames. Debug only.
-	private static final boolean DEBUG_AXES = false;
-
 	/**
 	 * Right arm pitch used by MixinModelBiped when holding a lantern: nearly horizontal,
 	 * pointing forward. Defined here (a normal class) rather than in the mixin, since mixins
@@ -103,9 +100,6 @@ public class ItemLanternRenderer implements IItemRenderer {
 			case EQUIPPED_FIRST_PERSON:
 				// First person is view space (ItemRenderer + ForgeHooksClient), not the posed arm,
 				// so it needs its own placement. +Y is up here; no un-tilting is required.
-				if (DEBUG_AXES) {
-					drawDebugAxes(2.0F);
-				}
 				GL11.glScalef(0.6F, 0.6F, 0.6F);
 				GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 				break;
@@ -124,10 +118,6 @@ public class ItemLanternRenderer implements IItemRenderer {
 					GL11.glRotatef(-armDeg, 1.0F, 0.0F, 0.0F);
 
 					// Origin is now the hand, axes world-aligned (X right, Y up, Z forward), scale 0.375.
-					if (DEBUG_AXES) {
-						drawDebugAxes(2.0F);
-					}
-
 					// Enlarge, flip so the top points up (model +Y maps to world-down here),
 					// then drop the body below the hand.
 					GL11.glScalef(2.0F, 2.0F, 2.0F);
@@ -186,12 +176,6 @@ public class ItemLanternRenderer implements IItemRenderer {
 		net.minecraft.client.renderer.texture.TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 		tm.bindTexture(tm.getResourceLocation(0));
 
-		// Axes drawn at the raw arm frame (before the placement below), so they show how the
-		// wrist frame is oriented on screen: +X red, +Y green, +Z blue.
-		if (DEBUG_AXES) {
-			drawDebugAxes(1.0F);
-		}
-
 		// The arm frame is rotated by vanilla's empty-hand sequence in renderItemInFirstPerson
 		// (glRotatef 45 Y, 120 Z, 200 X, -135 Y), so the model's +Y (chain) ends up tilted away
 		// from the camera. Undo that rotation - the inverse sequence, reversed order and negated
@@ -200,11 +184,6 @@ public class ItemLanternRenderer implements IItemRenderer {
 		GL11.glRotatef(-200.0F, 1.0F, 0.0F, 0.0F);
 		GL11.glRotatef(-120.0F, 0.0F, 0.0F, 1.0F);
 		GL11.glRotatef(-45.0F, 0.0F, 1.0F, 0.0F);
-
-		// Second gizmo at the view-aligned frame: green (+Y) should now point straight up on screen.
-		if (DEBUG_AXES) {
-			drawDebugAxes(0.5F);
-		}
 
 		// The frame is now view-aligned at the hand: +X right, +Y up, +Z toward the camera.
 		// Position, scale and center the lantern (visual tuning knobs; verify in-game).
@@ -236,35 +215,4 @@ public class ItemLanternRenderer implements IItemRenderer {
 		GL11.glPopMatrix();
 	}
 
-	/**
-	 * Temporary debug helper: draws a coloured axis gizmo at the current origin.
-	 * +X is red, +Y is green, +Z is blue. Does not disturb the surrounding matrix.
-	 */
-	private static void drawDebugAxes(float length) {
-		boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
-		boolean texture = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glLineWidth(4.0F);
-
-		Tessellator t = Tessellator.instance;
-		t.startDrawing(GL11.GL_LINES);
-		t.setColorOpaque_I(0xFF0000); // +X red
-		t.addVertex(0.0D, 0.0D, 0.0D);
-		t.addVertex(length, 0.0D, 0.0D);
-		t.setColorOpaque_I(0x00FF00); // +Y green
-		t.addVertex(0.0D, 0.0D, 0.0D);
-		t.addVertex(0.0D, length, 0.0D);
-		t.setColorOpaque_I(0x0000FF); // +Z blue
-		t.addVertex(0.0D, 0.0D, 0.0D);
-		t.addVertex(0.0D, 0.0D, length);
-		t.draw();
-
-		if (texture) {
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
-		if (lighting) {
-			GL11.glEnable(GL11.GL_LIGHTING);
-		}
-	}
 }
