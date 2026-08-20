@@ -19,7 +19,7 @@ import java.lang.reflect.Modifier;
 
 public class ItemMalletCooper extends BaseItem {
 
-	private static final String IRON_CHEST_COMPAT = "ganymedes01.etfuturum.items.MalletCooperCompat";
+	private static final String IRON_CHEST_COMPAT = "ganymedes01.etfuturum.compat.CoopersMalletCompat";
 
 	public ItemMalletCooper() {
 		setNames("malletcooper");
