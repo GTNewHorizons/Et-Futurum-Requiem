@@ -421,8 +421,8 @@ public class ModRecipes {
 	}
 
 	private static void registerRecipes() {
-		if (ModItems.STORAGEINATOR.isEnabled()) {
-			GameRegistry.addRecipe(new ShapedOreRecipe(ModItems.STORAGEINATOR.newItemStack(), "BCH", " S ", " S ", 'B', "ingotCopper", 'C', "blockCopper", 'S', "ingotIron", 'S', "stickWood"));
+		if (ModItems.MALLET_COOPER.isEnabled()) {
+			GameRegistry.addRecipe(new ShapedOreRecipe(ModItems.MALLET_COOPER.newItemStack(), "BCH", " S ", " S ", 'B', "ingotCopper", 'C', "blockCopper", 'S', "ingotIron", 'S', "stickWood"));
 		}
 
 		if (!ModsList.GTNH.isLoaded()) {

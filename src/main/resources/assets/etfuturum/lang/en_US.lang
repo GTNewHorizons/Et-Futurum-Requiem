@@ -1257,7 +1257,7 @@ tile.etfuturum.red_shulker_box.name=Red Shulker Box
 tile.etfuturum.black_shulker_box.name=Black Shulker Box
 
 util.totemBreak=§a§oYour Totem of Undying shatters...
-util.storageinator.no_barrel=This chest type has no barrel variant.
+util.malletcooper.no_barrel=This chest type has no barrel variant.
 
 # Damage types
 
@@ -2231,7 +2231,7 @@ item.barrel_silver_gold_upgrade.name=Silver to Gold Barrel Upgrade
 item.barrel_steel_gold_upgrade.name=Steel to Gold Barrel Upgrade
 item.barrel_obsidian_netherite_upgrade.name=Obsidian to Netherite Barrel Upgrade
 item.barrel_obsidian_darksteel_upgrade.name=Obsidian to Dark Steel Barrel Upgrade
-item.etfuturum.storageinator.name=Storageinator
+item.etfuturum.malletcooper.name=Cooper's Mallet
 
 item.etfuturum.raw_aluminum.name=Raw Aluminum
 item.etfuturum.raw_tin.name=Raw Tin

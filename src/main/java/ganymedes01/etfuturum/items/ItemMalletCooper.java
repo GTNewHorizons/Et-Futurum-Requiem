@@ -7,7 +7,6 @@ import ganymedes01.etfuturum.tileentities.TileEntityBarrel.BarrelType;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -18,12 +17,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public class ItemStorageinator extends BaseItem {
+public class ItemMalletCooper extends BaseItem {
 
-	private static final String IRON_CHEST_COMPAT = "ganymedes01.etfuturum.items.StorageinatorCompat";
+	private static final String IRON_CHEST_COMPAT = "ganymedes01.etfuturum.items.MalletCooperCompat";
 
-	public ItemStorageinator() {
-		setNames("storageinator");
+	public ItemMalletCooper() {
+		setNames("malletcooper");
 		setMaxStackSize(1);
 	}
 

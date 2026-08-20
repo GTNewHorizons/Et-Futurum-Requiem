@@ -7,13 +7,12 @@ import ganymedes01.etfuturum.tileentities.TileEntityBarrel;
 import ganymedes01.etfuturum.tileentities.TileEntityBarrel.BarrelType;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
-public class StorageinatorCompat {
+public class MalletCooperCompat {
 
 	public static boolean convertIronChestToBarrel(TileEntity tile, EntityPlayer player, World world, int x, int y,
 			int z) {
@@ -26,7 +25,7 @@ public class StorageinatorCompat {
 
 		BarrelType target = getBarrelType(chest.getType());
 		if (target == null) {
-			player.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("util.storageinator.no_barrel")));
+			player.addChatMessage(new ChatComponentText(StatCollector.translateToLocal("util.malletcooper.no_barrel")));
 			return false;
 		}
 

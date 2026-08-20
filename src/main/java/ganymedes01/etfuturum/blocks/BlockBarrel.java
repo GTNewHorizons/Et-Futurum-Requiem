@@ -6,7 +6,7 @@ import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.items.BaseSubtypesItem;
-import ganymedes01.etfuturum.items.ItemStorageinator;
+import ganymedes01.etfuturum.items.ItemMalletCooper;
 import ganymedes01.etfuturum.lib.GUIIDs;
 import ganymedes01.etfuturum.lib.RenderIDs;
 import ganymedes01.etfuturum.tileentities.TileEntityBarrel;
@@ -27,8 +27,6 @@ import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.Random;
 
 public class BlockBarrel extends BlockContainer {
 	public BlockBarrel(){this(TileEntityBarrel.BarrelType.VANILLA);}
@@ -114,8 +112,8 @@ public class BlockBarrel extends BlockContainer {
 		}
 
 		ItemStack held = player.getHeldItem();
-		if (held != null && held.getItem() == ModItems.STORAGEINATOR.get()) {
-			return ItemStorageinator.convertBarrelToChest(world, x, y, z, barrel);
+		if (held != null && held.getItem() == ModItems.MALLET_COOPER.get()) {
+			return ItemMalletCooper.convertBarrelToChest(world, x, y, z, barrel);
 		}
 
 		if (player.isSneaking() || barrel.numPlayersUsing != 0 || held == null || held.getItem() != ModItems.BARREL_UPGRADE.get()) {
