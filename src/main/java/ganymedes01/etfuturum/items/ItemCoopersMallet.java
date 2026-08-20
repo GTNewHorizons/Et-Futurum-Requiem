@@ -24,6 +24,7 @@ public class ItemCoopersMallet extends BaseItem {
 	public ItemCoopersMallet() {
 		setNames("coopers_mallet");
 		setMaxStackSize(1);
+		addTooltip = true;
 	}
 
 	@Override
