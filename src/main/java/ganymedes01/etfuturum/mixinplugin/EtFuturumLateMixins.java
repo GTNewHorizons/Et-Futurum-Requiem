@@ -28,10 +28,7 @@ public class EtFuturumLateMixins implements ILateMixinLoader {
 				&& ConfigMixins.heldLanternPose
 				&& ConfigBlocksItems.enableLantern
 				&& loadedMods.contains("backhand")) {
-			// Flag EFR's lantern renderer during Backhand's offhand render so it can place the
-			// lantern for the left hand.
-			mixins.add("backhand.MixinBackhandRenderHelper");
-			mixins.add("backhand.MixinItemRendererHooks");
+			// Extend and sway the left arm in third person when a lantern is carried in the offhand.
 			mixins.add("backhand.MixinModelBipedOffhand");
 		}
 

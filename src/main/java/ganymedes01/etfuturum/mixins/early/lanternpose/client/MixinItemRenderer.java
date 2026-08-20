@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.mixins.early.lanternpose.client;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.client.renderer.item.ItemLanternRenderer;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.RenderPlayer;
@@ -36,11 +37,12 @@ public abstract class MixinItemRenderer {
 
 	@Inject(method = "renderItemInFirstPerson", at = @At("HEAD"))
 	private void etfu$armInsteadOfLantern(float partialTicks, CallbackInfo ci) {
-		// Backhand's offhand first-person render reuses this method. Do not hijack it: let the
-		// offhand lantern flow through the normal item branch (EQUIPPED_FIRST_PERSON), which draws
-		// it in Backhand's left-hand frame. Hijacking would draw the right empty-hand arm in a
-		// mirrored frame and push everything off screen.
-		if (ItemLanternRenderer.renderingOffhand) {
+		// Only hijack the player's own hand. Offhand mods (Backhand) render through their own
+		// ItemRenderer instance, where the empty-hand arm branch never runs, so hijacking there would
+		// hide the lantern entirely. Flag it instead, and the renderer leaves that view to the
+		// default item rendering.
+		ItemLanternRenderer.firstPersonMainHand = (Object) this == Minecraft.getMinecraft().entityRenderer.itemRenderer;
+		if (!ItemLanternRenderer.firstPersonMainHand) {
 			return;
 		}
 		ItemStack held = this.itemToRender;

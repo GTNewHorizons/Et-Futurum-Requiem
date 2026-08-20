@@ -43,11 +43,11 @@ public class ItemLanternRenderer implements IItemRenderer {
 	public static boolean renderingFirstPersonArm = false;
 
 	/**
-	 * True while Backhand is rendering the lantern in the offhand (set by EFR's late mixins into
-	 * Backhand). The renderer and the first person mixin branch on this to place the lantern for the
-	 * left hand instead of assuming the main-hand pose. Always false when Backhand is absent.
+	 * False while another mod's ItemRenderer instance (an offhand mod such as Backhand) draws the
+	 * first person view. This renderer then declines EQUIPPED_FIRST_PERSON so the lantern falls back
+	 * to the default item rendering there. Set by MixinItemRenderer; stays true without that mixin.
 	 */
-	public static boolean renderingOffhand = false;
+	public static boolean firstPersonMainHand = true;
 
 	/**
 	 * First person arm tilt in radians, added to bipedRightArm.rotateAngleZ at the shoulder joint by
@@ -69,7 +69,10 @@ public class ItemLanternRenderer implements IItemRenderer {
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return type == ItemRenderType.EQUIPPED || type == ItemRenderType.EQUIPPED_FIRST_PERSON;
+		if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
+			return firstPersonMainHand;
+		}
+		return type == ItemRenderType.EQUIPPED;
 	}
 
 	@Override
@@ -103,15 +106,8 @@ public class ItemLanternRenderer implements IItemRenderer {
 				if (DEBUG_AXES) {
 					drawDebugAxes(2.0F);
 				}
-				if (renderingOffhand) {
-					// Backhand renders the offhand lantern through this path in a mirrored
-					// left-hand frame. Its own placement knobs; tune in-game.
-					GL11.glScalef(0.6F, 0.6F, 0.6F);
-					GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-				} else {
-					GL11.glScalef(0.6F, 0.6F, 0.6F);
-					GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-				}
+				GL11.glScalef(0.6F, 0.6F, 0.6F);
+				GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 				break;
 			case EQUIPPED:
 			default:
