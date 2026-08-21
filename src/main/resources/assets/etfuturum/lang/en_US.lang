@@ -2220,7 +2220,7 @@ item.shulker_copper_silver_upgrade.name=Copper to Silver Shulker Box Upgrade
 item.shulker_silver_gold_upgrade.name=Silver to Gold Shulker Box Upgrade
 
 item.etfuturum.coopers_mallet.name=Cooper's Mallet
-item.etfuturum.coopers_mallet.desc=Turns a chest into a barrel and back. What skill!
+item.etfuturum.coopers_mallet.desc=Swaps a chest or barrel for one held in your offhand or beside the mallet. What skill!
 
 item.barrel_vanilla_iron_upgrade.name=Vanilla to Iron Barrel Upgrade
 item.barrel_vanilla_copper_upgrade.name=Vanilla to Copper Barrel Upgrade

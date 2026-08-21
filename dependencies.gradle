@@ -67,6 +67,8 @@ dependencies {
     shadowImplementation('com.github.makamys:MCLib:0.3.7.8') {
         exclude group: "codechicken"
     }
+
+    compileOnly('com.github.GTNewHorizons:Backhand:1.8.11:dev') {transitive = false}
 }
 
 configurations.configureEach {
