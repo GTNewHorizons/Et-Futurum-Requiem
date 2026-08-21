@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.asm.pose;
 
-import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import ganymedes01.etfuturum.core.utils.Logger;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.spongepowered.asm.lib.ClassReader;
@@ -15,9 +14,11 @@ import org.spongepowered.asm.transformers.MixinClassWriter;
 import scala.tools.asm.Opcodes;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class HardcodedPlayerHeightTransformer implements IClassTransformer {
@@ -26,6 +27,7 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
         targets.put(className, new HashSet<>(Arrays.asList(methods)));
     }
     static {
+        // EntityPlayer
         addTarget("com.darkona.adventurebackpack.item.ItemComponent", "placeBoat");
         addTarget("appeng.items.tools.powered.ToolMassCannon", "func_77659_a", "onItemRightClick");
         addTarget("appeng.util.Platform", "rayTrace");
@@ -46,6 +48,18 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
         addTarget("com.kentington.thaumichorizons.common.items.ItemBoatThaumium", "func_77659_a", "onItemRightClick");
         addTarget("com.kentington.thaumichorizons.common.items.ItemBoatGreatwood", "func_77659_a", "onItemRightClick");
         addTarget("com.emoniph.witchery.item.ItemGeneral", "placeBroom");
+        // Entity
+        addTarget("pl.asie.lib.block.BlockBase", "determineRotation");
+        addTarget("com.brandon3055.draconicevolution.common.blocks.machine.FlowGate", "determineOrientation");
+        addTarget("com.brandon3055.draconicevolution.common.utils.Utils", "determineOrientation");
+        addTarget("com.enderio.core.client.render.RenderUtil", "createBillboardMatrix");
+        addTarget("micdoodle8.mods.galacticraft.core.proxy.ClientProxyCore", "orientCamera"); // fsub
+        addTarget("mods.natura.blocks.tech.NetherPistonBase", "determineOrientation");
+        addTarget("openblocks.common.entity.EntityGoldenEye", "targetStructure");
+        addTarget("mods.railcraft.common.util.misc.MiscTools", "getSideClosestToPlayer");
+        addTarget("thaumcraft.common.lib.utils.BlockUtils", "getTargetBlock");
+        addTarget("tb.common.block.BlockRelocator", "determineOrientation");
+        addTarget("twilightforest.block.BlockTFNagastoneEtched", "determineOrientation");
     }
 
     @Override
@@ -59,9 +73,12 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
         ClassNode cn = new ClassNode();
         cr.accept(cn, ClassReader.SKIP_FRAMES);
 
+        HashSet<String> successfulMethods = new HashSet<>();
+        List<MethodNode> attemptedMethods = new ArrayList<>();
         for (MethodNode method : cn.methods)
         {
             if (!patchedMethods.contains(method.name)) continue;
+            attemptedMethods.add(method);
             boolean methodPatched = false;
             for (AbstractInsnNode instruction = method.instructions.getFirst(); instruction != null; instruction = instruction.getNext())
             {
@@ -76,11 +93,18 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
                     }
                 }
             }
-            if (!methodPatched){
-                Logger.warn("Failed to patch hardcoded height in " + transformedName +"."+ method.name + ": target bytecode not found.");
+            if (methodPatched){
+                successfulMethods.add(method.name);
             }
         }
 
+        for (MethodNode method : attemptedMethods)
+        {
+            if (!successfulMethods.contains(method.name))
+            {
+                Logger.warn("Failed to patch hardcoded height in " + transformedName +"."+ method.name + method.desc + ": target bytecode not found.");
+            }
+        }
         MixinClassWriter cw = new MixinClassWriter(MixinClassWriter.COMPUTE_MAXS | MixinClassWriter.COMPUTE_FRAMES);
         cn.accept(cw);
         return cw.toByteArray();
@@ -93,18 +117,41 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
         return next;
     }
 
+    private @Nullable AbstractInsnNode getPrevValidNode(AbstractInsnNode node)
+    {
+        AbstractInsnNode prev = node.getPrevious();
+        while (prev != null && prev.getOpcode() == -1) prev = prev.getPrevious();
+        return prev;
+    }
+
     private boolean isTarget(FieldInsnNode fin)
     {
         AbstractInsnNode curr = getNextValidNode(fin);
-        if (curr == null || curr.getOpcode() != Opcodes.F2D) return false;
-        curr = getNextValidNode(curr);
-        if (curr == null || curr.getOpcode() != Opcodes.DSUB) return false;
-        curr = fin.getPrevious();
-        int limit = 10;
+        boolean isSubFound = false;
+        int limit = 5;
+        while (curr != null && limit -- > 0){
+            int op = curr.getOpcode();
+            if (op == Opcodes.DSUB || op == Opcodes.FSUB)
+            {
+                isSubFound = true;
+                break;
+            }
+            curr = getNextValidNode(curr);
+        }
+        if (!isSubFound) return false;
+        curr = getPrevValidNode(fin);
+        limit = 5;
         while (curr != null && limit-- > 0)
         {
             if (hasTargetConstant(curr)) return true;
-            curr = curr.getPrevious();
+            curr = getPrevValidNode(curr);
+        }
+        curr = getNextValidNode(fin);
+        limit = 5;
+        while (curr != null && limit-- > 0)
+        {
+            if (hasTargetConstant(curr)) return true;
+            curr = getNextValidNode(curr);
         }
         return false;
     }
