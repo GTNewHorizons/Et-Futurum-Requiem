@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.asm.pose;
 import ganymedes01.etfuturum.pose.IPlayerPose;
 import ganymedes01.etfuturum.pose.IPoseablePlayer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class HardcodedPlayerHeightHook {
@@ -16,5 +17,9 @@ public class HardcodedPlayerHeightHook {
             return 1.62f - actualEyeHeight + yOffset;
         }
         return yOffset;
+    }
+    public static double getOrientationThresholdDouble(EntityLivingBase player)
+    {
+        return Math.ceil(player.height);
     }
 }

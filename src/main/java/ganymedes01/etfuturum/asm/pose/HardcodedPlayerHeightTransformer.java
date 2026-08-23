@@ -11,17 +11,17 @@ import org.spongepowered.asm.lib.tree.InsnNode;
 import org.spongepowered.asm.lib.tree.LdcInsnNode;
 import org.spongepowered.asm.lib.tree.MethodInsnNode;
 import org.spongepowered.asm.lib.tree.MethodNode;
+import org.spongepowered.asm.lib.tree.VarInsnNode;
 import org.spongepowered.asm.transformers.MixinClassWriter;
 import scala.tools.asm.Opcodes;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
+// Note: this bytecode matching patterns are fragile, and have only been tested in beta2
 public class HardcodedPlayerHeightTransformer implements IClassTransformer {
     private static final Map<String, HashSet<String>> targets = new HashMap<>();
     private static void addTarget(String className, String... methods) {
@@ -86,6 +86,8 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
             String mappedMethodName = FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(name, method.name, method.desc);
             String mappedMethodDesc = FMLDeobfuscatingRemapper.INSTANCE.mapMethodDesc(method.desc);
             if (!patchedMethods.contains(mappedMethodName + mappedMethodDesc)) continue;
+            boolean isDetermineOrientation = "determineOrientation".equals(mappedMethodName) || "determineRotation".equals(mappedMethodName);
+            int entityIndex = (method.access & Opcodes.ACC_STATIC) != 0 ? 4 : 5;
             boolean methodPatched = false;
             for (AbstractInsnNode instruction = method.instructions.getFirst(); instruction != null; instruction = instruction.getNext())
             {
@@ -101,12 +103,28 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
                             method.instructions.insert(instruction, hook);
                         }
                     }
+                } else if (methodPatched && isDetermineOrientation && instruction.getOpcode() == Opcodes.LDC) {
+                    Object cst = ((LdcInsnNode) instruction).cst;
+                    // this probably should be done in Hodgepodge, refactoring it with modern version logic
+                    // match > 2.0D
+                    if (cst instanceof Double d && d == 2.0D) {
+                        AbstractInsnNode next = getNextValidNode(instruction);
+                        if (next != null && (next.getOpcode() == Opcodes.DCMPL)) {
+                            next = getNextValidNode(next);
+                            if (next != null && next.getOpcode() == Opcodes.IFLE) {
+                                method.instructions.insertBefore(instruction, new VarInsnNode(Opcodes.ALOAD, entityIndex));
+                                MethodInsnNode hook = new MethodInsnNode(Opcodes.INVOKESTATIC, "ganymedes01/etfuturum/asm/pose/HardcodedPlayerHeightHook", "getOrientationThresholdDouble", "(Lnet/minecraft/entity/EntityLivingBase;)D", false);
+                                method.instructions.set(instruction, hook);
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             if (!methodPatched){
-                Logger.warn("Failed to patch hardcoded height in " + transformedName +"."+ method.name + method.desc + ": target bytecode not found.");
+                Logger.warn("Failed to patch hardcoded height in " + transformedName +"."+ mappedMethodName + mappedMethodDesc + " target bytecode not found.");
             } else {
-                Logger.info("succeed to patch" + transformedName);
+                Logger.debug("Succeed to patch " + transformedName);
             }
         }
 
@@ -165,8 +183,8 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
     {
         if (instruction.getOpcode() != Opcodes.LDC) return false;
         Object cst = ((LdcInsnNode) instruction).cst;
-        if (cst instanceof Double && ((Double) cst == 1.62d || (Double) cst == 1.82d)) return true;
-        if (cst instanceof Float && ((Float) cst == 1.62f || (Float) cst == 1.82f)) return true;
+        if (cst instanceof Double d && (d == 1.62d || d == 1.82d)) return true;
+        if (cst instanceof Float f && (f == 1.62f || f == 1.82f)) return true;
         return false;
     }
 }
