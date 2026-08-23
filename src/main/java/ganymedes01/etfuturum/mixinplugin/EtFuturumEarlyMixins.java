@@ -306,6 +306,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("pose.client.MixinEntityClientPlayerMP");
 				mixins.add("pose.client.MixinEntityRenderer");
 				mixins.add("pose.client.NetHandlerPlayClientMixin");
+				mixins.add("pose.client.MixinEntityPlayerSP");
 			}
 		}
 
