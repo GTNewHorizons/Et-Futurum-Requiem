@@ -21,7 +21,10 @@ public class MixinMinecraftServer {
     private void etfu$beginSpawnTracking(CallbackInfo ci) {
         WorldServer world = worldServers[0];
         ChunkCoordinates spawn = world.getSpawnPoint();
-        LoadingScreenStateTracker.beginIfNeeded();
+        // Hard reset on every world's spawn load so a new/loaded world never inherits the
+        // previous world's chunk map or stuck progress. This runs on the integrated server
+        // regardless of client-side mods, so it works even where the launch bridge does not.
+        LoadingScreenStateTracker.begin();
         LoadingScreenStateTracker.updateChunkRadius(SpawnChunkProgress.SPAWN_CHUNK_RADIUS);
         SpawnChunkProgress.begin(spawn.posX, spawn.posZ);
     }

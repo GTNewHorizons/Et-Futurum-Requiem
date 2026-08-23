@@ -17,7 +17,7 @@ public class MixinChunkProviderServer {
     private void etfu$trackDiskLoaded(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
         Chunk chunk = cir.getReturnValue();
         if (chunk != null && chunk.isTerrainPopulated) {
-            LoadingScreenWorldGenTracker.markFull(chunkX, chunkZ);
+            LoadingScreenWorldGenTracker.markTerrain(chunkX, chunkZ, chunk);
         }
     }
 
@@ -29,6 +29,7 @@ public class MixinChunkProviderServer {
             )
     )
     private void etfu$markPopulated(IChunkProvider provider, int chunkX, int chunkZ, CallbackInfo ci) {
-        LoadingScreenWorldGenTracker.markFull(chunkX, chunkZ);
+        Chunk chunk = ((ChunkProviderServer) (Object) this).provideChunk(chunkX, chunkZ);
+        LoadingScreenWorldGenTracker.markTerrain(chunkX, chunkZ, chunk);
     }
 }
