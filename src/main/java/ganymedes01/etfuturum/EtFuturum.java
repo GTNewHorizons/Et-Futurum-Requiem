@@ -313,10 +313,12 @@ public class EtFuturum {
 
 		if(ConfigMixins.enableModernSwimming && SwimmingHooks.isDataWatcherFlagAvailable())
 		{
-			PlayerPoseManager.register(PlayerPose.STANDING);
-			PlayerPoseManager.register(PlayerPose.CROUCHING);
 			PlayerPoseManager.register(PlayerPose.CRAWLING);
 			PlayerPoseManager.register(PlayerPose.SWIMMING);
+		}
+		if (ConfigMixins.enableModernSneaking)
+		{
+			PlayerPoseManager.register(PlayerPose.CROUCHING);
 		}
 		if (ConfigMixins.enableElytra)
 		{
@@ -324,6 +326,7 @@ public class EtFuturum {
 		}
 		if (PlayerPoseManager.isEnabled())
 		{
+			PlayerPoseManager.register(PlayerPose.STANDING);
 			PlayerPoseManager.register(PlayerPose.SLEEPING);
 			PlayerPoseManager.register(PlayerPose.DEATH);
 		}

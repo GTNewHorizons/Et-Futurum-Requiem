@@ -18,16 +18,14 @@ public abstract class MixinEntityClientPlayerMP {
         float standingEyeHeight = PlayerPose.STANDING.getEyeHeight();
         float targetYOffset = standingEyeHeight - actualEyeHeight;
         targetYOffset = Math.min(targetYOffset, standingEyeHeight);
-        if (Math.abs(player.yOffset - actualEyeHeight) <= 0.001F) {
-            p.etfu$setCurrentYOffset(targetYOffset);
-            return;
-        }
         float currentYOffset = p.etfu$getCurrentYOffset();
-        if (Math.abs(targetYOffset - currentYOffset) <= 0.001F) {
-            player.yOffset = standingEyeHeight - targetYOffset;
-            return;
+        boolean shouldSnap = Math.abs(player.yOffset - actualEyeHeight) <= 0.001F || Math.abs(targetYOffset - currentYOffset) <= 0.001F;
+        if (shouldSnap)
+        {
+            currentYOffset = targetYOffset;
+        } else {
+            currentYOffset += (targetYOffset - currentYOffset) * 0.5F;
         }
-        currentYOffset += (targetYOffset - currentYOffset) * 0.5F;
         p.etfu$setCurrentYOffset(currentYOffset);
         player.yOffset = standingEyeHeight - currentYOffset;
     }

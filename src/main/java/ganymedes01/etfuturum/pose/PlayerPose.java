@@ -66,7 +66,7 @@ public class PlayerPose {
 
         @Override
         public boolean canApply(EntityPlayer player) {
-            return ConfigMixins.enableModernSneaking && ((IPlayerSwimming) player).etfu$isActuallySneaking() && !player.capabilities.isFlying && !player.isOnLadder();
+            return ((IPlayerSwimming) player).etfu$isActuallySneaking() && !player.capabilities.isFlying && !player.isOnLadder();
         }
 
         @Override
@@ -142,7 +142,7 @@ public class PlayerPose {
 
         @Override
         public boolean canApply(EntityPlayer player) {
-            return ConfigMixins.enableElytra && player instanceof IElytraPlayer && ((IElytraPlayer) player).etfu$isElytraFlying();
+            return player instanceof IElytraPlayer && ((IElytraPlayer) player).etfu$isElytraFlying();
         }
     }
 
