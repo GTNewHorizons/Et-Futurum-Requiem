@@ -1,5 +1,6 @@
 package ganymedes01.etfuturum.pose;
 
+import ganymedes01.etfuturum.EtFuturum;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -25,7 +26,7 @@ public class PlayerPoseManager {
             }
         }
         if (deserdPose == null) deserdPose = PlayerPose.STANDING;
-        if (player.noClip && !(player instanceof EntityOtherPlayerMP) || player.isRiding() || isPoseClear(player, deserdPose)) {
+        if (player.noClip && !EtFuturum.proxy.isClientOtherPlayer(player) || player.isRiding() || isPoseClear(player, deserdPose)) {
             return deserdPose;
         }
         for (int i = poses.size() - 1; i >= 0; i--) {
