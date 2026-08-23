@@ -4,6 +4,7 @@ import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import ganymedes01.etfuturum.core.utils.Logger;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.spongepowered.asm.lib.ClassReader;
+import org.spongepowered.asm.lib.Type;
 import org.spongepowered.asm.lib.tree.AbstractInsnNode;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.lib.tree.FieldInsnNode;
@@ -87,7 +88,6 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
             String mappedMethodDesc = FMLDeobfuscatingRemapper.INSTANCE.mapMethodDesc(method.desc);
             if (!patchedMethods.contains(mappedMethodName + mappedMethodDesc)) continue;
             boolean isDetermineOrientation = "determineOrientation".equals(mappedMethodName) || "determineRotation".equals(mappedMethodName);
-            int entityIndex = (method.access & Opcodes.ACC_STATIC) != 0 ? 4 : 5;
             boolean methodPatched = false;
             for (AbstractInsnNode instruction = method.instructions.getFirst(); instruction != null; instruction = instruction.getNext())
             {
@@ -112,9 +112,25 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
                         if (next != null && (next.getOpcode() == Opcodes.DCMPL)) {
                             next = getNextValidNode(next);
                             if (next != null && next.getOpcode() == Opcodes.IFLE) {
-                                method.instructions.insertBefore(instruction, new VarInsnNode(Opcodes.ALOAD, entityIndex));
-                                MethodInsnNode hook = new MethodInsnNode(Opcodes.INVOKESTATIC, "ganymedes01/etfuturum/asm/pose/HardcodedPlayerHeightHook", "getOrientationThresholdDouble", "(Lnet/minecraft/entity/EntityLivingBase;)D", false);
-                                method.instructions.set(instruction, hook);
+                                int entityIndex = -1;
+                                int currentIndex = (method.access & Opcodes.ACC_STATIC) != 0 ? 0 : 1;
+                                Type[] args = Type.getArgumentTypes(method.desc);
+                                for (Type type : args)
+                                {
+                                    if ("net/minecraft/entity/EntityLivingBase".equals(type.getInternalName())) {
+                                        entityIndex = currentIndex;
+                                        break;
+                                    }
+                                    currentIndex += type.getSize();
+                                }
+                                if (entityIndex != -1) {
+                                    method.instructions.insertBefore(instruction, new VarInsnNode(Opcodes.ALOAD, entityIndex));
+                                    MethodInsnNode hook = new MethodInsnNode(Opcodes.INVOKESTATIC, "ganymedes01/etfuturum/asm/pose/HardcodedPlayerHeightHook", "getOrientationThresholdDouble", "(Lnet/minecraft/entity/EntityLivingBase;)D", false);
+                                    method.instructions.set(instruction, hook);
+                                }
+                                else {
+                                    Logger.warn(String.format("Found hardcoded 2.0D threshold in %s.%s%s, but can't locate Entity parameter", transformedName, mappedMethodName, mappedMethodDesc));
+                                }
                             }
                         }
                         break;
@@ -122,7 +138,7 @@ public class HardcodedPlayerHeightTransformer implements IClassTransformer {
                 }
             }
             if (!methodPatched){
-                Logger.warn("Failed to patch hardcoded height in " + transformedName +"."+ mappedMethodName + mappedMethodDesc + " target bytecode not found.");
+                Logger.warn(String.format("Failed to patch hardcoded height in %s.%s%s,target bytecode not found.", transformedName, mappedMethodName, mappedMethodDesc));
             } else {
                 Logger.debug("Succeed to patch " + transformedName);
             }
