@@ -1,6 +1,8 @@
 package ganymedes01.etfuturum.items;
 
 import com.github.bsideup.jabel.Desugar;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.blocks.BlockBarrel;
 import ganymedes01.etfuturum.compat.CompatBackhand;
 import ganymedes01.etfuturum.compat.CompatIronChest;
@@ -17,6 +19,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -41,6 +44,18 @@ public class ItemCoopersMallet extends BaseItem {
 	@Override
 	public String getTextureDomain() {
 		return Reference.MOD_ID;
+	}
+
+	@SideOnly(Side.CLIENT)
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer player, List<String> toolTip, boolean advancedToolTips) {
+		if (shouldAddTooltip()) {
+			if (ModsList.BACKHAND.isLoaded()) {
+				toolTip.add(StatCollector.translateToLocal(getUnlocalizedName() + ".desc.backhand"));
+			} else {
+				toolTip.add(StatCollector.translateToLocal(getUnlocalizedName() + ".desc"));
+			}
+		}
 	}
 
 	/**
