@@ -67,6 +67,10 @@ public class ItemCoopersMallet extends BaseItem {
 			return false;
 		}
 
+		if (!player.canPlayerEdit(x, y, z, side, stack)) {
+			return false;
+		}
+
 		Existing from = read(world, x, y, z);
 		if (from == null) {
 			return false;
