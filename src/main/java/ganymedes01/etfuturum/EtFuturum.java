@@ -27,6 +27,7 @@ import ganymedes01.etfuturum.api.CompostingRegistry;
 import ganymedes01.etfuturum.api.DeepslateOreRegistry;
 import ganymedes01.etfuturum.api.HoeRegistry;
 import ganymedes01.etfuturum.api.MultiBlockSoundRegistry;
+import ganymedes01.etfuturum.api.DripOperationRegistry;
 import ganymedes01.etfuturum.api.PistonBehaviorRegistry;
 import ganymedes01.etfuturum.api.RawOreRegistry;
 import ganymedes01.etfuturum.api.StrippedLogRegistry;
@@ -442,6 +443,7 @@ public class EtFuturum {
 		CompostingRegistry.init();
 		BeePlantRegistry.init();
 		PistonBehaviorRegistry.init();
+		DripOperationRegistry.init();
 
 		if (ModsList.TINKERS_CONSTRUCT.isLoaded()) {
 			CompatTinkersConstruct.postInit();

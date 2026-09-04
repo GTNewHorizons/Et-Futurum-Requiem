@@ -15,6 +15,7 @@ import ganymedes01.etfuturum.world.generate.decorate.WorldGenCaveVines;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenGlowLichen;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenPinkPetals;
+import ganymedes01.etfuturum.world.generate.feature.WorldGenDripstone;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -71,6 +72,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator glowLichenGen;
 	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
+	protected IWorldGenerator dripstoneGen;
 
 	private List<BiomeGenBase> fossilBiomes;
 	private List<BiomeGenBase> berryBushBiomes;
@@ -183,6 +185,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			}
 
 			mudBiomes = Lists.newArrayList(BiomeDictionary.getBiomesForType(Type.SWAMP));
+		}
+
+		if (ModBlocks.DRIPSTONE_BLOCK.isEnabled() && ConfigWorld.dripstoneWorldgen) {
+			dripstoneGen = new WorldGenDripstone();
 		}
 	}
 
@@ -301,6 +307,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				if (y > 0 && mudBiomes.contains(world.getBiomeGenForCoords(x, z))) {
 					mudGen.generate(world, rand, x, world.getTopSolidOrLiquidBlock(x, z), z);
 				}
+			}
+
+			if (dripstoneGen != null) {
+				dripstoneGen.generate(rand, chunkX, chunkZ, world, chunkGenerator, chunkProvider);
 			}
 
 			if (fossilGen != null && rand.nextInt(64) == 0 && ArrayUtils.contains(ConfigWorld.fossilDimensionBlacklist, world.provider.dimensionId) == ConfigWorld.fossilDimensionBlacklistAsWhitelist) {
