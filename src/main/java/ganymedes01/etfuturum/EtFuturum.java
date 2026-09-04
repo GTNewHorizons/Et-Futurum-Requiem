@@ -1084,6 +1084,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "block.metal_pressure_plate.click_off", "block");
 		config.addSoundEvent(ver, "block.metal_pressure_plate.click_on", "block");
 
+		config.addSoundEvent(ver, "particle.soul_escape", "block");
 		//Automatically register block sounds for AssetDirector, but only if they contain the MC version (which means it needs to be registered here)
 		//Then we remove the mc version prefix and register that sound.
 
