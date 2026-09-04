@@ -41,6 +41,7 @@ import ganymedes01.etfuturum.client.renderer.entity.ArmourStandRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.BeeRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.BrownMooshroomRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.ChestBoatRenderer;
+import ganymedes01.etfuturum.client.renderer.entity.CushionRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.EndermiteRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.FoxRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.HuskRenderer;
@@ -76,6 +77,7 @@ import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
 import ganymedes01.etfuturum.entities.EntityArmourStand;
 import ganymedes01.etfuturum.entities.EntityBee;
 import ganymedes01.etfuturum.entities.EntityBrownMooshroom;
+import ganymedes01.etfuturum.entities.EntityCushion;
 import ganymedes01.etfuturum.entities.EntityEndermite;
 import ganymedes01.etfuturum.entities.EntityFox;
 import ganymedes01.etfuturum.entities.EntityHusk;
@@ -216,6 +218,7 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityBee.class, new BeeRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityNewSnowGolem.class, new NewSnowGolemRenderer());
 		RenderingRegistry.registerEntityRenderingHandler(EntityFox.class, new FoxRenderer());
+		RenderingRegistry.registerEntityRenderingHandler(EntityCushion.class, new CushionRenderer());
 
 		RenderingRegistry.registerEntityRenderingHandler(EntityPig.class, new TechnobladeCrownRenderer());
 
