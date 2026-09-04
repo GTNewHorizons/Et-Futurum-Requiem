@@ -9,32 +9,35 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.client.gui.inventory.GuiEditWoodSign;
 import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import net.minecraft.block.Block;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.world.World;
 
 public class WoodSignOpenHandler implements IMessageHandler<WoodSignOpenMessage, IMessage> {
 
-	@SideOnly(Side.CLIENT)
 	@Override
 	public IMessage onMessage(WoodSignOpenMessage message, MessageContext ctx) {
-		WorldClient world = FMLClientHandler.instance().getClient().theWorld;
-		if (world.blockExists(message.tileX, message.tileY, message.tileZ)) {
-			TileEntity tileEntity = FMLClientHandler.instance().getClient().theWorld.getTileEntity(message.tileX, message.tileY, message.tileZ);
-
-			if (!(tileEntity instanceof TileEntityWoodSign)) {
-				tileEntity = new TileEntityWoodSign();
-				tileEntity.blockType = Block.getBlockById(message.id);
-				tileEntity.setWorldObj(FMLClientHandler.instance().getClient().theWorld);
-				tileEntity.xCoord = message.tileX;
-				tileEntity.yCoord = message.tileY;
-				tileEntity.zCoord = message.tileZ;
-			}
-
-			tileEntity.markDirty();
-
-			FMLClientHandler.instance().getClient().displayGuiScreen(new GuiEditWoodSign((TileEntityWoodSign) tileEntity));
-		}
+		handleMessage(message);
 		return null;
 	}
 
+	@SideOnly(Side.CLIENT)
+	private void handleMessage(WoodSignOpenMessage message) {
+		World world = FMLClientHandler.instance().getClient().theWorld;
+		TileEntity tileEntity = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
+
+		if (!(tileEntity instanceof TileEntitySign)) {
+			Block block = Block.getBlockById(message.id);
+			tileEntity = block instanceof ganymedes01.etfuturum.blocks.BlockWoodSign
+					? new TileEntityWoodSign() : new TileEntitySign();
+			tileEntity.blockType = block;
+			tileEntity.setWorldObj(world);
+			tileEntity.xCoord = message.tileX;
+			tileEntity.yCoord = message.tileY;
+			tileEntity.zCoord = message.tileZ;
+		}
+
+		tileEntity.markDirty();
+		FMLClientHandler.instance().getClient().displayGuiScreen(new GuiEditWoodSign((TileEntitySign) tileEntity, message.front));
+	}
 }
