@@ -37,6 +37,7 @@ container.enchant.clue=%s . . . ?
 container.etfuturum.blast_furnace=Плавильная печь
 container.etfuturum.smoker=Коптильня
 container.etfuturum.barrel=Бочка
+etfuturum.spectator.flyspeed=Скорость полёта: %s%%
 container.etfuturum.shulker_box=Шалкеровый ящик
 container.etfuturum.chest_boat=Лодка с сундуком
 
