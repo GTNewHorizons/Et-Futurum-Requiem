@@ -77,4 +77,8 @@ public class SpawnChunkProgress {
     private static long key(int x, int z) {
         return (long) x & 4294967295L | ((long) z & 4294967295L) << 32;
     }
+
+    public static boolean isActive() {
+        return active;
+    }
 }
