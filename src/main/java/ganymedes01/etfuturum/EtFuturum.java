@@ -41,6 +41,7 @@ import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
 
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
+import ganymedes01.etfuturum.compat.CompatBiomesOPlenty;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.compat.CompatRPLEEventHandler;
 import ganymedes01.etfuturum.compat.CompatTinkersConstruct;
@@ -324,6 +325,9 @@ public class EtFuturum {
 		if (ModsList.WAILA.isLoaded()) {
 			CompatWaila.register();
 		}
+
+		// Restore JUNGLE tags for BOP's vanilla biome replacements before biome-based registrations take snapshots.
+		CompatBiomesOPlenty.registerOverriddenJungleBiomeTypes();
 
 		proxy.registerEvents();
 		proxy.registerEntities();
@@ -935,6 +939,17 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "entity.fox.death", "neutral");
 		config.addSoundEvent(ver, "entity.fox.bite", "neutral");
 		config.addSoundEvent(ver, "entity.fox.sniff", "neutral");
+		config.addSoundEvent(ver, "entity.panda.ambient", "neutral");
+		config.addSoundEvent(ver, "entity.panda.aggressive_ambient", "neutral");
+		config.addSoundEvent(ver, "entity.panda.worried_ambient", "neutral");
+		config.addSoundEvent(ver, "entity.panda.bite", "neutral");
+		config.addSoundEvent(ver, "entity.panda.eat", "neutral");
+		config.addSoundEvent(ver, "entity.panda.cant_breed", "neutral");
+		config.addSoundEvent(ver, "entity.panda.death", "neutral");
+		config.addSoundEvent(ver, "entity.panda.hurt", "neutral");
+		config.addSoundEvent(ver, "entity.panda.pre_sneeze", "neutral");
+		config.addSoundEvent(ver, "entity.panda.sneeze", "neutral");
+		config.addSoundEvent(ver, "entity.panda.step", "neutral");
 
 
 		config.addSoundEvent(ver, "entity.player.hurt_on_fire", "player");

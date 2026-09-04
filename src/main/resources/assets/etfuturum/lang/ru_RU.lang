@@ -123,6 +123,16 @@ subtitle.entity.witch.death=Ведьма погибает
 subtitle.entity.squid.ambient=Спрут плавает
 subtitle.entity.squid.hurt=Спрут получает урон
 subtitle.entity.squid.death=Спрут погибает
+subtitle.entity.panda.ambient=Панда фыркает
+subtitle.entity.panda.aggressive_ambient=Панда пыхтит
+subtitle.entity.panda.worried_ambient=Панда скулит
+subtitle.entity.panda.bite=Панда кусает
+subtitle.entity.panda.eat=Панда ест
+subtitle.entity.panda.cant_breed=Панда ноет
+subtitle.entity.panda.death=Панда погибает
+subtitle.entity.panda.hurt=Панда ранена
+subtitle.entity.panda.pre_sneeze=Панда чешет нос
+subtitle.entity.panda.sneeze=Панда чихает
 
 subtitle.entity.boat.paddle_water=Звук весла по воде
 subtitle.entity.boat.paddle_land=Звук весла по земле
@@ -297,6 +307,7 @@ entity.etfuturum.guardian.name=Страж
 entity.etfuturum.elder_guardian.name=Древний страж
 entity.etfuturum.polar_bear.name=Белый медведь
 entity.etfuturum.bee.name=Пчела
+entity.etfuturum.panda.name=Панда
 
 # Предметы (Items)
 item.etfuturum.mutton.name=Сырая баранина
