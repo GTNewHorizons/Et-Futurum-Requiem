@@ -10,8 +10,12 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.lib.Reference;
+import ganymedes01.etfuturum.pose.PlayerPose;
+import ganymedes01.etfuturum.pose.PlayerPoseManager;
+import ganymedes01.etfuturum.swimming.SwimmingHooks;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
@@ -116,6 +120,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("closedrops.MixinEntityPlayerMP");
 		}
 
+		boolean enablePoseSystem = false;
 		if (ConfigMixins.enableElytra) {
 			mixins.add("backlytra.MixinEntityPlayer");
 			mixins.add("backlytra.MixinEntityLivingBase");
@@ -129,8 +134,8 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("backlytra.client.MixinEntityPlayerSP");
 				mixins.add("backlytra.client.MixinRenderPlayer");
 				mixins.add("backlytra.client.MixinModelBiped");
-				mixins.add("backlytra.client.MixinEntityRenderer");
 			}
+			enablePoseSystem = true;
 		}
 
 		if (ConfigMixins.enableDoWeatherCycle) {
@@ -277,6 +282,37 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("horsewater.MixinEntityHorse");
 		}
 
+		boolean swimmingFlagAvailable = SwimmingHooks.isDataWatcherFlagAvailable();
+		if (ConfigMixins.enableModernSwimming && swimmingFlagAvailable) {
+			mixins.add("swimming.MixinEntity");
+			mixins.add("swimming.MixinEntityLivingBase");
+			mixins.add("swimming.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("swimming.client.MixinEntityClientPlayerMP");
+				mixins.add("swimming.client.MixinEntityPlayerSP");
+				mixins.add("swimming.client.MixinModelBiped");
+				mixins.add("swimming.client.MixinPlayerControllerMP");
+				mixins.add("swimming.client.MixinRenderPlayer");
+			}
+			enablePoseSystem = true;
+		} else if (ConfigMixins.enableModernSwimming) {
+			Logger.warn("Modern swimming mixins are disabled because swimmingDataWatcherFlag is reserved or conflicts with elytraDataWatcherFlag.");
+		}
+
+		if (enablePoseSystem)
+		{
+			mixins.add("pose.MixinEntity");
+			mixins.add("pose.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("pose.client.C04PacketPlayerPositionMixin");
+				mixins.add("pose.client.C06PacketPlayerPosLookMixin");
+				mixins.add("pose.client.MixinEntityClientPlayerMP");
+				mixins.add("pose.client.MixinEntityRenderer");
+				mixins.add("pose.client.NetHandlerPlayClientMixin");
+				mixins.add("pose.client.MixinEntityPlayerSP");
+			}
+		}
+
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
 		}
@@ -345,7 +381,7 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return null;
+		return new String[] {"ganymedes01.etfuturum.asm.pose.HardcodedPlayerHeightTransformer"};
 	}
 
 	@Override
