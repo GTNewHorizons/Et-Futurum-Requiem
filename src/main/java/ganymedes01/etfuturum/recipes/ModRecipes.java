@@ -797,12 +797,17 @@ public class ModRecipes {
 		}
 		addShapelessRecipe(new ItemStack(Items.dye, 9, 15), ModBlocks.BONE.newItemStack());
 
-		if (!ModsList.GTNH.isLoaded()) {
+		if (ModBlocks.CONCRETE_POWDER.isEnabled()) {
 			for (int i = 0; i < ore_dyes.length; i++) {
 				int dye = ~i & 15;
 				addShapelessRecipe(ModBlocks.CONCRETE_POWDER.newItemStack(8, i),
 						ore_dyes[dye], new ItemStack(Blocks.sand, 1, 0), new ItemStack(Blocks.sand, 1, 0), new ItemStack(Blocks.sand, 1, 0),
 						new ItemStack(Blocks.sand, 1, 0), Blocks.gravel, Blocks.gravel, Blocks.gravel, Blocks.gravel);
+			}
+		}
+
+		if (!ModsList.GTNH.isLoaded()) {
+			for (int i = 0; i < ore_dyes.length; i++) {
 				addSmelting(new ItemStack(Blocks.stained_hardened_clay, 1, i), ModBlocks.TERRACOTTA[i].newItemStack(), 0.1F);
 			}
 		}
