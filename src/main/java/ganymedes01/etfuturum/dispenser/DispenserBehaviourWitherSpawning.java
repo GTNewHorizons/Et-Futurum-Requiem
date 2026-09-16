@@ -27,23 +27,13 @@ public class DispenserBehaviourWitherSpawning extends BehaviorDefaultDispenseIte
         int y = coords.getYInt() + facing.getFrontOffsetY();
         int z = coords.getZInt() + facing.getFrontOffsetZ();
 
-        if (!world.isAirBlock(x, y, z)
-                || !checkWitherSpawnPotential(world, x, y, z)) {
+        if (!world.isAirBlock(x, y, z)) {
             return super.dispenseStack(coords, stack);
         }
 
-        world.setBlock(x, y, z, Blocks.skull, 0, 2);
         boolean flag = false;
-        TileEntity te = world.getTileEntity(x, y, z);
-        if (te instanceof TileEntitySkull) {
+        if (checkWitherSpawnPotential(world, x, y, z)) {
             flag = true;
-            TileEntitySkull skull = (TileEntitySkull) te;
-            // wither skeleton skull
-            skull.func_152107_a(1);
-            // rotate
-            skull.func_145903_a(facing.ordinal());
-            // try to spawn the wither
-            ((BlockSkull) Blocks.skull).func_149965_a(world, x, y, z, skull);
         }
 
         for (int i = x; i < x + 3; i++) {
@@ -63,11 +53,23 @@ public class DispenserBehaviourWitherSpawning extends BehaviorDefaultDispenseIte
         }
 
         if (!flag) {
-            world.setBlockToAir(x, y, z);
             return super.dispenseStack(coords, stack);
         }
 
-        stack.splitStack(1);
-        return stack;
+        world.setBlock(x, y, z, Blocks.skull, 0, 2);
+        TileEntity te = world.getTileEntity(x, y, z);
+        if (te instanceof TileEntitySkull skull) {
+            // wither skeleton skull
+            skull.func_152107_a(1);
+            // rotate
+            skull.func_145903_a(facing.ordinal());
+            // try to spawn wither
+            ((BlockSkull) Blocks.skull).func_149965_a(world, x, y, z, skull);
+
+            stack.splitStack(1);
+            return stack;
+        }
+
+        return super.dispenseStack(coords, stack);
     }
 }
