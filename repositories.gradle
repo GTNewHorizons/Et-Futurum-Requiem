@@ -9,11 +9,11 @@ repositories {
         name = "GTNH Maven"
         url = "https://nexus.gtnewhorizons.com/repository/public/"
     }
+    maven { url 'https://jitpack.io' }
     maven {
         name = "GTMEGA/FalsePattern Maven"
         url = "https://mvn.falsepattern.com/releases/"
     }
-	maven { url 'https://jitpack.io' }
 }
 
 
