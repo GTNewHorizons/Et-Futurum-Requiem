@@ -35,6 +35,7 @@ import ganymedes01.etfuturum.entities.EntityBee;
 import ganymedes01.etfuturum.entities.EntityBoostingFireworkRocket;
 import ganymedes01.etfuturum.entities.EntityBrownMooshroom;
 import ganymedes01.etfuturum.entities.EntityEndermite;
+import ganymedes01.etfuturum.entities.EntityFallingDripstone;
 import ganymedes01.etfuturum.entities.EntityFox;
 import ganymedes01.etfuturum.entities.EntityHusk;
 import ganymedes01.etfuturum.entities.EntityItemUninflammable;
@@ -268,9 +269,9 @@ public class CommonProxy implements IGuiHandler {
 			}
 		}
 
-//      {
-//          ModEntityList.registerEntity(EntityFallingDripstone.class, "falling_dripstone", 18, EtFuturum.instance, 64, 1, true);
-//      }
+		if (ConfigBlocksItems.enableDripstone) {
+			ModEntityList.registerEntity(EntityFallingDripstone.class, "falling_dripstone", 18, EtFuturum.instance, 64, 1, true);
+		}
 
 		if (ConfigBlocksItems.enableNewBoats) {
 			ModEntityList.registerEntity(EntityNewBoat.class, "new_boat", 13, EtFuturum.instance, 64, 1, true);

@@ -727,6 +727,10 @@ public class ModRecipes {
 		GameRegistry.addRecipe(new RecipeDuplicatePattern());
 		GameRegistry.addRecipe(new RecipeAddPattern());
 
+		if (ConfigBlocksItems.enableDripstone) {
+			addShapedRecipe(new ItemStack(ModBlocks.DRIPSTONE_BLOCK.get()), "xx", "xx", 'x', new ItemStack(ModBlocks.POINTED_DRIPSTONE.get()));
+		}
+
 		addShapedRecipe(ModItems.WOODEN_ARMORSTAND.newItemStack(), "xxx", " x ", "xyx", 'x', "stickWood", 'y', new ItemStack(Blocks.stone_slab));
 
 		addShapedRecipe(ModItems.RABBIT_STEW.newItemStack(), " R ", "CPM", " B ", 'R', ModItems.RABBIT_COOKED.newItemStack(), 'C', Items.carrot, 'P', Items.baked_potato, 'M', Blocks.brown_mushroom, 'B', "bowlWood");
