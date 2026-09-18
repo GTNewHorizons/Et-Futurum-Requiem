@@ -59,7 +59,7 @@ public class BlockWoodSign extends BlockSign {
 		} else {
 			setStepSound(Block.soundTypeWood);
 		}
-		if (block != Blocks.planks && standing) { //Only apply this logic to new signs; old ones use a separate item.
+		if (block != Blocks.planks && standing) {
 			setCreativeTab(EtFuturum.creativeTabBlocks);
 		}
 	}
@@ -74,7 +74,6 @@ public class BlockWoodSign extends BlockSign {
 		if (baseBlock == Blocks.planks) {
 			return ModItems.OLD_SIGN_ITEMS[this.meta - 1].get();
 		}
-		//Only apply this logic to new signs; old ones use a separate item.
 		return Item.getItemFromBlock(standingSign);
 	}
 
