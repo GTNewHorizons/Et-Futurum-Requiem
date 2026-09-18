@@ -9,9 +9,11 @@ public class ConfigEnchantsPotions extends ConfigBase {
 	public static boolean enableFrostWalker;
 	public static boolean enableMending;
 	public static boolean enableSwiftSneak;
+	public static boolean enableSoulSpeed;
 	public static int mendingID;
 	public static int frostWalkerID;
 	public static int swiftSneakID;
+	public static int soulSpeedID;
 	public static int levitationID;
 
 	static final String catEnchants = "enchantments";
@@ -36,6 +38,8 @@ public class ConfigEnchantsPotions extends ConfigBase {
 		mendingID = getInt("mendingID", catEnchants, 201, 0, Short.MAX_VALUE, "");
 		enableSwiftSneak = getBoolean("swiftSneak", catEnchants, true, "");
 		swiftSneakID = getInt("swiftSneakID", catEnchants, 202, 0, Short.MAX_VALUE, "");
+		enableSoulSpeed = getBoolean("soulSpeed", catEnchants, true, "");
+		soulSpeedID = getInt("soulSpeedID", catEnchants, 203, 0, Short.MAX_VALUE, "");
 
 		//potions
 		levitationID = getInt("levitationID", catPotions, 27, 0, Short.MAX_VALUE, "Since this is essential for Shulkers, this is tied to Shulkers being enabled instead of having its own option.");
