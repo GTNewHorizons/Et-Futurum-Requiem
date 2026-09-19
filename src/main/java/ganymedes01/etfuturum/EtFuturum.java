@@ -53,6 +53,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
+import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.core.handlers.ServerEventHandler;
@@ -79,10 +80,13 @@ import ganymedes01.etfuturum.network.StartElytraFlyingHandler;
 import ganymedes01.etfuturum.network.StartElytraFlyingMessage;
 import ganymedes01.etfuturum.network.WoodSignOpenHandler;
 import ganymedes01.etfuturum.network.WoodSignOpenMessage;
+import ganymedes01.etfuturum.pose.PlayerPose;
+import ganymedes01.etfuturum.pose.PlayerPoseManager;
 import ganymedes01.etfuturum.potion.ModPotions;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.recipes.SmithingTableRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
+import ganymedes01.etfuturum.swimming.SwimmingHooks;
 import ganymedes01.etfuturum.world.EtFuturumLateWorldGenerator;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import ganymedes01.etfuturum.world.end.dimension.DimensionProviderEFREnd;
@@ -310,9 +314,28 @@ public class EtFuturum {
 			CompatRPLEEventHandler.registerRPLECompat();
 		}
 
-        if (ConfigEntities.enableModernWither) {
-            BlockDispenser.dispenseBehaviorRegistry.putObject(Items.skull, new DispenserBehaviourWitherSpawning());
-        }
+		if(ConfigMixins.enableModernSwimming && SwimmingHooks.isDataWatcherFlagAvailable())
+		{
+			PlayerPoseManager.register(PlayerPose.CRAWLING);
+			PlayerPoseManager.register(PlayerPose.SWIMMING);
+		}
+		if (ConfigMixins.enableModernSneaking)
+		{
+			PlayerPoseManager.register(PlayerPose.CROUCHING);
+		}
+		if (ConfigMixins.enableElytra)
+		{
+			PlayerPoseManager.register(PlayerPose.FALL_FLYING);
+		}
+		if (PlayerPoseManager.isEnabled())
+		{
+			PlayerPoseManager.register(PlayerPose.STANDING);
+			PlayerPoseManager.register(PlayerPose.SLEEPING);
+			PlayerPoseManager.register(PlayerPose.DEATH);
+		}
+    if (ConfigEntities.enableModernWither) {
+      BlockDispenser.dispenseBehaviorRegistry.putObject(Items.skull, new DispenserBehaviourWitherSpawning());
+    }
 	}
 
 	@EventHandler
