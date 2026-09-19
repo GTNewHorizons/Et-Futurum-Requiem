@@ -6,5 +6,13 @@
         "name": "minecraft:mob/sheep/shear"
       }
     ]
+  },
+  "block.coopers_mallet.convert": {
+    "category": "block",
+    "sounds": [
+      {
+        "name": "etfuturum:coopers_mallet_convert"
+      }
+    ]
   }
 }
