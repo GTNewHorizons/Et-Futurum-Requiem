@@ -258,7 +258,7 @@ public class GuiEnchantment extends GuiContainer {
 			if (func_146978_c/*isPointInRegion*/(60, 14 + 19 * var6, 108, 17, mouseX, mouseY) && var7 > 0 && var8 >= 0) {
 				ArrayList<String> var10 = Lists.newArrayList();
 				String var11;
-				Enchantment ench = Enchantment.enchantmentsList[var8 % Enchantment.enchantmentsList.length];
+				Enchantment ench = Enchantment.enchantmentsList[var8 & 0xFF];
 				if (ench != null) {
 					var11 = ench.getTranslatedName((var8) >> 8);
 					var10.add(EnumChatFormatting.WHITE.toString() + EnumChatFormatting.ITALIC + I18n.format("container.enchant.clue", var11));
