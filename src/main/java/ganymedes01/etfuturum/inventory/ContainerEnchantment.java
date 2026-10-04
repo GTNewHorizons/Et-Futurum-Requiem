@@ -44,7 +44,12 @@ public class ContainerEnchantment extends Container {
 	 * 3-member array storing the enchantment levels of each slot
 	 */
 	public int[] enchantLevels;
+	/**
+	 * The enchantment shown as a hint for each slot and its level. They are synced separately because progress bar
+	 * values are sent as shorts, and with extended enchantment IDs the ID alone can take up all 15 bits.
+	 */
 	public int[] enchantmentIds;
+	public int[] enchantmentClueLevels;
 
 	public final boolean noFuel;
 
@@ -63,6 +68,7 @@ public class ContainerEnchantment extends Container {
 		rand = new Random();
 		enchantLevels = new int[3];
 		enchantmentIds = new int[]{-1, -1, -1};
+		enchantmentClueLevels = new int[]{-1, -1, -1};
 		this.world = world;
 		enchantmentSeed = getEnchantSeed(inventory.player);
 		noFuel = EnchantingFuelRegistry.getFuels().isEmpty();
@@ -120,6 +126,9 @@ public class ContainerEnchantment extends Container {
 		p_75132_1_.sendProgressBarUpdate(this, 4, enchantmentIds[0]);
 		p_75132_1_.sendProgressBarUpdate(this, 5, enchantmentIds[1]);
 		p_75132_1_.sendProgressBarUpdate(this, 6, enchantmentIds[2]);
+		p_75132_1_.sendProgressBarUpdate(this, 7, enchantmentClueLevels[0]);
+		p_75132_1_.sendProgressBarUpdate(this, 8, enchantmentClueLevels[1]);
+		p_75132_1_.sendProgressBarUpdate(this, 9, enchantmentClueLevels[2]);
 	}
 
 	/**
@@ -138,6 +147,9 @@ public class ContainerEnchantment extends Container {
 			var2.sendProgressBarUpdate(this, 4, enchantmentIds[0]);
 			var2.sendProgressBarUpdate(this, 5, enchantmentIds[1]);
 			var2.sendProgressBarUpdate(this, 6, enchantmentIds[2]);
+			var2.sendProgressBarUpdate(this, 7, enchantmentClueLevels[0]);
+			var2.sendProgressBarUpdate(this, 8, enchantmentClueLevels[1]);
+			var2.sendProgressBarUpdate(this, 9, enchantmentClueLevels[2]);
 		}
 	}
 
@@ -149,6 +161,8 @@ public class ContainerEnchantment extends Container {
 			enchantmentSeed = p_75137_2_;
 		else if (p_75137_1_ >= 4 && p_75137_1_ <= 6)
 			enchantmentIds[p_75137_1_ - 4] = p_75137_2_;
+		else if (p_75137_1_ >= 7 && p_75137_1_ <= 9)
+			enchantmentClueLevels[p_75137_1_ - 7] = p_75137_2_;
 		else
 			super.updateProgressBar(p_75137_1_, p_75137_2_);
 	}
@@ -186,6 +200,7 @@ public class ContainerEnchantment extends Container {
 					for (j = 0; j < 3; ++j) {
 						enchantLevels[j] = EnchantmentHelper.calcItemStackEnchantability(rand, j, power, var2);
 						enchantmentIds[j] = -1;
+						enchantmentClueLevels[j] = -1;
 
 						if (enchantLevels[j] < j + 1)
 							enchantLevels[j] = 0;
@@ -197,7 +212,8 @@ public class ContainerEnchantment extends Container {
 
 							if (var7 != null && !var7.isEmpty()) {
 								EnchantmentData var6 = var7.get(rand.nextInt(var7.size()));
-								enchantmentIds[j] = var6.enchantmentobj.effectId | var6.enchantmentLevel << 8;
+								enchantmentIds[j] = var6.enchantmentobj.effectId;
+								enchantmentClueLevels[j] = var6.enchantmentLevel;
 							}
 						}
 
@@ -207,6 +223,7 @@ public class ContainerEnchantment extends Container {
 				for (power = 0; power < 3; ++power) {
 					enchantLevels[power] = 0;
 					enchantmentIds[power] = -1;
+					enchantmentClueLevels[power] = -1;
 				}
 		}
 	}
