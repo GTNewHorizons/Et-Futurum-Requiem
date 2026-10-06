@@ -23,6 +23,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean newBeaconSounds;
 	public static boolean hoeTilling;
 	public static boolean blockHopperInteraction;
+	public static boolean modernChestConnections;
 	public static boolean avoidDroppingItemsWhenClosing;
 	public static boolean enableSpectatorMode;
 	public static boolean enableElytra;
@@ -45,7 +46,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean thinPanes;
 	public static boolean colorGrassBlockItemSides;
 	public static boolean enablePlayersSleepingPecentageGamerule;
-  public static boolean enableJumpClimbing;
+  	public static boolean enableJumpClimbing;
 	public static boolean worldSaveThumbnails;
 	public static boolean modernLoadingScreen;
 	public static boolean adjustedLiquidPhysics;
@@ -89,6 +90,7 @@ public class ConfigMixins extends ConfigBase {
 		enableSpectatorMode = getBoolean("enableSpectatorMode", catBackport, true, "VERY EXPERIMENTAL!\nModified Classes: net.minecraft.world.WorldSettings.GameType net.minecraft.entity.Entity net.minecraft.world.World net.minecraft.entity.player.EntityPlayer net.minecraft.network.NetHandlerPlayServer net.minecraft.entity.player.InventoryPlayer net.minecraft.inventory.ContainerChest\nModified Client Classes: net.minecraft.client.renderer.EntityRenderer net.minecraft.entity.player.EntityPlayer net.minecraft.client.renderer.WorldRenderer");
 		enableObservers = getBoolean("enableObservers", catBackport, true, "Modified Classes: net.minecraft.world.World net.minecraft.world.WorldServer");
 		blockHopperInteraction = getBoolean("blockHopperInteraction", catBackport, true, "Allows some blocks without tile entities (e.g. composters) to interact with hoppers. May still not interact with modded pipes.\nModified Classes: net.minecraft.tileentity.TileEntityHopper");
+		modernChestConnections = getBoolean("modernChestConnections", catBackport, true, "Allows deciding whether chests should be connected when placing. Requires EndlessIDs\nDisabling this will corrupt all existing chest connections created while this was enabled (not the items).");
 
 		enableNewElytraTakeoffLogic = getBoolean("enableNewElytraTakeoffLogic", catBackport, true, "When enabled, the 1.15+ elytra takeoff logic is used, when disabled, the 1.9-1.14 elytra takeoff logic is used.");
 		enableDoWeatherCycle = getBoolean("enableDoWeatherCycle", catBackport, true, "Add the doWeatherCycle game rule from 1.11+");
