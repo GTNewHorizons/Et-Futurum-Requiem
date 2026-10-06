@@ -1,6 +1,9 @@
 package ganymedes01.etfuturum.client.renderer.tileentity;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
+import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelSign;
@@ -9,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+@SideOnly(Side.CLIENT)
 public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 
 	/**
@@ -27,6 +31,10 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 	public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_) {
 		if (!(p_147500_1_.getBlockType() instanceof BlockWoodSign block))
 			return;
+
+		TileEntityWoodSign sign = (TileEntityWoodSign) p_147500_1_;
+		ISign iSign = (ISign) sign;
+
 		GL11.glPushMatrix();
 		float f1 = 0.6666667F;
 		float f3;
@@ -64,29 +72,48 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 		GL11.glPopMatrix();
 		FontRenderer fontrenderer = this.func_147498_b();
 		f3 = 0.016666668F * f1;
+		GL11.glPushMatrix();
 		GL11.glTranslatef(0.0F, 0.5F * f1, 0.07F * f1);
 		GL11.glScalef(f3, -f3, f3);
 		GL11.glNormal3f(0.0F, 0.0F, -1.0F * f3);
 		GL11.glDepthMask(false);
 		byte b0 = 0;
-		TileEntityWoodSign sign = (TileEntityWoodSign) p_147500_1_;
-		for (int i = 0; i < sign.signText.length; ++i) {
-			String colour = "";
-//          if (signType(sign)) {
-//              colour = "\u00A7f";
-//          }
-			String s = colour + sign.signText[i];
 
+		for (int i = 0; i < sign.signText.length; ++i) {
+			String s = sign.signText[i];
 			if (i == sign.lineBeingEdited) {
 				s = "> " + s + "§r <";
-				fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
-			} else {
-				fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
 			}
+			s = iSign.applyDyeBaseColor(s);
+			fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
 		}
 
 		GL11.glDepthMask(true);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GL11.glPopMatrix();
+
+		// Render back text
+		String[] backText = iSign.getSignText(false);
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0.0F, 0.5F * f1, -0.07F * f1);
+		GL11.glScalef(f3, -f3, f3);
+		GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
+		GL11.glNormal3f(0.0F, 0.0F, -1.0F * f3);
+		GL11.glDepthMask(false);
+		for (int i = 0; i < backText.length; ++i) {
+			String s = backText[i];
+			if (i == sign.lineBeingEdited) {
+				s = "> " + s + "§r <";
+			}
+			s = iSign.applyDyeBaseColor(s);
+			fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - backText.length * 5, b0);
+		}
+		GL11.glDepthMask(true);
+		GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GL11.glPopMatrix();
+
+
 		GL11.glPopMatrix();
 	}
 }
