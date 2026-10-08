@@ -45,12 +45,8 @@ public class LayeredColorMaskTexture extends AbstractTexture {
 
 		try {
 			BufferedImage bufferedimage1 = readBufferedImage(resourceManager.getResource(textureLocation).getInputStream());
-			int i = bufferedimage1.getType();
-
-			if (i == 0)
-				i = 6;
-
-			bufferedimage = new BufferedImage(bufferedimage1.getWidth(), bufferedimage1.getHeight(), i);
+			// Always ARGB: an optimized base texture may load as palette or grayscale and would lose the dye colours
+			bufferedimage = new BufferedImage(bufferedimage1.getWidth(), bufferedimage1.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			Graphics graphics = bufferedimage.getGraphics();
 			graphics.drawImage(bufferedimage1, 0, 0, null);
 
@@ -62,21 +58,24 @@ public class LayeredColorMaskTexture extends AbstractTexture {
 					InputStream inputstream = resourceManager.getResource(new ResourceLocation(s)).getInputStream();
 					BufferedImage bufferedimage2 = readBufferedImage(inputstream);
 
-					if (bufferedimage2.getWidth() == bufferedimage.getWidth() && bufferedimage2.getHeight() == bufferedimage.getHeight() && bufferedimage2.getType() == 6) {
-						for (int k = 0; k < bufferedimage2.getHeight(); ++k)
-							for (int l = 0; l < bufferedimage2.getWidth(); ++l) {
-								int i1 = bufferedimage2.getRGB(l, k);
+					// Resource packs may ship masks with a different size or colour type than the base image,
+					// so normalize them instead of dropping the layer
+					BufferedImage mask = new BufferedImage(bufferedimage.getWidth(), bufferedimage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+					mask.getGraphics().drawImage(bufferedimage2, 0, 0, mask.getWidth(), mask.getHeight(), null);
 
-								if ((i1 & -16777216) != 0) {
-									int j1 = (i1 & 16711680) << 8 & -16777216;
-									int k1 = bufferedimage1.getRGB(l, k);
-									int l1 = multiplyColor(k1, mapcolor.colorValue) & 16777215;
-									bufferedimage2.setRGB(l, k, j1 | l1);
-								}
+					for (int k = 0; k < mask.getHeight(); ++k)
+						for (int l = 0; l < mask.getWidth(); ++l) {
+							int i1 = mask.getRGB(l, k);
+
+							if ((i1 & -16777216) != 0) {
+								int j1 = (i1 & 16711680) << 8 & -16777216;
+								int k1 = bufferedimage1.getRGB(l, k);
+								int l1 = multiplyColor(k1, mapcolor.colorValue) & 16777215;
+								mask.setRGB(l, k, j1 | l1);
 							}
+						}
 
-						bufferedimage.getGraphics().drawImage(bufferedimage2, 0, 0, null);
-					}
+					bufferedimage.getGraphics().drawImage(mask, 0, 0, null);
 
 					inputstream.close();
 				}
