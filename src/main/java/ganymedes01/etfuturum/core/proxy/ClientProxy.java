@@ -101,6 +101,7 @@ import ganymedes01.etfuturum.tileentities.TileEntityWoodSign;
 import ganymedes01.etfuturum.world.nether.biome.utils.BiomeFogEventHandler;
 import net.minecraft.block.BlockBed;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.passive.EntityPig;
@@ -231,5 +232,11 @@ public class ClientProxy extends CommonProxy {
 
 			RenderManager.instance.entityRenderMap.put(EntityPlayer.class, new NewRenderPlayer());
 		}
+	}
+
+	@Override
+	public boolean isClientOtherPlayer(EntityPlayer player)
+	{
+		return player instanceof EntityOtherPlayerMP;
 	}
 }

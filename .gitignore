@@ -78,7 +78,6 @@ README.txt
 logos
 
 .mixin.out/
-asm/
 config/
 crash-reports/
 logs/
