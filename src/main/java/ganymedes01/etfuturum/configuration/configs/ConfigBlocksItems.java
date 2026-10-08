@@ -58,6 +58,7 @@ public class ConfigBlocksItems extends ConfigBase {
 	public static boolean enableBrewingStands;
 	public static boolean enableColourfulBeacons;
 	public static boolean enableBarrel;
+	public static boolean enableCoopersMallet;
 	public static boolean enableLantern;
 	public static boolean enableSmoker;
 	public static boolean enableBlastFurnace;
@@ -254,6 +255,7 @@ public class ConfigBlocksItems extends ConfigBase {
 		enableVanillaWoodRedstone = getBoolean("enableVanillaWoodRedstone", catBlockFunc, true, "Enables wood variant buttons and pressure plates for wood available natively in Minecraft 1.7");
 		enableNewWoodRedstone = getBoolean("enableNewWoodRedstone", catBlockFunc, true, "Enables wood variant buttons and pressure plates for wood available in Minecraft after 1.7");
 		enableBarrel = getBoolean("enableBarrel", catBlockFunc, true, "");
+		enableCoopersMallet = getBoolean("enableCoopersMallet", catBlockFunc, true, "Adds a mallet that converts a chest into a barrel in place, and back, keeping the inventory. Requires enableBarrel.");
 		enableSmoker = getBoolean("enableSmoker", catBlockFunc, true, "Will attempt to seek and auto-add recipes to itself. Look at ConfigFunctions.cfg \"autoAddSmoker\" for more info.\nCompatible with CraftTweaker. In the same way that you'd use furnace.addRecipe or furnace.remove, you can use \"mods.etfuturum.smoker\" instead of \"furnace\".");
 		enableBlastFurnace = getBoolean("enableBlastFurnace", catBlockFunc, true, "Will attempt to seek and auto-add recipes to itself. Look at ConfigFunctions.cfg \"autoAddBlastFurance\" for more info.\nCompatible with CraftTweaker. In the same way that you'd use furnace.addRecipe or furnace.remove, you can use \"mods.etfuturum.blastFurnace\" instead of \"furnace\".");
 		enableVanillaSigns = getBoolean("enableVanillaSigns", catBlockFunc, true, "Enables variant signs for materials available natively in Minecraft 1.7");
