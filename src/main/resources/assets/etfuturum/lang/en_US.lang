@@ -436,6 +436,40 @@ item.etfuturum.tipped_arrow.potion.regeneration.name=Arrow of Regeneration
 item.etfuturum.tipped_arrow.potion.damageBoost.name=Arrow of Strength
 item.etfuturum.tipped_arrow.potion.weakness.name=Arrow of Weakness
 
+# Cushions
+entity.etfuturum.white_cushion.name=White Cushion
+entity.etfuturum.orange_cushion.name=Orange Cushion
+entity.etfuturum.magenta_cushion.name=Magenta Cushion
+entity.etfuturum.light_blue_cushion.name=Light Blue Cushion
+entity.etfuturum.yellow_cushion.name=Yellow Cushion
+entity.etfuturum.lime_cushion.name=Lime Cushion
+entity.etfuturum.pink_cushion.name=Pink Cushion
+entity.etfuturum.gray_cushion.name=Gray Cushion
+entity.etfuturum.light_gray_cushion.name=Light Gray Cushion
+entity.etfuturum.cyan_cushion.name=Cyan Cushion
+entity.etfuturum.purple_cushion.name=Purple Cushion
+entity.etfuturum.blue_cushion.name=Blue Cushion
+entity.etfuturum.brown_cushion.name=Brown Cushion
+entity.etfuturum.green_cushion.name=Green Cushion
+entity.etfuturum.red_cushion.name=Red Cushion
+entity.etfuturum.black_cushion.name=Black Cushion
+item.etfuturum.white_cushion.name=White Cushion
+item.etfuturum.orange_cushion.name=Orange Cushion
+item.etfuturum.magenta_cushion.name=Magenta Cushion
+item.etfuturum.light_blue_cushion.name=Light Blue Cushion
+item.etfuturum.yellow_cushion.name=Yellow Cushion
+item.etfuturum.lime_cushion.name=Lime Cushion
+item.etfuturum.pink_cushion.name=Pink Cushion
+item.etfuturum.gray_cushion.name=Gray Cushion
+item.etfuturum.light_gray_cushion.name=Light Gray Cushion
+item.etfuturum.cyan_cushion.name=Cyan Cushion
+item.etfuturum.purple_cushion.name=Purple Cushion
+item.etfuturum.blue_cushion.name=Blue Cushion
+item.etfuturum.brown_cushion.name=Brown Cushion
+item.etfuturum.green_cushion.name=Green Cushion
+item.etfuturum.red_cushion.name=Red Cushion
+item.etfuturum.black_cushion.name=Black Cushion
+
 # Blocks
 tile.etfuturum.granite.name=Granite
 tile.etfuturum.polished_granite.name=Polished Granite
