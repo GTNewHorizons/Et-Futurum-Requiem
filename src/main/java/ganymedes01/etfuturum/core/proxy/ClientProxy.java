@@ -58,6 +58,7 @@ import ganymedes01.etfuturum.client.renderer.entity.VillagerZombieRenderer;
 import ganymedes01.etfuturum.client.renderer.item.Item3DBedRenderer;
 import ganymedes01.etfuturum.client.renderer.item.ItemBannerRenderer;
 import ganymedes01.etfuturum.client.renderer.item.ItemBowRenderer;
+import ganymedes01.etfuturum.client.renderer.item.ItemLanternRenderer;
 import ganymedes01.etfuturum.client.renderer.item.ItemShulkerBoxRenderer;
 import ganymedes01.etfuturum.client.renderer.item.ItemSkullRenderer;
 import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityBannerRenderer;
@@ -149,6 +150,13 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForgeClient.registerItemRenderer(Items.skull, new ItemSkullRenderer());
 		MinecraftForgeClient.registerItemRenderer(Items.bow, new ItemBowRenderer());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(ModBlocks.SHULKER_BOX.get()), new ItemShulkerBoxRenderer());
+		ItemLanternRenderer lanternRenderer = new ItemLanternRenderer();
+		if (ModBlocks.LANTERN.isEnabled()) {
+			MinecraftForgeClient.registerItemRenderer(ModBlocks.LANTERN.getItem(), lanternRenderer);
+		}
+		if (ModBlocks.SOUL_LANTERN.isEnabled()) {
+			MinecraftForgeClient.registerItemRenderer(ModBlocks.SOUL_LANTERN.getItem(), lanternRenderer);
+		}
 		if (ConfigFunctions.inventoryBedModels) {
 			MinecraftForgeClient.registerItemRenderer(Items.bed, new Item3DBedRenderer((BlockBed) Blocks.bed));
 			for (ModBlocks bed : ModBlocks.BEDS) {
