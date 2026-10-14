@@ -64,6 +64,14 @@ public class BlockObserver extends Block implements IBlockObserver {
 	}
 
 	@Override
+	public void onBlockAdded(World world, int x, int y, int z) {
+		super.onBlockAdded(world, x, y, z);
+		if (!world.isRemote) {
+			world.scheduleBlockUpdate(x, y, z, this, 2);
+		}
+	}
+	
+	@Override
 	public void onBlockPlacedBy(World worldIn, int x, int y, int z, EntityLivingBase placer, ItemStack itemIn) {
 		int l = BlockPistonBase.determineOrientation(worldIn, x, y, z, placer);
 		worldIn.setBlockMetadataWithNotify(x, y, z, Facing.oppositeSide[l], 2);
