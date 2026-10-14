@@ -38,6 +38,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.ItemStackMap;
 import ganymedes01.etfuturum.core.utils.ItemStackSet;
 import ganymedes01.etfuturum.core.utils.Utils;
+import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.elytra.IElytraEntityTrackerEntry;
 import ganymedes01.etfuturum.elytra.IElytraPlayer;
 
@@ -62,6 +63,7 @@ import ganymedes01.etfuturum.items.ItemArrowTipped;
 import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.AttackYawMessage;
 import ganymedes01.etfuturum.network.BlackHeartParticlesMessage;
+import ganymedes01.etfuturum.network.SignUpdateMessage;
 import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import ganymedes01.etfuturum.storage.EtFuturumPlayer;
@@ -141,6 +143,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionHelper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntitySign;
 
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentText;
@@ -779,6 +782,28 @@ public class ServerEventHandler {
 		}
 	}
 
+	// Sync sign state to players on chunk load
+	@SubscribeEvent
+	public void onChunkWatch(net.minecraftforge.event.world.ChunkWatchEvent.Watch event) {
+		EntityPlayerMP mp = event.player;
+		net.minecraft.world.chunk.Chunk chunk = mp.getServerForPlayer()
+				.getChunkFromChunkCoords(event.chunk.chunkXPos, event.chunk.chunkZPos);
+		if (chunk == null) return;
+
+		for (Object obj : chunk.chunkTileEntityMap.values()) {
+			if (obj instanceof ISign) {
+				TileEntity te = (TileEntity) obj;
+				ISign iSign = (ISign) obj;
+				TileEntitySign signTe = (TileEntitySign) te;
+
+				EtFuturum.networkWrapper.sendTo(
+					new SignUpdateMessage(te.xCoord, te.yCoord, te.zCoord,
+							signTe.signText, iSign.getSignText(false),
+							iSign.isWaxed(), iSign.getDyeId()), mp);
+			}
+		}
+	}
+
 	@SubscribeEvent
 	public void onPlayerInteractNonVanilla(PlayerInteractEvent event) {
 		if (event.action == Action.RIGHT_CLICK_AIR) {
@@ -909,8 +934,6 @@ public class ServerEventHandler {
 
 							if (item == Items.redstone) {
 								block = Blocks.redstone_wire;
-							} else if (item == Items.sign) {
-								block = side < 2 ? Blocks.standing_sign : Blocks.wall_sign;
 							} else if (item == Items.wooden_door && side == 1) {
 								block = Blocks.wooden_door;
 							} else if (item == Items.iron_door && side == 1) {
