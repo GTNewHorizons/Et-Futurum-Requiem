@@ -69,7 +69,7 @@ dependencies {
     }
 
     compileOnly('com.github.GTNewHorizons:Backhand:1.8.11:dev') {transitive = false}
-    compileOnly('com.github.GTNewHorizons:Dashboard:1.0.3:api')
+    compileOnly('com.github.GTNewHorizons:Dashboard:1.0.4:api')
 }
 
 configurations.configureEach {
