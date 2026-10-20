@@ -1,6 +1,8 @@
 package ganymedes01.etfuturum.client.subtitle;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ganymedes01.etfuturum.compat.CompatDashboard;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -114,6 +116,8 @@ public class GuiSubtitles extends Gui {
 
 	public void renderSubtitles(ScaledResolution resolution) {
 		if (!subtitles.isEmpty()) {
+			boolean dashboard = ModsList.DASHBOARD.isLoaded();
+			if (dashboard) CompatDashboard.beginSubtitles();
 			GL11.glPushMatrix();
 			GL11.glEnable(GL11.GL_BLEND);
 			OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
@@ -181,6 +185,7 @@ public class GuiSubtitles extends Gui {
 			}
 			GL11.glDisable(GL11.GL_BLEND);
 			GL11.glPopMatrix();
+			if (dashboard) CompatDashboard.endSubtitles();
 		}
 	}
 
