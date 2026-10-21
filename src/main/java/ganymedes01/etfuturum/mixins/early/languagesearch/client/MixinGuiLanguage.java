@@ -125,7 +125,7 @@ public abstract class MixinGuiLanguage extends GuiScreen {
 
 		@Inject(method = "<init>", at = @At("RETURN"))
 		private void etfu$initSearch(CallbackInfo ci) {
-			top = 36;
+			top = 38;
 			field_148163_i = false;
 			etfu$allLanguages = new ArrayList<>(field_148176_l);
 		}
