@@ -117,7 +117,11 @@ public class GuiSubtitles extends Gui {
 	public void renderSubtitles(ScaledResolution resolution) {
 		if (!subtitles.isEmpty()) {
 			boolean dashboard = ModsList.DASHBOARD.isLoaded();
-			if (dashboard) CompatDashboard.beginSubtitles();
+			if (dashboard && !CompatDashboard.beginSubtitles()) {
+				// Hidden, so only remove the subtitles that ran out
+				subtitles.removeIf(sub -> sub.getStartTime() + 3000L <= Minecraft.getSystemTime());
+				return;
+			}
 			GL11.glPushMatrix();
 			GL11.glEnable(GL11.GL_BLEND);
 			OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);

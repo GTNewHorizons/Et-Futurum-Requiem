@@ -3,7 +3,6 @@ package ganymedes01.etfuturum.compat;
 import com.gtnewhorizons.dashboard.api.HudBounds;
 import com.gtnewhorizons.dashboard.api.HudElement;
 import com.gtnewhorizons.dashboard.api.HudRegistry;
-import com.gtnewhorizons.dashboard.api.HudShift;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -12,7 +11,7 @@ import net.minecraft.client.gui.Gui;
 
 /**
  * Lets players move, resize and hide the subtitles in Dashboard's editor. The only class using Dashboard, so only call it
- * while Dashboard is loaded. Hidden subtitles are still drawn, just invisibly, so old ones keep being removed.
+ * while Dashboard is loaded.
  */
 @SideOnly(Side.CLIENT)
 public final class CompatDashboard {
@@ -27,7 +26,6 @@ public final class CompatDashboard {
 	private static final int[] SAMPLE_BRIGHTNESS = {255, 195, 135};
 
 	private static final HudElement SUBTITLES = new HudElement("etfuturum:subtitles", CompatDashboard::getBounds);
-	private static final HudShift SHIFT = new HudShift();
 
 	private CompatDashboard() {
 	}
@@ -37,12 +35,13 @@ public final class CompatDashboard {
 		HudRegistry.register(SUBTITLES);
 	}
 
-	public static void beginSubtitles() {
-		SHIFT.beginOrHide(SUBTITLES);
+	/** False means the player hid the subtitles, so skip drawing them and do not call {@link #endSubtitles()}. */
+	public static boolean beginSubtitles() {
+		return HudRegistry.beginRender(SUBTITLES);
 	}
 
 	public static void endSubtitles() {
-		SHIFT.end();
+		HudRegistry.endRender();
 	}
 
 	/** As wide as the sample rows and right aligned like them, from the top row to the bottom one. */
