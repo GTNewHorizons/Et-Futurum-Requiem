@@ -12,6 +12,7 @@ container.enchant.lapis.many=%d Lápis-Lazúlis
 container.enchant.level.one=1 Nível de Encantamento
 container.enchant.level.many=%d Níveis de Encantamento
 container.enchant.clue=%s . . . ?
+etfuturum.gui.language_search=Buscar...
 
 # Entities
 entity.etfuturum.endermite.name=Endermite
