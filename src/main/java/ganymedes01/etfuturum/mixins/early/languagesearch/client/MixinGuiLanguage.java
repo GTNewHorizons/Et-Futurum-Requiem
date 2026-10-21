@@ -32,6 +32,17 @@ public abstract class MixinGuiLanguage extends GuiScreen {
 	@Unique
 	private GuiTextField etfu$searchBox;
 
+	@Unique
+	private int etfu$scrollAmount;
+
+	@Inject(method = "initGui", at = @At("HEAD"))
+	private void etfu$saveScroll(CallbackInfo ci) {
+		// Record list scroll amount when resizing or toggling Unicode fonts
+		if (field_146450_f != null) {
+			etfu$scrollAmount = field_146450_f.getAmountScrolled();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Inject(method = "initGui", at = @At("RETURN"))
 	private void etfu$initSearch(CallbackInfo ci) {
@@ -40,12 +51,16 @@ public abstract class MixinGuiLanguage extends GuiScreen {
 			etfu$searchBox = new GuiTextField(fontRendererObj, width / 2 - 100, 19, 200, 14);
 			etfu$searchBox.setMaxStringLength(48);
 			etfu$searchBox.setFocused(true);
+			// Scroll selected slot to middle of screen
+			int index = new ArrayList<>(mc.getLanguageManager().getLanguages()).indexOf(mc.getLanguageManager().getCurrentLanguage());
+            etfu$scrollAmount = index * field_146450_f.slotHeight + (field_146450_f.slotHeight + 4) / 2
+                    - (field_146450_f.bottom - field_146450_f.top) / 2;
 		} else {
 			// Keep the query, cursor and selection when resizing or toggling Unicode fonts.
 			etfu$searchBox.xPosition = width / 2 - 100;
+			((Consumer<String>) field_146450_f).accept(etfu$searchBox.getText());
 		}
-		// Accept filter when resizing or toggling Unicode fonts
-		((Consumer<String>) field_146450_f).accept(etfu$searchBox.getText());
+		field_146450_f.scrollBy(etfu$scrollAmount);
 	}
 
 	@ModifyConstant(method = "drawScreen", constant = @Constant(intValue = 16))
