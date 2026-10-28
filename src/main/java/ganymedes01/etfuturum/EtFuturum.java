@@ -50,6 +50,7 @@ import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
@@ -60,6 +61,7 @@ import ganymedes01.etfuturum.core.handlers.WorldEventHandler;
 import ganymedes01.etfuturum.core.proxy.CommonProxy;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Logger;
+import ganymedes01.etfuturum.dispenser.DispenserBehaviourWitherSpawning;
 import ganymedes01.etfuturum.entities.ModEntityList;
 import ganymedes01.etfuturum.items.ItemWoodSign;
 import ganymedes01.etfuturum.lib.Reference;
@@ -96,6 +98,7 @@ import makamys.mclib.ext.assetdirector.AssetDirectorAPI;
 import net.minecraft.block.Block;
 import net.minecraft.block.Block.SoundType;
 import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockHay;
 import net.minecraft.block.BlockHopper;
 import net.minecraft.block.BlockLeaves;
@@ -307,6 +310,10 @@ public class EtFuturum {
 		if(ModsList.RPLE.isLoaded()) {
 			CompatRPLEEventHandler.registerRPLECompat();
 		}
+
+        if (ConfigEntities.enableModernWither) {
+            BlockDispenser.dispenseBehaviorRegistry.putObject(Items.skull, new DispenserBehaviourWitherSpawning());
+        }
 	}
 
 	@EventHandler
