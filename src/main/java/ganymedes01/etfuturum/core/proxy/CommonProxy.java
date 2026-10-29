@@ -18,6 +18,7 @@ import ganymedes01.etfuturum.client.gui.inventory.GuiNewBrewingStand;
 import ganymedes01.etfuturum.client.gui.inventory.GuiShulkerBox;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmithingTable;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmoker;
+import ganymedes01.etfuturum.compat.CompatVillageNames;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
@@ -117,6 +118,10 @@ public class CommonProxy implements IGuiHandler {
 
 		if (ModItems.DEBUGGING_TOOL.isEnabled()) {
 			MinecraftForge.EVENT_BUS.register(ModItems.DEBUGGING_TOOL.get());
+		}
+
+		if (CompatVillageNames.isActive()) {
+			MinecraftForge.EVENT_BUS.register(CompatVillageNames.INSTANCE);
 		}
 	}
 

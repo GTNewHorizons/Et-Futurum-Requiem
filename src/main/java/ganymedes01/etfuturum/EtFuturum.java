@@ -44,6 +44,7 @@ import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.CompatMisc;
 import ganymedes01.etfuturum.compat.CompatRPLEEventHandler;
 import ganymedes01.etfuturum.compat.CompatTinkersConstruct;
+import ganymedes01.etfuturum.compat.CompatVillageNames;
 import ganymedes01.etfuturum.compat.CompatWaila;
 import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
@@ -525,6 +526,8 @@ public class EtFuturum {
 		}
 
 		CompatMisc.runModHooksLoadComplete();
+
+		CompatVillageNames.deprecate();
 
 		if (ConfigExperiments.netherDimensionProvider && !ModsList.NETHERLICIOUS.isLoaded()) {
 			DimensionProviderEFRNether.init();
