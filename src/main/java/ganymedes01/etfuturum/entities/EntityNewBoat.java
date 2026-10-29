@@ -458,7 +458,9 @@ public class EntityNewBoat extends Entity {
 		super.onUpdate();
 		this.tickLerp();
 
-		if (this.canPassengerSteer()) {
+		boolean chunkMissing = this.isChunkMissingOnClient();
+
+		if (this.canPassengerSteer() && !chunkMissing) {
 			this.collideWithSurfaceBlocks();
 			if (this.getPassengers().size() == 0) {
 				this.setPaddleState(false, false);
@@ -521,9 +523,19 @@ public class EntityNewBoat extends Entity {
 			}
 		}
 
-		if (this.worldObj.isRemote && canPassengerSteer() && getControllingPassenger() instanceof EntityClientPlayerMP) {
+		if (this.worldObj.isRemote && canPassengerSteer() && !chunkMissing && getControllingPassenger() instanceof EntityClientPlayerMP) {
 			EtFuturum.networkWrapper.sendToServer(new BoatMoveMessage(this));
 		}
+	}
+
+	/**
+	 * On the client, the chunk under the boat can arrive later than the boat itself (e.g. right after joining a world).
+	 * Until then the client world is empty there, so the boat would fall through it and the BoatMoveMessage would drag
+	 * the server's boat down with it. Freeze the boat until the chunk is there.
+	 */
+	private boolean isChunkMissingOnClient() {
+		return this.worldObj.isRemote && this.worldObj
+				.getChunkFromBlockCoords(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posZ)).isEmpty();
 	}
 
 	private boolean canEntitySit(Entity entity) {
