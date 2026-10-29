@@ -37,6 +37,7 @@ container.enchant.clue=%s…？
 container.etfuturum.blast_furnace=高炉
 container.etfuturum.smoker=烟熏炉
 container.etfuturum.barrel=木桶
+etfuturum.spectator.flyspeed=飞行速度：%s%%
 container.etfuturum.shulker_box=潜影盒
 container.etfuturum.chest_boat=运输船
 
