@@ -12,7 +12,7 @@ import tconstruct.armor.ArmorProxyClient;
 public class MixinArmorProxyClientTConstruct {
 	@Inject(method = "adjustArmor", at = @At("HEAD"), cancellable = true)
 	private void skipTConstructArmorExtrasForSpectator(RenderPlayerEvent.SetArmorModel event, CallbackInfo ci) {
-		if (SpectatorMode.isSpectator(event.entityPlayer)) {
+		if (SpectatorMode.isSpectatorForRender(event.entityPlayer)) {
 			ci.cancel();
 		}
 	}
