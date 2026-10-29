@@ -44,6 +44,7 @@ public enum ModsList {
 	LOTR("lotr"),
     BATTLEGEAR_2("battlegear2"),
 	BACKHAND("backhand"),
+	DASHBOARD("dashboard"),
 
 	NOTFINE("notfine"),
 	NOT_ENOUGH_IDS("neid"),
