@@ -100,8 +100,10 @@ public class MixinEntity {
         double distB = x.get() * x.get() + z.get() * z.get();
 
         if (distA > distB) {
-            // New approach wins
-            double yDown = -this.stepHeight;
+            // New approach wins. Step down by the height actually stepped up, like 1.12.2: with a ceiling above the
+            // destination yA is less than stepHeight, and the collision list has nothing below the start height, so
+            // stepping down by the full stepHeight would push the entity into the floor
+            double yDown = -yA;
             for (int i = 0; i < list.size(); i++) {
                 yDown = ((AxisAlignedBB) list.get(i)).calculateYOffset(bbA, yDown);
             }
