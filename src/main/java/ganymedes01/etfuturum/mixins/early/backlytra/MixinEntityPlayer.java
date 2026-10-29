@@ -19,10 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer extends EntityLivingBase implements IElytraPlayer {
-	@Override
-	@Shadow
-	public abstract boolean isPlayerSleeping();
-
 	@Shadow
 	public PlayerCapabilities capabilities;
 
@@ -62,13 +58,6 @@ public abstract class MixinEntityPlayer extends EntityLivingBase implements IEly
 			this.etfu$ticksElytraFlying += 1;
 		} else {
 			this.etfu$ticksElytraFlying = 0;
-		}
-	}
-
-	@Inject(method = "getEyeHeight", at = @At("HEAD"), cancellable = true)
-	private void getElytraEyeHeight(CallbackInfoReturnable<Float> cir) {
-		if (this.etfu$isElytraFlying() && !this.isPlayerSleeping()) {
-			cir.setReturnValue(0.4f);
 		}
 	}
 

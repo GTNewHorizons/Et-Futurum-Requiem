@@ -336,4 +336,9 @@ public class CommonProxy implements IGuiHandler {
 
 	public void registerRenderers() {
 	}
+
+	public boolean isClientOtherPlayer(EntityPlayer player)
+	{
+		return false;
+	}
 }
