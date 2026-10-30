@@ -42,6 +42,7 @@ import ganymedes01.etfuturum.client.renderer.entity.BeeRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.BrownMooshroomRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.ChestBoatRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.EndermiteRenderer;
+import ganymedes01.etfuturum.client.renderer.entity.FallingDripstoneRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.FoxRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.HuskRenderer;
 import ganymedes01.etfuturum.client.renderer.entity.LingeringEffectRenderer;
@@ -77,6 +78,7 @@ import ganymedes01.etfuturum.entities.EntityArmourStand;
 import ganymedes01.etfuturum.entities.EntityBee;
 import ganymedes01.etfuturum.entities.EntityBrownMooshroom;
 import ganymedes01.etfuturum.entities.EntityEndermite;
+import ganymedes01.etfuturum.entities.EntityFallingDripstone;
 import ganymedes01.etfuturum.entities.EntityFox;
 import ganymedes01.etfuturum.entities.EntityHusk;
 import ganymedes01.etfuturum.entities.EntityLingeringEffect;
@@ -219,9 +221,7 @@ public class ClientProxy extends CommonProxy {
 
 		RenderingRegistry.registerEntityRenderingHandler(EntityPig.class, new TechnobladeCrownRenderer());
 
-//      {
-//          RenderingRegistry.registerEntityRenderingHandler(EntityFallingDripstone.class, new FallingDripstoneRenderer());
-//      }
+		RenderingRegistry.registerEntityRenderingHandler(EntityFallingDripstone.class, new FallingDripstoneRenderer());
 
 		if (ConfigFunctions.enablePlayerSkinOverlay) {
 			TextureManager texManager = Minecraft.getMinecraft().renderEngine;
