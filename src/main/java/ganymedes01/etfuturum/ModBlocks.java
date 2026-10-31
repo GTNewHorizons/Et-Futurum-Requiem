@@ -160,6 +160,7 @@ import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockBanner;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockBarrel;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockDecorationWorkbench;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockDyedBed;
+import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockLantern;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockGlowLichen;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockNewDoor;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockRedSandstone;
@@ -477,8 +478,8 @@ public enum ModBlocks {
 
 	IRON_TRAPDOOR(ConfigBlocksItems.enableIronTrapdoor, new BlockIronTrapdoor()),
 	MAGMA(ConfigBlocksItems.enableMagmaBlock, new BlockMagma()),
-	LANTERN(ConfigBlocksItems.enableLantern, new BlockLantern("lantern", 15)),
-	SOUL_LANTERN(ConfigBlocksItems.enableLantern && ConfigBlocksItems.enableSoulLighting, new BlockLantern("soul_lantern", 10)),
+	LANTERN(ConfigBlocksItems.enableLantern, new BlockLantern("lantern", 15), ItemBlockLantern.class),
+	SOUL_LANTERN(ConfigBlocksItems.enableLantern && ConfigBlocksItems.enableSoulLighting, new BlockLantern("soul_lantern", 10), ItemBlockLantern.class),
 	SOUL_TORCH(ConfigBlocksItems.enableSoulLighting, new BlockSoulTorch()),
 	SMOKER(ConfigBlocksItems.enableSmoker, new BlockSmoker(false)),
 	LIT_SMOKER(ConfigBlocksItems.enableSmoker, new BlockSmoker(true), null),

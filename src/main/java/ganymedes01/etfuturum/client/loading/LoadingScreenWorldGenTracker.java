@@ -6,8 +6,8 @@ import net.minecraft.world.chunk.Chunk;
 public class LoadingScreenWorldGenTracker {
 
     public static void markTerrain(int chunkX, int chunkZ, Chunk chunk) {
-        // populate/loadChunk fire during normal play too, skip unless the loading screen is up
-        if (!LoadingScreenStateTracker.isActive()) {
+        // Skip populate/loadChunk fires after spawn progress is complete. It can happen even during normal play
+        if (!SpawnChunkProgress.isActive()) {
             return;
         }
         SpawnChunkProgress.markPopulated(chunkX, chunkZ);

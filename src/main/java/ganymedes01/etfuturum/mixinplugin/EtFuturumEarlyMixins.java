@@ -80,6 +80,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigBlocksItems.enableNewBoats) {
 			mixins.add("boatstat.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("boatcamera.client.MixinEntity");
+			}
 		}
 
 		if (ConfigMixins.fenceWallConnectFix) {
@@ -140,7 +143,8 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("randomtickspeed.MixinGameRules");
 		}
 
-		if ((ConfigWorld.endFlashes || ConfigWorld.modernEndAmbientColor) && side == MixinEnvironment.Side.CLIENT) {
+		if ((ConfigWorld.endFlashes || ConfigWorld.modernEndAmbientColor || ConfigWorld.modernBlockLightTint)
+				&& side == MixinEnvironment.Side.CLIENT) {
 			mixins.add("endflashes.client.MixinEntityRenderer");
 		}
 
@@ -150,6 +154,11 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigWorld.modernLightmapGamma && side == MixinEnvironment.Side.CLIENT) {
 			mixins.add("modernlightmap.client.MixinEntityRenderer");
+		}
+
+		if ((ConfigWorld.modernBlockLightTint || ConfigWorld.modernNightVision)
+				&& side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("modernblocklight.client.MixinEntityRenderer");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {
@@ -334,6 +343,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityLivingBase");
 			mixins.add("foxes.MixinEntityWolf");
 		}
+
+        if (ConfigEntities.enableModernWither) {
+            mixins.add("wither.MixinBlockSkull_OnPlacingWitherSkull");
+        }
 
 		return mixins;
 	}
