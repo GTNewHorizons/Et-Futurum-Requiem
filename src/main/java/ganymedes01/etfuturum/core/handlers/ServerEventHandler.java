@@ -208,6 +208,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -2085,8 +2086,8 @@ public class ServerEventHandler {
 	}
 
 	private void doConcreteTracking() {
-		for (Iterator<EntityFallingBlock> iterator = fallingConcreteBlocks.iterator(); iterator.hasNext(); ) {
-			EntityFallingBlock block = iterator.next();
+		// Placing concrete can add more falling powder to the set (block updates, chunk loads), so iterate a copy.
+		for (EntityFallingBlock block : new ArrayList<>(fallingConcreteBlocks)) {
 			if (!block.isDead) {
 				int i = MathHelper.floor_double(block.posX);
 				int j = MathHelper.floor_double(block.posY);
@@ -2096,11 +2097,12 @@ public class ServerEventHandler {
 					if (block.worldObj.getBlock(i, j - jOff, k).getMaterial() == Material.water) {
 						block.worldObj.setBlock(i, j - jOff, k, ModBlocks.CONCRETE.get(), block.field_145814_a, 3); // metadata
 						block.setDead();
-						iterator.remove();
+						fallingConcreteBlocks.remove(block);
+						break;
 					}
 				}
 			} else {
-				iterator.remove();
+				fallingConcreteBlocks.remove(block);
 			}
 		}
 	}
