@@ -186,6 +186,27 @@ public class GuiModernMerchant extends GuiContainer {
         GL11.glEnable(GL11.GL_LIGHTING);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         RenderHelper.enableStandardItemLighting();
+
+        for (int i = 0; i < 7; i++) {
+            if (i + scrollOffset >= merchantrecipelist.size()) break;
+            int y = 19 + i * 20;
+
+            MerchantRecipe merchantrecipe = (MerchantRecipe)merchantrecipelist.get(i + scrollOffset);
+            ItemStack firstCost = merchantrecipe.getItemToBuy();
+            ItemStack secondCost = merchantrecipe.getSecondItemToBuy();
+            ItemStack result = merchantrecipe.getItemToSell();
+
+            if (func_146978_c(10, y, 16, 16, mouseX, mouseY)) {
+                this.renderToolTip(firstCost, mouseX, mouseY);
+            }
+            if (secondCost != null && func_146978_c(40, y, 16, 16, mouseX, mouseY)) {
+                this.renderToolTip(secondCost, mouseX, mouseY);
+            }
+
+            if (func_146978_c(73, y, 16, 16, mouseX, mouseY)) {
+                this.renderToolTip(result, mouseX, mouseY);
+            }
+        }
     }
 
     @Override
