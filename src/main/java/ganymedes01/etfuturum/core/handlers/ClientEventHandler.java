@@ -590,6 +590,11 @@ public class ClientEventHandler {
 				// Specific blocks
 				if (blockBeneath == Blocks.soul_sand) {
 					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.cow_bell";
+				} else if (blockBeneath == Blocks.glowstone || EtFuturum.hasDictTag(blockBeneath, "blockGlowstone")) {
+					// "note.pling" exists (unused) in 1.7.10, so the vanilla name is used directly
+					// for legacy resource pack compatibility. Could also be
+					// Reference.MCAssetVer + ":block.note_block.pling" for consistency.
+					instrumentToPlay = "minecraft:note.pling";
 				} else if (blockName.contains("hay")) {
 					instrumentToPlay = Reference.MCAssetVer + ":block.note_block.banjo";
 				} else if (EtFuturum.hasDictTag(blockBeneath, "blockGold")) {
