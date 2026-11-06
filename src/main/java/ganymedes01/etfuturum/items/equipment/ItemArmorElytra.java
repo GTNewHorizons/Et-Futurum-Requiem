@@ -90,6 +90,14 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 	}
 
 	public static ItemStack getElytra(EntityLivingBase entity) {
+		return getElytra(entity, false);
+	}
+
+	public static ItemStack getElytraForRendering(EntityLivingBase entity) {
+		return getElytra(entity, true);
+	}
+
+	private static ItemStack getElytra(EntityLivingBase entity, boolean forRendering) {
 		if (!ModsList.BAUBLES_EXPANDED.isLoaded() || ConfigModCompat.elytraBaublesExpandedCompat != 2) {
 			ItemStack armorSlot = entity.getEquipmentInSlot(3);
 			if (armorSlot != null && armorSlot.getItem() instanceof ItemArmorElytra) {
@@ -97,7 +105,7 @@ public class ItemArmorElytra extends BaseItem implements IBaubleExpanded {
 			}
 		}
 		if (ModsList.BAUBLES_EXPANDED.isLoaded() && ConfigModCompat.elytraBaublesExpandedCompat != 0) {
-			return CompatBaublesExpanded.getElytraFromBaubles(entity);
+			return CompatBaublesExpanded.getElytraFromBaubles(entity, forRendering);
 		}
 		return null;
 	}
