@@ -6,8 +6,11 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -133,11 +136,16 @@ public class CommandLocate extends CommandBase {
             ));
         } else {
             int distance = (int) bestDist;
-            sender.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.GREEN + "Nearest Shipwreck: "
-                + EnumChatFormatting.WHITE + foundX + ", ~, " + foundZ
-                + EnumChatFormatting.GRAY + " (~" + distance + " blocks away)"
-            ));
+            IChatComponent coords = new ChatComponentText(foundX + ", ~, " + foundZ);
+            coords.getChatStyle()
+                .setColor(EnumChatFormatting.WHITE)
+                .setUnderlined(true)
+                .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp " + foundX + " ~ " + foundZ))
+                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to put /tp in the chat box")));
+            IChatComponent message = new ChatComponentText(EnumChatFormatting.GREEN + "Nearest Shipwreck: ");
+            message.appendSibling(coords);
+            message.appendSibling(new ChatComponentText(EnumChatFormatting.GRAY + " (~" + distance + " blocks away)"));
+            sender.addChatMessage(message);
             if (sender instanceof EntityPlayer) {
                 ((EntityPlayer) sender).addChatMessage(new ChatComponentText(
                     EnumChatFormatting.GRAY + "Tip: use "
