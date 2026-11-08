@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.command;
 
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
+import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
@@ -24,6 +26,14 @@ public class CommandLocate extends CommandBase {
     // Max search radius in chunks (~3200 blocks)
     private static final int MAX_SEARCH_RADIUS = 200;
 
+    private static final String LANG_PREFIX = "commands.etfuturum.locate.";
+
+    private static IChatComponent message(EnumChatFormatting color, String key, Object... args) {
+        IChatComponent component = new ChatComponentTranslation(LANG_PREFIX + key, args);
+        component.getChatStyle().setColor(color);
+        return component;
+    }
+
     @Override
     public String getCommandName() {
         return "locate";
@@ -36,7 +46,7 @@ public class CommandLocate extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/locate shipwreck";
+        return LANG_PREFIX + "usage";
     }
 
     @Override
@@ -58,18 +68,16 @@ public class CommandLocate extends CommandBase {
             throw new WrongUsageException(getCommandUsage(sender));
         }
 
+        String id = "shipwreck";
+
         if (!ConfigWorld.enableShipwrecks) {
-            sender.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.RED + "Shipwrecks are disabled in the config."
-            ));
+            sender.addChatMessage(message(EnumChatFormatting.RED, id + ".disabled"));
             return;
         }
 
         World world = sender.getEntityWorld();
         if (world.provider.dimensionId != 0) {
-            sender.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.RED + "Shipwrecks only generate in the overworld."
-            ));
+            sender.addChatMessage(message(EnumChatFormatting.RED, id + ".overworldOnly"));
             return;
         }
 
@@ -78,20 +86,12 @@ public class CommandLocate extends CommandBase {
         int centerChunkX = playerX >> 4;
         int centerChunkZ = playerZ >> 4;
 
-        sender.addChatMessage(new ChatComponentText(
-            EnumChatFormatting.YELLOW + "Searching for the nearest shipwreck..."
-        ));
+        sender.addChatMessage(message(EnumChatFormatting.YELLOW, id + ".searching"));
 
-        List<BiomeGenBase> validBiomes = Arrays.asList(
-            BiomeDictionary.getBiomesForType(BiomeDictionary.Type.OCEAN)
-        );
-        // Also add rivers
-        for (BiomeGenBase b : BiomeDictionary.getBiomesForType(BiomeDictionary.Type.RIVER)) {
-            if (!validBiomes.contains(b)) {
-                validBiomes = new java.util.ArrayList<>(validBiomes);
-                validBiomes.add(b);
-            }
-        }
+        List<BiomeGenBase> validBiomes = Arrays.asList(Utils.excludeBiomesFromTypes(
+            BiomeDictionary.getBiomesForType(BiomeDictionary.Type.OCEAN),
+            BiomeDictionary.Type.NETHER, BiomeDictionary.Type.END, BiomeDictionary.Type.RIVER
+        ));
 
         long worldSeed = world.getSeed();
         int foundX = Integer.MIN_VALUE;
@@ -131,27 +131,23 @@ public class CommandLocate extends CommandBase {
         }
 
         if (foundX == Integer.MIN_VALUE) {
-            sender.addChatMessage(new ChatComponentText(
-                EnumChatFormatting.RED + "No shipwreck found within " + (MAX_SEARCH_RADIUS * 16) + " blocks."
-            ));
+            sender.addChatMessage(message(EnumChatFormatting.RED, id + ".notFound", MAX_SEARCH_RADIUS * 16));
         } else {
             int distance = (int) bestDist;
+            String teleport = "/tp " + foundX + " ~ " + foundZ;
             IChatComponent coords = new ChatComponentText(foundX + ", ~, " + foundZ);
             coords.getChatStyle()
                 .setColor(EnumChatFormatting.WHITE)
                 .setUnderlined(true)
-                .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp " + foundX + " ~ " + foundZ))
-                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to put /tp in the chat box")));
-            IChatComponent message = new ChatComponentText(EnumChatFormatting.GREEN + "Nearest Shipwreck: ");
-            message.appendSibling(coords);
-            message.appendSibling(new ChatComponentText(EnumChatFormatting.GRAY + " (~" + distance + " blocks away)"));
-            sender.addChatMessage(message);
+                .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, teleport))
+                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentTranslation(LANG_PREFIX + "click")));
+            IChatComponent found = message(EnumChatFormatting.GREEN, id + ".found", coords);
+            found.appendSibling(message(EnumChatFormatting.GRAY, "distance", distance));
+            sender.addChatMessage(found);
             if (sender instanceof EntityPlayer) {
-                ((EntityPlayer) sender).addChatMessage(new ChatComponentText(
-                    EnumChatFormatting.GRAY + "Tip: use "
-                    + EnumChatFormatting.YELLOW + "/tp " + foundX + " ~ " + foundZ
-                    + EnumChatFormatting.GRAY + " to teleport there."
-                ));
+                IChatComponent command = new ChatComponentText(teleport);
+                command.getChatStyle().setColor(EnumChatFormatting.YELLOW);
+                sender.addChatMessage(message(EnumChatFormatting.GRAY, "tip", command));
             }
         }
     }
