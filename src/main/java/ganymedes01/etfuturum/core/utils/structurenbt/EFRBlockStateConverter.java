@@ -149,6 +149,10 @@ public class EFRBlockStateConverter extends BlockStateConverter {
 			case "acacia_button":
 			case "dark_oak_button":
 				return Blocks.wooden_button;
+			case "stone_brick_wall":
+				return Blocks.cobblestone_wall;
+			case "magma_block":
+				return ModBlocks.MAGMA.isEnabled() ? ModBlocks.MAGMA.get() : Blocks.netherrack;
 			case "lantern":
 				return ModBlocks.LANTERN.isEnabled() ? ModBlocks.LANTERN.get() : Blocks.torch;
 			case "soul_lantern":

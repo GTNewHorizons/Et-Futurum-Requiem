@@ -691,7 +691,7 @@ public class EtFuturum {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
 		}
-		if (ConfigWorld.enableShipwrecks) {
+		if (ConfigWorld.enableShipwrecks || ConfigWorld.enableRuinedPortals) {
 			event.registerServerCommand(new CommandLocate());
 		}
 	}

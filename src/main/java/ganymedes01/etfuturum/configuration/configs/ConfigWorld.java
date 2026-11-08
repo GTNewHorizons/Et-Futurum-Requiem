@@ -50,6 +50,8 @@ public class ConfigWorld extends ConfigBase {
 	public static boolean enableOceanMonuments;
 	public static boolean enableShipwrecks;
 	public static int shipwreckRarity;
+	public static boolean enableRuinedPortals;
+	public static int ruinedPortalRarity;
 	public static int[] deepslateLayerDimensionBlacklist;
 	public static boolean deepslateLayerDimensionBlacklistAsWhitelist;
 	public static int[] replaceAllStoneWithDeepslateDimensionWhitelist;
@@ -121,6 +123,8 @@ public class ConfigWorld extends ConfigBase {
 		enableOceanMonuments = getBoolean("enableOceanMonuments", catGeneration, true, "Note: Ocean monuments currently do not have guardians");
 		enableShipwrecks = getBoolean("enableShipwrecks", catGeneration, true, "Generate shipwrecks in ocean biomes");
 		shipwreckRarity = getInt("shipwreckRarity", catGeneration, 500, 1, 10000, "How rare should shipwrecks be? 1/x chance per chunk. Higher = rarer.");
+		enableRuinedPortals = getBoolean("enableRuinedPortals", catGeneration, true, "Generate ruined portals in the overworld");
+		ruinedPortalRarity = getInt("ruinedPortalRarity", catGeneration, 1600, 1, 10000, "How rare should ruined portals be? 1/x chance per chunk. Higher = rarer. The default of 1600 matches vanilla's average of one portal per 40x40 chunks.");
 		enableFossils = getBoolean("enableFossils", catGeneration, true, "");
 		if (hasKey(catGeneration, "fossilBoneBlock")) {
 			Property oldFossilIDProp = get(catGeneration, "fossilBoneBlock", 0);

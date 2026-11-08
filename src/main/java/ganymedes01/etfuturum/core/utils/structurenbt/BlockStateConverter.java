@@ -922,6 +922,7 @@ public class BlockStateConverter {
 						return Blocks.wooden_slab;
 					}
 
+				case "stone_slab":
 				case "smooth_stone_slab":
 				case "sandstone_slab":
 				case "petrified_oak_slab":

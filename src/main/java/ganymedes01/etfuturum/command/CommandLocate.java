@@ -3,6 +3,7 @@ package ganymedes01.etfuturum.command;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
 import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
+import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -52,7 +53,7 @@ public class CommandLocate extends CommandBase {
     @Override
     public List addTabCompletionOptions(ICommandSender sender, String[] args) {
         if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, "shipwreck");
+            return getListOfStringsMatchingLastWord(args, "shipwreck", "ruined_portal");
         }
         return null;
     }
@@ -64,13 +65,14 @@ public class CommandLocate extends CommandBase {
         }
 
         String target = args[0].toLowerCase();
-        if (!target.equals("shipwreck")) {
+        boolean portal = target.equals("ruined_portal");
+        if (!portal && !target.equals("shipwreck")) {
             throw new WrongUsageException(getCommandUsage(sender));
         }
 
-        String id = "shipwreck";
+        String id = portal ? "ruined_portal" : "shipwreck";
 
-        if (!ConfigWorld.enableShipwrecks) {
+        if (!(portal ? ConfigWorld.enableRuinedPortals : ConfigWorld.enableShipwrecks)) {
             sender.addChatMessage(message(EnumChatFormatting.RED, id + ".disabled"));
             return;
         }
@@ -107,14 +109,15 @@ public class CommandLocate extends CommandBase {
                     int chunkX = centerChunkX + dx;
                     int chunkZ = centerChunkZ + dz;
 
-                    Random r = EtFuturumWorldGenerator.getShipwreckRandom(worldSeed, chunkX, chunkZ);
-                    if (r.nextInt(ConfigWorld.shipwreckRarity) != 0) continue;
+                    Random r = portal ? EtFuturumWorldGenerator.getRuinedPortalRandom(worldSeed, chunkX, chunkZ)
+                        : EtFuturumWorldGenerator.getShipwreckRandom(worldSeed, chunkX, chunkZ);
+                    if (r.nextInt(portal ? ConfigWorld.ruinedPortalRarity : ConfigWorld.shipwreckRarity) != 0) continue;
 
                     int candidateX = (chunkX << 4) + r.nextInt(16) + 8;
                     int candidateZ = (chunkZ << 4) + r.nextInt(16) + 8;
 
                     BiomeGenBase biome = world.getBiomeGenForCoords(candidateX, candidateZ);
-                    if (!validBiomes.contains(biome)) continue;
+                    if (portal ? !WorldGenRuinedPortal.canGenerateIn(biome) : !validBiomes.contains(biome)) continue;
 
                     double dist = Math.sqrt((double)(candidateX - playerX) * (candidateX - playerX)
                                          + (double)(candidateZ - playerZ) * (candidateZ - playerZ));

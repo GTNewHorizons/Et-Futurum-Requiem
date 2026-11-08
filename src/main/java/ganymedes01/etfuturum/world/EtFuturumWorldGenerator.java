@@ -16,6 +16,7 @@ import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenGlowLichen;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenPinkPetals;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
+import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenShipwreck;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
@@ -73,6 +74,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
 	protected WorldGenerator shipwreckGen;
+	protected WorldGenerator ruinedPortalGen;
 
 	private List<BiomeGenBase> fossilBiomes;
 	private List<BiomeGenBase> shipwreckBiomes;
@@ -181,6 +183,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			shipwreckBiomeArray = Utils.excludeBiomesFromTypes(shipwreckBiomeArray, Type.NETHER, Type.END, Type.RIVER);
 			shipwreckBiomes = Arrays.asList(shipwreckBiomeArray);
 			shipwreckGen = new WorldGenShipwreck();
+		}
+
+		if (ConfigWorld.enableRuinedPortals) {
+			ruinedPortalGen = new WorldGenRuinedPortal();
 		}
 
 		if (ModBlocks.MUD.isEnabled()) {
@@ -332,6 +338,15 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				}
 			}
 
+			if (ruinedPortalGen != null && world.provider.dimensionId == 0) {
+				Random portalRand = getRuinedPortalRandom(world.getSeed(), chunkX, chunkZ);
+				if (portalRand.nextInt(ConfigWorld.ruinedPortalRarity) == 0) {
+					x = (chunkX << 4) + portalRand.nextInt(16) + 8;
+					z = (chunkZ << 4) + portalRand.nextInt(16) + 8;
+					ruinedPortalGen.generate(world, portalRand, x, 0, z);
+				}
+			}
+
 			if (ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled()
 					&& !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell)) {
 				if (OceanMonument.canSpawnAt(world, chunkX, chunkZ)) {
@@ -423,5 +438,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	public static Random getShipwreckRandom(long worldSeed, int chunkX, int chunkZ) {
 		return new Random(worldSeed ^ ((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L));
+	}
+
+	public static Random getRuinedPortalRandom(long worldSeed, int chunkX, int chunkZ) {
+		// Salt of the vanilla ruined_portals structure set
+		return new Random((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L + worldSeed + 34222645L);
 	}
 }
