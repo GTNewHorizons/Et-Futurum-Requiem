@@ -39,6 +39,7 @@ import ganymedes01.etfuturum.client.DynamicSoundsResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
+import ganymedes01.etfuturum.command.CommandLocate;
 
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.CompatMisc;
@@ -51,6 +52,7 @@ import ganymedes01.etfuturum.configuration.ConfigBase;
 
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
@@ -688,6 +690,9 @@ public class EtFuturum {
 	public void serverStarting(FMLServerStartingEvent event) {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
+		}
+		if (ConfigWorld.enableShipwrecks) {
+			event.registerServerCommand(new CommandLocate());
 		}
 	}
 

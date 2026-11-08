@@ -16,6 +16,7 @@ import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenGlowLichen;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenPinkPetals;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
+import ganymedes01.etfuturum.world.generate.structure.WorldGenShipwreck;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
 import net.minecraft.block.Block;
@@ -71,8 +72,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator glowLichenGen;
 	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
+	protected WorldGenerator shipwreckGen;
 
 	private List<BiomeGenBase> fossilBiomes;
+	private List<BiomeGenBase> shipwreckBiomes;
 	private List<BiomeGenBase> berryBushBiomes;
 	private List<BiomeGenBase> cornflowerBiomes;
 	private List<BiomeGenBase> lilyValleyBiomes;
@@ -171,6 +174,13 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				biome.addFlower(ModBlocks.PINK_PETALS.get(), 8, 1);
 				biome.addFlower(ModBlocks.PINK_PETALS.get(), 12, 1);
 			}
+		}
+
+		if (ConfigWorld.enableShipwrecks) {
+			BiomeGenBase[] shipwreckBiomeArray = BiomeDictionary.getBiomesForType(Type.OCEAN);
+			shipwreckBiomeArray = Utils.excludeBiomesFromTypes(shipwreckBiomeArray, Type.NETHER, Type.END, Type.RIVER);
+			shipwreckBiomes = Arrays.asList(shipwreckBiomeArray);
+			shipwreckGen = new WorldGenShipwreck();
 		}
 
 		if (ModBlocks.MUD.isEnabled()) {
@@ -311,6 +321,17 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				}
 			}
 
+			if (shipwreckGen != null && world.provider.dimensionId == 0) {
+				Random shipwreckRand = getShipwreckRandom(world.getSeed(), chunkX, chunkZ);
+				if (shipwreckRand.nextInt(ConfigWorld.shipwreckRarity) == 0) {
+					x = (chunkX << 4) + shipwreckRand.nextInt(16) + 8;
+					z = (chunkZ << 4) + shipwreckRand.nextInt(16) + 8;
+					if (shipwreckBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+						shipwreckGen.generate(world, rand, x, 0, z);
+					}
+				}
+			}
+
 			if (ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled()
 					&& !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell)) {
 				if (OceanMonument.canSpawnAt(world, chunkX, chunkZ)) {
@@ -398,5 +419,9 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
 		return chunkProvider instanceof ChunkProviderFlat && !chunkProvider.getClass().getName().equals("com.rwtema.extrautils.worldgen.Underdark.ChunkProviderUnderdark");
+	}
+
+	public static Random getShipwreckRandom(long worldSeed, int chunkX, int chunkZ) {
+		return new Random(worldSeed ^ ((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L));
 	}
 }
