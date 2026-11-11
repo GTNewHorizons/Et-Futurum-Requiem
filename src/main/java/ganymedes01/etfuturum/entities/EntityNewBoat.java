@@ -54,6 +54,7 @@ public class EntityNewBoat extends Entity {
 	private static final int DATA_ID_TYPE = 21;
 	private static final int DATA_ID_RESOURCELOCATION = 22;
 	private static final int DATA_ID_RAFT = 23;
+	private static final float PASSENGER_YAW_LIMIT = 105.0F;
 	private final float[] paddlePositions;
 
 	/**
@@ -457,7 +458,9 @@ public class EntityNewBoat extends Entity {
 		super.onUpdate();
 		this.tickLerp();
 
-		if (this.canPassengerSteer()) {
+		boolean chunkMissing = this.isChunkMissingOnClient();
+
+		if (this.canPassengerSteer() && !chunkMissing) {
 			this.collideWithSurfaceBlocks();
 			if (this.getPassengers().size() == 0) {
 				this.setPaddleState(false, false);
@@ -520,9 +523,19 @@ public class EntityNewBoat extends Entity {
 			}
 		}
 
-		if (this.worldObj.isRemote && canPassengerSteer() && getControllingPassenger() instanceof EntityClientPlayerMP) {
+		if (this.worldObj.isRemote && canPassengerSteer() && !chunkMissing && getControllingPassenger() instanceof EntityClientPlayerMP) {
 			EtFuturum.networkWrapper.sendToServer(new BoatMoveMessage(this));
 		}
+	}
+
+	/**
+	 * On the client, the chunk under the boat can arrive later than the boat itself (e.g. right after joining a world).
+	 * Until then the client world is empty there, so the boat would fall through it and the BoatMoveMessage would drag
+	 * the server's boat down with it. Freeze the boat until the chunk is there.
+	 */
+	private boolean isChunkMissingOnClient() {
+		return this.worldObj.isRemote && this.worldObj
+				.getChunkFromBlockCoords(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posZ)).isEmpty();
 	}
 
 	private boolean canEntitySit(Entity entity) {
@@ -893,8 +906,7 @@ public class EntityNewBoat extends Entity {
 		passenger.setPosition(this.posX + vec3d.xCoord, this.posY + (double) f1, this.posZ + vec3d.zCoord);
 		if (ConfigTweaks.stopBoatRotationLock) {
 			return;
-		}
-		else {
+		} else {
 			passenger.rotationYaw += this.deltaRotation;
 			this.applyYawToEntity(passenger);
 		}
@@ -904,20 +916,44 @@ public class EntityNewBoat extends Entity {
 	 * Applies this boat's yaw to the given entity. Used to update the orientation of its passenger.
 	 */
 	protected void applyYawToEntity(Entity entityToUpdate) {
-		int j = 0;
-		if (entityToUpdate instanceof EntityAnimal && this.getPassengers().size() > 1) {
-			j = entityToUpdate.getEntityId() % 2 == 0 ? 90 : 270;
-		}
+		int j = this.getPassengerYawOffset(entityToUpdate);
+		limitPassengerYaw(entityToUpdate, this.rotationYaw + j, this.prevRotationYaw + j);
+		syncPassengerRenderYaw(entityToUpdate, j);
+	}
+
+	private void syncPassengerRenderYaw(Entity entityToUpdate, int yawOffset) {
 		if (entityToUpdate instanceof EntityLivingBase) {
-			float f = MathHelper.wrapAngleTo180_float(((EntityLivingBase) entityToUpdate).rotationYawHead - this.rotationYaw) + j;
-			float f1 = MathHelper.clamp_float(f, -105.0F + j, 105.0F + j % 360);
-			entityToUpdate.prevRotationYaw += f1 - f;
-			entityToUpdate.rotationYaw += f1 - f;
-			((EntityLivingBase) entityToUpdate).rotationYawHead += f1 - f;
-			((EntityLivingBase) entityToUpdate).prevRotationYawHead += f1 - f;
-			((EntityLivingBase) entityToUpdate).renderYawOffset = this.rotationYaw + j;
-			((EntityLivingBase) entityToUpdate).prevRenderYawOffset = this.rotationYaw + j;
+			EntityLivingBase living = (EntityLivingBase) entityToUpdate;
+			living.rotationYawHead = entityToUpdate.rotationYaw;
+			living.prevRotationYawHead = entityToUpdate.prevRotationYaw;
+			living.renderYawOffset = this.rotationYaw + yawOffset;
+			living.prevRenderYawOffset = this.prevRotationYaw + yawOffset;
 		}
+	}
+
+	public void limitPassengerYaw(Entity entityToUpdate) {
+		if (!ConfigTweaks.stopBoatRotationLock) {
+			int j = this.getPassengerYawOffset(entityToUpdate);
+			limitPassengerYaw(entityToUpdate, this.rotationYaw + j, this.prevRotationYaw + j);
+			syncPassengerRenderYaw(entityToUpdate, j);
+		}
+	}
+
+	private int getPassengerYawOffset(Entity entityToUpdate) {
+		if (entityToUpdate instanceof EntityAnimal && this.getPassengers().size() > 1) {
+			return entityToUpdate.getEntityId() % 2 == 0 ? 90 : 270;
+		}
+		return 0;
+	}
+
+	private static void limitPassengerYaw(Entity entityToUpdate, float yawCenter, float prevYawCenter) {
+		entityToUpdate.rotationYaw += getYawLimitAdjustment(entityToUpdate.rotationYaw, yawCenter);
+		entityToUpdate.prevRotationYaw += getYawLimitAdjustment(entityToUpdate.prevRotationYaw, prevYawCenter);
+	}
+
+	private static float getYawLimitAdjustment(float yaw, float yawCenter) {
+		float yawDelta = MathHelper.wrapAngleTo180_float(yaw - yawCenter);
+		return MathHelper.clamp_float(yawDelta, -PASSENGER_YAW_LIMIT, PASSENGER_YAW_LIMIT) - yawDelta;
 	}
 
 	/**

@@ -49,6 +49,15 @@ public class RegistryMapping<T> {
 		return object.hashCode(); // Do not hash meta so wildcards and metas all get placed into the same bucket
 	}
 
+	@Override
+	public String toString() {
+		String name = object instanceof Block ? Block.blockRegistry.getNameForObject(object) : Item.itemRegistry.getNameForObject(object);
+		if (name == null) {
+			name = "<unregistered:" + object.getClass().getName() + ">";
+		}
+		return name + ":" + (meta == OreDictionary.WILDCARD_VALUE ? "*" : meta);
+	}
+
 	/**
 	 * Returns a recycled RegistryMapping instance of the specified type. This does NOT CREATE A NEW INSTANCE!
 	 * This is used by things like deepslate registry as a key object without spamming the garbage collector with tons of new instances.

@@ -18,6 +18,7 @@ import ganymedes01.etfuturum.items.DebugTestItem;
 import ganymedes01.etfuturum.items.ItemArmorStand;
 import ganymedes01.etfuturum.items.ItemArrowTipped;
 import ganymedes01.etfuturum.items.ItemBamboo;
+import ganymedes01.etfuturum.items.ItemCoopersMallet;
 import ganymedes01.etfuturum.items.ItemBarrelUpgrade;
 import ganymedes01.etfuturum.items.ItemBeetrootSeeds;
 import ganymedes01.etfuturum.items.ItemBeetrootSoup;
@@ -103,6 +104,7 @@ public enum ModItems {
 	AMETHYST_SHARD(ConfigBlocksItems.enableAmethyst, new BaseItem("amethyst_shard")),
 	SHULKER_BOX_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.shulkerBoxesIronChest, new ItemShulkerBoxUpgrade()),
 	BARREL_UPGRADE(ModsList.IRON_CHEST.isLoaded() && ConfigModCompat.barrelIronChest, new ItemBarrelUpgrade()),
+	COOPERS_MALLET(ConfigBlocksItems.enableBarrel && ConfigBlocksItems.enableCoopersMallet, new ItemCoopersMallet()),
 	HONEYCOMB(ConfigBlocksItems.enableHoney, new BaseItem("honeycomb")),
 	HONEY_BOTTLE(ConfigBlocksItems.enableHoney, new ItemHoneyBottle()),
 	BAMBOO(ConfigBlocksItems.enableBambooBlocks, new ItemBamboo()),
