@@ -152,6 +152,16 @@ subtitle.entity.fox.eat=Fox eats
 subtitle.entity.fox.hurt=Fox hurts
 subtitle.entity.fox.sniff=Fox sniffs
 subtitle.entity.fox.spit=Fox spits
+subtitle.entity.panda.ambient=Panda pants
+subtitle.entity.panda.aggressive_ambient=Panda huffs
+subtitle.entity.panda.worried_ambient=Panda whimpers
+subtitle.entity.panda.bite=Panda bites
+subtitle.entity.panda.eat=Panda eats
+subtitle.entity.panda.cant_breed=Panda bleats
+subtitle.entity.panda.death=Panda dies
+subtitle.entity.panda.hurt=Panda hurts
+subtitle.entity.panda.pre_sneeze=Panda's nose tickles
+subtitle.entity.panda.sneeze=Panda sneezes
 
 subtitle.entity.boat.paddle_water=Paddles smack the water
 subtitle.entity.boat.paddle_land=Paddles hit the ground
@@ -350,6 +360,7 @@ entity.etfuturum.elder_guardian.name=Elder Guardian
 entity.etfuturum.polar_bear.name=Polar Bear
 entity.etfuturum.bee.name=Bee
 entity.etfuturum.fox.name=Fox
+entity.etfuturum.panda.name=Panda
 
 # Items
 item.etfuturum.mutton.name=Raw Mutton

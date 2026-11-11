@@ -344,6 +344,11 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
             mixins.add("wither.MixinBlockSkull_OnPlacingWitherSkull");
         }
 
+		if (ConfigEntities.enablePandas) {
+			mixins.add("panda.MixinEntityLivingBase");
+			mixins.add("panda.MixinEntityTrackerEntry");
+		}
+
 		return mixins;
 	}
 
