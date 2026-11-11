@@ -69,10 +69,6 @@ import ganymedes01.etfuturum.tileentities.TileEntityGateway;
 import ganymedes01.etfuturum.world.EtFuturumWorldListener;
 import ganymedes01.etfuturum.world.nether.biome.utils.NetherBiomeManager;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEndPortalFrame;
 import net.minecraft.block.BlockFarmland;
@@ -154,7 +150,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
@@ -193,7 +188,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.oredict.OreDictionary;
@@ -208,6 +202,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -219,6 +214,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"deprecation", "UnstableApiUsage"})
 public class ServerEventHandler {
@@ -236,6 +232,7 @@ public class ServerEventHandler {
 		armorTracker.clear();
 		fallingConcreteBlocks.clear();
 		droppedEntityItems.invalidateAll();
+		pendingReplacements.clear();
 	}
 
 	@SubscribeEvent
@@ -243,6 +240,7 @@ public class ServerEventHandler {
 		if (!event.world.isRemote) {
 			armorTracker.entrySet().removeIf(e -> e.getKey().worldObj == event.world);
 			fallingConcreteBlocks.removeIf(e -> e.worldObj == event.world);
+			pendingReplacements.keySet().removeIf(e -> e.worldObj == event.world);
 		}
 		droppedEntityItems.asMap().entrySet().removeIf(e -> e.getKey().worldObj == event.world);
 	}
@@ -410,86 +408,124 @@ public class ServerEventHandler {
 
 		if (ConfigBlocksItems.enableNewBoats && ConfigBlocksItems.replaceOldBoats) {
 			if (event.entity.getClass() == EntityBoat.class) {
-				EntityNewBoat boat = new EntityNewBoat(event.world);
-				event.entity.rotationYaw += 90;
-				replaceEntity(event.entity, boat, event.world, event);
-				boat.setBoatType("minecraft", "oak");
+				replaceEntity(event.entity, new EntityNewBoat(event.world), event.world, event, boat -> {
+					boat.prevRotationYaw = boat.rotationYaw += 90;
+					((EntityNewBoat) boat).setBoatType("minecraft", "oak");
+				});
 				return;
 			}
 		}
 
 		if (ConfigEntities.enableVillagerZombies && event.entity.getClass() == EntityZombie.class && ((EntityZombie) event.entity).isVillager()) {
-			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, event);
+			replaceEntity(event.entity, new EntityZombieVillager(event.world), event.world, event, null);
 			return;
 		}
 
 		if (ConfigEntities.enableShearableSnowGolems && event.entity.getClass() == EntitySnowman.class) {
-			Entity entity = new EntityNewSnowGolem(event.world);
-			replaceEntity(event.entity, entity, event.world, event);
-			entity.getDataWatcher().updateObject(12, (byte) 1);
+			replaceEntity(event.entity, new EntityNewSnowGolem(event.world), event.world, event,
+				golem -> golem.getDataWatcher().updateObject(12, (byte) 1));
 		}
 	}
 
-	// Map of dim ID -> packed chunk coords
-	private final Int2ObjectMap<LongSet> loadedChunks = new Int2ObjectLinkedOpenHashMap<>();
-
-	@SubscribeEvent
-	public void chunkLoad(ChunkEvent.Load event) {
-		if (event.world.isRemote) return;
-		getLongSet(event.world.provider.dimensionId).add(toLongCoords(event.getChunk()));
-	}
-
-	@SubscribeEvent
-	public void chunkUnload(ChunkEvent.Unload event) {
-		if (event.world.isRemote) return;
-		getLongSet(event.world.provider.dimensionId).remove(toLongCoords(event.getChunk()));
-	}
-
-	@SubscribeEvent
-	public void worldUnload(WorldEvent.Unload event) {
-		if (event.world.isRemote) return;
-		loadedChunks.remove(event.world.provider.dimensionId);
-	}
-
-	private long toLongCoords(Chunk chunk){
-		return ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition);
-	}
-
-	private LongSet getLongSet(int dim){
-		return loadedChunks.computeIfAbsent(dim, ($) -> new LongOpenHashSet());
-	}
-
-	private boolean isChunkLoaded(int dim, int chunkX, int chunkZ){
-		LongSet set = loadedChunks.get(dim);
-		return set != null && set.contains(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ));
-	}
-
-	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Event event) {
+	/// @param afterCopy changes the replacement after it got the data of the old entity
+	private void replaceEntity(Entity oldEntity, Entity newEntity, World world, Event event, Consumer<Entity> afterCopy) {
 		if(event.isCanceled() || oldEntity.isDead)
 			return;
-		event.setCanceled(true);
-		// Accounts for a bug where entities can be saved to the wrong chunk
-		int chunkX = oldEntity.chunkCoordX;
-		int chunkZ = oldEntity.chunkCoordZ;
-		// Newly spawned entity, so we get chunk coords from position
-		if(!oldEntity.addedToChunk){
-			chunkX = MathHelper.floor_double(oldEntity.posX) >> 4;
-			chunkZ = MathHelper.floor_double(oldEntity.posZ) >> 4;
-		}
-		newEntity.copyDataFrom(oldEntity, true);
 
-		// We only call world.spawnEntityInWorld if the chunk is already loaded or else
-		// the entity will be added to the EntityTracker twice which will cause issues
-		if(isChunkLoaded(world.provider.dimensionId, chunkX, chunkZ)){
+		// A newly spawned entity is not in a chunk yet
+		if(!oldEntity.addedToChunk){
+			event.setCanceled(true);
+			copyData(oldEntity, newEntity, afterCopy);
 			world.spawnEntityInWorld(newEntity);
-		}else{
-			IChunkProvider chunkProv = world.getChunkProvider();
-			if(chunkProv.chunkExists(chunkX, chunkZ)){
-				Chunk chunk = chunkProv.loadChunk(chunkX, chunkZ);
-				chunk.addEntity(newEntity);
-				chunk.removeEntity(oldEntity);
+			return;
+		}
+
+		// The entity is loaded with its chunk: World.addLoadedEntities is going through the chunk's entity list.
+		// Spawning the replacement now would add it to that list and to the world, and the list would add it to the
+		// world again (the entity tracker then fails with "Entity is already tracked!"); removing the old entity from the
+		// list would skip the next one. Let it join and replace it after the world tick.
+		pendingReplacements.put(oldEntity, new PendingReplacement(newEntity, afterCopy));
+	}
+
+	private static void copyData(Entity oldEntity, Entity newEntity, Consumer<Entity> afterCopy) {
+		newEntity.copyDataFrom(oldEntity, true);
+		if (afterCopy != null) afterCopy.accept(newEntity);
+	}
+
+	private static class PendingReplacement {
+		final Entity replacement;
+		final Consumer<Entity> afterCopy;
+
+		PendingReplacement(Entity replacement, Consumer<Entity> afterCopy) {
+			this.replacement = replacement;
+			this.afterCopy = afterCopy;
+		}
+	}
+
+	/// Entities loaded with their chunk -> their replacements, swapped at the end of the world tick
+	private final Map<Entity, PendingReplacement> pendingReplacements = new HashMap<>();
+
+	@SubscribeEvent
+	public void replaceLoadedEntities(TickEvent.WorldTickEvent e) {
+		if (e.phase != TickEvent.Phase.END || e.side != Side.SERVER || pendingReplacements.isEmpty()) return;
+		// Take this world's entries out first: spawning can load chunks (cubes under Cubic Chunks), whose entities add
+		// new entries for the next tick
+		List<Map.Entry<Entity, PendingReplacement>> due = new ArrayList<>();
+		for (Iterator<Map.Entry<Entity, PendingReplacement>> it = pendingReplacements.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<Entity, PendingReplacement> entry = it.next();
+			if (entry.getKey().worldObj == e.world) {
+				due.add(entry);
+				it.remove();
 			}
 		}
+		for (Map.Entry<Entity, PendingReplacement> entry : due) {
+			Entity oldEntity = entry.getKey();
+			PendingReplacement pending = entry.getValue();
+			// Drop it if it died or was unloaded since it joined; it stays as it was
+			if (oldEntity.isDead || e.world.getEntityByID(oldEntity.getEntityId()) != oldEntity) continue;
+			// Wait until it is in the chunk of its position, so the replacement spawns where it is
+			if (!isInChunkOfItsPosition(oldEntity)) {
+				pendingReplacements.put(oldEntity, pending);
+				continue;
+			}
+			swapEntity(oldEntity, pending.replacement, pending.afterCopy, e.world);
+		}
+	}
+
+	/// Replaces an entity that is in the world (and not being added by its chunk): the replacement gets its data and
+	/// is spawned, and only if that worked the old entity is removed and its mount and rider move to the replacement.
+	/// @return whether the entity was replaced; if not, the old entity is unchanged
+	private static boolean swapEntity(Entity oldEntity, Entity newEntity, Consumer<Entity> afterCopy, World world) {
+		Entity mount = oldEntity.ridingEntity;
+		Entity rider = oldEntity.riddenByEntity;
+		copyData(oldEntity, newEntity, afterCopy);
+		if (!world.spawnEntityInWorld(newEntity)) return false;
+		// Dismounts and kills it; the world's entity update removes it from its chunk
+		world.removeEntity(oldEntity);
+		if (mount != null && !mount.isDead) newEntity.mountEntity(mount);
+		if (rider != null && !rider.isDead) rider.mountEntity(newEntity);
+		return true;
+	}
+
+	/// Replaces a mob that natural spawning just spawned (SpecialSpawn is posted after spawnEntityInWorld, outside chunk
+	/// loading). The replacement then gets its own spawn setup instead of the old mob's.
+	private static void replaceSpawnedEntity(Entity oldEntity, EntityLiving newEntity, SpecialSpawn event) {
+		if (event.isCanceled() || oldEntity.isDead) return;
+		if (swapEntity(oldEntity, newEntity, null, event.world)) {
+			newEntity.onSpawnWithEgg(null);
+			event.setCanceled(true);
+			event.setResult(Result.DENY);
+		}
+	}
+
+	/// Whether the entity is filed in the chunk (and, under Cubic Chunks, the cube) of its position. Vanilla files
+	/// entities below or above the height limit in the bottom or top section.
+	private static boolean isInChunkOfItsPosition(Entity entity) {
+		int chunkY = MathHelper.floor_double(entity.posY / 16.0D);
+		return entity.addedToChunk
+			&& entity.chunkCoordX == MathHelper.floor_double(entity.posX / 16.0D)
+			&& entity.chunkCoordZ == MathHelper.floor_double(entity.posZ / 16.0D)
+			&& (entity.chunkCoordY == chunkY || entity.chunkCoordY == MathHelper.clamp_int(chunkY, 0, 15));
 	}
 
 	@SubscribeEvent
@@ -1430,18 +1466,14 @@ public class ServerEventHandler {
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SNOWY)) {
 				EntityStray stray = new EntityStray(world);
-				replaceEntity(entity, stray, world, event);
-				stray.onSpawnWithEgg(null);
-				event.setResult(Result.DENY);
+				replaceSpawnedEntity(entity, stray, event);
 			}
 		} else if (ConfigEntities.enableHusk && !ConfigWorld.oldHuskSpawning && EntityList.getEntityID(entity) == 54 /*Zombie ID*/ && world.rand.nextFloat() < .80F && world.canBlockSeeTheSky(x, y + 1, z)) {
 			Chunk chunk = world.getChunkFromBlockCoords(x, z);
 			BiomeDictionary.Type[] biomeTags = BiomeDictionary.getTypesForBiome(chunk.getBiomeGenForWorldCoords(x & 15, z & 15, world.getWorldChunkManager()));
 			if (ArrayUtils.contains(biomeTags, BiomeDictionary.Type.HOT) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.DRY) && ArrayUtils.contains(biomeTags, BiomeDictionary.Type.SANDY)) {
 				EntityHusk husk = new EntityHusk(world);
-				replaceEntity(entity, husk, world, event);
-				husk.onSpawnWithEgg(null);
-				event.setResult(Result.DENY);
+				replaceSpawnedEntity(entity, husk, event);
 			}
 		}
 	}
