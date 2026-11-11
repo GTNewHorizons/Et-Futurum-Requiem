@@ -9,6 +9,7 @@ public class ConfigEntities extends ConfigBase {
 	public static boolean enableStray;
 	public static boolean enableEndermite;
 	public static boolean enableVillagerZombies;
+    public static boolean enableModernWither;
 	public static boolean enableVillagerTurnsIntoWitch;
 	public static boolean enableHusk;
 	public static boolean enableShulker;
@@ -59,6 +60,7 @@ public class ConfigEntities extends ConfigBase {
 		enableStray = getBoolean("enableStrays", catHostile, true, "Tundra skeleton variant");
 		enableShulker = getBoolean("enableShulker", catHostile, true, "Shell-lurking mobs from the End.");
 		enableVillagerZombies = getBoolean("enableZombieVillager", catHostile, true, "");
+        enableModernWither = getBoolean("enableModernWither", catHostile, true, "Introduces the modern behavior of the wither on spawning.");
 
 		//function
 		enableShearableSnowGolems = getBoolean("enableShearableSnowGolems", catMisc, true, "");

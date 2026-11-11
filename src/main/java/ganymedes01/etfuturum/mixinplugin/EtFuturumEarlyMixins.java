@@ -346,6 +346,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityWolf");
 		}
 
+        if (ConfigEntities.enableModernWither) {
+            mixins.add("wither.MixinBlockSkull_OnPlacingWitherSkull");
+        }
+
 		return mixins;
 	}
 
