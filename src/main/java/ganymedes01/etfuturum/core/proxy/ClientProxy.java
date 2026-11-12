@@ -69,6 +69,8 @@ import ganymedes01.etfuturum.client.renderer.tileentity.TileEntityWoodSignRender
 import ganymedes01.etfuturum.client.skins.NewRenderPlayer;
 import ganymedes01.etfuturum.client.skins.NewSkinManager;
 import ganymedes01.etfuturum.client.subtitle.GuiSubtitles;
+import ganymedes01.etfuturum.compat.CompatDashboard;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.core.handlers.ClientEventHandler;
@@ -131,6 +133,9 @@ public class ClientProxy extends CommonProxy {
 		if (ConfigFunctions.enableSubtitles) {
 			GuiSubtitles.INSTANCE = new GuiSubtitles(FMLClientHandler.instance().getClient());
 			MinecraftForge.EVENT_BUS.register(GuiSubtitles.INSTANCE);
+			if (ModsList.DASHBOARD.isLoaded()) {
+				CompatDashboard.register();
+			}
 		}
 		
 		MinecraftForge.EVENT_BUS.register(new GlowLichenHighlightEvent());
