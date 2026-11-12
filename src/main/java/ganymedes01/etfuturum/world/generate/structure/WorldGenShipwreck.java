@@ -49,11 +49,10 @@ public class WorldGenShipwreck extends WorldGenerator {
         ShipwreckStructure structure = structures.get(rand.nextInt(structures.size()));
         ForgeDirection dir = ForgeDirection.getOrientation(rand.nextInt(4) + 2);
 
-        // Find the seafloor: go down from surface until we hit a solid/liquid block
+        // Water does not block movement, so this skips it and returns the seabed surface + 1
         int seafloor = world.getTopSolidOrLiquidBlock(x, z);
 
-        BlockPos size = structure.getSize(dir);
-        // Place ship so its bottom is 2 blocks above the seafloor
+        // seafloor is the surface + 1, so -2 sinks the bottom layer of the ship 1 block into the seabed
         int placeY = seafloor - 2;
         // Ensure we're not clipping into bedrock
         if (placeY < 5) return false;
