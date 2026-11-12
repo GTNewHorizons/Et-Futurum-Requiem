@@ -302,6 +302,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("swiftsneak.client.MixinMovementInputFromOptions");
 			}
 
+			if (ConfigEnchantsPotions.enableSoulSpeed) {
+				mixins.add("soulspeed.BlockSoulSandMixin");
+			}
+
 			if (ConfigMixins.flowerPotFixes) {
 				mixins.add("flowerpotfix.client.MixinRenderBlocks");
 			}
