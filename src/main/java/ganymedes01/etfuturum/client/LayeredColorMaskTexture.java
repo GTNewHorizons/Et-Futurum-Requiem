@@ -17,6 +17,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LayeredColorMaskTexture extends AbstractTexture {
@@ -45,40 +46,56 @@ public class LayeredColorMaskTexture extends AbstractTexture {
 
 		try {
 			BufferedImage bufferedimage1 = readBufferedImage(resourceManager.getResource(textureLocation).getInputStream());
-			int i = bufferedimage1.getType();
+			int layers = Math.min(listTextures.size(), listDyeColors.size());
+			List<BufferedImage> layerImages = new ArrayList<>(layers);
+			int width = bufferedimage1.getWidth();
+			int height = bufferedimage1.getHeight();
 
-			if (i == 0)
-				i = 6;
-
-			bufferedimage = new BufferedImage(bufferedimage1.getWidth(), bufferedimage1.getHeight(), i);
-			Graphics graphics = bufferedimage.getGraphics();
-			graphics.drawImage(bufferedimage1, 0, 0, null);
-
-			for (int j = 0; j < listTextures.size() && j < listDyeColors.size(); ++j) {
+			// Size the canvas to the largest layer so higher-resolution masks keep their detail
+			for (int j = 0; j < layers; ++j) {
 				String s = listTextures.get(j);
-				MapColor mapcolor = listDyeColors.get(j).getMapColour();
+				BufferedImage layer = null;
 
 				if (s != null) {
-					InputStream inputstream = resourceManager.getResource(new ResourceLocation(s)).getInputStream();
-					BufferedImage bufferedimage2 = readBufferedImage(inputstream);
+					layer = readBufferedImage(resourceManager.getResource(new ResourceLocation(s)).getInputStream());
+					width = Math.max(width, layer.getWidth());
+					height = Math.max(height, layer.getHeight());
+				}
 
-					if (bufferedimage2.getWidth() == bufferedimage.getWidth() && bufferedimage2.getHeight() == bufferedimage.getHeight() && bufferedimage2.getType() == 6) {
-						for (int k = 0; k < bufferedimage2.getHeight(); ++k)
-							for (int l = 0; l < bufferedimage2.getWidth(); ++l) {
-								int i1 = bufferedimage2.getRGB(l, k);
+				layerImages.add(layer);
+			}
 
-								if ((i1 & -16777216) != 0) {
-									int j1 = (i1 & 16711680) << 8 & -16777216;
-									int k1 = bufferedimage1.getRGB(l, k);
-									int l1 = multiplyColor(k1, mapcolor.colorValue) & 16777215;
-									bufferedimage2.setRGB(l, k, j1 | l1);
-								}
+			// Always ARGB: an optimized base texture may load as palette or grayscale and would lose the dye colours
+			BufferedImage base = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			base.getGraphics().drawImage(bufferedimage1, 0, 0, width, height, null);
+			bufferedimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			Graphics graphics = bufferedimage.getGraphics();
+			graphics.drawImage(base, 0, 0, null);
+
+			for (int j = 0; j < layers; ++j) {
+				BufferedImage layer = layerImages.get(j);
+
+				if (layer != null) {
+					MapColor mapcolor = listDyeColors.get(j).getMapColour();
+
+					// Resource packs may ship masks with a different size or colour type than the base image,
+					// so normalize them instead of dropping the layer
+					BufferedImage mask = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+					mask.getGraphics().drawImage(layer, 0, 0, width, height, null);
+
+					for (int k = 0; k < height; ++k)
+						for (int l = 0; l < width; ++l) {
+							int i1 = mask.getRGB(l, k);
+
+							if ((i1 & -16777216) != 0) {
+								int j1 = (i1 & 16711680) << 8 & -16777216;
+								int k1 = base.getRGB(l, k);
+								int l1 = multiplyColor(k1, mapcolor.colorValue) & 16777215;
+								mask.setRGB(l, k, j1 | l1);
 							}
+						}
 
-						bufferedimage.getGraphics().drawImage(bufferedimage2, 0, 0, null);
-					}
-
-					inputstream.close();
+					graphics.drawImage(mask, 0, 0, null);
 				}
 			}
 		} catch (IOException ioexception) {
