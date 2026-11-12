@@ -27,7 +27,7 @@ public class LayerBetterElytra {
 	public static float headPitch = 0.0F;
 
 	public static void doRenderLayer(EntityLivingBase entityIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float scale) {
-		ItemStack itemstack = ItemArmorElytra.getElytra(entityIn);
+		ItemStack itemstack = ItemArmorElytra.getElytraForRendering(entityIn);
 		if (entityIn instanceof AbstractClientPlayer player && itemstack != null) {
 			GL11.glPushAttrib(-1);
 			/*
