@@ -35,6 +35,11 @@ commands.etfuturum.locate.shipwreck.overworldOnly=Shipwrecks only generate in th
 commands.etfuturum.locate.shipwreck.searching=Searching for the nearest shipwreck...
 commands.etfuturum.locate.shipwreck.notFound=No shipwreck found within %d blocks.
 commands.etfuturum.locate.shipwreck.found=Nearest Shipwreck: %s
+commands.etfuturum.locate.ruined_portal.disabled=Ruined portals are disabled in the config.
+commands.etfuturum.locate.ruined_portal.overworldOnly=Ruined portals only generate in the overworld.
+commands.etfuturum.locate.ruined_portal.searching=Searching for the nearest ruined portal...
+commands.etfuturum.locate.ruined_portal.notFound=No ruined portal found within %d blocks.
+commands.etfuturum.locate.ruined_portal.found=Nearest Ruined Portal: %s
 
 sleep.players_sleeping=%s/%s players sleeping
 sleep.skipping_night=Sleeping through this night

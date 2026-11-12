@@ -35,6 +35,11 @@ commands.etfuturum.locate.shipwreck.overworldOnly=Затонувшие кора�
 commands.etfuturum.locate.shipwreck.searching=Поиск ближайшего затонувшего корабля...
 commands.etfuturum.locate.shipwreck.notFound=Затонувший корабль не найден в радиусе %d блоков.
 commands.etfuturum.locate.shipwreck.found=Ближайший затонувший корабль: %s
+commands.etfuturum.locate.ruined_portal.disabled=Разрушенные порталы отключены в конфиге.
+commands.etfuturum.locate.ruined_portal.overworldOnly=Разрушенные порталы генерируются только в Обычном мире.
+commands.etfuturum.locate.ruined_portal.searching=Поиск ближайшего разрушенного портала...
+commands.etfuturum.locate.ruined_portal.notFound=Разрушенный портал не найден в радиусе %d блоков.
+commands.etfuturum.locate.ruined_portal.found=Ближайший разрушенный портал: %s
 
 # Контейнеры (Containers/GUI)
 container.enchant.lapis.one=1 лазурит
