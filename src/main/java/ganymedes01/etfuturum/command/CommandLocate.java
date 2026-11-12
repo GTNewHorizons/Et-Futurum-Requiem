@@ -97,7 +97,7 @@ public class CommandLocate extends CommandBase {
 
         int foundX = Integer.MIN_VALUE;
         int foundZ = Integer.MIN_VALUE;
-        double bestDist = Double.MAX_VALUE;
+        double bestDistSq = Double.MAX_VALUE;
 
         // Spiral search outward from player chunk
         outer:
@@ -114,24 +114,24 @@ public class CommandLocate extends CommandBase {
                     int candidateX = pos[0];
                     int candidateZ = pos[1];
 
-                    double dist = Math.sqrt((double)(candidateX - playerX) * (candidateX - playerX)
-                                         + (double)(candidateZ - playerZ) * (candidateZ - playerZ));
-                    if (dist < bestDist) {
-                        bestDist = dist;
+                    double distSq = (double)(candidateX - playerX) * (candidateX - playerX)
+                                  + (double)(candidateZ - playerZ) * (candidateZ - playerZ);
+                    if (distSq < bestDistSq) {
+                        bestDistSq = distSq;
                         foundX = candidateX;
                         foundZ = candidateZ;
                     }
                     // Once we've found something on this ring, keep checking the ring then stop
-                    if (radius > 0 && bestDist < Double.MAX_VALUE) break outer;
+                    if (radius > 0 && bestDistSq < Double.MAX_VALUE) break outer;
                 }
             }
-            if (bestDist < Double.MAX_VALUE) break;
+            if (bestDistSq < Double.MAX_VALUE) break;
         }
 
         if (foundX == Integer.MIN_VALUE) {
             sender.addChatMessage(message(EnumChatFormatting.RED, id + ".notFound", MAX_SEARCH_RADIUS * 16));
         } else {
-            int distance = (int) bestDist;
+            int distance = (int) Math.sqrt(bestDistSq);
             String teleport = "/tp " + foundX + " ~ " + foundZ;
             IChatComponent coords = new ChatComponentText(foundX + ", ~, " + foundZ);
             coords.getChatStyle()
