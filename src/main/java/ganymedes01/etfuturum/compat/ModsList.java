@@ -7,6 +7,7 @@ public enum ModsList {
 	ENDERLICIOUS("enderlicious"),
 	IRON_CHEST("IronChest"),
 	NETHERLICIOUS("netherlicious"),
+	VILLAGE_NAMES("VillageNames"),
 	AETHER_LEGACY("aether_legacy"),
 	WAILA("Waila"),
 	THAUMCRAFT("Thaumcraft"),

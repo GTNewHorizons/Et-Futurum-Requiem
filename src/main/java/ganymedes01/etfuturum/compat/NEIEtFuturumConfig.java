@@ -12,6 +12,7 @@ import ganymedes01.etfuturum.compat.nei.ComposterHandler;
 import ganymedes01.etfuturum.compat.nei.SmokerRecipeHandler;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.lib.Reference;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -25,6 +26,10 @@ public class NEIEtFuturumConfig implements IConfigureNEI {
 
 	@Override
 	public void loadConfig() {
+		for (Block block : CompatVillageNames.getDeprecatedBlocks()) {
+			API.hideItem(new ItemStack(block, 1, OreDictionary.WILDCARD_VALUE));
+		}
+
 		if (ConfigWorld.tileReplacementMode != -1) {
 			if (ModBlocks.BREWING_STAND.isEnabled()) {
 				API.hideItem(ModBlocks.BREWING_STAND.newItemStack());
