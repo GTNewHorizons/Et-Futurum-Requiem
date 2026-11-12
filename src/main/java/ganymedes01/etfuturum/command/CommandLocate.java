@@ -1,9 +1,5 @@
 package ganymedes01.etfuturum.command;
 
-import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
-import ganymedes01.etfuturum.core.utils.Utils;
-import ganymedes01.etfuturum.world.EtFuturumWorldGenerator;
-import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -15,12 +11,10 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.BiomeDictionary;
 
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
 
 public class CommandLocate extends CommandBase {
 
@@ -28,6 +22,18 @@ public class CommandLocate extends CommandBase {
     private static final int MAX_SEARCH_RADIUS = 200;
 
     private static final String LANG_PREFIX = "commands.etfuturum.locate.";
+
+    private static final Map<String, LocateTarget> TARGETS = new LinkedHashMap<String, LocateTarget>();
+
+    /** Makes /locate accept the target's id as an argument. */
+    public static void register(LocateTarget target) {
+        TARGETS.put(target.getId(), target);
+    }
+
+    /** Returns true if at least one target is registered, so the command is worth adding. */
+    public static boolean hasTargets() {
+        return !TARGETS.isEmpty();
+    }
 
     private static IChatComponent message(EnumChatFormatting color, String key, Object... args) {
         IChatComponent component = new ChatComponentTranslation(LANG_PREFIX + key, args);
@@ -53,7 +59,7 @@ public class CommandLocate extends CommandBase {
     @Override
     public List addTabCompletionOptions(ICommandSender sender, String[] args) {
         if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, "shipwreck", "ruined_portal");
+            return getListOfStringsMatchingLastWord(args, TARGETS.keySet().toArray(new String[0]));
         }
         return null;
     }
@@ -64,21 +70,20 @@ public class CommandLocate extends CommandBase {
             throw new WrongUsageException(getCommandUsage(sender));
         }
 
-        String target = args[0].toLowerCase();
-        boolean portal = target.equals("ruined_portal");
-        if (!portal && !target.equals("shipwreck")) {
+        LocateTarget target = TARGETS.get(args[0].toLowerCase());
+        if (target == null) {
             throw new WrongUsageException(getCommandUsage(sender));
         }
 
-        String id = portal ? "ruined_portal" : "shipwreck";
+        String id = target.getId();
 
-        if (!(portal ? ConfigWorld.enableRuinedPortals : ConfigWorld.enableShipwrecks)) {
+        if (!target.isEnabled()) {
             sender.addChatMessage(message(EnumChatFormatting.RED, id + ".disabled"));
             return;
         }
 
         World world = sender.getEntityWorld();
-        if (world.provider.dimensionId != 0) {
+        if (!target.isValidWorld(world)) {
             sender.addChatMessage(message(EnumChatFormatting.RED, id + ".overworldOnly"));
             return;
         }
@@ -90,12 +95,6 @@ public class CommandLocate extends CommandBase {
 
         sender.addChatMessage(message(EnumChatFormatting.YELLOW, id + ".searching"));
 
-        List<BiomeGenBase> validBiomes = Arrays.asList(Utils.excludeBiomesFromTypes(
-            BiomeDictionary.getBiomesForType(BiomeDictionary.Type.OCEAN),
-            BiomeDictionary.Type.NETHER, BiomeDictionary.Type.END, BiomeDictionary.Type.RIVER
-        ));
-
-        long worldSeed = world.getSeed();
         int foundX = Integer.MIN_VALUE;
         int foundZ = Integer.MIN_VALUE;
         double bestDist = Double.MAX_VALUE;
@@ -109,15 +108,11 @@ public class CommandLocate extends CommandBase {
                     int chunkX = centerChunkX + dx;
                     int chunkZ = centerChunkZ + dz;
 
-                    Random r = portal ? EtFuturumWorldGenerator.getRuinedPortalRandom(worldSeed, chunkX, chunkZ)
-                        : EtFuturumWorldGenerator.getShipwreckRandom(worldSeed, chunkX, chunkZ);
-                    if (r.nextInt(portal ? ConfigWorld.ruinedPortalRarity : ConfigWorld.shipwreckRarity) != 0) continue;
+                    int[] pos = target.findInChunk(world, chunkX, chunkZ);
+                    if (pos == null) continue;
 
-                    int candidateX = (chunkX << 4) + r.nextInt(16) + 8;
-                    int candidateZ = (chunkZ << 4) + r.nextInt(16) + 8;
-
-                    BiomeGenBase biome = world.getBiomeGenForCoords(candidateX, candidateZ);
-                    if (portal ? !WorldGenRuinedPortal.canGenerateIn(biome) : !validBiomes.contains(biome)) continue;
+                    int candidateX = pos[0];
+                    int candidateZ = pos[1];
 
                     double dist = Math.sqrt((double)(candidateX - playerX) * (candidateX - playerX)
                                          + (double)(candidateZ - playerZ) * (candidateZ - playerZ));

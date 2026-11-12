@@ -52,7 +52,6 @@ import ganymedes01.etfuturum.configuration.ConfigBase;
 
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
-import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigModCompat;
@@ -691,7 +690,7 @@ public class EtFuturum {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
 		}
-		if (ConfigWorld.enableShipwrecks || ConfigWorld.enableRuinedPortals) {
+		if (CommandLocate.hasTargets()) {
 			event.registerServerCommand(new CommandLocate());
 		}
 	}

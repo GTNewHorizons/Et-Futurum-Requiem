@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import cpw.mods.fml.common.IWorldGenerator;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockChorusFlower;
+import ganymedes01.etfuturum.command.CommandLocate;
+import ganymedes01.etfuturum.command.LocateTarget;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
@@ -183,10 +185,64 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			shipwreckBiomeArray = Utils.excludeBiomesFromTypes(shipwreckBiomeArray, Type.NETHER, Type.END, Type.RIVER);
 			shipwreckBiomes = Arrays.asList(shipwreckBiomeArray);
 			shipwreckGen = new WorldGenShipwreck();
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "shipwreck";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableShipwrecks;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					Random shipwreckRand = getShipwreckRandom(world.getSeed(), chunkX, chunkZ);
+					if (shipwreckRand.nextInt(ConfigWorld.shipwreckRarity) != 0) {
+						return null;
+					}
+					int x = (chunkX << 4) + shipwreckRand.nextInt(16) + 8;
+					int z = (chunkZ << 4) + shipwreckRand.nextInt(16) + 8;
+					return shipwreckBiomes.contains(world.getBiomeGenForCoords(x, z)) ? new int[] {x, z} : null;
+				}
+			});
 		}
 
 		if (ConfigWorld.enableRuinedPortals) {
 			ruinedPortalGen = new WorldGenRuinedPortal();
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "ruined_portal";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableRuinedPortals;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					Random portalRand = getRuinedPortalRandom(world.getSeed(), chunkX, chunkZ);
+					if (portalRand.nextInt(ConfigWorld.ruinedPortalRarity) != 0) {
+						return null;
+					}
+					int x = (chunkX << 4) + portalRand.nextInt(16) + 8;
+					int z = (chunkZ << 4) + portalRand.nextInt(16) + 8;
+					return WorldGenRuinedPortal.canGenerateIn(world.getBiomeGenForCoords(x, z)) ? new int[] {x, z} : null;
+				}
+			});
 		}
 
 		if (ModBlocks.MUD.isEnabled()) {
