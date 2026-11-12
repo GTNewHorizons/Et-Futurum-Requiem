@@ -1,21 +1,15 @@
 package ganymedes01.etfuturum;
 
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
+import ganymedes01.etfuturum.core.utils.helpers.EnchantRandomlyChestContent;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenShipwreck;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraftforge.common.ChestGenHooks;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class EtFuturumLootTables {
 
@@ -55,7 +49,7 @@ public class EtFuturumLootTables {
 		Item[] goldGear = {Items.golden_sword, Items.golden_axe, Items.golden_hoe, Items.golden_shovel, Items.golden_pickaxe,
 			Items.golden_boots, Items.golden_chestplate, Items.golden_helmet, Items.golden_leggings};
 		for (Item item : goldGear) {
-			portal.addItem(new EnchantRandomlyContent(item, 15));
+			portal.addItem(new EnchantRandomlyChestContent(new ItemStack(item), 1, 1, 15));
 		}
 		portal.addItem(new WeightedRandomChestContent(new ItemStack(Items.speckled_melon), 4, 12, 5));
 		portal.addItem(new WeightedRandomChestContent(new ItemStack(Items.golden_horse_armor), 1, 1, 5));
@@ -65,34 +59,6 @@ public class EtFuturumLootTables {
 		portal.addItem(new WeightedRandomChestContent(new ItemStack(Items.gold_ingot), 2, 8, 5));
 		portal.addItem(new WeightedRandomChestContent(new ItemStack(Items.golden_apple, 1, 1), 1, 1, 1));
 		portal.addItem(new WeightedRandomChestContent(new ItemStack(Blocks.gold_block), 1, 2, 1));
-	}
-
-	/**
-	 * Equivalent of the enchant_randomly loot function: one random applicable enchantment at a random level.
-	 */
-	private static class EnchantRandomlyContent extends WeightedRandomChestContent {
-
-		EnchantRandomlyContent(Item item, int weight) {
-			super(new ItemStack(item), 1, 1, weight);
-		}
-
-		@Override
-		protected ItemStack[] generateChestContent(Random random, IInventory inventory) {
-			ItemStack[] stacks = super.generateChestContent(random, inventory);
-			for (ItemStack stack : stacks) {
-				List<Enchantment> applicable = new ArrayList<>();
-				for (Enchantment enchantment : Enchantment.enchantmentsList) {
-					if (enchantment != null && enchantment.canApply(stack)) {
-						applicable.add(enchantment);
-					}
-				}
-				if (!applicable.isEmpty()) {
-					Enchantment enchantment = applicable.get(random.nextInt(applicable.size()));
-					stack.addEnchantment(enchantment, MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel()));
-				}
-			}
-			return stacks;
-		}
 	}
 
 	private static void initShipwreckLoot() {
