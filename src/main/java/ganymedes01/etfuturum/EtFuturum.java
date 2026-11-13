@@ -39,6 +39,7 @@ import ganymedes01.etfuturum.client.DynamicSoundsResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
+import ganymedes01.etfuturum.command.CommandLocate;
 
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.CompatMisc;
@@ -688,6 +689,9 @@ public class EtFuturum {
 	public void serverStarting(FMLServerStartingEvent event) {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
+		}
+		if (CommandLocate.hasTargets()) {
+			event.registerServerCommand(new CommandLocate());
 		}
 	}
 
