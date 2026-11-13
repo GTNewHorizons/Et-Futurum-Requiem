@@ -22,6 +22,7 @@ import ganymedes01.etfuturum.blocks.BlockPointedDripstone;
 import ganymedes01.etfuturum.blocks.BlockWoodFence;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import net.minecraft.block.Block;
+import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidRegistry;
 
 public final class CompatLiquidLogged {
@@ -38,6 +39,13 @@ public final class CompatLiquidLogged {
 			if (entry.isEnabled() && isWaterloggable(entry.get())) {
 				LiquidLoggedAPI.registerPredicate(entry.get(), WATER_ONLY);
 			}
+		}
+	}
+
+	/** Fills the block at this position with water if it can hold it; used by structure generation. */
+	public static void fillWater(World world, int x, int y, int z) {
+		if (LiquidLoggedAPI.canHold(world, x, y, z, FluidRegistry.WATER)) {
+			LiquidLoggedAPI.setFluid(world, x, y, z, FluidRegistry.WATER);
 		}
 	}
 
