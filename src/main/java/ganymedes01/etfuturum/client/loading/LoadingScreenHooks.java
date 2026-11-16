@@ -3,14 +3,24 @@ package ganymedes01.etfuturum.client.loading;
 import ganymedes01.etfuturum.client.ChunkLoadingProgress;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.chunk.Chunk;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoadingScreenHooks {
 
-    public static final int CHUNK_COLOR_EMPTY = LoadingScreenChunkStage.EMPTY.getColor();
-    public static final int CHUNK_COLOR_FULL = LoadingScreenChunkStage.FULL.getColor();
+    private static final int CHUNK_COLOR_EMPTY = 0xFF545454;
 
-    public static void beginOther() {
-        LoadingScreenStateTracker.beginIfNeeded();
+    // sampling isn't free and the client map rebuilds every frame, so cache per chunk coord
+    // (cleared on reset/new world so colors don't carry over)
+    private static final Map<Long, Integer> CLIENT_CHUNK_COLOR_CACHE = new HashMap<>();
+
+    public static void beginIntegratedLaunch() {
+        // activate the new session; resetForNewLaunch already cleared the old world at launch HEAD
+        CLIENT_CHUNK_COLOR_CACHE.clear();
+        LoadingScreenStateTracker.begin();
     }
 
     public static void beginDownloadTerrain(boolean integratedServer) {
@@ -21,11 +31,16 @@ public class LoadingScreenHooks {
     }
 
     public static void reset() {
+        CLIENT_CHUNK_COLOR_CACHE.clear();
         LoadingScreenStateTracker.reset();
     }
 
-    public static void updateServerChunkStage(int chunkX, int chunkZ, LoadingScreenChunkStage stage) {
-        updateServerChunkColor(chunkX, chunkZ, stage.getColor());
+    public static void resetForNewLaunch() {
+        // Clear the previous world's chunk map and progress before a new world loads; the
+        // in-world reset is skipped when you quit via the menu.
+        CLIENT_CHUNK_COLOR_CACHE.clear();
+        LoadingScreenStateTracker.reset();
+        SpawnChunkProgress.reset();
     }
 
     public static void updateServerChunkColor(int chunkX, int chunkZ, int color) {
@@ -46,6 +61,7 @@ public class LoadingScreenHooks {
 
     public static void updateClientChunkMap(Minecraft mc) {
         if (mc.theWorld == null) {
+            CLIENT_CHUNK_COLOR_CACHE.clear();
             LoadingScreenStateTracker.clearChunkMap();
             return;
         }
@@ -57,8 +73,22 @@ public class LoadingScreenHooks {
 
         for (int relativeZ = -radius; relativeZ <= radius; relativeZ++) {
             for (int relativeX = -radius; relativeX <= radius; relativeX++) {
-                boolean loaded = ChunkLoadingProgress.isChunkLoaded(playerChunkX + relativeX, playerChunkZ + relativeZ);
-                int color = loaded ? CHUNK_COLOR_FULL : CHUNK_COLOR_EMPTY;
+                int chunkX = playerChunkX + relativeX;
+                int chunkZ = playerChunkZ + relativeZ;
+                int color;
+                if (ChunkLoadingProgress.isChunkLoaded(chunkX, chunkZ)) {
+                    long key = ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ);
+                    Integer cached = CLIENT_CHUNK_COLOR_CACHE.get(key);
+                    if (cached != null) {
+                        color = cached;
+                    } else {
+                        Chunk chunk = mc.theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
+                        color = LoadingScreenChunkColorSampler.sample(chunk);
+                        CLIENT_CHUNK_COLOR_CACHE.put(key, color);
+                    }
+                } else {
+                    color = CHUNK_COLOR_EMPTY;
+                }
                 LoadingScreenStateTracker.updateChunkColor(relativeX, relativeZ, color);
             }
         }

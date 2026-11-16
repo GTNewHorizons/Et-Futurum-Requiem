@@ -1,6 +1,7 @@
 package ganymedes01.etfuturum.core.utils.structurenbt;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -98,6 +99,71 @@ public class EFRBlockStateConverter extends BlockStateConverter {
 			case "black_wall_banner":
 				nameToFind = "banner";
 		}
+		// Spruce-specific blocks not in base converter (1.7.10 has no separate spruce door/trapdoor/fence)
+		switch (truncatedName) {
+			case "spruce_door":
+			case "birch_door":
+			case "jungle_door":
+			case "acacia_door":
+			case "dark_oak_door":
+				return Blocks.wooden_door;
+			case "spruce_trapdoor":
+			case "birch_trapdoor":
+			case "jungle_trapdoor":
+			case "acacia_trapdoor":
+			case "dark_oak_trapdoor":
+				return Blocks.trapdoor;
+			case "spruce_fence":
+			case "birch_fence":
+			case "jungle_fence":
+			case "acacia_fence":
+			case "dark_oak_fence":
+				return Blocks.fence;
+			case "spruce_fence_gate":
+			case "birch_fence_gate":
+			case "jungle_fence_gate":
+			case "acacia_fence_gate":
+			case "dark_oak_fence_gate":
+				return Blocks.fence_gate;
+			case "spruce_sign":
+			case "birch_sign":
+			case "jungle_sign":
+			case "acacia_sign":
+			case "dark_oak_sign":
+				return Blocks.standing_sign;
+			case "spruce_wall_sign":
+			case "birch_wall_sign":
+			case "jungle_wall_sign":
+			case "acacia_wall_sign":
+			case "dark_oak_wall_sign":
+				return Blocks.wall_sign;
+			case "spruce_pressure_plate":
+			case "birch_pressure_plate":
+			case "jungle_pressure_plate":
+			case "acacia_pressure_plate":
+			case "dark_oak_pressure_plate":
+				return Blocks.wooden_pressure_plate;
+			case "spruce_button":
+			case "birch_button":
+			case "jungle_button":
+			case "acacia_button":
+			case "dark_oak_button":
+				return Blocks.wooden_button;
+			case "stone_brick_wall":
+				return Blocks.cobblestone_wall;
+			case "magma_block":
+				return ModBlocks.MAGMA.isEnabled() ? ModBlocks.MAGMA.get() : Blocks.netherrack;
+			case "lantern":
+				return ModBlocks.LANTERN.isEnabled() ? ModBlocks.LANTERN.get() : Blocks.torch;
+			case "soul_lantern":
+				return ModBlocks.SOUL_LANTERN.isEnabled() ? ModBlocks.SOUL_LANTERN.get() : Blocks.torch;
+			case "kelp":
+			case "kelp_plant":
+			case "seagrass":
+			case "tall_seagrass":
+				return Blocks.air;
+		}
+
 		Block efrBlock = GameRegistry.findBlock("etfuturum", nameToFind);
 		if (efrBlock != null) {
 			return efrBlock;

@@ -39,6 +39,7 @@ import ganymedes01.etfuturum.client.DynamicSoundsResourcePack;
 import ganymedes01.etfuturum.client.GrayscaleWaterResourcePack;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.command.CommandFill;
+import ganymedes01.etfuturum.command.CommandLocate;
 
 import ganymedes01.etfuturum.compat.CompatBaublesExpanded;
 import ganymedes01.etfuturum.compat.CompatMisc;
@@ -49,6 +50,7 @@ import ganymedes01.etfuturum.compat.ExternalContent;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.ConfigBase;
 
+import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
@@ -59,6 +61,7 @@ import ganymedes01.etfuturum.core.handlers.WorldEventHandler;
 import ganymedes01.etfuturum.core.proxy.CommonProxy;
 import ganymedes01.etfuturum.core.utils.IInitAction;
 import ganymedes01.etfuturum.core.utils.Logger;
+import ganymedes01.etfuturum.dispenser.DispenserBehaviourWitherSpawning;
 import ganymedes01.etfuturum.entities.ModEntityList;
 import ganymedes01.etfuturum.items.ItemWoodSign;
 import ganymedes01.etfuturum.lib.Reference;
@@ -95,6 +98,7 @@ import makamys.mclib.ext.assetdirector.AssetDirectorAPI;
 import net.minecraft.block.Block;
 import net.minecraft.block.Block.SoundType;
 import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockHay;
 import net.minecraft.block.BlockHopper;
 import net.minecraft.block.BlockLeaves;
@@ -250,12 +254,12 @@ public class EtFuturum {
 			e.printStackTrace();
 		}
 
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).preInitAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).preInitAction();
 			}
@@ -306,16 +310,20 @@ public class EtFuturum {
 		if(ModsList.RPLE.isLoaded()) {
 			CompatRPLEEventHandler.registerRPLECompat();
 		}
+
+        if (ConfigEntities.enableModernWither) {
+            BlockDispenser.dispenseBehaviorRegistry.putObject(Items.skull, new DispenserBehaviourWitherSpawning());
+        }
 	}
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).initAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).initAction();
 			}
@@ -417,12 +425,12 @@ public class EtFuturum {
 			}
 		}
 
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).postInitAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).postInitAction();
 			}
@@ -451,12 +459,12 @@ public class EtFuturum {
 	@EventHandler
 	@SuppressWarnings("unchecked")
 	public void onLoadComplete(FMLLoadCompleteEvent e) {
-		for (ModBlocks block : ModBlocks.values()) {
+		for (ModBlocks block : ModBlocks.VALUES) {
 			if (block.isEnabled() && block.get() instanceof IInitAction) {
 				((IInitAction) block.get()).onLoadAction();
 			}
 		}
-		for (ModItems item : ModItems.values()) {
+		for (ModItems item : ModItems.VALUES) {
 			if (item.isEnabled() && item.get() instanceof IInitAction) {
 				((IInitAction) item.get()).onLoadAction();
 			}
@@ -682,6 +690,9 @@ public class EtFuturum {
 		if (ConfigFunctions.enableFillCommand) {
 			event.registerServerCommand(new CommandFill());
 		}
+		if (CommandLocate.hasTargets()) {
+			event.registerServerCommand(new CommandLocate());
+		}
 	}
 
 	@EventHandler
@@ -817,6 +828,7 @@ public class EtFuturum {
 
 		config.addSoundEvent(ver, "weather.rain", "weather");
 		config.addSoundEvent(ver, "weather.rain.above", "weather");
+		config.addSoundEvent(ver, "weather.end_flash", "weather");
 
 		config.addSoundEvent(ver, "music.nether.nether_wastes", "music");
 		config.addSoundEvent(ver, "ambient.nether_wastes.additions", "ambient");

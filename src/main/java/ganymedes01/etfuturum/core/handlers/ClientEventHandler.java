@@ -13,6 +13,7 @@ import ganymedes01.etfuturum.ModItems;
 import ganymedes01.etfuturum.api.MultiBlockSoundRegistry;
 import ganymedes01.etfuturum.api.mappings.MultiBlockSoundContainer;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
+import ganymedes01.etfuturum.client.EndFlashState;
 import ganymedes01.etfuturum.client.OpenGLHelper;
 import ganymedes01.etfuturum.client.SpawnChunkProgress;
 import ganymedes01.etfuturum.client.loading.LoadingScreenHooks;
@@ -25,6 +26,7 @@ import ganymedes01.etfuturum.client.particle.DeferredBubbleFX;
 import ganymedes01.etfuturum.client.renderer.entity.elytra.LayerBetterElytra;
 import ganymedes01.etfuturum.client.sound.AmbienceLoop;
 import ganymedes01.etfuturum.client.sound.BeeFlySound;
+import ganymedes01.etfuturum.client.sound.EndFlashSound;
 import ganymedes01.etfuturum.client.sound.ElytraSound;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.configuration.ConfigBase;
@@ -33,6 +35,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigExperiments;
 import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.core.utils.RandomXoshiro256StarStar;
 import ganymedes01.etfuturum.core.utils.Utils;
@@ -62,6 +65,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiScreenBook;
+import net.minecraft.client.gui.GuiWinGame;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.client.particle.EntityFX;
@@ -84,6 +88,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
@@ -120,6 +125,8 @@ public class ClientEventHandler {
 	public static final ClientEventHandler INSTANCE = new ClientEventHandler();
 	private final Minecraft mc = FMLClientHandler.instance().getClient();
 	private final Random rand = new RandomXoshiro256StarStar();
+	private final EndFlashState endFlashState = new EndFlashState();
+	private boolean wasInEnd;
 	private boolean showedDebugWarning;
 	private int currPage;
 	/**
@@ -230,6 +237,8 @@ public class ClientEventHandler {
 		} else {
 			netherAmbienceLoop = null;
 		}
+
+		tickEndFlashes(world);
 
 		if (ConfigFunctions.enableGamemodeSwitcher && Keyboard.isCreated() && Keyboard.isKeyDown(Keyboard.KEY_F3) && Keyboard.isKeyDown(Keyboard.KEY_F4)) {
 			if (mc.currentScreen == null) {
@@ -342,6 +351,42 @@ public class ClientEventHandler {
 			netherAmbienceLoop = netherAmbienceLoops.getOrDefault(currentBiome, defaultNetherAmbienceLoop).createNew();
 			mc.getSoundHandler().playSound(netherAmbienceLoop);
 		}
+	}
+
+	private void tickEndFlashes(World world) {
+		if (!ConfigWorld.endFlashes) {
+			wasInEnd = false;
+			return;
+		}
+		if (world.provider instanceof WorldProviderEnd) {
+			if (!wasInEnd) {
+				endFlashState.reset();
+				wasInEnd = true;
+			}
+			endFlashState.tick(world.getTotalWorldTime());
+			if (endFlashState.flashStartedThisTick() && !(mc.currentScreen instanceof GuiWinGame)) {
+				mc.getSoundHandler().playDelayedSound(
+						new EndFlashSound(endFlashState.getXAngle(), endFlashState.getYAngle()),
+						EndFlashState.SOUND_DELAY_IN_TICKS);
+			}
+		} else {
+			wasInEnd = false;
+		}
+	}
+
+	public static float getEndFlashIntensity(float partialTicks) {
+		if (!ConfigWorld.endFlashes || !INSTANCE.wasInEnd) {
+			return 0.0F;
+		}
+		return INSTANCE.endFlashState.getIntensity(partialTicks);
+	}
+
+	public static float getEndFlashXAngle() {
+		return INSTANCE.endFlashState.getXAngle();
+	}
+
+	public static float getEndFlashYAngle() {
+		return INSTANCE.endFlashState.getYAngle();
 	}
 
 	private String getAmbienceMood() {

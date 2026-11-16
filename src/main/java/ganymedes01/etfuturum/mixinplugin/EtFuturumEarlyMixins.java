@@ -10,6 +10,7 @@ import ganymedes01.etfuturum.configuration.configs.ConfigEnchantsPotions;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
 import ganymedes01.etfuturum.configuration.configs.ConfigTweaks;
+import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.lib.Reference;
 import net.minecraft.launchwrapper.Launch;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -79,6 +80,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigBlocksItems.enableNewBoats) {
 			mixins.add("boatstat.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("boatcamera.client.MixinEntity");
+			}
 		}
 
 		if (ConfigMixins.fenceWallConnectFix) {
@@ -138,6 +142,24 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 		if (ConfigMixins.enableRandomTickSpeed) {
 			mixins.add("randomtickspeed.MixinWorldServer");
 			mixins.add("randomtickspeed.MixinGameRules");
+		}
+
+		if ((ConfigWorld.endFlashes || ConfigWorld.modernEndAmbientColor || ConfigWorld.modernBlockLightTint)
+				&& side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("endflashes.client.MixinEntityRenderer");
+		}
+
+		if (ConfigWorld.endFlashes && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("endflashes.client.MixinRenderGlobal");
+		}
+
+		if (ConfigWorld.modernLightmapGamma && side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("modernlightmap.client.MixinEntityRenderer");
+		}
+
+		if ((ConfigWorld.modernBlockLightTint || ConfigWorld.modernNightVision)
+				&& side == MixinEnvironment.Side.CLIENT) {
+			mixins.add("modernblocklight.client.MixinEntityRenderer");
 		}
 
 		if (ConfigMixins.creativeFlightSpeedModifier > 1 || ConfigTweaks.creativeFlightVerticalModifier > 1) {
@@ -252,6 +274,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("liquidphysics.MixinEntityItem");
 		}
 
+		if (ConfigMixins.riddenHorsesInWater) {
+			mixins.add("horsewater.MixinEntityHorse");
+		}
+
 		if (false) { //Does not work for some reason, investigate in 2.6.1
 			mixins.add("darkspawns.MixinEntityMob");
 		}
@@ -296,9 +322,6 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("worldthumbnail.client.MixinMinecraft_LoadingBridge");
 				mixins.add("worldthumbnail.MixinMinecraftServer");
 				mixins.add("worldthumbnail.MixinChunkProviderServer");
-				mixins.add("worldthumbnail.MixinChunkProviderGenerate");
-				mixins.add("worldthumbnail.MixinChunkProviderHell");
-				mixins.add("worldthumbnail.MixinChunkProviderEnd");
 			}
 		}
 
@@ -317,6 +340,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityLivingBase");
 			mixins.add("foxes.MixinEntityWolf");
 		}
+
+        if (ConfigEntities.enableModernWither) {
+            mixins.add("wither.MixinBlockSkull_OnPlacingWitherSkull");
+        }
 
 		return mixins;
 	}
