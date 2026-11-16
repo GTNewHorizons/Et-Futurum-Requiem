@@ -80,6 +80,9 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 
 		if (ConfigBlocksItems.enableNewBoats) {
 			mixins.add("boatstat.MixinEntityPlayer");
+			if (side == MixinEnvironment.Side.CLIENT) {
+				mixins.add("boatcamera.client.MixinEntity");
+			}
 		}
 
 		if (ConfigMixins.fenceWallConnectFix) {
@@ -336,6 +339,10 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 			mixins.add("foxes.MixinEntityLivingBase");
 			mixins.add("foxes.MixinEntityWolf");
 		}
+
+        if (ConfigEntities.enableModernWither) {
+            mixins.add("wither.MixinBlockSkull_OnPlacingWitherSkull");
+        }
 
 		return mixins;
 	}
