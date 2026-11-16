@@ -74,7 +74,9 @@ public class WorldGenShipwreck extends WorldGenerator {
             // MalisisDoors replaces vanilla doors and trapdoors with tile entity blocks. Reading the empty NBT into them
             // wipes their descriptor, which removes collision and selection, so place them without touching the tile entity.
             if (block instanceof BlockTrapDoor || block instanceof BlockDoor) {
+                boolean wasWater = isWaterSource(world, x, y, z);
                 world.setBlock(x, y, z, block, state.getMeta(), 2);
+                fillWaterIfNeeded(world, x, y, z, wasWater);
                 return;
             }
             super.setBlockState(world, rand, x, y, z, state, integrity);
