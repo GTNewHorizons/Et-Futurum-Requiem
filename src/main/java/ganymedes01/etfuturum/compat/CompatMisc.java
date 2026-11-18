@@ -1,8 +1,6 @@
 package ganymedes01.etfuturum.compat;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.client.sound.ModSounds;
 import ganymedes01.etfuturum.compat.nei.IMCSenderGTNH;
@@ -24,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 public class CompatMisc {
-
-	private static final ClassLoader CLASSLOADER = EtFuturum.class.getClassLoader(); //Used by reflection
 
 	public static void doLwjgl3ifyCompat() {
 		try {
@@ -60,25 +56,8 @@ public class CompatMisc {
 	public static void runModHooksInit() {
 		IMCSenderGTNH.IMCSender();
 
-		if (ModsList.MULTIPART.isLoaded() && ModsList.MULTIPART.isVersionNewerOrEqual("1.4.2")) {
-			try {
-				Class<?> button = ReflectionHelper.getClass(CLASSLOADER, "codechicken.multipart.minecraft.ButtonPart");
-
-				Field metaSideMapField = ReflectionHelper.findField(button, "metaSideMap");
-				metaSideMapField.setAccessible(true);
-				int[] metaSideMap = (int[]) metaSideMapField.get(null);
-				metaSideMap[0] = 1;
-				metaSideMap[5] = 0;
-				metaSideMapField.set(null, metaSideMap);
-
-				Field sideMetaMapField = ReflectionHelper.findField(button, "sideMetaMap");
-				sideMetaMapField.setAccessible(true);
-				int[] sideMetaMap = (int[]) sideMetaMapField.get(null);
-				sideMetaMap[0] = 5;
-				sideMetaMap[1] = 0;
-				sideMetaMapField.set(null, sideMetaMap);
-			} catch (Exception ignored) {
-			}
+		if (ModsList.MULTIPART.isLoaded() && ModsList.MULTIPART.isVersionNewerOrEqual("2.0.0")) {
+			CompatMultipart.init();
 		}
 
         if (ModsList.BATTLEGEAR_2.isLoaded()) {
