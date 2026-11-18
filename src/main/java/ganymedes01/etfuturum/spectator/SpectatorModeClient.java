@@ -158,4 +158,18 @@ public class SpectatorModeClient extends SpectatorMode {
 			}
 		}
 	}
+
+	/** Changes the fly speed by one step per scroll tick (wheelDelta is -1 or +1) and shows it as a percent of the default speed. */
+	public void handleScrollFlySpeed(int wheelDelta) {
+		EntityClientPlayerMP player = FMLClientHandler.instance().getClientPlayerEntity();
+		if (player == null) {
+			return;
+		}
+		float speed = player.capabilities.flySpeed + wheelDelta * 0.005F;
+		speed = Math.max(0.0F, Math.min(0.2F, speed));
+		player.capabilities.flySpeed = speed;
+		int percent = Math.round(speed / 0.05F * 100.0F);
+		Minecraft.getMinecraft().ingameGUI.func_110326_a/*setRecordPlaying*/(
+				net.minecraft.client.resources.I18n.format("etfuturum.spectator.flyspeed", percent), false);
+	}
 }
