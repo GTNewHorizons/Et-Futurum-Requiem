@@ -723,6 +723,7 @@ public class ModRecipes {
 
 		for (EnumColor colour : EnumColor.VALUES) {
 			addShapedRecipe(ModBlocks.BANNER.newItemStack(1, colour.getDamage()), "xxx", "xxx", " y ", 'x', new ItemStack(Blocks.wool, 1, colour.getDamage()), 'y', "stickWood");
+			addShapedRecipe(ModItems.CUSHION.newItemStack(1, colour.getDamage()), "xxx", 'x' , new ItemStack(Blocks.carpet, 1, colour.getDamage())); // carpets instead of wool slabs, as we don't have those (yet)
 		}
 		GameRegistry.addRecipe(new RecipeDuplicatePattern());
 		GameRegistry.addRecipe(new RecipeAddPattern());
