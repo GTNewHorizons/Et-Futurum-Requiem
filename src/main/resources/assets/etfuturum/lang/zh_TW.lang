@@ -12,6 +12,7 @@ container.enchant.lapis.many=%d 青金石
 container.enchant.level.one=一個附魔等級
 container.enchant.level.many=%d 附魔等級
 container.enchant.clue=%s . . . ?
+etfuturum.gui.language_search=搜尋...
 
 # Entities
 entity.etfuturum.endermite.name=終界蟎

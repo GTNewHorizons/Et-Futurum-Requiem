@@ -52,6 +52,7 @@ item.record.lava_chicken.desc=Hyper Potions - Lava Chicken
 item.record.5.desc=Samuel Åberg - 5
 
 gui.smithing.upgrade=Ausrüstung aufwerten
+etfuturum.gui.language_search=Suche …
 gui.warn.continue=Fortsetzen...
 gui.warn.dismiss=Nicht erneut anzeigen.
 gui.warn.notice=HINWEIS:
