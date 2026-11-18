@@ -1,5 +1,6 @@
 package ganymedes01.etfuturum.mixins.early.spectator;
 
+import ganymedes01.etfuturum.configuration.configs.ConfigFunctions;
 import ganymedes01.etfuturum.spectator.SpectatorMode;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -72,6 +73,7 @@ public abstract class MixinEntityPlayer extends EntityLivingBase {
 
 	@Inject(method = "setGameType", at = @At("HEAD"))
 	private void dropCarriedItem(WorldSettings.GameType gameType, CallbackInfo ci) {
+		setFlag(ConfigFunctions.spectatorDataWatcherFlag, gameType == SpectatorMode.SPECTATOR_GAMETYPE);
 		if(gameType == SpectatorMode.SPECTATOR_GAMETYPE) {
 			ItemStack stack = inventory.getItemStack(); // Item in cursor
 			// Tries to add ItemStack to inventory, else drops it on the ground.
