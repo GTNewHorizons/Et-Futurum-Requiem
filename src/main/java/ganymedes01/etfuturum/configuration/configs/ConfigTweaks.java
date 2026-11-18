@@ -17,6 +17,7 @@ public class ConfigTweaks extends ConfigBase {
 	public static boolean stonecutterSawHurts;
 	public static boolean squidsBlindPlayers;
 	public static boolean stopBoatRotationLock;
+	public static boolean heldLanternPose;
 	public static float creativeFlightVerticalModifier;
 
 	public static final String catAbandoned = "abandoned ideas";
@@ -46,6 +47,7 @@ public class ConfigTweaks extends ConfigBase {
 		stonecutterSawHurts = getBoolean("stonecutterSawHurts", catCustomTweaks, false, "If you want stonecutters to deal damage to players standing on them.");
 		squidsBlindPlayers = getBoolean("squidsBlindPlayers", catCustomTweaks, false, "Squids will blind players when they take damage.");
 		stopBoatRotationLock = getBoolean("stopBoatRotationLock", catCustomTweaks, false, "Stops the boat view rotation lock, body rotates with camera.");
+		heldLanternPose = getBoolean("heldLanternPose", catCustomTweaks, false, "Renders a held lantern as a 3D model gripped by its top, and poses the arm to carry it: held out in third person, raised in first person. Requires lanterns to be enabled.\nModified Classes: net.minecraft.client.model.ModelBiped net.minecraft.client.renderer.ItemRenderer");
 		creativeFlightVerticalModifier = getFloat("creativeFlightVerticalModifier", catCustomTweaks, 1, 1, 5, "When greater than 1, boosts vertical(up/down) creative flight speed when sprinting.");
 	}
 
