@@ -1,15 +1,18 @@
 package ganymedes01.etfuturum.mixins.early.modernlightmap.client;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
+import ganymedes01.etfuturum.client.ModernLightmap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.settings.GameSettings;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -21,50 +24,50 @@ public class MixinEntityRenderer {
 	@Shadow
 	private Minecraft mc;
 
-	@Shadow
-	@Final
-	private int[] lightmapColors;
+	@Unique
+	private boolean etfu$hasModernCounterpart;
 
-	@Redirect(method = "updateLightmap", at = @At(value = "FIELD",
-			target = "Lnet/minecraft/client/settings/GameSettings;gammaSetting:F", opcode = Opcodes.GETFIELD))
-	private float etfu$skipPerChannelGamma(GameSettings settings) {
-		return 0.0F;
+	@Unique
+	private static float etfu$clamp(float value) {
+		return value < 0.0F ? 0.0F : Math.min(value, 1.0F);
 	}
 
-	@Inject(method = "updateLightmap", at = @At(value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/texture/DynamicTexture;updateDynamicTexture()V"))
-	private void etfu$applyModernGamma(float partialTicks, CallbackInfo ci) {
-		float gamma = this.mc.gameSettings.gammaSetting;
+	@Inject(method = "updateLightmap", at = @At("HEAD"))
+	private void etfu$resolveModernGamma(float p_78472_1_, CallbackInfo ci) {
+		WorldClient world = this.mc.theWorld;
+		this.etfu$hasModernCounterpart = world != null && ModernLightmap.hasModernCounterpart(world.provider);
+	}
+
+	@ModifyExpressionValue(method = "updateLightmap", at = @At(value = "FIELD",
+			target = "Lnet/minecraft/client/settings/GameSettings;gammaSetting:F",
+			opcode = Opcodes.GETFIELD))
+	private float etfu$modernGamma(float gamma,
+								   @Local(name = "f8") LocalFloatRef red,
+								   @Local(name = "f9") LocalFloatRef green,
+								   @Local(name = "f10") LocalFloatRef blue) {
+		if (!this.etfu$hasModernCounterpart) {
+			return gamma;
+		}
 		if (gamma <= 0.0F) {
-			return;
+			return 0.0F;
 		}
-		int[] colors = this.lightmapColors;
-		for (int i = 0; i < colors.length; i++) {
-			int color = colors[i];
-			int alpha = color >>> 24 & 255;
-			float r = ((color >> 16 & 255) / 255.0F - 0.03F) / 0.96F;
-			float g = ((color >> 8 & 255) / 255.0F - 0.03F) / 0.96F;
-			float b = ((color & 255) / 255.0F - 0.03F) / 0.96F;
+		float r = etfu$clamp(red.get());
+		float g = etfu$clamp(green.get());
+		float b = etfu$clamp(blue.get());
 
-			float max = Math.max(r, Math.max(g, b));
-			if (max > 0.0F) {
-				float inv = 1.0F - max;
-				float scaled = 1.0F - inv * inv * inv * inv;
-				float mix = 1.0F + gamma * (scaled / max - 1.0F);
-				r *= mix;
-				g *= mix;
-				b *= mix;
-			}
-
-			r = etfu$scaleAndClamp(r);
-			g = etfu$scaleAndClamp(g);
-			b = etfu$scaleAndClamp(b);
-			colors[i] = alpha << 24 | (int) (r * 255.0F) << 16 | (int) (g * 255.0F) << 8 | (int) (b * 255.0F);
+		float max = Math.max(r, Math.max(g, b));
+		if (max > 0.0F) {
+			float inverted = 1.0F - max;
+			float scaled = (float) (1.0F - (inverted*inverted*inverted*inverted));
+			float mix = 1.0F + gamma * (scaled / max - 1.0F);
+			r *= mix;
+			g *= mix;
+			b *= mix;
 		}
-	}
 
-	private static float etfu$scaleAndClamp(float v) {
-		v = v * 0.96F + 0.03F;
-		return v < 0.0F ? 0.0F : Math.min(v, 1.0F);
+		red.set(r);
+		green.set(g);
+		blue.set(b);
+		return 0.0F;
 	}
 }

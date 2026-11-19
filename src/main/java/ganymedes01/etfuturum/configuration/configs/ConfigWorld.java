@@ -28,6 +28,8 @@ public class ConfigWorld extends ConfigBase {
 	public static boolean endFlashes;
 	public static boolean modernEndAmbientColor;
 	public static boolean modernLightmapGamma;
+	public static boolean modernBlockLightTint;
+	public static boolean modernNightVision;
 	public static boolean enableAirDebris;
 	public static int debrisMax = 3;
 	public static int maxNetherGoldPerCluster;
@@ -46,6 +48,10 @@ public class ConfigWorld extends ConfigBase {
 	public static int maxStonesPerCluster;
 	public static int smallDebrisMax = 2;
 	public static boolean enableOceanMonuments;
+	public static boolean enableShipwrecks;
+	public static int shipwreckRarity;
+	public static boolean enableRuinedPortals;
+	public static int ruinedPortalRarity;
 	public static int[] deepslateLayerDimensionBlacklist;
 	public static boolean deepslateLayerDimensionBlacklistAsWhitelist;
 	public static int[] replaceAllStoneWithDeepslateDimensionWhitelist;
@@ -98,8 +104,10 @@ public class ConfigWorld extends ConfigBase {
 		enableDmgIndicator = getBoolean("enableDmgIndicator", catClient, true, "Heart Damage Indicator");
 
 		endFlashes = getBoolean("endFlashes", catClient, true, "Allow The End dimension to have periodic flashes of light in the sky");
-		modernEndAmbientColor = getBoolean("modernEndAmbientColor", catClient, true, "Tint The End's ambient lighting to match modern Minecraft.");
+		modernEndAmbientColor = getBoolean("modernEndAmbientColor", catClient, true, "Rebuild The End's lightmap to match modern Minecraft.");
 		modernLightmapGamma = getBoolean("modernLightmapGamma", catClient, true, "Replaces the vanilla brightness-slider curve with the modern hue and saturation preserving one.");
+		modernBlockLightTint = getBoolean("modernBlockLightTint", catClient, true, "Adjust block light color and gradient to match modern Minecraft.");
+		modernNightVision = getBoolean("modernNightVision", catClient, true, "Adjust night vision to match modern Minecraft.");
 		enableAirDebris = getBoolean("enableAirDebris", catGeneration, false, "Can ancient debris generate next to air?");
 		maxStonesPerCluster = getInt("maxStonesPerCluster", catGeneration, 32, 0, 64, "Max vein size for Granite/Andesite/Diorite blocks in a cluster");
 		smallDebrisMax = getInt("smallDebrisMax", catGeneration, 2, 0, 64, "The max vein size for the first, typically smaller debris veins which generate from Y 8 to 119");
@@ -113,6 +121,10 @@ public class ConfigWorld extends ConfigBase {
 		deepslateReplacesDirt = getBoolean("deepslateReplacesDirt", catGeneration, true, "Whether or not Deepslate will overwrite dirt (Only works when deepslate generation mode is set to 0)");
 		deepslateGenerationMode = getInt("deepslateGenerationMode", catGeneration, 0, -1, 1, "If 0, deepslate replaces all stone below the specified value, with a shattering effect near the top similar to bedrock. If 1, it generates in clusters using the deepslate cluster settings. -1 disables Et Futurum deepslate generation entirely.");
 		enableOceanMonuments = getBoolean("enableOceanMonuments", catGeneration, true, "Note: Ocean monuments currently do not have guardians");
+		enableShipwrecks = getBoolean("enableShipwrecks", catGeneration, true, "Generate shipwrecks in ocean biomes");
+		shipwreckRarity = getInt("shipwreckRarity", catGeneration, 500, 1, 10000, "How rare should shipwrecks be? 1/x chance per chunk. Higher = rarer.");
+		enableRuinedPortals = getBoolean("enableRuinedPortals", catGeneration, true, "Generate ruined portals in the overworld");
+		ruinedPortalRarity = getInt("ruinedPortalRarity", catGeneration, 1600, 1, 10000, "How rare should ruined portals be? 1/x chance per chunk. Higher = rarer. The default of 1600 matches vanilla's average of one portal per 40x40 chunks.");
 		enableFossils = getBoolean("enableFossils", catGeneration, true, "");
 		if (hasKey(catGeneration, "fossilBoneBlock")) {
 			Property oldFossilIDProp = get(catGeneration, "fossilBoneBlock", 0);
