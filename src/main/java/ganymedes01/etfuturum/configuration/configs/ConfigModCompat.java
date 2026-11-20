@@ -21,6 +21,8 @@ public class ConfigModCompat extends ConfigBase {
 	public static boolean disableBaseBountifulStonesOnly;
 	public static boolean disableCopperOreAndIngotOnly;
 
+	public static boolean deprecateVillageNamesBlocks;
+
 	public static short soulFireColor;
 
 	static final String catMisc = "misc";
@@ -70,5 +72,8 @@ public class ConfigModCompat extends ConfigBase {
 				"\nUseful if you have mods like Chisel or Botania which feature these same stones but not the stairs and other variants.");
 		disableCopperOreAndIngotOnly = getBoolean("disableCopperOreAndIngotOnly", catMisc, false, "Disables copper ingots and ores, but leaves the blocks and other stuff." +
 				"\nUseful if you prefer another mod's copper, but want to use the oxidizing copper building blocks.");
+
+		deprecateVillageNamesBlocks = getBoolean("deprecateVillageNamesBlocks", catMisc, true, "If Village Names is installed, its 1.12 concrete, concrete powder and glazed terracotta duplicate these EFR blocks." +
+				"\nWhen enabled, the Village Names versions stay registered for existing worlds, but can no longer be crafted or obtained, are hidden from NEI and say so in their tooltip.");
 	}
 }
