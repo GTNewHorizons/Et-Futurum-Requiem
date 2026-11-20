@@ -49,6 +49,7 @@ import ganymedes01.etfuturum.entities.EntityHusk;
 import ganymedes01.etfuturum.entities.EntityLingeringEffect;
 import ganymedes01.etfuturum.entities.EntityNewBoat;
 import ganymedes01.etfuturum.entities.EntityNewSnowGolem;
+import ganymedes01.etfuturum.entities.EntityPanda;
 import ganymedes01.etfuturum.entities.EntityRabbit;
 import ganymedes01.etfuturum.entities.EntityShulker;
 import ganymedes01.etfuturum.entities.EntityStray;
@@ -1583,7 +1584,8 @@ public class ServerEventHandler {
 				} else if (animal instanceof EntityChicken)
 					if (stack.getItem() == ModItems.BEETROOT_SEEDS.get() && ConfigBlocksItems.enableBeetroot)
 						setAnimalInLove(animal, event.entityPlayer, stack);
-			} else if (ConfigEntities.enableBabyGrowthBoost && isFoodItem(animal, stack)) {
+			} else if (ConfigEntities.enableBabyGrowthBoost && !(animal instanceof EntityPanda)
+					&& isFoodItem(animal, stack)) {
 				feedBaby(animal, event.entityPlayer, stack);
 			}
 

@@ -18,6 +18,7 @@ import ganymedes01.etfuturum.client.gui.inventory.GuiNewBrewingStand;
 import ganymedes01.etfuturum.client.gui.inventory.GuiShulkerBox;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmithingTable;
 import ganymedes01.etfuturum.client.gui.inventory.GuiSmoker;
+import ganymedes01.etfuturum.compat.CompatBiomesOPlenty;
 import ganymedes01.etfuturum.configuration.configs.ConfigBlocksItems;
 import ganymedes01.etfuturum.configuration.configs.ConfigEntities;
 import ganymedes01.etfuturum.configuration.configs.ConfigMixins;
@@ -44,6 +45,7 @@ import ganymedes01.etfuturum.entities.EntityNewBoat;
 import ganymedes01.etfuturum.entities.EntityNewBoatSeat;
 import ganymedes01.etfuturum.entities.EntityNewBoatWithChest;
 import ganymedes01.etfuturum.entities.EntityNewSnowGolem;
+import ganymedes01.etfuturum.entities.EntityPanda;
 import ganymedes01.etfuturum.entities.EntityPlacedEndCrystal;
 import ganymedes01.etfuturum.entities.EntityRabbit;
 import ganymedes01.etfuturum.entities.EntityRespawnedDragon;
@@ -92,7 +94,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CommonProxy implements IGuiHandler {
 
@@ -291,9 +295,30 @@ public class CommonProxy implements IGuiHandler {
 			EntityRegistry.addSpawn(EntityFox.class, 8, 2, 4, EnumCreatureType.creature, BiomeDictionary.getBiomesForType(Type.CONIFEROUS));
 		}
 
+		if (ConfigEntities.enablePandas) {
+			ModEntityList.registerEntity(EntityPanda.class, "panda", 23, EtFuturum.instance, 80, 3, true, 0xE7E7E7, 0x1B1B22);
+			addPandaSpawns();
+		}
+
 		//make magmas slightly more common, hopefully.
 		EntityRegistry.removeSpawn(EntityMagmaCube.class, EnumCreatureType.monster, BiomeGenBase.hell);
 		EntityRegistry.addSpawn(EntityMagmaCube.class, 2, 4, 4, EnumCreatureType.monster, BiomeGenBase.hell);
+	}
+
+	private void addPandaSpawns() {
+		BiomeGenBase bambooForest = CompatBiomesOPlenty.getBambooForestBiome();
+		Set<BiomeGenBase> regularJungles = new LinkedHashSet<>(Arrays.asList(
+				Utils.excludeBiomesFromTypesWithDefaults(BiomeDictionary.getBiomesForType(Type.JUNGLE))));
+		regularJungles.remove(null);
+		regularJungles.remove(bambooForest);
+
+		if (!regularJungles.isEmpty()) {
+			EntityRegistry.addSpawn(EntityPanda.class, 1, 1, 2, EnumCreatureType.creature,
+					regularJungles.toArray(new BiomeGenBase[regularJungles.size()]));
+		}
+		if (bambooForest != null) {
+			EntityRegistry.addSpawn(EntityPanda.class, 80, 1, 2, EnumCreatureType.creature, bambooForest);
+		}
 	}
 
 	@Override

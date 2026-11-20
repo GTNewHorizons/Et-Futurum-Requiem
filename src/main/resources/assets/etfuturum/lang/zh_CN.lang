@@ -123,6 +123,16 @@ subtitle.entity.witch.death=女巫：死亡
 subtitle.entity.squid.ambient=鱿鱼：游动
 subtitle.entity.squid.hurt=鱿鱼：受伤
 subtitle.entity.squid.death=鱿鱼：死亡
+subtitle.entity.panda.ambient=熊猫：喘息
+subtitle.entity.panda.aggressive_ambient=熊猫：发怒
+subtitle.entity.panda.worried_ambient=熊猫：呜咽
+subtitle.entity.panda.bite=熊猫：撕咬
+subtitle.entity.panda.eat=熊猫：进食
+subtitle.entity.panda.cant_breed=熊猫：哀鸣
+subtitle.entity.panda.death=熊猫：死亡
+subtitle.entity.panda.hurt=熊猫：受伤
+subtitle.entity.panda.pre_sneeze=熊猫：鼻痒
+subtitle.entity.panda.sneeze=熊猫：打喷嚏
 
 subtitle.entity.boat.paddle_water=划船
 subtitle.entity.boat.paddle_land=划船
@@ -297,6 +307,7 @@ entity.etfuturum.guardian.name=守卫者
 entity.etfuturum.elder_guardian.name=远古守卫者
 entity.etfuturum.polar_bear.name=北极熊
 entity.etfuturum.bee.name=蜜蜂
+entity.etfuturum.panda.name=熊猫
 
 # Items
 item.etfuturum.mutton.name=生羊肉
