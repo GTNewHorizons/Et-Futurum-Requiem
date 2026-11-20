@@ -84,6 +84,10 @@ public class CompatMisc {
         if (ModsList.BATTLEGEAR_2.isLoaded()) {
             CompatBattlegear.init();
         }
+
+		if (ModsList.LIQUIDLOGGED.isLoaded()) {
+			CompatLiquidLogged.init();
+		}
 	}
 
 	public static void runModHooksPostInit() {
