@@ -64,11 +64,13 @@ dependencies {
     compileOnly("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev") {
         transitive = false
     }
-    shadowImplementation('com.github.makamys:MCLib:0.3.7.8') {
+    shadowImplementation('com.github.makamys:MCLib:0.4') {
         exclude group: "codechicken"
     }
 
     compileOnly('com.github.GTNewHorizons:Backhand:1.8.11:dev') {transitive = false}
+    compileOnly('com.github.GTNewHorizons:LiquidLogged:0.2.3:dev') {transitive = false}
+    devOnlyNonPublishable("com.github.GTNewHorizons:LiquidLogged:0.2.3:dev")
 }
 
 configurations.configureEach {
