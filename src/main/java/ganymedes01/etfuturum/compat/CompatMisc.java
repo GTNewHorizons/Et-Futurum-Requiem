@@ -60,24 +60,29 @@ public class CompatMisc {
 	public static void runModHooksInit() {
 		IMCSenderGTNH.IMCSender();
 
-		if (ModsList.MULTIPART.isLoaded() && ModsList.MULTIPART.isVersionNewerOrEqual("1.4.2")) {
-			try {
-				Class<?> button = ReflectionHelper.getClass(CLASSLOADER, "codechicken.multipart.minecraft.ButtonPart");
+		if (ModsList.MULTIPART.isLoaded()) {
+			if (ModsList.MULTIPART.isVersionNewerOrEqual("2.0.0")) {
+				CompatMultipart.init();
+			} else if (ModsList.MULTIPART.isVersionNewerOrEqual("1.4.2")) {
+				// FMP before 2.0.0 has no setOrientation
+				try {
+					Class<?> button = ReflectionHelper.getClass(CLASSLOADER, "codechicken.multipart.minecraft.ButtonPart");
 
-				Field metaSideMapField = ReflectionHelper.findField(button, "metaSideMap");
-				metaSideMapField.setAccessible(true);
-				int[] metaSideMap = (int[]) metaSideMapField.get(null);
-				metaSideMap[0] = 1;
-				metaSideMap[5] = 0;
-				metaSideMapField.set(null, metaSideMap);
+					Field metaSideMapField = ReflectionHelper.findField(button, "metaSideMap");
+					metaSideMapField.setAccessible(true);
+					int[] metaSideMap = (int[]) metaSideMapField.get(null);
+					metaSideMap[0] = 1;
+					metaSideMap[5] = 0;
+					metaSideMapField.set(null, metaSideMap);
 
-				Field sideMetaMapField = ReflectionHelper.findField(button, "sideMetaMap");
-				sideMetaMapField.setAccessible(true);
-				int[] sideMetaMap = (int[]) sideMetaMapField.get(null);
-				sideMetaMap[0] = 5;
-				sideMetaMap[1] = 0;
-				sideMetaMapField.set(null, sideMetaMap);
-			} catch (Exception ignored) {
+					Field sideMetaMapField = ReflectionHelper.findField(button, "sideMetaMap");
+					sideMetaMapField.setAccessible(true);
+					int[] sideMetaMap = (int[]) sideMetaMapField.get(null);
+					sideMetaMap[0] = 5;
+					sideMetaMap[1] = 0;
+					sideMetaMapField.set(null, sideMetaMap);
+				} catch (Exception ignored) {
+				}
 			}
 		}
 
