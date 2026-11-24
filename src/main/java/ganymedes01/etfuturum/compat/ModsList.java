@@ -45,6 +45,7 @@ public enum ModsList {
     BATTLEGEAR_2("battlegear2"),
 	BACKHAND("backhand"),
 	LIQUIDLOGGED("liquidlogged"),
+	DASHBOARD("dashboard"),
 
 	NOTFINE("notfine"),
 	NOT_ENOUGH_IDS("neid"),
