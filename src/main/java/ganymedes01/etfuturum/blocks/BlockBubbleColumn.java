@@ -18,6 +18,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import java.util.Map;
@@ -151,6 +153,23 @@ public class BlockBubbleColumn extends BaseBlock implements IInitAction {
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World worldIn, int x, int y, int z) {
 		return null;
+	}
+
+	@Override
+	public boolean canCollideCheck(int meta, boolean hitIfLiquid) {
+		return hitIfLiquid;
+	}
+
+	/**
+	 * The block bounds are zero-sized so the column is never selected, so the full cube is
+	 * swapped in only for liquid raytraces (e.g. buckets), which canCollideCheck lets through.
+	 */
+	@Override
+	public MovingObjectPosition collisionRayTrace(World worldIn, int x, int y, int z, Vec3 start, Vec3 end) {
+		setBlockBounds(0, 0, 0, 1, 1, 1);
+		final MovingObjectPosition hit = super.collisionRayTrace(worldIn, x, y, z, start, end);
+		setBlockBounds(0, 0, 0, 0, 0, 0);
+		return hit;
 	}
 
 	@Override
