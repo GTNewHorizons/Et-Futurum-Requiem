@@ -266,6 +266,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 				@Override
 				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					if (world.getChunkProvider() instanceof ChunkProviderServer serverChunkProvider
+							&& !canGenerateDecorations(world, serverChunkProvider.currentChunkProvider)) {
+						return null;
+					}
 					return OceanMonument.canLocateAt(world, chunkX, chunkZ)
 							? new int[] {(chunkX << 4) + 8, (chunkZ << 4) + 8} : null;
 				}
@@ -294,8 +298,8 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				@Override
 				public int[] findInChunk(World world, int chunkX, int chunkZ) {
 					if (!world.getWorldInfo().isMapFeaturesEnabled()
-							|| (world.getChunkProvider() instanceof ChunkProviderServer
-							&& isFlatWorld(((ChunkProviderServer) world.getChunkProvider()).currentChunkProvider))) {
+							|| (world.getChunkProvider() instanceof ChunkProviderServer serverChunkProvider
+							&& isFlatWorld(serverChunkProvider.currentChunkProvider))) {
 						return null;
 					}
 					return searchGenerator.canLocateAt(world, chunkX, chunkZ)
@@ -320,7 +324,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	@Override
 	public void generate(Random rand, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
-		if (!isFlatWorld(chunkGenerator) || world.getWorldInfo().getGeneratorOptions().contains("decoration")) {
+		if (canGenerateDecorations(world, chunkGenerator)) {
 			int x;
 			int z;
 
@@ -545,6 +549,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 		if (i <= 1)
 			return 1;
 		return rand.nextInt(i);
+	}
+
+	private boolean canGenerateDecorations(World world, IChunkProvider chunkProvider) {
+		return !isFlatWorld(chunkProvider) || world.getWorldInfo().getGeneratorOptions().contains("decoration");
 	}
 
 	protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
