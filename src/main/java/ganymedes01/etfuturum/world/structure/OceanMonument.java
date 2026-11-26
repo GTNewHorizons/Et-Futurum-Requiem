@@ -167,6 +167,14 @@ public class OceanMonument {
 	}
 
 	public static boolean canSpawnAt(World worldObj, int chunkX, int chunkZ) {
+		return canSpawnAt(worldObj, chunkX, chunkZ, false);
+	}
+
+	public static boolean canLocateAt(World world, int chunkX, int chunkZ) {
+		return canSpawnAt(world, chunkX, chunkZ, true);
+	}
+
+	private static boolean canSpawnAt(World worldObj, int chunkX, int chunkZ, boolean locating) {
 		int spacing = 32;
 		int separation = 5;
 		int xx = chunkX;
@@ -180,7 +188,9 @@ public class OceanMonument {
 
 		int i1 = chunkX / spacing;
 		int j1 = chunkZ / spacing;
-		Random random = worldObj.setRandomSeed(i1, j1, 10387313);
+		Random random = locating
+				? new Random(i1 * 341873128712L + j1 * 132897987541L + worldObj.getWorldInfo().getSeed() + 10387313L)
+				: worldObj.setRandomSeed(i1, j1, 10387313);
 		i1 *= spacing;
 		j1 *= spacing;
 		i1 += (random.nextInt(spacing - separation) + random.nextInt(spacing - separation)) / 2;

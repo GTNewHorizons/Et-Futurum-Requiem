@@ -40,6 +40,16 @@ commands.etfuturum.locate.ruined_portal.overworldOnly=Разрушенные п�
 commands.etfuturum.locate.ruined_portal.searching=Поиск ближайшего разрушенного портала...
 commands.etfuturum.locate.ruined_portal.notFound=Разрушенный портал не найден в радиусе %d блоков.
 commands.etfuturum.locate.ruined_portal.found=Ближайший разрушенный портал: %s
+commands.etfuturum.locate.monument.disabled=Генерация океанских монументов отключена.
+commands.etfuturum.locate.monument.overworldOnly=В этом измерении океанские монументы не генерируются.
+commands.etfuturum.locate.monument.searching=Поиск океанского монумента...
+commands.etfuturum.locate.monument.notFound=Океанский монумент не найден в радиусе %d блоков.
+commands.etfuturum.locate.monument.found=Океанский монумент на %s
+commands.etfuturum.locate.mineshaft_mesa.disabled=Генерация заброшенных шахт в бесплодных землях отключена.
+commands.etfuturum.locate.mineshaft_mesa.overworldOnly=Ищите заброшенные шахты в бесплодных землях Обычного мира.
+commands.etfuturum.locate.mineshaft_mesa.searching=Поиск заброшенной шахты в бесплодных землях...
+commands.etfuturum.locate.mineshaft_mesa.notFound=Заброшенная шахта в бесплодных землях не найдена в радиусе %d блоков.
+commands.etfuturum.locate.mineshaft_mesa.found=Заброшенная шахта в бесплодных землях на %s
 
 # Контейнеры (Containers/GUI)
 container.enchant.lapis.one=1 лазурит
