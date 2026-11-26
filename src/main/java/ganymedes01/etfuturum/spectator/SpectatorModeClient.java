@@ -159,13 +159,13 @@ public class SpectatorModeClient extends SpectatorMode {
 		}
 	}
 
-	/** Changes the fly speed by one step per scroll tick (wheelDelta is -1 or +1) and shows it as a percent of the default speed. */
+	/** Adjusts flight speed by one step in the scroll direction and shows it as a percentage of the default. */
 	public void handleScrollFlySpeed(int wheelDelta) {
 		EntityClientPlayerMP player = FMLClientHandler.instance().getClientPlayerEntity();
 		if (player == null) {
 			return;
 		}
-		float speed = player.capabilities.flySpeed + wheelDelta * 0.005F;
+		float speed = player.capabilities.flySpeed + Integer.signum(wheelDelta) * 0.005F;
 		speed = Math.max(0.0F, Math.min(0.2F, speed));
 		player.capabilities.flySpeed = speed;
 		int percent = Math.round(speed / 0.05F * 100.0F);
