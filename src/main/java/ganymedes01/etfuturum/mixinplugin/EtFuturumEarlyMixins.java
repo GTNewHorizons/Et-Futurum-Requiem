@@ -315,6 +315,11 @@ public class EtFuturumEarlyMixins implements IFMLLoadingPlugin, IEarlyMixinLoade
 				mixins.add("worldthumbnail.client.MixinGuiSelectWorldList");
 			}
 
+			if (ConfigMixins.languageSearch) {
+				mixins.add("languagesearch.client.MixinGuiLanguage");
+				mixins.add("languagesearch.client.MixinGuiLanguage$MixinList");
+			}
+
 			if (ConfigMixins.modernLoadingScreen) {
 				mixins.add("worldthumbnail.client.MixinLoadingScreenRenderer");
 				mixins.add("worldthumbnail.client.MixinGuiDownloadTerrain");

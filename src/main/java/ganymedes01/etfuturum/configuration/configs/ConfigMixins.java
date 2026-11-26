@@ -47,6 +47,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean enablePlayersSleepingPecentageGamerule;
   public static boolean enableJumpClimbing;
 	public static boolean worldSaveThumbnails;
+	public static boolean languageSearch;
 	public static boolean modernLoadingScreen;
 	public static boolean adjustedLiquidPhysics;
 	public static boolean liquidItemFloat;
@@ -80,6 +81,7 @@ public class ConfigMixins extends ConfigBase {
 
 			flowerPotFixes = getBoolean("flowerPotFixes", catFixes, true, "Fixes flower pots having several restrictions limiting what they'll render inside of them. Required for crimson roots or azalea to render correctly in the flower pot, among other custom blocks.\nModified Client Classes: net.minecraft.client.renderer.RenderBlock");
 			worldSaveThumbnails = getBoolean("worldSaveThumbnails", catBackport, true, "Saves and displays icon.png thumbnails in the world selection screen, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiSelectWorld");
+			languageSearch = getBoolean("languageSearch", catBackport, true, "Adds a search box to the language selection screen, like 1.21.11+.\nModified Client Classes: net.minecraft.client.gui.GuiLanguage, net.minecraft.client.gui.GuiLanguage$List");
 			modernLoadingScreen = getBoolean("modernLoadingScreen", catBackport, true, "Modern loading screen with progress bar and chunk grid when entering a world, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiDownloadTerrain");
 		}
 
