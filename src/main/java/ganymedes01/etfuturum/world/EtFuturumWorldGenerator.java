@@ -21,6 +21,7 @@ import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
 import ganymedes01.etfuturum.world.generate.structure.WorldGenShipwreck;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
+import ganymedes01.etfuturum.world.structure.MapGenMesaMineshaft;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -31,6 +32,7 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderServer;
 
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenClay;
@@ -245,6 +247,63 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			});
 		}
 
+		if (isMonumentGenerationEnabled()) {
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "monument";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return isMonumentGenerationEnabled();
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell);
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					return OceanMonument.canLocateAt(world, chunkX, chunkZ)
+							? new int[] {(chunkX << 4) + 8, (chunkZ << 4) + 8} : null;
+				}
+			});
+		}
+
+		if (ConfigWorld.enableMesaMineshaft) {
+			CommandLocate.register(new LocateTarget() {
+				private final MapGenMesaMineshaft searchGenerator = new MapGenMesaMineshaft();
+
+				@Override
+				public String getId() {
+					return "mineshaft_mesa";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableMesaMineshaft;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					if (!world.getWorldInfo().isMapFeaturesEnabled()
+							|| (world.getChunkProvider() instanceof ChunkProviderServer
+							&& isFlatWorld(((ChunkProviderServer) world.getChunkProvider()).currentChunkProvider))) {
+						return null;
+					}
+					return searchGenerator.canLocateAt(world, chunkX, chunkZ)
+							? new int[] {(chunkX << 4) + 2, (chunkZ << 4) + 2} : null;
+				}
+			});
+		}
+
 		if (ModBlocks.MUD.isEnabled()) {
 			mudGen = new WorldGenClay(4);
 			((WorldGenClay) mudGen).field_150546_a/*block*/ = ModBlocks.MUD.get();
@@ -403,7 +462,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				}
 			}
 
-			if (ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled()
+			if (isMonumentGenerationEnabled()
 					&& !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell)) {
 				if (OceanMonument.canSpawnAt(world, chunkX, chunkZ)) {
 					x = (chunkX << 4) + rand.nextInt(16) + 8;
@@ -490,6 +549,10 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
 		return chunkProvider instanceof ChunkProviderFlat && !chunkProvider.getClass().getName().equals("com.rwtema.extrautils.worldgen.Underdark.ChunkProviderUnderdark");
+	}
+
+	private static boolean isMonumentGenerationEnabled() {
+		return ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled();
 	}
 
 	public static Random getShipwreckRandom(long worldSeed, int chunkX, int chunkZ) {
