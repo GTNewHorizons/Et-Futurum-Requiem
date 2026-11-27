@@ -24,6 +24,7 @@ public class ModSounds {
 	public static final SoundType soundLantern = new CustomSound("lantern", true).setDisabledSound(Block.soundTypeMetal);
 	public static final SoundType soundSoulSand = new CustomSound("soul_sand").setDisabledSound(Block.soundTypeSand);
 	public static final SoundType soundSoulSoil = new CustomSound("soul_soil").setDisabledSound(Block.soundTypeGravel);
+	public static final SoundType soundSoulEscape = new CustomSound("soul_escape");
 	public static final SoundType soundNetherBricks = new CustomSound("nether_bricks");
 	public static final SoundType soundBoneBlock = new CustomSound("bone_block");
 	public static final SoundType soundNetherrack = new CustomSound("netherrack");

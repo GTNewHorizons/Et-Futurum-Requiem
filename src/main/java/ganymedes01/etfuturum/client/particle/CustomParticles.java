@@ -118,6 +118,21 @@ public class CustomParticles {
 		return spawnParticle(world, particle);
 	}
 
+	public static EntityFX spawnSoulSpeedOrb(World world, double x, double y, double z) {
+		if (rand.nextDouble() < 0.3D) {
+			double px = x + (rand.nextDouble() - 0.5D);
+			double py = y - 0.9D;
+			double pz = z + (rand.nextDouble() - 0.5D);
+			double mX = (rand.nextDouble() - 0.5D) * 0.05D;
+			double mY = 0.025D + rand.nextDouble() * 0.05D;
+			double mZ = (rand.nextDouble() - 0.5D) * 0.05D;
+			//EntityFX particle = new SoulFlameFX(world, px, py, pz, mX, mY, mZ);
+			EntityFX particle = new SoulSpeedFX(world, px,py,pz,mX,mY,mZ);
+			return spawnParticle(world, particle);
+		}
+		return null;
+	}
+
 	protected static EntityFX spawnParticle(World world, EntityFX entityFX) {
 		if (world.isRemote) {
 			Minecraft.getMinecraft().effectRenderer.addEffect(entityFX);
