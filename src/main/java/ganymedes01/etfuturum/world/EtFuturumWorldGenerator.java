@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import cpw.mods.fml.common.IWorldGenerator;
 import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockChorusFlower;
+import ganymedes01.etfuturum.command.CommandLocate;
+import ganymedes01.etfuturum.command.LocateTarget;
 import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.configuration.configs.ConfigWorld;
 import ganymedes01.etfuturum.core.utils.Utils;
@@ -16,7 +18,10 @@ import ganymedes01.etfuturum.world.generate.decorate.WorldGenCherryTrees;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenGlowLichen;
 import ganymedes01.etfuturum.world.generate.decorate.WorldGenPinkPetals;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenFossil;
+import ganymedes01.etfuturum.world.generate.structure.WorldGenRuinedPortal;
+import ganymedes01.etfuturum.world.generate.structure.WorldGenShipwreck;
 import ganymedes01.etfuturum.world.generate.feature.WorldGenGeode;
+import ganymedes01.etfuturum.world.structure.MapGenMesaMineshaft;
 import ganymedes01.etfuturum.world.structure.OceanMonument;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -27,6 +32,7 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderServer;
 
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenClay;
@@ -71,8 +77,11 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 	protected WorldGenerator glowLichenGen;
 	protected WorldGenerator caveVineGen;
 	protected WorldGenerator mudGen;
+	protected WorldGenerator shipwreckGen;
+	protected WorldGenerator ruinedPortalGen;
 
 	private List<BiomeGenBase> fossilBiomes;
+	private List<BiomeGenBase> shipwreckBiomes;
 	private List<BiomeGenBase> berryBushBiomes;
 	private List<BiomeGenBase> cornflowerBiomes;
 	private List<BiomeGenBase> lilyValleyBiomes;
@@ -173,6 +182,132 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 			}
 		}
 
+		if (ConfigWorld.enableShipwrecks) {
+			BiomeGenBase[] shipwreckBiomeArray = BiomeDictionary.getBiomesForType(Type.OCEAN);
+			shipwreckBiomeArray = Utils.excludeBiomesFromTypes(shipwreckBiomeArray, Type.NETHER, Type.END, Type.RIVER);
+			shipwreckBiomes = Arrays.asList(shipwreckBiomeArray);
+			shipwreckGen = new WorldGenShipwreck();
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "shipwreck";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableShipwrecks;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					Random shipwreckRand = getShipwreckRandom(world.getSeed(), chunkX, chunkZ);
+					if (shipwreckRand.nextInt(ConfigWorld.shipwreckRarity) != 0) {
+						return null;
+					}
+					int x = (chunkX << 4) + shipwreckRand.nextInt(16) + 8;
+					int z = (chunkZ << 4) + shipwreckRand.nextInt(16) + 8;
+					return shipwreckBiomes.contains(world.getBiomeGenForCoords(x, z)) ? new int[] {x, z} : null;
+				}
+			});
+		}
+
+		if (ConfigWorld.enableRuinedPortals) {
+			ruinedPortalGen = new WorldGenRuinedPortal();
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "ruined_portal";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableRuinedPortals;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					Random portalRand = getRuinedPortalRandom(world.getSeed(), chunkX, chunkZ);
+					if (portalRand.nextInt(ConfigWorld.ruinedPortalRarity) != 0) {
+						return null;
+					}
+					int x = (chunkX << 4) + portalRand.nextInt(16) + 8;
+					int z = (chunkZ << 4) + portalRand.nextInt(16) + 8;
+					return WorldGenRuinedPortal.canGenerateIn(world.getBiomeGenForCoords(x, z)) ? new int[] {x, z} : null;
+				}
+			});
+		}
+
+		if (isMonumentGenerationEnabled()) {
+			CommandLocate.register(new LocateTarget() {
+				@Override
+				public String getId() {
+					return "monument";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return isMonumentGenerationEnabled();
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell);
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					if (world.getChunkProvider() instanceof ChunkProviderServer serverChunkProvider
+							&& !canGenerateDecorations(world, serverChunkProvider.currentChunkProvider)) {
+						return null;
+					}
+					return OceanMonument.canLocateAt(world, chunkX, chunkZ)
+							? new int[] {(chunkX << 4) + 8, (chunkZ << 4) + 8} : null;
+				}
+			});
+		}
+
+		if (ConfigWorld.enableMesaMineshaft) {
+			CommandLocate.register(new LocateTarget() {
+				private final MapGenMesaMineshaft searchGenerator = new MapGenMesaMineshaft();
+
+				@Override
+				public String getId() {
+					return "mineshaft_mesa";
+				}
+
+				@Override
+				public boolean isEnabled() {
+					return ConfigWorld.enableMesaMineshaft;
+				}
+
+				@Override
+				public boolean isValidWorld(World world) {
+					return world.provider.dimensionId == 0;
+				}
+
+				@Override
+				public int[] findInChunk(World world, int chunkX, int chunkZ) {
+					if (!world.getWorldInfo().isMapFeaturesEnabled()
+							|| (world.getChunkProvider() instanceof ChunkProviderServer serverChunkProvider
+							&& isFlatWorld(serverChunkProvider.currentChunkProvider))) {
+						return null;
+					}
+					return searchGenerator.canLocateAt(world, chunkX, chunkZ)
+							? new int[] {(chunkX << 4) + 2, (chunkZ << 4) + 2} : null;
+				}
+			});
+		}
+
 		if (ModBlocks.MUD.isEnabled()) {
 			mudGen = new WorldGenClay(4);
 			((WorldGenClay) mudGen).field_150546_a/*block*/ = ModBlocks.MUD.get();
@@ -189,7 +324,7 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 
 	@Override
 	public void generate(Random rand, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
-		if (!isFlatWorld(chunkGenerator) || world.getWorldInfo().getGeneratorOptions().contains("decoration")) {
+		if (canGenerateDecorations(world, chunkGenerator)) {
 			int x;
 			int z;
 
@@ -311,7 +446,27 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 				}
 			}
 
-			if (ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled()
+			if (shipwreckGen != null && world.provider.dimensionId == 0) {
+				Random shipwreckRand = getShipwreckRandom(world.getSeed(), chunkX, chunkZ);
+				if (shipwreckRand.nextInt(ConfigWorld.shipwreckRarity) == 0) {
+					x = (chunkX << 4) + shipwreckRand.nextInt(16) + 8;
+					z = (chunkZ << 4) + shipwreckRand.nextInt(16) + 8;
+					if (shipwreckBiomes.contains(world.getBiomeGenForCoords(x, z))) {
+						shipwreckGen.generate(world, rand, x, 0, z);
+					}
+				}
+			}
+
+			if (ruinedPortalGen != null && world.provider.dimensionId == 0) {
+				Random portalRand = getRuinedPortalRandom(world.getSeed(), chunkX, chunkZ);
+				if (portalRand.nextInt(ConfigWorld.ruinedPortalRarity) == 0) {
+					x = (chunkX << 4) + portalRand.nextInt(16) + 8;
+					z = (chunkZ << 4) + portalRand.nextInt(16) + 8;
+					ruinedPortalGen.generate(world, portalRand, x, 0, z);
+				}
+			}
+
+			if (isMonumentGenerationEnabled()
 					&& !(world.provider instanceof WorldProviderEnd) && !(world.provider instanceof WorldProviderHell)) {
 				if (OceanMonument.canSpawnAt(world, chunkX, chunkZ)) {
 					x = (chunkX << 4) + rand.nextInt(16) + 8;
@@ -396,7 +551,24 @@ public class EtFuturumWorldGenerator implements IWorldGenerator {
 		return rand.nextInt(i);
 	}
 
+	private boolean canGenerateDecorations(World world, IChunkProvider chunkProvider) {
+		return !isFlatWorld(chunkProvider) || world.getWorldInfo().getGeneratorOptions().contains("decoration");
+	}
+
 	protected final boolean isFlatWorld(IChunkProvider chunkProvider) {
 		return chunkProvider instanceof ChunkProviderFlat && !chunkProvider.getClass().getName().equals("com.rwtema.extrautils.worldgen.Underdark.ChunkProviderUnderdark");
+	}
+
+	private static boolean isMonumentGenerationEnabled() {
+		return ConfigWorld.enableOceanMonuments && ModBlocks.PRISMARINE_BLOCK.isEnabled() && ModBlocks.SEA_LANTERN.isEnabled();
+	}
+
+	public static Random getShipwreckRandom(long worldSeed, int chunkX, int chunkZ) {
+		return new Random(worldSeed ^ ((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L));
+	}
+
+	public static Random getRuinedPortalRandom(long worldSeed, int chunkX, int chunkZ) {
+		// Salt of the vanilla ruined_portals structure set
+		return new Random((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L + worldSeed + 34222645L);
 	}
 }

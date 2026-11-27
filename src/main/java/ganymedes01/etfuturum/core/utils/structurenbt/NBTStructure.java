@@ -3,8 +3,11 @@ package ganymedes01.etfuturum.core.utils.structurenbt;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import ganymedes01.etfuturum.EtFuturum;
+import ganymedes01.etfuturum.compat.CompatLiquidLogged;
+import ganymedes01.etfuturum.compat.ModsList;
 import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.core.utils.helpers.BlockPos;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
@@ -301,7 +304,9 @@ public class NBTStructure {
 		if (integrity >= 1 || (0 < integrity && rand.nextFloat() <= integrity)) {
 			BlockStateContainer newState = getBlockStateContainer(world, rand, x, y, z, state);
 			if (newState != null) {
+				boolean wasWater = isWaterSource(world, x, y, z);
 				world.setBlock(x, y, z, state.getBlock(), state.getMeta(), 2);
+				fillWaterIfNeeded(world, x, y, z, wasWater);
 				if (state.getType() == BlockStateContainer.BlockStateType.BLOCK_ENTITY) {
 					TileEntity te = world.getTileEntity(x, y, z);
 					if (te != null) {
@@ -319,6 +324,22 @@ public class NBTStructure {
 					}
 				}
 			}
+		}
+	}
+
+	/** True if LiquidLogged is loaded and the cell holds a water source; call before replacing the block. */
+	protected static boolean isWaterSource(World world, int x, int y, int z) {
+		if (!ModsList.LIQUIDLOGGED.isLoaded()) {
+			return false;
+		}
+		Block block = world.getBlock(x, y, z);
+		return (block == Blocks.water || block == Blocks.flowing_water) && world.getBlockMetadata(x, y, z) == 0;
+	}
+
+	/** Refills the cell with water after a block replaced a water source, if the new block can hold it. */
+	protected static void fillWaterIfNeeded(World world, int x, int y, int z, boolean wasWater) {
+		if (wasWater) {
+			CompatLiquidLogged.fillWater(world, x, y, z);
 		}
 	}
 
