@@ -1296,6 +1296,27 @@ public class ServerEventHandler {
 	}
 
 
+	@SubscribeEvent
+	public void onFillBucketFromBubbleColumn(FillBucketEvent event) {
+		if (event.current.getItem() != Items.bucket || event.target == null
+				|| event.target.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+			return;
+		}
+		final int x = event.target.blockX;
+		final int y = event.target.blockY;
+		final int z = event.target.blockZ;
+		if (!ModBlocks.BUBBLE_COLUMN.isEnabled() || event.world.getBlock(x, y, z) != ModBlocks.BUBBLE_COLUMN.get()) {
+			return;
+		}
+		if (!event.world.canMineBlock(event.entityPlayer, x, y, z)
+				|| !event.entityPlayer.canPlayerEdit(x, y, z, event.target.sideHit, event.current)) {
+			return;
+		}
+		event.world.setBlockToAir(x, y, z);
+		event.result = new ItemStack(Items.water_bucket);
+		event.setResult(Result.ALLOW);
+	}
+
 	public static boolean canUse(EntityPlayer player, World world, int x, int y, int z) {
 		return !player.isSneaking() || player.getHeldItem() == null || player.getHeldItem().getItem().doesSneakBypassUse(world, x, y, z, player);
 	}
