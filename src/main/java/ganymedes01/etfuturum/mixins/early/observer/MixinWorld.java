@@ -38,11 +38,11 @@ public abstract class MixinWorld {
 			this.etfu$notifyObserver(x + 1, y, z, block);
 		}
 
-		if (sideExcept != 0) {
+		if (sideExcept != 0 && blockExists(x, y - 1, z)) {
 			this.etfu$notifyObserver(x, y - 1, z, block);
 		}
 
-		if (sideExcept != 1) {
+		if (sideExcept != 1 && blockExists(x, y + 1, z)) {
 			this.etfu$notifyObserver(x, y + 1, z, block);
 		}
 
