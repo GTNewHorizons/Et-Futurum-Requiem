@@ -1,3 +1,15 @@
+# Subtitles
+subtitle.entity.panda.ambient=Panda arfa
+subtitle.entity.panda.aggressive_ambient=Panda zangado
+subtitle.entity.panda.worried_ambient=Panda geme
+subtitle.entity.panda.bite=Panda morde
+subtitle.entity.panda.eat=Panda come
+subtitle.entity.panda.cant_breed=Panda bale
+subtitle.entity.panda.death=Panda morre
+subtitle.entity.panda.hurt=Panda aleija-se
+subtitle.entity.panda.pre_sneeze=Panda coça o nariz
+subtitle.entity.panda.sneeze=Panda espirra
+
 # Creative Tab
 itemGroup.etfuturum=Et Futurum
 
@@ -21,6 +33,7 @@ entity.etfuturum.villager_zombie.name=Aldeão Zumbi
 entity.etfuturum.end_crystal.name=Cristal do Fim
 entity.etfuturum.ender_dragon.name=Dragão do Fim
 entity.etfuturum.snow_golem.name=Golem de Neve
+entity.etfuturum.panda.name=Panda
 
 # Items
 item.etfuturum.mutton_raw.name=Carne de Carneiro Crua

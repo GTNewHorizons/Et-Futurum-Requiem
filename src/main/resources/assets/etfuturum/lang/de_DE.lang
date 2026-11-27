@@ -125,6 +125,16 @@ subtitle.entity.witch.death=Hexe stirbt
 subtitle.entity.squid.ambient=Tintenfisch schwimmt
 subtitle.entity.squid.hurt=Tintenfisch nimmt Schaden
 subtitle.entity.squid.death=Tintenfisch stirbt
+subtitle.entity.panda.ambient=Panda hechelt
+subtitle.entity.panda.aggressive_ambient=Panda grollt
+subtitle.entity.panda.worried_ambient=Panda wimmert
+subtitle.entity.panda.bite=Panda beißt
+subtitle.entity.panda.eat=Panda frisst
+subtitle.entity.panda.cant_breed=Panda blökt
+subtitle.entity.panda.death=Panda stirbt
+subtitle.entity.panda.hurt=Panda nimmt Schaden
+subtitle.entity.panda.pre_sneeze=Panda verspürt Niesreiz
+subtitle.entity.panda.sneeze=Panda niest
 
 subtitle.entity.boat.paddle_water=Ruder im Wasser
 subtitle.entity.boat.paddle_land=Ruder an Land
@@ -299,6 +309,7 @@ entity.etfuturum.guardian.name=Wächter
 entity.etfuturum.elder_guardian.name=Großer Wächter
 entity.etfuturum.polar_bear.name=Eisbär
 entity.etfuturum.bee.name=Biene
+entity.etfuturum.panda.name=Panda
 
 # Gegenstände
 item.etfuturum.mutton.name=Rohes Hammelfleisch
