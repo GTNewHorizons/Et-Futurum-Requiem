@@ -51,6 +51,7 @@ public class ConfigMixins extends ConfigBase {
 	public static boolean adjustedLiquidPhysics;
 	public static boolean liquidItemFloat;
 	public static boolean riddenHorsesInWater;
+    public static boolean modernTradingScreen;
 
 
 	static final String catBackport = "backported features";
@@ -81,7 +82,8 @@ public class ConfigMixins extends ConfigBase {
 			flowerPotFixes = getBoolean("flowerPotFixes", catFixes, true, "Fixes flower pots having several restrictions limiting what they'll render inside of them. Required for crimson roots or azalea to render correctly in the flower pot, among other custom blocks.\nModified Client Classes: net.minecraft.client.renderer.RenderBlock");
 			worldSaveThumbnails = getBoolean("worldSaveThumbnails", catBackport, true, "Saves and displays icon.png thumbnails in the world selection screen, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiSelectWorld");
 			modernLoadingScreen = getBoolean("modernLoadingScreen", catBackport, true, "Modern loading screen with progress bar and chunk grid when entering a world, like 1.14+.\nModified Client Classes: net.minecraft.client.gui.GuiDownloadTerrain");
-		}
+		    modernTradingScreen = getBoolean("modernTradingScreen", catBackport, true, "Modern villager trading screen with up to 7 trades being displayed and all trade offers being a scrollable list, like 1.14+.\nModified Client Classes: net.minecraft.client.entity.EntityPlayerSP\nnet.minecraft.client.network.NetHandlerPlayClient");
+        }
 
 		endPortalFix = getBoolean("endPortalFix", catBackport, true, "Makes the End Portal block (the actual portal, not the frame) have an item icon, proper hitbox and will not instantly destroy itself in other dimensions.\nModified classes: net.minecraft.block.BlockEndPortal");
 		fenceWallConnectFix = getBoolean("fenceWallConnectFix", catBackport, true, "Makes vanilla fences connect to modded ones of the same material. Might have connection issue with mods that don't reference BlockFence super code.\nModified classes: net.minecraft.block.BlockFence net.minecraft.block.BlockWall");
