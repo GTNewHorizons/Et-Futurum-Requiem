@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.input.Keyboard;
@@ -44,7 +45,8 @@ public class GuiEditWoodSign extends GuiScreen {
 	public GuiEditWoodSign(TileEntitySign tileSign, boolean front) {
 		this.tileSign = tileSign;
 		this.front = front;
-		this.editingText = ((ISign) tileSign).getSignText(front);
+		// Without ConfigMixins.signs the tile isn't an ISign, so only the front can be edited
+		this.editingText = tileSign instanceof ISign iSign ? iSign.getSignText(front) : tileSign.signText;
 	}
 
 	@Override
@@ -63,7 +65,10 @@ public class GuiEditWoodSign extends GuiScreen {
 		Keyboard.enableRepeatEvents(false);
 		NetHandlerPlayClient nethandlerplayclient = this.mc.getNetHandler();
 
-		if (nethandlerplayclient != null) {
+		if (nethandlerplayclient != null && !(this.tileSign instanceof ISign)) {
+			// Vanilla path, used when ConfigMixins.signs is disabled
+			nethandlerplayclient.addToSendQueue(new C12PacketUpdateSign(this.tileSign.xCoord, this.tileSign.yCoord, this.tileSign.zCoord, this.tileSign.signText));
+		} else if (nethandlerplayclient != null) {
 			ISign iSign = (ISign) this.tileSign;
 
 			// Update client TE immediately (don't wait for server relay)

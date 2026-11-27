@@ -33,7 +33,8 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 			return;
 
 		TileEntityWoodSign sign = (TileEntityWoodSign) p_147500_1_;
-		ISign iSign = (ISign) sign;
+		// Null when ConfigMixins.signs is disabled (TileEntitySign isn't mixed into ISign)
+		ISign iSign = p_147500_1_ instanceof ISign s ? s : null;
 
 		GL11.glPushMatrix();
 		float f1 = 0.6666667F;
@@ -84,13 +85,20 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 			if (i == sign.lineBeingEdited) {
 				s = "> " + s + "§r <";
 			}
-			s = iSign.applyDyeBaseColor(s);
+			if (iSign != null) {
+				s = iSign.applyDyeBaseColor(s);
+			}
 			fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, i * 10 - sign.signText.length * 5, b0);
 		}
 
 		GL11.glDepthMask(true);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glPopMatrix();
+
+		if (iSign == null) {
+			GL11.glPopMatrix();
+			return;
+		}
 
 		// Render back text
 		String[] backText = iSign.getSignText(false);
