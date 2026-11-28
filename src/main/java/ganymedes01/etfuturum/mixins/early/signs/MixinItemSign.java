@@ -4,6 +4,8 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,20 +29,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ItemSign.class)
 public class MixinItemSign {
 
-	// Calculate result before applying offset based on side
-	private boolean etfuturum$blockIsReplaceable;
-
-	// Skip solid check if replaceable
+	// Skip solid check if replaceable. The result is shared per call (not a field) since the
+	// client and integrated server threads use the same Items.sign instance in singleplayer.
 	@ModifyExpressionValue(method = "onItemUse", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/block/material/Material;isSolid()Z"))
 	private boolean treatReplaceableAsSolid(boolean original, ItemStack stack, EntityPlayer player,
-		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
+		@Share("blockIsReplaceable") LocalBooleanRef blockIsReplaceable) {
 		if (original) {
-			etfuturum$blockIsReplaceable = false;
+			blockIsReplaceable.set(false);
 			return true;
 		}
-		etfuturum$blockIsReplaceable = world.getBlock(x, y, z).isReplaceable(world, x, y, z);
-		return etfuturum$blockIsReplaceable;
+		blockIsReplaceable.set(world.getBlock(x, y, z).isReplaceable(world, x, y, z));
+		return blockIsReplaceable.get();
 	}
 
 	// Skip offset if replaceable
@@ -52,8 +53,9 @@ public class MixinItemSign {
 			to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;canPlayerEdit(IIIILnet/minecraft/item/ItemStack;)Z")
 		))
 	private boolean skipOffsetReplaceable(boolean original, ItemStack stack, EntityPlayer player,
-		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		return original && !etfuturum$blockIsReplaceable;
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
+		@Share("blockIsReplaceable") LocalBooleanRef blockIsReplaceable) {
+		return original && !blockIsReplaceable.get();
 	}
 
 	// If replaceable, force standing sign (side = 1)
@@ -61,8 +63,9 @@ public class MixinItemSign {
 		target = "Lnet/minecraft/entity/player/EntityPlayer;canPlayerEdit(IIIILnet/minecraft/item/ItemStack;)Z"),
 		ordinal = 3, argsOnly = true)
 	private int forceStandingReplaceable(int currentSide, ItemStack stack, EntityPlayer player,
-		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		return etfuturum$blockIsReplaceable ? 1 : currentSide;
+		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
+		@Share("blockIsReplaceable") LocalBooleanRef blockIsReplaceable) {
+		return blockIsReplaceable.get() ? 1 : currentSide;
 	}
 
 	@Inject(method = "onItemUse", at = @At(value = "INVOKE",
