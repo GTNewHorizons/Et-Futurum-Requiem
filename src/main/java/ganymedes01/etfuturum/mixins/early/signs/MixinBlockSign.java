@@ -68,7 +68,9 @@ public class MixinBlockSign extends Block {
 		// Dye the sign
 		if (heldStack != null) {
 			int dyeId = getDyeColorFromStack(heldStack);
-			if (dyeId >= 0 && iSign.getDyeId() != dyeId) {
+			// Undyed signs are already black (15)
+			int currentDyeId = iSign.getDyeId() < 0 ? 15 : iSign.getDyeId();
+			if (dyeId >= 0 && currentDyeId != dyeId) {
 				if (!world.isRemote) {
 					iSign.setDyeId(dyeId);
 					tileEntity.markDirty();
