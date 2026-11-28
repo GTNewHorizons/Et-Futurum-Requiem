@@ -2,6 +2,7 @@ package ganymedes01.etfuturum.mixins.early.signs;
 
 import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.blocks.IDegradable;
+import ganymedes01.etfuturum.lib.Reference;
 import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import ganymedes01.etfuturum.network.SignUpdateMessage;
 import ganymedes01.etfuturum.ducks.ISign;
@@ -79,7 +80,7 @@ public class MixinBlockSign extends Block {
 					player.inventoryContainer.detectAndSendChanges();
 				}
 				else {
-					world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, "random.orb", 0.2F, 0.4F / (world.rand.nextFloat() * 0.4F + 0.8F), false);
+					world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":item.dye.use", 1.0F, 1.0F, false);
 				}
 
 				return true;

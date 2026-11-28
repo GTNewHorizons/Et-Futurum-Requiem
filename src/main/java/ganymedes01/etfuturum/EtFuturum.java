@@ -969,6 +969,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "item.axe.strip", "player");
 		config.addSoundEvent(ver, "item.hoe.till", "player");
 		config.addSoundEvent(ver, "item.honeycomb.wax_on", "player");
+		config.addSoundEvent(ver, "item.dye.use", "player");
 		config.addSoundEvent(ver, "item.totem.use", "player");
 		config.addSoundEvent(ver, "item.shovel.flatten", "player");
 		config.addSoundEvent(ver, "item.chorus_fruit.teleport", "player");
