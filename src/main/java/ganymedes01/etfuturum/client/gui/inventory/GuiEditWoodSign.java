@@ -90,6 +90,11 @@ public class GuiEditWoodSign extends GuiScreen {
 	}
 
 	@Override
+	public boolean doesGuiPauseGame() {
+		return false;
+	}
+
+	@Override
 	protected void actionPerformed(GuiButton button) {
 		if (button.enabled) {
 			if (button.id == 0) {
