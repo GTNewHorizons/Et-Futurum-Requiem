@@ -86,7 +86,7 @@ public class MixinBlockSign extends Block {
 			}
 		}
 
-		// Open edit GUI (server only). FakePlayers have no network handler to open a GUI with
+		// Open edit GUI (server only)
 		if (world.isRemote || !(player instanceof EntityPlayerMP) || player instanceof FakePlayer) {
 			return true;
 		}

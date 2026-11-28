@@ -33,7 +33,6 @@ public class SignUpdateClientHandler implements IMessageHandler<SignUpdateMessag
 		TileEntity te = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 		if (te instanceof ISign) {
 			ISign sign = (ISign) te;
-			// Like vanilla's handleUpdateSign, don't overwrite the text while this player is editing it
 			if (((TileEntitySign) te).func_145914_a()) {
 				System.arraycopy(message.frontLines, 0, sign.getSignText(true), 0, 4);
 				System.arraycopy(message.backLines, 0, sign.getSignText(false), 0, 4);

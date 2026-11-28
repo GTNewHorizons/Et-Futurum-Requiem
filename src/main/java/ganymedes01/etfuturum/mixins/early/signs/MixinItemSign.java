@@ -29,8 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ItemSign.class)
 public class MixinItemSign {
 
-	// Skip solid check if replaceable. The result is shared per call (not a field) since the
-	// client and integrated server threads use the same Items.sign instance in singleplayer.
+	// Skip solid check if replaceable
 	@ModifyExpressionValue(method = "onItemUse", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/block/material/Material;isSolid()Z"))
 	private boolean treatReplaceableAsSolid(boolean original, ItemStack stack, EntityPlayer player,

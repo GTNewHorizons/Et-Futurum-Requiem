@@ -33,7 +33,6 @@ public class TileEntityWoodSignRenderer extends TileEntitySpecialRenderer {
 			return;
 
 		TileEntityWoodSign sign = (TileEntityWoodSign) p_147500_1_;
-		// Null when ConfigMixins.signs is disabled (TileEntitySign isn't mixed into ISign)
 		ISign iSign = p_147500_1_ instanceof ISign s ? s : null;
 
 		GL11.glPushMatrix();

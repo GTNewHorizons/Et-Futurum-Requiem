@@ -45,7 +45,6 @@ public class GuiEditWoodSign extends GuiScreen {
 	public GuiEditWoodSign(TileEntitySign tileSign, boolean front) {
 		this.tileSign = tileSign;
 		this.front = front;
-		// Without ConfigMixins.signs the tile isn't an ISign, so only the front can be edited
 		this.editingText = tileSign instanceof ISign iSign ? iSign.getSignText(front) : tileSign.signText;
 	}
 
@@ -66,7 +65,6 @@ public class GuiEditWoodSign extends GuiScreen {
 		NetHandlerPlayClient nethandlerplayclient = this.mc.getNetHandler();
 
 		if (nethandlerplayclient != null && !(this.tileSign instanceof ISign)) {
-			// Vanilla path, used when ConfigMixins.signs is disabled
 			nethandlerplayclient.addToSendQueue(new C12PacketUpdateSign(this.tileSign.xCoord, this.tileSign.yCoord, this.tileSign.zCoord, this.tileSign.signText));
 		} else if (nethandlerplayclient != null) {
 			ISign iSign = (ISign) this.tileSign;

@@ -36,10 +36,6 @@ public class SignUpdateMessage implements IMessage {
 		this.dyeId = dyeId;
 	}
 
-	/**
-	 * Send this message to every player tracking the sign's chunk,
-	 * i.e. the same players that receive vanilla's S33PacketUpdateSign.
-	 */
 	public void sendToChunkWatchers(WorldServer world) {
 		PlayerManager playerManager = world.getPlayerManager();
 		int chunkX = this.tileX >> 4;

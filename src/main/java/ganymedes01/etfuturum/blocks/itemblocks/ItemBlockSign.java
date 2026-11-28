@@ -79,7 +79,6 @@ public class ItemBlockSign extends ItemBlock {
 			--itemStack.stackSize;
 			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
-			// FakePlayers (deployers, activators) have no network handler to open a GUI with
 			if (tileentitysign != null && player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer)) {
 				tileentitysign.func_145912_a(player);
 				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), playerMP);
