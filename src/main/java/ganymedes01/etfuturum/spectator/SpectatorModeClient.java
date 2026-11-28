@@ -23,6 +23,8 @@ public class SpectatorModeClient extends SpectatorMode {
 	public static final SpectatorModeClient INSTANCE = new SpectatorModeClient();
 	private boolean doRefreshModel = false;
 	private boolean canSelect = false;
+	private EntityClientPlayerMP spectatorFlySpeedPlayer;
+	private float spectatorFlySpeed;
 
 	private static void setBipedVisible(ModelBiped biped, boolean visible) {
 		biped.bipedHead.showModel = visible;
@@ -142,7 +144,11 @@ public class SpectatorModeClient extends SpectatorMode {
 	@SubscribeEvent
 	public void onClientTick(TickEvent.ClientTickEvent event) {
 		EntityClientPlayerMP player = FMLClientHandler.instance().getClientPlayerEntity();
-		if (isSpectator(player)) {
+		boolean spectator = isSpectator(player);
+		if (!spectator || player != spectatorFlySpeedPlayer) {
+			spectatorFlySpeedPlayer = null;
+		}
+		if (spectator) {
 			if (!player.capabilities.isFlying) {
 				player.capabilities.isFlying = true;
 				player.sendPlayerAbilities();
@@ -157,5 +163,24 @@ public class SpectatorModeClient extends SpectatorMode {
 				followEntity(player, entityToSpectate);
 			}
 		}
+	}
+
+	/** Returns the selected flight speed for the local spectator, or the normal speed otherwise. */
+	public float getSpectatorFlySpeed(EntityPlayer player, float normalSpeed) {
+		return player == spectatorFlySpeedPlayer && isSpectator(player) ? spectatorFlySpeed : normalSpeed;
+	}
+
+	/** Adjusts flight speed by one step in the scroll direction and shows it as a percentage of the default. */
+	public void handleScrollFlySpeed(int wheelDelta) {
+		EntityClientPlayerMP player = FMLClientHandler.instance().getClientPlayerEntity();
+		if (player == null) {
+			return;
+		}
+		float speed = getSpectatorFlySpeed(player, player.capabilities.getFlySpeed()) + Integer.signum(wheelDelta) * 0.005F;
+		spectatorFlySpeed = Math.max(0.0F, Math.min(0.2F, speed));
+		spectatorFlySpeedPlayer = player;
+		int percent = Math.round(spectatorFlySpeed / 0.05F * 100.0F);
+		Minecraft.getMinecraft().ingameGUI.func_110326_a/*setRecordPlaying*/(
+				net.minecraft.client.resources.I18n.format("etfuturum.spectator.flyspeed", percent), false);
 	}
 }
