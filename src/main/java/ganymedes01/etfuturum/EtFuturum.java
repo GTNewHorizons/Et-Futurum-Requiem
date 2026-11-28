@@ -78,6 +78,9 @@ import ganymedes01.etfuturum.network.ChestBoatOpenInventoryHandler;
 import ganymedes01.etfuturum.network.ChestBoatOpenInventoryMessage;
 import ganymedes01.etfuturum.network.StartElytraFlyingHandler;
 import ganymedes01.etfuturum.network.StartElytraFlyingMessage;
+import ganymedes01.etfuturum.network.SignUpdateClientHandler;
+import ganymedes01.etfuturum.network.SignUpdateServerHandler;
+import ganymedes01.etfuturum.network.SignUpdateMessage;
 import ganymedes01.etfuturum.network.WoodSignOpenHandler;
 import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import ganymedes01.etfuturum.potion.ModPotions;
@@ -296,6 +299,8 @@ public class EtFuturum {
 		networkWrapper.registerMessage(ArmourStandInteractHandler.class, ArmourStandInteractMessage.class, 0, Side.SERVER);
 		networkWrapper.registerMessage(BlackHeartParticlesHandler.class, BlackHeartParticlesMessage.class, 1, Side.CLIENT);
 		networkWrapper.registerMessage(WoodSignOpenHandler.class, WoodSignOpenMessage.class, 3, Side.CLIENT);
+		networkWrapper.registerMessage(SignUpdateServerHandler.class, SignUpdateMessage.class, 8, Side.SERVER);
+		networkWrapper.registerMessage(SignUpdateClientHandler.class, SignUpdateMessage.class, 9, Side.CLIENT);
 		networkWrapper.registerMessage(BoatMoveHandler.class, BoatMoveMessage.class, 4, Side.SERVER);
 		networkWrapper.registerMessage(ChestBoatOpenInventoryHandler.class, ChestBoatOpenInventoryMessage.class, 5, Side.SERVER);
 		networkWrapper.registerMessage(StartElytraFlyingHandler.class, StartElytraFlyingMessage.class, 6, Side.SERVER);
@@ -964,6 +969,7 @@ public class EtFuturum {
 		config.addSoundEvent(ver, "item.axe.strip", "player");
 		config.addSoundEvent(ver, "item.hoe.till", "player");
 		config.addSoundEvent(ver, "item.honeycomb.wax_on", "player");
+		config.addSoundEvent(ver, "item.dye.use", "player");
 		config.addSoundEvent(ver, "item.totem.use", "player");
 		config.addSoundEvent(ver, "item.shovel.flatten", "player");
 		config.addSoundEvent(ver, "item.chorus_fruit.teleport", "player");
@@ -1001,6 +1007,7 @@ public class EtFuturum {
 
 		config.addSoundEvent(ver, "block.barrel.open", "block");
 		config.addSoundEvent(ver, "block.barrel.close", "block");
+		config.addSoundEvent(ver, "block.sign.waxed_interact_fail", "block");
 		config.addSoundEvent(ver, "block.chorus_flower.grow", "block");
 		config.addSoundEvent(ver, "block.chorus_flower.death", "block");
 		config.addSoundEvent(ver, "block.end_portal.spawn", "ambient");

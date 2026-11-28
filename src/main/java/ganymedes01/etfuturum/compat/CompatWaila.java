@@ -5,6 +5,7 @@ import ganymedes01.etfuturum.ModBlocks;
 import ganymedes01.etfuturum.blocks.BlockBanner;
 import ganymedes01.etfuturum.blocks.BlockPotionCauldron;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
+import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronPotion;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
@@ -12,13 +13,16 @@ import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaRegistrar;
+import net.minecraft.block.BlockSign;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ public class CompatWaila {
 		registrar.registerBodyProvider(new BannerDataProvider(), BlockBanner.class);
 		registrar.registerStackProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
 		registrar.registerBodyProvider(new PotionCauldronDataProvider(), BlockPotionCauldron.class);
+		registrar.registerBodyProvider(new SignDataProvider(), BlockSign.class);
 	}
 
 	public static void register() {
@@ -142,6 +147,47 @@ public class CompatWaila {
 		@Override
 		public NBTTagCompound getNBTData(EntityPlayerMP arg0, TileEntity arg1, NBTTagCompound arg2, World arg3, int arg4, int arg5, int arg6) {
 			return arg2;
+		}
+	}
+
+	public static class SignDataProvider implements IWailaDataProvider {
+		@Override
+		public ItemStack getWailaStack(IWailaDataAccessor accessor, IWailaConfigHandler config) {
+			return accessor.getStack();
+		}
+
+		@Override
+		public List<String> getWailaHead(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			return currenttip;
+		}
+
+		@Override
+		public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			if (accessor.getTileEntity() instanceof ISign sign) {
+				if (sign.isWaxed()) {
+					currenttip.add(StatCollector.translateToLocal("etfuturum.waila.sign.waxed"));
+				}
+				int dyeId = sign.getDyeId();
+				if (dyeId >= 0 && dyeId < ItemDye.field_150923_a.length) {
+					// dyeId uses wool order (0 = white), ItemDye names use dye damage order (0 = black)
+					String colorName = StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.field_150923_a[15 - dyeId]);
+					currenttip.add(StatCollector.translateToLocalFormatted("etfuturum.waila.sign.dyed", colorName));
+				}
+			}
+			return currenttip;
+		}
+
+		@Override
+		public List<String> getWailaTail(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+										 IWailaConfigHandler config) {
+			return currenttip;
+		}
+
+		@Override
+		public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity te, NBTTagCompound tag, World world, int x, int y, int z) {
+			return tag;
 		}
 	}
 }
