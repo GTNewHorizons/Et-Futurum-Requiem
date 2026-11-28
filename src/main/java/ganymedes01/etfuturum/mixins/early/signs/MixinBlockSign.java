@@ -6,7 +6,6 @@ import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import ganymedes01.etfuturum.network.SignUpdateMessage;
 import ganymedes01.etfuturum.ducks.ISign;
 import ganymedes01.etfuturum.recipes.ModRecipes;
-import cpw.mods.fml.common.network.NetworkRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSign;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayer;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -135,11 +135,10 @@ public class MixinBlockSign extends Block {
 		return -1;
 	}
 
-	// Send current sign state (text, waxed, dye) to all nearby players
+	// Send current sign state (text, waxed, dye) to all players tracking the chunk
 	private static void syncSignState(World world, int x, int y, int z, TileEntitySign signTile, ISign iSign) {
 		SignUpdateMessage msg = new SignUpdateMessage(x, y, z,
 				signTile.signText, iSign.getSignText(false), iSign.isWaxed(), iSign.getDyeId());
-		EtFuturum.networkWrapper.sendToAllAround(msg,
-				new NetworkRegistry.TargetPoint(world.provider.dimensionId, x + 0.5, y + 0.5, z + 0.5, 64));
+		msg.sendToChunkWatchers((WorldServer) world);
 	}
 }

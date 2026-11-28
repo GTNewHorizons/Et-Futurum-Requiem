@@ -1,10 +1,8 @@
 package ganymedes01.etfuturum.network;
 
-import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.core.utils.Logger;
 import ganymedes01.etfuturum.ducks.ISign;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -70,8 +68,7 @@ public class SignUpdateServerHandler implements IMessageHandler<SignUpdateMessag
 		if (chunk != null) {
 			chunk.setChunkModified();
 		}
-		EtFuturum.networkWrapper.sendToAllAround(message,
-				new NetworkRegistry.TargetPoint(world.provider.dimensionId, x + 0.5, y + 0.5, z + 0.5, 64));
+		message.sendToChunkWatchers(world);
 		return null;
 	}
 

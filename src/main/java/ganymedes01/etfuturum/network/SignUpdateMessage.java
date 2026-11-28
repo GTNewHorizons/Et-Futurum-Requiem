@@ -1,7 +1,11 @@
 package ganymedes01.etfuturum.network;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import ganymedes01.etfuturum.EtFuturum;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.management.PlayerManager;
+import net.minecraft.world.WorldServer;
 
 public class SignUpdateMessage implements IMessage {
 
@@ -30,6 +34,21 @@ public class SignUpdateMessage implements IMessage {
 		this.backLines = backLines;
 		this.waxed = waxed;
 		this.dyeId = dyeId;
+	}
+
+	/**
+	 * Send this message to every player tracking the sign's chunk,
+	 * i.e. the same players that receive vanilla's S33PacketUpdateSign.
+	 */
+	public void sendToChunkWatchers(WorldServer world) {
+		PlayerManager playerManager = world.getPlayerManager();
+		int chunkX = this.tileX >> 4;
+		int chunkZ = this.tileZ >> 4;
+		for (Object obj : world.playerEntities) {
+			if (obj instanceof EntityPlayerMP player && playerManager.isPlayerWatchingChunk(player, chunkX, chunkZ)) {
+				EtFuturum.networkWrapper.sendTo(this, player);
+			}
+		}
 	}
 
 	private static void writeLines(ByteBuf buf, String[] lines) {
