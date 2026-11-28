@@ -86,8 +86,7 @@ public class ItemWoodSign extends Item {
 			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
 			if (tileentitysign != null && player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer)) {
-				tileentitysign.func_145912_a(player);
-				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), playerMP);
+				WoodSignOpenMessage.openEditor(playerMP, tileentitysign, true);
 			}
 			return true;
 		}

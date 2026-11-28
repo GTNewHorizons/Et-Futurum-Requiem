@@ -7,16 +7,22 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
+import ganymedes01.etfuturum.network.WoodSignOpenMessage;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSign;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -65,6 +71,14 @@ public class MixinItemSign {
 		World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ,
 		@Share("blockIsReplaceable") LocalBooleanRef blockIsReplaceable) {
 		return blockIsReplaceable.get() ? 1 : currentSide;
+	}
+
+	@Redirect(method = "onItemUse", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/entity/player/EntityPlayer;func_146100_a(Lnet/minecraft/tileentity/TileEntity;)V"))
+	private void openEditor(EntityPlayer player, TileEntity tileEntity) {
+		if (player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer) && tileEntity instanceof TileEntitySign sign) {
+			WoodSignOpenMessage.openEditor(playerMP, sign, true);
+		}
 	}
 
 	@Inject(method = "onItemUse", at = @At(value = "INVOKE",

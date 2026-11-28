@@ -1,6 +1,5 @@
 package ganymedes01.etfuturum.blocks.itemblocks;
 
-import ganymedes01.etfuturum.EtFuturum;
 import ganymedes01.etfuturum.blocks.BlockWoodSign;
 import ganymedes01.etfuturum.configuration.configs.ConfigSounds;
 import ganymedes01.etfuturum.network.WoodSignOpenMessage;
@@ -80,8 +79,7 @@ public class ItemBlockSign extends ItemBlock {
 			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
 			if (tileentitysign != null && player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer)) {
-				tileentitysign.func_145912_a(player);
-				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), playerMP);
+				WoodSignOpenMessage.openEditor(playerMP, tileentitysign, true);
 			}
 			return true;
 		}

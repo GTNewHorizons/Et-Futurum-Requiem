@@ -92,11 +92,7 @@ public class MixinBlockSign extends Block {
 		}
 
 		// Route all signs through custom GUI for double-sided editing
-		TileEntitySign signTile = (TileEntitySign) tileEntity;
-		signTile.func_145912_a(player);
-		boolean front = isPlayerOnFrontSide(world, x, y, z, player);
-		int blockId = Block.getIdFromBlock(signTile.getBlockType());
-		EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(signTile, blockId, front), (EntityPlayerMP) player);
+		WoodSignOpenMessage.openEditor((EntityPlayerMP) player, (TileEntitySign) tileEntity, isPlayerOnFrontSide(world, x, y, z, player));
 		return true;
 	}
 

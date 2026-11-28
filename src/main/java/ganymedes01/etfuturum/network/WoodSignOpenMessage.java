@@ -1,7 +1,11 @@
 package ganymedes01.etfuturum.network;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import ganymedes01.etfuturum.EtFuturum;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.tileentity.TileEntitySign;
 
 public class WoodSignOpenMessage implements IMessage {
@@ -21,6 +25,14 @@ public class WoodSignOpenMessage implements IMessage {
 		tileZ = tileentitysign.zCoord;
 		id = blockId;
 		this.front = front;
+	}
+
+	public static void openEditor(EntityPlayerMP player, TileEntitySign sign, boolean front) {
+		sign.func_145912_a(player);
+		// Like modern vanilla, send the block first so the client edits the real sign instead of a placeholder
+		player.playerNetServerHandler.sendPacket(new S23PacketBlockChange(sign.xCoord, sign.yCoord, sign.zCoord, sign.getWorldObj()));
+		int blockId = Block.getIdFromBlock(sign.getWorldObj().getBlock(sign.xCoord, sign.yCoord, sign.zCoord));
+		EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(sign, blockId, front), player);
 	}
 
 	@Override
