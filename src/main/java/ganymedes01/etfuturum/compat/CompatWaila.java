@@ -6,7 +6,6 @@ import ganymedes01.etfuturum.blocks.BlockBanner;
 import ganymedes01.etfuturum.blocks.BlockPotionCauldron;
 import ganymedes01.etfuturum.blocks.BlockShulkerBox;
 import ganymedes01.etfuturum.ducks.ISign;
-import ganymedes01.etfuturum.recipes.ModRecipes;
 import ganymedes01.etfuturum.tileentities.TileEntityBanner;
 import ganymedes01.etfuturum.tileentities.TileEntityCauldronPotion;
 import ganymedes01.etfuturum.tileentities.TileEntityShulkerBox;
@@ -19,9 +18,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -166,14 +167,13 @@ public class CompatWaila {
 										 IWailaConfigHandler config) {
 			if (accessor.getTileEntity() instanceof ISign sign) {
 				if (sign.isWaxed()) {
-					currenttip.add("Waxed");
+					currenttip.add(StatCollector.translateToLocal("etfuturum.waila.sign.waxed"));
 				}
 				int dyeId = sign.getDyeId();
-				if (dyeId >= 0 && dyeId < ModRecipes.dye_names.length) {
-					String dyeName = ModRecipes.dye_names[dyeId];
-					// Capitalize first letter
-					String displayName = dyeName.substring(0, 1).toUpperCase() + dyeName.substring(1).replace("_", " ");
-					currenttip.add("Dyed: " + displayName);
+				if (dyeId >= 0 && dyeId < ItemDye.field_150923_a.length) {
+					// dyeId uses wool order (0 = white), ItemDye names use dye damage order (0 = black)
+					String colorName = StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.field_150923_a[15 - dyeId]);
+					currenttip.add(StatCollector.translateToLocalFormatted("etfuturum.waila.sign.dyed", colorName));
 				}
 			}
 			return currenttip;

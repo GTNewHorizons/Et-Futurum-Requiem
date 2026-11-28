@@ -67,6 +67,8 @@ container.etfuturum.barrel=Barrel
 container.etfuturum.shulker_box=Shulker Box
 container.etfuturum.chest_boat=Boat with Chest
 sign.edit.back=Edit sign message (back)
+etfuturum.waila.sign.waxed=Waxed
+etfuturum.waila.sign.dyed=Dyed: %s
 
 item.record.pigstep.desc=Lena Raine - Pigstep
 item.record.otherside.desc=Lena Raine - otherside
