@@ -8,6 +8,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import ganymedes01.etfuturum.ducks.ISign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.world.World;
 
 /**
@@ -32,8 +33,11 @@ public class SignUpdateClientHandler implements IMessageHandler<SignUpdateMessag
 		TileEntity te = world.getTileEntity(message.tileX, message.tileY, message.tileZ);
 		if (te instanceof ISign) {
 			ISign sign = (ISign) te;
-			System.arraycopy(message.frontLines, 0, sign.getSignText(true), 0, 4);
-			System.arraycopy(message.backLines, 0, sign.getSignText(false), 0, 4);
+			// Like vanilla's handleUpdateSign, don't overwrite the text while this player is editing it
+			if (((TileEntitySign) te).func_145914_a()) {
+				System.arraycopy(message.frontLines, 0, sign.getSignText(true), 0, 4);
+				System.arraycopy(message.backLines, 0, sign.getSignText(false), 0, 4);
+			}
 			sign.setDyeId(message.dyeId);
 			sign.setWaxed(message.waxed);
 			world.func_147479_m(message.tileX, message.tileY, message.tileZ);

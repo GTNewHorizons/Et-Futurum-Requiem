@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Enable sign waxing, back text, and dye color update logic
@@ -88,16 +87,5 @@ public abstract class MixinTileEntitySign implements ISign {
 		if (self.getWorldObj() != null && self.getWorldObj().isRemote) {
 			self.getWorldObj().func_147479_m(self.xCoord, self.yCoord, self.zCoord);
 		}
-	}
-
-	/**
-	 * Vanilla's NetHandlerPlayServer.processUpdateSign checks func_145914_a()
-	 * (is an editing player set?) and logs a warning if not found.
-	 * MixinBlockSign messes with that, so always return true here.
-	 * Probably OK to suppress warning? It didn't stop anything before anyways.
-	 */
-	@Inject(method = "func_145914_a", at = @At("HEAD"), cancellable = true)
-	private void onGetIsEditable(CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(true);
 	}
 }
