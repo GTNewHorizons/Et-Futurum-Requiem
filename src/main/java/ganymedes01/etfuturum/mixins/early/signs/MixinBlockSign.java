@@ -44,7 +44,9 @@ public class MixinBlockSign extends Block {
 		ISign iSign = (ISign) tileEntity;
 
 		if (iSign.isWaxed()) {
-			iSign.playWaxOnSound(world, x, y, z);
+			if (!world.isRemote) {
+				world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":block.sign.waxed_interact_fail", 1.0F, 1.0F);
+			}
 			return true;
 		}
 
@@ -60,6 +62,7 @@ public class MixinBlockSign extends Block {
 					player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
 				}
 				player.inventoryContainer.detectAndSendChanges();
+				iSign.playWaxOnSound(world, x, y, z);
 			}
 			iSign.spawnWaxOnEffects(world, x, y, z);
 			return true;
@@ -80,9 +83,7 @@ public class MixinBlockSign extends Block {
 						player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
 					}
 					player.inventoryContainer.detectAndSendChanges();
-				}
-				else {
-					world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":item.dye.use", 1.0F, 1.0F, false);
+					world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, Reference.MCAssetVer + ":item.dye.use", 1.0F, 1.0F);
 				}
 
 				return true;

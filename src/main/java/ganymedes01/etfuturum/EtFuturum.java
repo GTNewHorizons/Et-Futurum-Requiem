@@ -1007,6 +1007,7 @@ public class EtFuturum {
 
 		config.addSoundEvent(ver, "block.barrel.open", "block");
 		config.addSoundEvent(ver, "block.barrel.close", "block");
+		config.addSoundEvent(ver, "block.sign.waxed_interact_fail", "block");
 		config.addSoundEvent(ver, "block.chorus_flower.grow", "block");
 		config.addSoundEvent(ver, "block.chorus_flower.death", "block");
 		config.addSoundEvent(ver, "block.end_portal.spawn", "ambient");

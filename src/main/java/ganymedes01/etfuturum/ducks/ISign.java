@@ -57,17 +57,16 @@ public interface ISign {
 	}
 
 	default void playWaxOnSound(World world, int x, int y, int z) {
-		if (world.isRemote) {
+		if (!world.isRemote) {
 			int pitch = world.rand.nextInt(3);
-			world.playSound(x + 0.5D, y + 0.5D, z + 0.5D,
+			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D,
 				Reference.MCAssetVer + ":item.honeycomb.wax_on", 1F,
-				(float) ((pitch == 0 ? 0 : ((double) pitch / 10D)) + 0.9D), false);
+				(float) ((pitch == 0 ? 0 : ((double) pitch / 10D)) + 0.9D));
 		}
 	}
 
 	default void spawnWaxOnEffects(World world, int x, int y, int z) {
 		if (world.isRemote) {
-			playWaxOnSound(world, x, y, z);
 			Random random = world.rand;
 
 			boolean isWall = isWallSign(world, x, y, z);
