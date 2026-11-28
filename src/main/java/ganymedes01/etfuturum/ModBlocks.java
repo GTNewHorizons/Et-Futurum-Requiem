@@ -166,6 +166,7 @@ import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockNewDoor;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockRedSandstone;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockShulkerBox;
 import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockSign;
+import ganymedes01.etfuturum.blocks.itemblocks.ItemBlockWithTooltip;
 import ganymedes01.etfuturum.blocks.ores.BlockCopperOre;
 import ganymedes01.etfuturum.blocks.ores.BlockDeepslateCopperOre;
 import ganymedes01.etfuturum.blocks.ores.BlockDeepslateOre;
@@ -481,9 +482,9 @@ public enum ModBlocks {
 	LANTERN(ConfigBlocksItems.enableLantern, new BlockLantern("lantern", 15), ItemBlockLantern.class),
 	SOUL_LANTERN(ConfigBlocksItems.enableLantern && ConfigBlocksItems.enableSoulLighting, new BlockLantern("soul_lantern", 10), ItemBlockLantern.class),
 	SOUL_TORCH(ConfigBlocksItems.enableSoulLighting, new BlockSoulTorch()),
-	SMOKER(ConfigBlocksItems.enableSmoker, new BlockSmoker(false)),
+	SMOKER(ConfigBlocksItems.enableSmoker, new BlockSmoker(false), ItemBlockWithTooltip.class),
 	LIT_SMOKER(ConfigBlocksItems.enableSmoker, new BlockSmoker(true), null),
-	BLAST_FURNACE(ConfigBlocksItems.enableBlastFurnace, new BlockBlastFurnace(false)),
+	BLAST_FURNACE(ConfigBlocksItems.enableBlastFurnace, new BlockBlastFurnace(false), ItemBlockWithTooltip.class),
 	LIT_BLAST_FURNACE(ConfigBlocksItems.enableBlastFurnace, new BlockBlastFurnace(true), null),
 	SHULKER_BOX(ConfigBlocksItems.enableShulkerBoxes, new BlockShulkerBox(), ItemBlockShulkerBox.class),
 	SMITHING_TABLE(ConfigBlocksItems.enableSmithingTable, new BlockSmithingTable()),
