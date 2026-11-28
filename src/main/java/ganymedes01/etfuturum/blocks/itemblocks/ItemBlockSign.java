@@ -14,6 +14,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 
 public class ItemBlockSign extends ItemBlock {
 	public ItemBlockSign(Block sign) {
@@ -78,9 +79,10 @@ public class ItemBlockSign extends ItemBlock {
 			--itemStack.stackSize;
 			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
-			if (tileentitysign != null) {
+			// FakePlayers (deployers, activators) have no network handler to open a GUI with
+			if (tileentitysign != null && player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer)) {
 				tileentitysign.func_145912_a(player);
-				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
+				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), playerMP);
 			}
 			return true;
 		}

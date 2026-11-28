@@ -15,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 
 // Unfortunately we can't just use ItemBlockSign too for legacy signs
 // because that would break registration and compat with other mods
@@ -84,9 +85,10 @@ public class ItemWoodSign extends Item {
 			--itemStack.stackSize;
 			TileEntityWoodSign tileentitysign = (TileEntityWoodSign) world.getTileEntity(x, y, z);
 
-			if (tileentitysign != null) {
+			// FakePlayers (deployers, activators) have no network handler to open a GUI with
+			if (tileentitysign != null && player instanceof EntityPlayerMP playerMP && !(player instanceof FakePlayer)) {
 				tileentitysign.func_145912_a(player);
-				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), (EntityPlayerMP) player);
+				EtFuturum.networkWrapper.sendTo(new WoodSignOpenMessage(tileentitysign, Block.getIdFromBlock(block), true), playerMP);
 			}
 			return true;
 		}

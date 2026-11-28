@@ -16,6 +16,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import org.spongepowered.asm.mixin.Mixin;
 
 /**
@@ -85,8 +86,8 @@ public class MixinBlockSign extends Block {
 			}
 		}
 
-		// Open edit GUI (server only)
-		if (world.isRemote || !(player instanceof EntityPlayerMP)) {
+		// Open edit GUI (server only). FakePlayers have no network handler to open a GUI with
+		if (world.isRemote || !(player instanceof EntityPlayerMP) || player instanceof FakePlayer) {
 			return true;
 		}
 
